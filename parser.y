@@ -58,7 +58,7 @@ int cur_clause = 0;
 %type <term> term
 %type <atoms> atoms
 %type <atom> atom
-%type <clause> claus
+%type <clause> clause
 %type <clause> program
 %start program
 %%
@@ -98,16 +98,16 @@ atoms : atom TK_PERIOD
       { atoms[cur_atom++] = $1;
         $$ = atoms; }
 
-claus : atom TK_PERIOD
-          { struct clause_t * cl = mk_clause($1, 0, NULL);
-            cur_atom = 0;
-            $$ = cl; }
-      | atom TK_IF atoms
-          { struct clause_t * cl = mk_clause($1, cur_atom, atoms);
-            cur_atom = 0;
-            $$ = cl; }
+clause : atom TK_PERIOD
+           { struct clause_t * cl = mk_clause($1, 0, NULL);
+             cur_atom = 0;
+             $$ = cl; }
+       | atom TK_IF atoms
+           { struct clause_t * cl = mk_clause($1, cur_atom, atoms);
+             cur_atom = 0;
+             $$ = cl; }
 
-program : claus
+program : clause
           { *clause = $1; } /* FIXME generalise to accept multiple clauses */
 
 %%
