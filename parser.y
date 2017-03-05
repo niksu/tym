@@ -64,44 +64,44 @@ int cur_clause = 0;
 %%
 
 term : TK_CONST
-          { char * identifier = strdup($1);
-            struct term_t * t = mk_term(Const, identifier);
-            $$ = t; }
+       { char * identifier = strdup($1);
+         struct term_t * t = mk_term(Const, identifier);
+         $$ = t; }
      | TK_VAR
-          { char * identifier = strdup($1);
-            struct term_t * t = mk_term(Var, identifier);
-            $$ = t; }
+       { char * identifier = strdup($1);
+         struct term_t * t = mk_term(Var, identifier);
+         $$ = t; }
      | TK_STRING
-          { char * identifier = strdup($1);
-            struct term_t * t = mk_term(Str, identifier);
-            $$ = t; }
+       { char * identifier = strdup($1);
+         struct term_t * t = mk_term(Str, identifier);
+         $$ = t; }
 
 terms : term TK_R_RB
-      { terms[cur_term++] = $1; // FIXME could work back from a maximum instead of later reversing the parameter list.
-        $$ = terms; /* FIXME weird */}
+        { terms[cur_term++] = $1; // FIXME could work back from a maximum instead of later reversing the parameter list.
+          $$ = terms; /* FIXME weird */}
       | term TK_COMMA terms
-      { terms[cur_term++] = $1;
-        $$ = terms; }
+        { terms[cur_term++] = $1;
+          $$ = terms; }
       | TK_R_RB
         { $$ = terms; }
 
 atom : TK_CONST TK_L_RB terms
-          { char * predicate = strdup($1);
-            struct atom_t * atom = mk_atom(predicate, cur_term, terms);
-            cur_term = 0;
-            $$ = atom; }
+       { char * predicate = strdup($1);
+         struct atom_t * atom = mk_atom(predicate, cur_term, terms);
+         cur_term = 0;
+         $$ = atom; }
 
 atoms : atom TK_PERIOD
-      { atoms[cur_atom++] = $1;
-        $$ = atoms; }
+        { atoms[cur_atom++] = $1;
+          $$ = atoms; }
       | atom TK_COMMA atoms
-      { atoms[cur_atom++] = $1;
-        $$ = atoms; }
+        { atoms[cur_atom++] = $1;
+          $$ = atoms; }
 
 clause : atom TK_PERIOD
-           { struct clause_t * cl = mk_clause($1, 0, NULL);
-             cur_atom = 0;
-             $$ = cl; }
+         { struct clause_t * cl = mk_clause($1, 0, NULL);
+           cur_atom = 0;
+           $$ = cl; }
        | atom TK_IF atoms
            { struct clause_t * cl = mk_clause($1, cur_atom, atoms);
              cur_atom = 0;
