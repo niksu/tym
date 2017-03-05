@@ -3,7 +3,7 @@
  * TYM Datalog.
  * Nik Sultana, March 2017.
  *
- * License: LGPL (for licensing terms see the file called LICENSE)
+ * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
 #include <stdlib.h>

@@ -1,6 +1,8 @@
 # Makefile for TYM Datalog
 # Nik Sultana, March 2017
 # https://github.com/niksu/tym
+#
+# License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
 CFLAGS=-std=c99 -Wall -pedantic
