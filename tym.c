@@ -13,9 +13,8 @@
 #include "parser.h"
 #include "lexer.h"
 
-int yyparse (struct clause_t ** clause, yyscan_t scanner);
 void tests(struct clause_t * parsed);
-struct clause_t * parse(const char * string);
+struct clause_t ** parse(const char * string);
 
 char* source_file = NULL;
 char verbosity = 0;
@@ -62,10 +61,10 @@ int main (int argc, char **argv) {
 verbosity = %d\n\
 query = %s\n", source_file, verbosity, query);
     if (query) {
-      struct clause_t * parsed = parse(query);
+      struct clause_t ** parsed = parse(query);
       size_t SIZE = 300;
       char * buf = (char *)malloc(SIZE);
-      int result = clause_to_str(parsed, &SIZE, buf);
+      int result = clauses_to_str(parsed, &SIZE, buf);
       printf("parsed query (size=%d, remaining=%zu) %s\n", result, SIZE, buf);
     }
   }

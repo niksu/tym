@@ -145,6 +145,27 @@ int clause_to_str(struct clause_t* clause, size_t * outbuf_size, char* outbuf) {
   return l;
 }
 
+int clauses_to_str(struct clause_t** clauses, size_t * outbuf_size, char* outbuf) {
+  int l = 0;
+  int l_sub;
+  while (*clauses) {
+    l_sub = clause_to_str(*(clauses++), outbuf_size, outbuf + l);
+
+    if (l_sub < 0) {
+      // FIXME complain
+      return l_sub;
+    }
+
+    if (*(clauses)) {
+      (*outbuf_size)++, l--; // chomp the trailing \0.
+    }
+
+    l += l_sub;
+  }
+
+  return l;
+}
+
 struct term_t * mk_term(term_kind_t kind, char * identifier) {
   struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
   t->kind = kind;

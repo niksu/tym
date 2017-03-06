@@ -17,13 +17,13 @@
 #define ATOM_BUFFER 300
 #define CLAUSE_BUFFER 300
 
-int yyerror(struct clause_t **clause, yyscan_t scanner, const char * error_message);
+int yyerror(struct clause_t ***clause, yyscan_t scanner, const char * error_message);
 
-struct term_t * terms[TERM_BUFFER];
+struct term_t * terms_buf[TERM_BUFFER];
 int cur_term = 0;
-struct atom_t * atoms[ATOM_BUFFER];
+struct atom_t * atoms_buf[ATOM_BUFFER];
 int cur_atom = 0;
-struct clause_t * clauses[CLAUSE_BUFFER];
+struct clause_t * clauses_buf[CLAUSE_BUFFER];
 int cur_clause = 0;
 
 %}
@@ -31,7 +31,7 @@ int cur_clause = 0;
 %pure-parser
 
 %lex-param   { yyscan_t scanner }
-%parse-param { struct clause_t ** clause }
+%parse-param { struct clause_t *** clauses }
 %parse-param { yyscan_t scanner }
 
 %union {
@@ -41,6 +41,7 @@ int cur_clause = 0;
   struct term_t * term;
   struct term_t ** terms;
   struct atom_t ** atoms;
+  struct clause_t ** clauses;
 }
 
 %token TK_L_RB
@@ -59,7 +60,8 @@ int cur_clause = 0;
 %type <atoms> atoms
 %type <atom> atom
 %type <clause> clause
-%type <clause> program
+%type <clauses> clauses
+%type <clauses> program
 %start program
 %%
 
@@ -77,48 +79,59 @@ term : TK_CONST
          $$ = t; }
 
 terms : term TK_R_RB
-        { terms[cur_term++] = $1; // FIXME could work back from a maximum instead of later reversing the parameter list.
-          $$ = terms; /* FIXME weird */}
+        { terms_buf[cur_term++] = $1; // FIXME could work back from a maximum instead of later reversing the parameter list.
+          $$ = terms_buf; /* FIXME weird */}
       | term TK_COMMA terms
-        { terms[cur_term++] = $1;
-          $$ = terms; }
+        { terms_buf[cur_term++] = $1;
+          $$ = terms_buf; }
       | TK_R_RB
-        { $$ = terms; }
+        { $$ = terms_buf; }
 
 atom : TK_CONST TK_L_RB terms
        { char * predicate = strdup($1);
-         struct atom_t * atom = mk_atom(predicate, cur_term, terms);
+         struct atom_t * atom = mk_atom(predicate, cur_term, terms_buf);
          cur_term = 0;
          $$ = atom; }
 
 atoms : atom TK_PERIOD
-        { atoms[cur_atom++] = $1;
-          $$ = atoms; }
+        { atoms_buf[cur_atom++] = $1;
+          $$ = atoms_buf; }
       | atom TK_COMMA atoms
-        { atoms[cur_atom++] = $1;
-          $$ = atoms; }
+        { atoms_buf[cur_atom++] = $1;
+          $$ = atoms_buf; }
 
 clause : atom TK_PERIOD
          { struct clause_t * cl = mk_clause($1, 0, NULL);
            cur_atom = 0;
            $$ = cl; }
        | atom TK_IF atoms
-           { struct clause_t * cl = mk_clause($1, cur_atom, atoms);
+           { struct clause_t * cl = mk_clause($1, cur_atom, atoms_buf);
              cur_atom = 0;
              $$ = cl; }
 
-program : clause
-          { *clause = $1; } /* FIXME generalise to accept multiple clauses */
+clauses : clause
+          { clauses_buf[cur_clause++] = $1;
+            $$ = clauses_buf; }
+        | clause clauses
+          { clauses_buf[cur_clause++] = $1;
+            $$ = clauses_buf; }
+
+program : clauses
+          { //*clause = $1;
+             clauses_buf[cur_clause] = NULL;
+             *clauses = clauses_buf;
+             cur_clause = 0;
+          }
 
 %%
 
-int yyerror(struct clause_t **clause, yyscan_t scanner, const char * error_message) {
+int yyerror(struct clause_t ***clause, yyscan_t scanner, const char * error_message) {
   fprintf(stderr, "parse error: %s\n", error_message);
   return 0;
 }
 
-struct clause_t * parse(const char * string) {
-  struct clause_t * parsed = NULL;
+struct clause_t ** parse(const char * string) {
+  struct clause_t ** parsed = NULL;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
   if (yylex_init(&scanner)) {
