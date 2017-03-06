@@ -23,7 +23,7 @@ char* query = NULL;
 int main (int argc, char **argv) {
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
-    {"input", required_argument, NULL, LONG_OPT_INPUT},
+    {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
 #define LONG_OPT_VERBOSE 2
     {"verbose", no_argument, NULL, LONG_OPT_VERBOSE},
 #define LONG_OPT_QUERY 3
