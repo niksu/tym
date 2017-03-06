@@ -145,27 +145,6 @@ int clause_to_str(struct clause_t* clause, size_t * outbuf_size, char* outbuf) {
   return l;
 }
 
-int clauses_to_str(struct clause_t** clauses, size_t * outbuf_size, char* outbuf) {
-  int l = 0;
-  int l_sub;
-  while (*clauses) {
-    l_sub = clause_to_str(*(clauses++), outbuf_size, outbuf + l);
-
-    if (l_sub < 0) {
-      // FIXME complain
-      return l_sub;
-    }
-
-    if (*(clauses)) {
-      (*outbuf_size)++, l--; // chomp the trailing \0.
-    }
-
-    l += l_sub;
-  }
-
-  return l;
-}
-
 struct term_t * mk_term(term_kind_t kind, char * identifier) {
   struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
   t->kind = kind;
@@ -201,4 +180,18 @@ struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom
   }
 
   return cl;
+}
+
+struct program_t * mk_program(uint8_t no_clauses, struct clause_t ** program) {
+  struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
+  p->no_clauses = no_clauses;
+
+  if (no_clauses > 0) {
+    p->program = (struct clause_t **)malloc(sizeof(struct clause_t **) * no_clauses);
+    for (int i = 0; i < p->no_clauses; i++) {
+      p->program[i] = program[i];
+    }
+  }
+
+  return p;
 }

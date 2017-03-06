@@ -28,10 +28,15 @@ struct clause_t {
   struct atom_t * body;
 };
 
+struct program_t {
+  uint8_t no_clauses;
+  struct clause_t ** program;
+};
+
 int my_strcpy(char * dst, const char * src, size_t * space);
 int atom_to_str(struct atom_t* atom, size_t * outbuf_size, char* outbuf);
 int clause_to_str(struct clause_t* clause, size_t * outbuf_size, char* outbuf);
-int clauses_to_str(struct clause_t** clauses, size_t * outbuf_size, char* outbuf);
 struct term_t * mk_term(term_kind_t kind, char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** rev_args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** rev_body);
+struct program_t * mk_program(uint8_t no_clauses, struct clause_t ** rev_program);

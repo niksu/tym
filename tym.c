@@ -14,7 +14,7 @@
 #include "lexer.h"
 
 void tests(struct clause_t * parsed);
-struct clause_t ** parse(const char * string);
+struct program_t * parse(const char * string);
 
 char* source_file = NULL;
 char verbosity = 0;
@@ -61,11 +61,18 @@ int main (int argc, char **argv) {
 verbosity = %d\n\
 query = %s\n", source_file, verbosity, query);
     if (query) {
-      struct clause_t ** parsed = parse(query);
+      struct program_t * parsed = parse(query);
+      printf("%d clauses\n", parsed->no_clauses);
+
       size_t SIZE = 300;
       char * buf = (char *)malloc(SIZE);
-      int result = clauses_to_str(parsed, &SIZE, buf);
-      printf("parsed query (size=%d, remaining=%zu) %s\n", result, SIZE, buf);
+
+      for (int i = 0; i < parsed->no_clauses; i++) {
+        int result = clause_to_str(parsed->program[i], &SIZE, buf);
+        printf("  stringed query (size=%d, remaining=%zu)\n    %s\n", result, SIZE, buf);
+        SIZE = 300;
+      }
+
     }
   }
 

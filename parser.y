@@ -17,21 +17,21 @@
 #define ATOM_BUFFER 300
 #define CLAUSE_BUFFER 300
 
-int yyerror(struct clause_t ***clause, yyscan_t scanner, const char * error_message);
+int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
 
 struct term_t * terms_buf[TERM_BUFFER];
 int cur_term = 0;
 struct atom_t * atoms_buf[ATOM_BUFFER];
 int cur_atom = 0;
 struct clause_t * clauses_buf[CLAUSE_BUFFER];
-int cur_clause = 0;
+int cur_clause = CLAUSE_BUFFER - 1;
 
 %}
 
 %pure-parser
 
 %lex-param   { yyscan_t scanner }
-%parse-param { struct clause_t *** clauses }
+%parse-param { struct program_t ** program }
 %parse-param { yyscan_t scanner }
 
 %union {
@@ -42,6 +42,7 @@ int cur_clause = 0;
   struct term_t ** terms;
   struct atom_t ** atoms;
   struct clause_t ** clauses;
+  struct program_t * program;
 }
 
 %token TK_L_RB
@@ -61,7 +62,7 @@ int cur_clause = 0;
 %type <atom> atom
 %type <clause> clause
 %type <clauses> clauses
-%type <clauses> program
+%type <program> program
 %start program
 %%
 
@@ -110,28 +111,30 @@ clause : atom TK_PERIOD
              $$ = cl; }
 
 clauses : clause
-          { clauses_buf[cur_clause++] = $1;
+          { clauses_buf[cur_clause--] = $1;
             $$ = clauses_buf; }
         | clause clauses
-          { clauses_buf[cur_clause++] = $1;
+          { clauses_buf[cur_clause--] = $1;
             $$ = clauses_buf; }
 
 program : clauses
-          { //*clause = $1;
-             clauses_buf[cur_clause] = NULL;
-             *clauses = clauses_buf;
-             cur_clause = 0;
+          {
+            struct program_t * p = mk_program(CLAUSE_BUFFER - (cur_clause + 1),
+              &(clauses_buf[cur_clause + 1]));
+            clauses_buf[CLAUSE_BUFFER - 1] = NULL;
+            cur_clause = CLAUSE_BUFFER - 2;
+            *program = p;
           }
 
 %%
 
-int yyerror(struct clause_t ***clause, yyscan_t scanner, const char * error_message) {
+int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message) {
   fprintf(stderr, "parse error: %s\n", error_message);
   return 0;
 }
 
-struct clause_t ** parse(const char * string) {
-  struct clause_t ** parsed = NULL;
+struct program_t * parse(const char * string) {
+  struct program_t * parsed = NULL;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
   if (yylex_init(&scanner)) {
