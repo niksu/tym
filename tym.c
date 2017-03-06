@@ -68,7 +68,6 @@ query = %s\n", source_file, verbosity, query);
       char * buf = (char *)malloc(SIZE);
       int result = program_to_str(parsed, &SIZE, buf);
       printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
-      SIZE = 300;
     }
   }
 
