@@ -36,6 +36,7 @@ struct program_t {
 int my_strcpy(char * dst, const char * src, size_t * space);
 int atom_to_str(struct atom_t* atom, size_t * outbuf_size, char* outbuf);
 int clause_to_str(struct clause_t* clause, size_t * outbuf_size, char* outbuf);
+int program_to_str(struct program_t* clause, size_t * outbuf_size, char* outbuf);
 struct term_t * mk_term(term_kind_t kind, char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** rev_args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** rev_body);

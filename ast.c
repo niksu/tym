@@ -145,6 +145,28 @@ int clause_to_str(struct clause_t* clause, size_t * outbuf_size, char* outbuf) {
   return l;
 }
 
+int program_to_str(struct program_t* program, size_t * outbuf_size, char* outbuf) {
+  int offset = 0;
+  int pre_offset;
+
+  for (int i = 0; i < program->no_clauses; i++) {
+    pre_offset = clause_to_str(program->program[i], outbuf_size, outbuf + offset);
+    if (pre_offset < 0) {
+      // FIXME complain
+      return -1;
+    }
+
+    offset += pre_offset;
+
+    if (i < program->no_clauses - 1) {
+      //(*outbuf_size)++, offset--; // chomp trailing \0
+      outbuf[offset - 1] = '\n';
+    }
+  }
+
+  return offset;
+}
+
 struct term_t * mk_term(term_kind_t kind, char * identifier) {
   struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
   t->kind = kind;
