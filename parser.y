@@ -94,7 +94,7 @@ atom : TK_CONST TK_L_RB terms
          cur_term = 0;
          $$ = atom; }
 
-atoms : atom TK_PERIOD
+atoms : atom
         { atoms_buf[cur_atom++] = $1;
           $$ = atoms_buf; }
       | atom TK_COMMA atoms
@@ -105,7 +105,7 @@ clause : atom TK_PERIOD
          { struct clause_t * cl = mk_clause($1, 0, NULL);
            cur_atom = 0;
            $$ = cl; }
-       | atom TK_IF atoms
+       | atom TK_IF atoms TK_PERIOD
            { struct clause_t * cl = mk_clause($1, cur_atom, atoms_buf);
              cur_atom = 0;
              $$ = cl; }
@@ -121,8 +121,7 @@ program : clauses
           {
             struct program_t * p = mk_program(CLAUSE_BUFFER - (cur_clause + 1),
               &(clauses_buf[cur_clause + 1]));
-            clauses_buf[CLAUSE_BUFFER - 1] = NULL;
-            cur_clause = CLAUSE_BUFFER - 2;
+            cur_clause = CLAUSE_BUFFER - 1;
             *program = p;
           }
 
