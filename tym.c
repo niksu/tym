@@ -72,7 +72,7 @@ query = %s\n", source_file, verbosity, query);
     }
   }
 
-  if (source_file || 1) {
+  if (source_file) {
     FILE *source_f = fopen(source_file, "r");
     if (!source_f) {
       // FIXME complain
@@ -87,9 +87,7 @@ query = %s\n", source_file, verbosity, query);
     assert(file_size > 0);
 
     query = malloc(file_size + 1);
-    fgets(query, file_size, source_f);
-
-    query[file_size] = '\0';
+    fread(query, sizeof(char), file_size, source_f);
 
     printf("|%s|", query);
 
@@ -98,8 +96,6 @@ query = %s\n", source_file, verbosity, query);
     printf("%d clauses\n", parsed->no_clauses);
     size_t SIZE = 300;
     char * buf = (char *)malloc(SIZE);
-    //int result = clause_to_str(parsed->program[0], &SIZE, buf);
-    //printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
 
     int result = program_to_str(parsed, &SIZE, buf);
     printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);

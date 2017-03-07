@@ -39,7 +39,7 @@ STRING {QUOTE}[^{QUOTE}]*{QUOTE}
 %%
 
 {WS} { }
-{PERCENT}.* { }
+{PERCENT}[^\n]* { }
 
 {L_ROUND_BRACKET} {return TK_L_RB;}
 {R_ROUND_BRACKET} {return TK_R_RB;}
