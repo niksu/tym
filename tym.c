@@ -12,6 +12,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
+#include <assert.h>
 
 void tests(struct clause_t * parsed);
 struct program_t * parse(const char * string);
@@ -69,6 +70,41 @@ query = %s\n", source_file, verbosity, query);
       int result = program_to_str(parsed, &SIZE, buf);
       printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
     }
+  }
+
+  if (source_file || 1) {
+    FILE *source_f = fopen(source_file, "r");
+    if (!source_f) {
+      // FIXME complain
+    }
+
+    int file_size = -1;
+    fseek(source_f, 0L, SEEK_END);
+    file_size = ftell(source_f);
+    rewind(source_f);
+
+    printf("file_size=%d", file_size);
+    assert(file_size > 0);
+
+    query = malloc(file_size + 1);
+    fgets(query, file_size, source_f);
+
+    query[file_size] = '\0';
+
+    printf("|%s|", query);
+
+    // FIXME DRY principle
+    struct program_t * parsed = parse(query);
+    printf("%d clauses\n", parsed->no_clauses);
+    size_t SIZE = 300;
+    char * buf = (char *)malloc(SIZE);
+    //int result = clause_to_str(parsed->program[0], &SIZE, buf);
+    //printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
+
+    int result = program_to_str(parsed, &SIZE, buf);
+    printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
+
+    fclose(source_f);
   }
 
   return 0;
