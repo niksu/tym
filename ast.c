@@ -174,7 +174,7 @@ struct term_t * mk_term(term_kind_t kind, char * identifier) {
   return t;
 }
 
-struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** rev_args) {
+struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** args) {
   struct atom_t * at = (struct atom_t *)malloc(sizeof(struct atom_t));
   at->predicate = predicate;
   at->arity = arity;
@@ -182,14 +182,14 @@ struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** rev_ar
   if (at->arity > 0) {
     at->args = (struct term_t *)malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = *(rev_args[--arity]);
+      at->args[i] = *(args[i]);
     }
   }
 
   return at;
 }
 
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** rev_body) {
+struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body) {
   struct clause_t * cl = (struct clause_t *)malloc(sizeof(struct clause_t));
   cl->head = *head;
   cl->body_size = body_size;
@@ -197,7 +197,7 @@ struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom
   if (cl->body_size > 0) {
     cl->body = (struct atom_t *)malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = *(rev_body[--body_size]);
+      cl->body[i] = *(body[i]);
     }
   }
 

@@ -20,9 +20,9 @@
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
 
 struct term_t * terms_buf[TERM_BUFFER];
-int cur_term = 0;
+int cur_term = TERM_BUFFER - 1;
 struct atom_t * atoms_buf[ATOM_BUFFER];
-int cur_atom = 0;
+int cur_atom = ATOM_BUFFER - 1;
 struct clause_t * clauses_buf[CLAUSE_BUFFER];
 int cur_clause = CLAUSE_BUFFER - 1;
 
@@ -80,35 +80,37 @@ term : TK_CONST
          $$ = t; }
 
 terms : term TK_R_RB
-        { terms_buf[cur_term++] = $1; // FIXME could work back from a maximum instead of later reversing the parameter list.
+        { terms_buf[cur_term--] = $1;
           $$ = terms_buf; /* FIXME weird */}
       | term TK_COMMA terms
-        { terms_buf[cur_term++] = $1;
+        { terms_buf[cur_term--] = $1;
           $$ = terms_buf; }
       | TK_R_RB
         { $$ = terms_buf; }
 
 atom : TK_CONST TK_L_RB terms
        { char * predicate = strdup($1);
-         struct atom_t * atom = mk_atom(predicate, cur_term, terms_buf);
-         cur_term = 0;
+         struct atom_t * atom = mk_atom(predicate, TERM_BUFFER - (cur_term + 1),
+            &(terms_buf[cur_term + 1]));
+         cur_term = TERM_BUFFER - 1;
          $$ = atom; }
 
 atoms : atom
-        { atoms_buf[cur_atom++] = $1;
+        { atoms_buf[cur_atom--] = $1;
           $$ = atoms_buf; }
       | atom TK_COMMA atoms
-        { atoms_buf[cur_atom++] = $1;
+        { atoms_buf[cur_atom--] = $1;
           $$ = atoms_buf; }
 
 clause : atom TK_PERIOD
          { struct clause_t * cl = mk_clause($1, 0, NULL);
-           cur_atom = 0;
+           cur_atom = ATOM_BUFFER - 1;
            $$ = cl; }
        | atom TK_IF atoms TK_PERIOD
-           { struct clause_t * cl = mk_clause($1, cur_atom, atoms_buf);
-             cur_atom = 0;
-             $$ = cl; }
+         { struct clause_t * cl = mk_clause($1, ATOM_BUFFER - (cur_atom + 1),
+              &(atoms_buf[cur_atom + 1]));
+           cur_atom = ATOM_BUFFER - 1;
+           $$ = cl; }
 
 clauses : clause
           { clauses_buf[cur_clause--] = $1;
