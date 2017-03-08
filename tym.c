@@ -13,13 +13,16 @@
 #include "parser.h"
 #include "lexer.h"
 #include <assert.h>
+#include <stdbool.h>
 
 void tests(struct clause_t * parsed);
 struct program_t * parse(const char * string);
+char * read_file(char * filename);
 
 char* source_file = NULL;
 char verbosity = 0;
 char* query = NULL;
+bool test_parsing = false;
 
 int main (int argc, char **argv) {
   static struct option long_options[] = {
@@ -28,7 +31,9 @@ int main (int argc, char **argv) {
 #define LONG_OPT_VERBOSE 2
     {"verbose", no_argument, NULL, LONG_OPT_VERBOSE},
 #define LONG_OPT_QUERY 3
-    {"query", required_argument, NULL, LONG_OPT_QUERY}
+    {"query", required_argument, NULL, LONG_OPT_QUERY},
+#define LONG_OPT_TESTPARSING 4
+    {"test_parsing", no_argument, NULL, LONG_OPT_TESTPARSING}
   };
 
   int option_index = 0;
@@ -49,6 +54,9 @@ int main (int argc, char **argv) {
       case 'q':
         query = malloc(strlen(optarg) + 1);
         strcpy(query, optarg);
+        break;
+      case LONG_OPT_TESTPARSING:
+        test_parsing = true;
         break;
       // FIXME add support for -h
       default:
@@ -72,22 +80,8 @@ query = %s\n", source_file, verbosity, query);
     }
   }
 
-  if (source_file) {
-    FILE *source_f = fopen(source_file, "r");
-    if (!source_f) {
-      // FIXME complain
-    }
-
-    int file_size = -1;
-    fseek(source_f, 0L, SEEK_END);
-    file_size = ftell(source_f);
-    rewind(source_f);
-
-    printf("file_size=%d", file_size);
-    assert(file_size > 0);
-
-    query = malloc(file_size + 1);
-    fread(query, sizeof(char), file_size, source_f);
+  if (test_parsing) {
+    query = read_file(source_file);
 
     printf("|%s|", query);
 
@@ -99,9 +93,44 @@ query = %s\n", source_file, verbosity, query);
 
     int result = program_to_str(parsed, &SIZE, buf);
     printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
+    return 0;
+  }
 
-    fclose(source_f);
+  if (verbosity && source_file) {
+    query = read_file(source_file);
+
+    printf("|%s|", query);
+
+    // FIXME DRY principle
+    struct program_t * parsed = parse(query);
+    printf("%d clauses\n", parsed->no_clauses);
+    size_t SIZE = 300;
+    char * buf = (char *)malloc(SIZE);
+
+    int result = program_to_str(parsed, &SIZE, buf);
+    printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
   }
 
   return 0;
+}
+
+char * read_file(char * filename) {
+  char * contents = NULL;
+  FILE *file = fopen(filename, "r");
+  if (!file) {
+    // FIXME complain
+  }
+
+  int file_size = -1;
+  fseek(file, 0L, SEEK_END);
+  file_size = ftell(file);
+  rewind(file);
+
+  assert(file_size > 0);
+
+  contents = malloc(file_size + 1);
+  fread(contents, sizeof(char), file_size, file);
+
+  fclose(file);
+  return contents;
 }
