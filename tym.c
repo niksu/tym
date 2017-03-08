@@ -15,14 +15,20 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#define BUF_SIZE 300
+
 void tests(struct clause_t * parsed);
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 
 char* source_file = NULL;
+char* source_file_contents = NULL;
 char verbosity = 0;
 char* query = NULL;
 bool test_parsing = false;
+
+struct program_t * parsed_source_file_contents = NULL;
+struct program_t * parsed_query = NULL;
 
 int main (int argc, char **argv) {
   static struct option long_options[] = {
@@ -66,50 +72,61 @@ int main (int argc, char **argv) {
   }
 
   if (verbosity) {
-    printf("input = %s\n\
-verbosity = %d\n\
-query = %s\n", source_file, verbosity, query);
-    if (query) {
-      struct program_t * parsed = parse(query);
-      printf("%d clauses\n", parsed->no_clauses);
+    printf("input = %s\n", source_file);
+    printf("verbosity = %d\n", verbosity);
+    printf("test_parsing = %d\n", test_parsing);
+    printf("query = %s\n", query);
+  }
 
-      size_t SIZE = 300;
-      char * buf = (char *)malloc(SIZE);
-      int result = program_to_str(parsed, &SIZE, buf);
-      printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
+  if (source_file != NULL) {
+    source_file_contents = read_file(source_file);
+    if (test_parsing) {
+      printf("input contents |%s|\n", source_file_contents);
+    }
+    parsed_source_file_contents = parse(source_file_contents);
+    if (verbosity && source_file_contents != NULL) {
+      printf("input : %d clauses\n", parsed_source_file_contents->no_clauses);
+    }
+  } else {
+    if (test_parsing) {
+      printf("(no input file given)\n");
+    }
+  }
+
+  if (query != NULL) {
+    if (test_parsing && !verbosity) {
+      printf("query contents |%s|\n", query);
+    }
+    parsed_query = parse(query);
+    if (verbosity && query != NULL) {
+      printf("query : %d clauses\n", parsed_query->no_clauses);
+    }
+  } else {
+    if (test_parsing) {
+      printf("(no query given)\n");
     }
   }
 
   if (test_parsing) {
-    query = read_file(source_file);
+    size_t remaining_buf_size = BUF_SIZE;
+    char * buf = (char *)malloc(remaining_buf_size);
+    int used_buf_size;
 
-    printf("|%s|", query);
+    if (source_file != NULL) {
+      used_buf_size = program_to_str(parsed_source_file_contents, &remaining_buf_size, buf);
+      printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n", used_buf_size, remaining_buf_size, buf);
+    }
 
-    // FIXME DRY principle
-    struct program_t * parsed = parse(query);
-    printf("%d clauses\n", parsed->no_clauses);
-    size_t SIZE = 300;
-    char * buf = (char *)malloc(SIZE);
+    if (query != NULL) {
+      remaining_buf_size = BUF_SIZE;
+      used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
+      printf("stringed query (size=%d, remaining=%zu)\n|%s|\n", used_buf_size, remaining_buf_size, buf);
+    }
 
-    int result = program_to_str(parsed, &SIZE, buf);
-    printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
     return 0;
   }
 
-  if (verbosity && source_file) {
-    query = read_file(source_file);
-
-    printf("|%s|", query);
-
-    // FIXME DRY principle
-    struct program_t * parsed = parse(query);
-    printf("%d clauses\n", parsed->no_clauses);
-    size_t SIZE = 300;
-    char * buf = (char *)malloc(SIZE);
-
-    int result = program_to_str(parsed, &SIZE, buf);
-    printf("stringed query (size=%d, remaining=%zu)\n%s\n", result, SIZE, buf);
-  }
+  // FIXME add main application logic.
 
   return 0;
 }
