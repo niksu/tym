@@ -20,16 +20,17 @@
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 
-char* source_file = NULL;
-char* source_file_contents = NULL;
+char * source_file = NULL;
+char * source_file_contents = NULL;
 char verbosity = 0;
-char* query = NULL;
+char * query = NULL;
 bool test_parsing = false;
 
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
-int main (int argc, char **argv) {
+int
+main (int argc, char ** argv) {
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
@@ -44,7 +45,8 @@ int main (int argc, char **argv) {
   int option_index = 0;
 
   int option;
-  while ((option = getopt_long(argc, argv, "i:vq:", long_options, &option_index)) != -1) {
+  while ((option = getopt_long(argc, argv, "i:vq:", long_options,
+          &option_index)) != -1) {
     switch (option) {
       case LONG_OPT_INPUT:
       case 'i':
@@ -86,10 +88,8 @@ int main (int argc, char **argv) {
     if (verbosity && source_file_contents != NULL) {
       printf("input : %d clauses\n", parsed_source_file_contents->no_clauses);
     }
-  } else {
-    if (test_parsing) {
-      printf("(no input file given)\n");
-    }
+  } else if (test_parsing) {
+    printf("(no input file given)\n");
   }
 
   if (query != NULL) {
@@ -100,10 +100,8 @@ int main (int argc, char **argv) {
     if (verbosity && query != NULL) {
       printf("query : %d clauses\n", parsed_query->no_clauses);
     }
-  } else {
-    if (test_parsing) {
-      printf("(no query given)\n");
-    }
+  } else if (test_parsing) {
+    printf("(no query given)\n");
   }
 
   if (test_parsing) {
@@ -112,14 +110,17 @@ int main (int argc, char **argv) {
     int used_buf_size;
 
     if (source_file != NULL) {
-      used_buf_size = program_to_str(parsed_source_file_contents, &remaining_buf_size, buf);
-      printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n", used_buf_size, remaining_buf_size, buf);
+      used_buf_size = program_to_str(parsed_source_file_contents,
+          &remaining_buf_size, buf);
+      printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n",
+          used_buf_size, remaining_buf_size, buf);
     }
 
     if (query != NULL) {
       remaining_buf_size = BUF_SIZE;
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
-      printf("stringed query (size=%d, remaining=%zu)\n|%s|\n", used_buf_size, remaining_buf_size, buf);
+      printf("stringed query (size=%d, remaining=%zu)\n|%s|\n",
+          used_buf_size, remaining_buf_size, buf);
     }
 
     return 0;
@@ -130,7 +131,8 @@ int main (int argc, char **argv) {
   return 0;
 }
 
-char * read_file(char * filename) {
+char *
+read_file(char * filename) {
   char * contents = NULL;
 
   // FIXME check whether file exists.
