@@ -133,6 +133,8 @@ int main (int argc, char **argv) {
 
 char * read_file(char * filename) {
   char * contents = NULL;
+
+  // FIXME check whether file exists.
   FILE *file = fopen(filename, "r");
   if (!file) {
     // FIXME complain
