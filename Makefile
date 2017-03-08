@@ -7,7 +7,7 @@
 CC?=gcc
 CFLAGS=-std=c99 -Wall -pedantic
 TGT=tym
-OBJ=tym.o ast.o lexer.o parser.o tests.o
+OBJ=tym.o ast.o lexer.o parser.o
 HEADERS=ast.h lexer.h parser.h
 
 $(TGT) : $(OBJ) $(HEADERS)

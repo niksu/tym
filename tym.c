@@ -17,7 +17,6 @@
 
 #define BUF_SIZE 300
 
-void tests(struct clause_t * parsed);
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 
