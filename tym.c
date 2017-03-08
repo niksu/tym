@@ -150,6 +150,7 @@ read_file(char * filename) {
 
   contents = malloc(file_size + 1);
   fread(contents, sizeof(char), file_size, file);
+  contents[file_size] = '\0';
 
   fclose(file);
   return contents;
