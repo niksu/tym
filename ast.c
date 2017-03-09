@@ -11,7 +11,8 @@
 #include "ast.h"
 
 int
-my_strcpy(char * dst, const char * src, size_t * space) {
+my_strcpy(char * dst, const char * src, size_t * space)
+{
   int l = strlen(src);
   if (l < *space) {
     strcpy(dst, src);
@@ -24,7 +25,8 @@ my_strcpy(char * dst, const char * src, size_t * space) {
 }
 
 int
-term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf) {
+term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
+{
   int l = my_strcpy(outbuf, term->identifier, outbuf_size);
   if (l < 0) {
     // FIXME complain
@@ -34,7 +36,8 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf) {
 }
 
 int
-predicate_to_str(struct atom_t* atom, size_t * outbuf_size, char * outbuf) {
+predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
+{
   int l = my_strcpy(outbuf, atom->predicate, outbuf_size);
   if (l < 0) {
     // FIXME complain
@@ -44,7 +47,8 @@ predicate_to_str(struct atom_t* atom, size_t * outbuf_size, char * outbuf) {
 }
 
 int
-atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf) {
+atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
+{
   int l = predicate_to_str(atom, outbuf_size, outbuf);
   if (l < 0) {
     // FIXME complain
@@ -89,7 +93,8 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf) {
 }
 
 int
-clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf) {
+clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
+{
   int l = atom_to_str(&(clause->head), outbuf_size, outbuf);
   if (l < 0) {
     // FIXME complain
@@ -151,7 +156,8 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf) {
 }
 
 int
-program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf) {
+program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
+{
   int offset = 0;
   int pre_offset;
 
@@ -174,7 +180,8 @@ program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf) 
 }
 
 struct term_t *
-mk_term(term_kind_t kind, char * identifier) {
+mk_term(term_kind_t kind, char * identifier)
+{
   struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
   t->kind = kind;
   t->identifier = identifier;
@@ -214,7 +221,8 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body) {
 }
 
 struct program_t *
-mk_program(uint8_t no_clauses, struct clause_t ** program) {
+mk_program(uint8_t no_clauses, struct clause_t ** program)
+{
   struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
   p->no_clauses = no_clauses;
 

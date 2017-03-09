@@ -134,7 +134,9 @@ int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_me
   return 0;
 }
 
-struct program_t * parse(const char * string) {
+struct program_t *
+parse(const char * string)
+{
   struct program_t * parsed = NULL;
   yyscan_t scanner;
   YY_BUFFER_STATE state;

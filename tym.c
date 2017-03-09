@@ -30,7 +30,8 @@ struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
 int
-main (int argc, char ** argv) {
+main (int argc, char ** argv)
+{
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
@@ -132,7 +133,8 @@ main (int argc, char ** argv) {
 }
 
 char *
-read_file(char * filename) {
+read_file(char * filename)
+{
   char * contents = NULL;
 
   // FIXME check whether file exists.
