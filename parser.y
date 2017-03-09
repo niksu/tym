@@ -19,8 +19,6 @@
 
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
 
-struct term_t * terms_buf[TERM_BUFFER];
-int cur_term = TERM_BUFFER - 1;
 struct atom_t * atoms_buf[ATOM_BUFFER];
 int cur_atom = ATOM_BUFFER - 1;
 struct clause_t * clauses_buf[CLAUSE_BUFFER];
@@ -39,7 +37,7 @@ int cur_clause = CLAUSE_BUFFER - 1;
   struct clause_t * clause;
   struct atom_t * atom;
   struct term_t * term;
-  struct term_t ** terms;
+  struct terms_t * terms;
   struct atom_t ** atoms;
   struct clause_t ** clauses;
   struct program_t * program;
@@ -80,19 +78,18 @@ term : TK_CONST
          $$ = t; }
 
 terms : term TK_R_RB
-        { terms_buf[cur_term--] = $1;
-          $$ = terms_buf; /* FIXME weird */}
+        { struct terms_t * ts = mk_term_cell($1, NULL);
+          $$ = ts; }
       | term TK_COMMA terms
-        { terms_buf[cur_term--] = $1;
-          $$ = terms_buf; }
+        { struct terms_t * ts = mk_term_cell($1, $3);
+          $$ = ts; }
       | TK_R_RB
-        { $$ = terms_buf; }
+        { $$ = NULL; }
 
 atom : TK_CONST TK_L_RB terms
        { char * predicate = strdup($1);
-         struct atom_t * atom = mk_atom(predicate, TERM_BUFFER - (cur_term + 1),
-            &(terms_buf[cur_term + 1]));
-         cur_term = TERM_BUFFER - 1;
+         struct terms_t * ts = $3;
+         struct atom_t * atom = mk_atom(predicate, len_term_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom

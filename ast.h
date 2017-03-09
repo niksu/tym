@@ -16,6 +16,11 @@ struct term_t {
   char * identifier;
 };
 
+struct terms_t {
+  struct term_t * term;
+  struct terms_t * next;
+};
+
 struct atom_t {
   char * predicate;
   uint8_t arity;
@@ -37,7 +42,12 @@ int my_strcpy(char * dst, const char * src, size_t * space);
 int atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 int clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
 int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
+
 struct term_t * mk_term(term_kind_t kind, char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, struct term_t ** args);
+struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body);
 struct program_t * mk_program(uint8_t no_clauses, struct clause_t ** program);
+
+struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
+
+int len_term_cell(struct terms_t * next);

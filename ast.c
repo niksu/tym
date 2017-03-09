@@ -188,8 +188,30 @@ mk_term(term_kind_t kind, char * identifier)
   return t;
 }
 
+struct terms_t *
+mk_term_cell(struct term_t * term, struct terms_t * next)
+{
+  struct terms_t * ts = (struct terms_t *)malloc(sizeof(struct terms_t));
+  ts->term = term;
+  ts->next = next;
+  return ts;
+}
+
+int
+len_term_cell(struct terms_t * next)
+{
+  int result = 0;
+
+  while (next != NULL) {
+    result++;
+    next = next->next;
+  }
+
+  return result;
+}
+
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, struct term_t ** args) {
+mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   struct atom_t * at = (struct atom_t *)malloc(sizeof(struct atom_t));
   at->predicate = predicate;
   at->arity = arity;
@@ -197,7 +219,8 @@ mk_atom(char * predicate, uint8_t arity, struct term_t ** args) {
   if (at->arity > 0) {
     at->args = (struct term_t *)malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = *(args[i]);
+      at->args[i] = *(args->term);
+      args = args->next;
     }
   }
 
