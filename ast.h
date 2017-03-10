@@ -6,6 +6,9 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
+#ifndef __TYM_AST_H__
+#define __TYM_AST_H__
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -51,3 +54,5 @@ struct program_t * mk_program(uint8_t no_clauses, struct clause_t ** program);
 struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
 
 int len_term_cell(struct terms_t * next);
+
+#endif // __TYM_AST_H__
