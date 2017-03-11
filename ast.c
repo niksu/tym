@@ -227,8 +227,30 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   return at;
 }
 
+struct atoms_t *
+mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
+{
+  struct atoms_t * ats = (struct atoms_t *)malloc(sizeof(struct atoms_t));
+  ats->atom = atom;
+  ats->next = next;
+  return ats;
+}
+
+int
+len_atom_cell(struct atoms_t * next)
+{
+  int result = 0;
+
+  while (next != NULL) {
+    result++;
+    next = next->next;
+  }
+
+  return result;
+}
+
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body) {
+mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
   struct clause_t * cl = (struct clause_t *)malloc(sizeof(struct clause_t));
   cl->head = *head;
   cl->body_size = body_size;
@@ -236,15 +258,38 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body) {
   if (cl->body_size > 0) {
     cl->body = (struct atom_t *)malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = *(body[i]);
+      cl->body[i] = *(body->atom);
+      body = body->next;
     }
   }
 
   return cl;
 }
 
+struct clauses_t *
+mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
+{
+  struct clauses_t * cls = (struct clauses_t *)malloc(sizeof(struct clauses_t));
+  cls->clause = clause;
+  cls->next = next;
+  return cls;
+}
+
+int
+len_clause_cell(struct clauses_t * next)
+{
+  int result = 0;
+
+  while (next != NULL) {
+    result++;
+    next = next->next;
+  }
+
+  return result;
+}
+
 struct program_t *
-mk_program(uint8_t no_clauses, struct clause_t ** program)
+mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
   struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
   p->no_clauses = no_clauses;
@@ -252,7 +297,8 @@ mk_program(uint8_t no_clauses, struct clause_t ** program)
   if (no_clauses > 0) {
     p->program = (struct clause_t **)malloc(sizeof(struct clause_t **) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
-      p->program[i] = program[i];
+      p->program[i] = program->clause;
+      program = program->next;
     }
   }
 

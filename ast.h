@@ -30,10 +30,20 @@ struct atom_t {
   struct term_t * args;
 };
 
+struct atoms_t {
+  struct atom_t * atom;
+  struct atoms_t * next;
+};
+
 struct clause_t {
   struct atom_t head;
   uint8_t body_size;
   struct atom_t * body;
+};
+
+struct clauses_t {
+  struct clause_t * clause;
+  struct clauses_t * next;
 };
 
 struct program_t {
@@ -48,11 +58,15 @@ int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbu
 
 struct term_t * mk_term(term_kind_t kind, char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atom_t ** body);
-struct program_t * mk_program(uint8_t no_clauses, struct clause_t ** program);
+struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body);
+struct program_t * mk_program(uint8_t no_clauses, struct clauses_t * program);
 
 struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
+struct atoms_t * mk_atom_cell(struct atom_t * term, struct atoms_t * next);
+struct clauses_t * mk_clause_cell(struct clause_t * term, struct clauses_t * next);
 
 int len_term_cell(struct terms_t * next);
+int len_atom_cell(struct atoms_t * next);
+int len_clause_cell(struct clauses_t * next);
 
 #endif // __TYM_AST_H__
