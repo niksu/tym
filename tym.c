@@ -70,7 +70,7 @@ main (int argc, char ** argv)
       break;
     // FIXME add support for -h
     default:
-      printf("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
+      ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
       return -1;
     }
   }

@@ -121,7 +121,7 @@ program : clauses
 %%
 
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message) {
-  fprintf(stderr, "parse error: %s\n", error_message);
+  ERR("parse error: %s\n", error_message);
   return 0;
 }
 

@@ -57,6 +57,6 @@ STRING {QUOTE}[^{QUOTE}]*{QUOTE}
 
 /*
 int yyerror(const char *error_message) {
-  fprintf(stderr, "Tokenisation error: %s\n", error_message);
+  ERR("Tokenisation error: %s\n", error_message);
 }
 */
