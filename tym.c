@@ -49,27 +49,27 @@ main (int argc, char ** argv)
   while ((option = getopt_long(argc, argv, "i:vq:", long_options,
           &option_index)) != -1) {
     switch (option) {
-      case LONG_OPT_INPUT:
-      case 'i':
-        source_file = malloc(strlen(optarg) + 1);
-        strcpy(source_file, optarg);
-        break;
-      case LONG_OPT_VERBOSE:
-      case 'v':
-        verbosity = 1;
-        break;
-      case LONG_OPT_QUERY:
-      case 'q':
-        query = malloc(strlen(optarg) + 1);
-        strcpy(query, optarg);
-        break;
-      case LONG_OPT_TESTPARSING:
-        test_parsing = true;
-        break;
-      // FIXME add support for -h
-      default:
-        printf("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
-        return -1;
+    case LONG_OPT_INPUT:
+    case 'i':
+      source_file = malloc(strlen(optarg) + 1);
+      strcpy(source_file, optarg);
+      break;
+    case LONG_OPT_VERBOSE:
+    case 'v':
+      verbosity = 1;
+      break;
+    case LONG_OPT_QUERY:
+    case 'q':
+      query = malloc(strlen(optarg) + 1);
+      strcpy(query, optarg);
+      break;
+    case LONG_OPT_TESTPARSING:
+      test_parsing = true;
+      break;
+    // FIXME add support for -h
+    default:
+      printf("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
+      return -1;
     }
   }
 
