@@ -204,7 +204,7 @@ len_term_cell(struct terms_t * next)
 {
   int result = 0;
 
-  while (next != NULL) {
+  while (NULL != next) {
     result++;
     next = next->next;
   }
@@ -243,7 +243,7 @@ len_atom_cell(struct atoms_t * next)
 {
   int result = 0;
 
-  while (next != NULL) {
+  while (NULL != next) {
     result++;
     next = next->next;
   }
@@ -282,7 +282,7 @@ len_clause_cell(struct clauses_t * next)
 {
   int result = 0;
 
-  while (next != NULL) {
+  while (NULL != next) {
     result++;
     next = next->next;
   }

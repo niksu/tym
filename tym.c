@@ -81,25 +81,25 @@ main (int argc, char ** argv)
     printf("query = %s\n", query);
   }
 
-  if (source_file != NULL) {
+  if (NULL != source_file) {
     source_file_contents = read_file(source_file);
     if (test_parsing) {
       printf("input contents |%s|\n", source_file_contents);
     }
     parsed_source_file_contents = parse(source_file_contents);
-    if (verbosity && source_file_contents != NULL) {
+    if (verbosity && NULL != source_file_contents) {
       printf("input : %d clauses\n", parsed_source_file_contents->no_clauses);
     }
   } else if (test_parsing) {
     printf("(no input file given)\n");
   }
 
-  if (query != NULL) {
+  if (NULL != query) {
     if (test_parsing && !verbosity) {
       printf("query contents |%s|\n", query);
     }
     parsed_query = parse(query);
-    if (verbosity && query != NULL) {
+    if (verbosity && NULL != query) {
       printf("query : %d clauses\n", parsed_query->no_clauses);
     }
   } else if (test_parsing) {
@@ -111,14 +111,14 @@ main (int argc, char ** argv)
     char * buf = (char *)malloc(remaining_buf_size);
     int used_buf_size;
 
-    if (source_file != NULL) {
+    if (NULL != source_file) {
       used_buf_size = program_to_str(parsed_source_file_contents,
           &remaining_buf_size, buf);
       printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
     }
 
-    if (query != NULL) {
+    if (NULL != query) {
       remaining_buf_size = BUF_SIZE;
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
       printf("stringed query (size=%d, remaining=%zu)\n|%s|\n",
