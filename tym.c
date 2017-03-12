@@ -15,6 +15,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
+#include "tym.h"
 
 #define BUF_SIZE 300
 
@@ -75,10 +76,10 @@ main (int argc, char ** argv)
   }
 
   if (verbosity) {
-    printf("input = %s\n", source_file);
-    printf("verbosity = %d\n", verbosity);
-    printf("test_parsing = %d\n", test_parsing);
-    printf("query = %s\n", query);
+    VERBOSE("input = %s\n", source_file);
+    VERBOSE("verbosity = %d\n", verbosity);
+    VERBOSE("test_parsing = %d\n", test_parsing);
+    VERBOSE("query = %s\n", query);
   }
 
   if (NULL != source_file) {
@@ -88,7 +89,7 @@ main (int argc, char ** argv)
     }
     parsed_source_file_contents = parse(source_file_contents);
     if (verbosity && NULL != source_file_contents) {
-      printf("input : %d clauses\n", parsed_source_file_contents->no_clauses);
+      VERBOSE("input : %d clauses\n", parsed_source_file_contents->no_clauses);
     }
   } else if (test_parsing) {
     printf("(no input file given)\n");
@@ -100,7 +101,7 @@ main (int argc, char ** argv)
     }
     parsed_query = parse(query);
     if (verbosity && NULL != query) {
-      printf("query : %d clauses\n", parsed_query->no_clauses);
+      VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
     }
   } else if (test_parsing) {
     printf("(no query given)\n");
