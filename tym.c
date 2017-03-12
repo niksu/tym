@@ -137,6 +137,8 @@ main (int argc, char ** argv)
 char *
 read_file(char * filename)
 {
+  DBG("Reading \"%s\"\n", filename);
+
   char * contents = NULL;
 
   // FIXME check whether file exists.

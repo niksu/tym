@@ -9,9 +9,10 @@ CFLAGS=-std=c99 -Wall -pedantic
 TGT=tym
 OBJ=tym.o ast.o lexer.o parser.o
 HEADERS=ast.h lexer.h parser.h tym.h
+ADDITIONAL_CFLAGS?=
 
 $(TGT) : $(OBJ) $(HEADERS)
-	$(CC) -o $@ $(CFLAGS) $(OBJ)
+	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $(OBJ)
 
 lexer.c : lexer.l
 	flex $<
@@ -26,7 +27,7 @@ parser.c : parser.y
 	bison -d -o parser.c $<
 
 %.o: %.c $(HEADERS)
-	$(CC) -c -o $@ $(CFLAGS) $<
+	$(CC) -c -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $<
 
 .PHONY: clean
 
