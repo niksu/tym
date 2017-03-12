@@ -5,15 +5,16 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <assert.h>
 #include <getopt.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
-#include <assert.h>
-#include <stdbool.h>
 
 #define BUF_SIZE 300
 
