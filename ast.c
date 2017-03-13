@@ -306,3 +306,68 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
 
   return p;
 }
+
+void
+free_term(struct term_t * term)
+{
+  free(term->identifier);
+  free(term);
+}
+
+void
+free_terms(struct terms_t * terms)
+{
+  free_term(terms->term);
+  if (NULL != terms->next) {
+    free_terms(terms->next);
+  }
+  free(terms);
+}
+
+void
+free_atom(struct atom_t * atom)
+{
+  free(atom->predicate);
+  for (int i = 0; i < atom->arity; i++) {
+    free_term(&(atom->args[i]));
+  }
+  free(atom);
+}
+
+void
+free_atoms(struct atoms_t * atoms)
+{
+  free_atom(atoms->atom);
+  if (NULL != atoms->next) {
+    free_atoms(atoms->next);
+  }
+  free(atoms);
+}
+
+void
+free_clause(struct clause_t * clause)
+{
+  for (int i = 0; i < clause->body_size; i++) {
+    free_atom(&(clause->body[i]));
+  }
+  free(clause);
+}
+
+void
+free_clauses(struct clauses_t * clauses)
+{
+  free_clause(clauses->clause);
+  if (NULL != clauses->next) {
+    free_clauses(clauses->next);
+  }
+  free(clauses);
+}
+
+void
+free_program(struct program_t * program)
+{
+  for (int i = 0; i < program->no_clauses; i++) {
+    free_clause(program->program[i]);
+  }
+  free(program);
+}

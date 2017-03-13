@@ -117,6 +117,10 @@ main (int argc, char ** argv)
           &remaining_buf_size, buf);
       printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
+
+      free_program(parsed_source_file_contents);
+      free(source_file_contents);
+      free(source_file);
     }
 
     if (NULL != query) {
@@ -124,12 +128,31 @@ main (int argc, char ** argv)
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
       printf("stringed query (size=%d, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
+
+      free_program(parsed_query);
+      free(query);
     }
+
+    free(buf);
 
     return 0;
   }
 
   // FIXME add main application logic.
+
+
+  DBG("Cleaning up before exiting");
+
+  if (NULL != source_file) {
+    free_program(parsed_source_file_contents);
+    free(source_file_contents);
+    free(source_file);
+  }
+
+  if (NULL != query) {
+    free_program(parsed_query);
+    free(query);
+  }
 
   return 0;
 }
