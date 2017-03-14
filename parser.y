@@ -21,6 +21,11 @@
 #define ATOM_BUFFER 300
 #define CLAUSE_BUFFER 300
 
+// FIXME could add checks to ensure that syntactic structures fit within a
+//       certain size, e.g., by using constraints such as those below:
+//#define MAX_NO_ATOM_ARGS 30
+//#define MAX_CLAUSE_BODY_SIZE 30
+
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
 
 %}
