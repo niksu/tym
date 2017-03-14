@@ -7,6 +7,7 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -185,7 +186,11 @@ program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
 struct term_t *
 mk_term(term_kind_t kind, char * identifier)
 {
+  assert(NULL != identifier);
+
   struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
+  assert(NULL != t);
+
   t->kind = kind;
   t->identifier = identifier;
   return t;
@@ -194,7 +199,11 @@ mk_term(term_kind_t kind, char * identifier)
 struct terms_t *
 mk_term_cell(struct term_t * term, struct terms_t * next)
 {
+  assert(NULL != term);
+
   struct terms_t * ts = (struct terms_t *)malloc(sizeof(struct terms_t));
+  assert(NULL != ts);
+
   ts->term = term;
   ts->next = next;
   return ts;
@@ -215,7 +224,11 @@ len_term_cell(struct terms_t * next)
 
 struct atom_t *
 mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
+  assert(NULL != predicate);
+
   struct atom_t * at = (struct atom_t *)malloc(sizeof(struct atom_t));
+  assert(NULL != at);
+
   at->predicate = predicate;
   at->arity = arity;
 
@@ -225,6 +238,8 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
       at->args[i] = *(args->term);
       args = args->next;
     }
+  } else {
+    at->args = NULL;
   }
 
   return at;
@@ -233,9 +248,14 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
 struct atoms_t *
 mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
 {
+  assert(NULL != atom);
+
   struct atoms_t * ats = (struct atoms_t *)malloc(sizeof(struct atoms_t));
+  assert(NULL != ats);
+
   ats->atom = atom;
   ats->next = next;
+
   return ats;
 }
 
@@ -254,7 +274,11 @@ len_atom_cell(struct atoms_t * next)
 
 struct clause_t *
 mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
+  assert(NULL != head);
+
   struct clause_t * cl = (struct clause_t *)malloc(sizeof(struct clause_t));
+  assert(NULL != cl);
+
   cl->head = *head;
   cl->body_size = body_size;
 
@@ -264,6 +288,8 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
       cl->body[i] = *(body->atom);
       body = body->next;
     }
+  } else {
+    cl->body = NULL;
   }
 
   return cl;
@@ -272,9 +298,14 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
 struct clauses_t *
 mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
 {
+  assert(NULL != clause);
+
   struct clauses_t * cls = (struct clauses_t *)malloc(sizeof(struct clauses_t));
+  assert(NULL != cls);
+
   cls->clause = clause;
   cls->next = next;
+
   return cls;
 }
 
@@ -295,6 +326,8 @@ struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
   struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
+  assert(NULL != p);
+
   p->no_clauses = no_clauses;
 
   if (no_clauses > 0) {
@@ -303,6 +336,8 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
       p->program[i] = program->clause;
       program = program->next;
     }
+  } else {
+    p->program = NULL;
   }
 
   return p;
@@ -311,12 +346,17 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
 void
 free_term(struct term_t term)
 {
+  assert(NULL != term.identifier);
+
   free(term.identifier);
 }
 
 void
 free_terms(struct terms_t * terms)
 {
+  assert(NULL != terms);
+
+  assert(NULL != terms->term);
   free_term(*(terms->term));
   free(terms->term);
   if (NULL != terms->next) {
@@ -328,6 +368,8 @@ free_terms(struct terms_t * terms)
 void
 free_atom(struct atom_t atom)
 {
+  assert(NULL != atom.predicate);
+
   DBG("Freeing atom: ");
   DBG_SYNTAX((void *)&atom, (x_to_str_t)atom_to_str);
   DBG("\n");
@@ -336,9 +378,11 @@ free_atom(struct atom_t atom)
   for (int i = 0; i < atom.arity; i++) {
     free_term(atom.args[i]);
   }
-  // Since we allocated the space for all arguments, rather than for each argument,
-  // we deallocate it as such.
-  free(atom.args);
+  if (atom.arity > 0) {
+    // Since we allocated the space for all arguments, rather than for each argument,
+    // we deallocate it as such.
+    free(atom.args);
+  }
 
   // NOTE since we are passed an atom value rather than a pointer to an atom, we
   // don't deallocate the atom -- it's up to a caller to work out if it wants to
@@ -348,6 +392,9 @@ free_atom(struct atom_t atom)
 void
 free_atoms(struct atoms_t * atoms)
 {
+  assert(NULL != atoms);
+
+  assert(NULL != atoms->atom);
   free_atom(*(atoms->atom));
   free(atoms->atom);
   if (NULL != atoms->next) {
@@ -361,16 +408,25 @@ free_clause(struct clause_t clause)
 {
   // No need to free clause->head since that's freed when we free this clause's
   // memory.
+
+  assert((0 == clause.body_size && NULL == clause.body) ||
+         (clause.body_size > 0 && NULL != clause.body));
   for (int i = 0; i < clause.body_size; i++) {
     free_atom(clause.body[i]);
   }
-  // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
-  free(clause.body);
+
+  if (clause.body_size > 0) {
+    // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
+    free(clause.body);
+  }
 }
 
 void
 free_clauses(struct clauses_t * clauses)
 {
+  assert(NULL != clauses);
+
+  assert(NULL != clauses->clause);
   free_clause(*(clauses->clause));
   free(clauses->clause);
   if (NULL != clauses->next) {
@@ -382,15 +438,22 @@ free_clauses(struct clauses_t * clauses)
 void
 free_program(struct program_t * program)
 {
+  assert(NULL != program);
+
   for (int i = 0; i < program->no_clauses; i++) {
     DBG("Freeing clause %d: ", i);
     DBG_SYNTAX((void *)program->program[i], (x_to_str_t)clause_to_str);
     DBG("\n");
 
+    assert(NULL != (program->program[i]));
     free_clause(*(program->program[i])); // Free clause contents.
     free(program->program[i]); // Free the clause itsenf.
   }
-  free(program->program); // Free the array of pointers to clauses.
+
+  if (program->no_clauses > 0) {
+    free(program->program); // Free the array of pointers to clauses.
+  }
+
   free(program); // Free the program struct.
 }
 
@@ -400,6 +463,7 @@ debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * 
 {
   size_t buf_size = BUF_SIZE;
   char * outbuf = (char *)malloc(buf_size);
+  assert(NULL != outbuf);
   x_to_str(x, &buf_size, outbuf);
   DBG("%s", outbuf);
   free(outbuf);

@@ -158,6 +158,7 @@ main (int argc, char ** argv)
 char *
 read_file(char * filename)
 {
+  assert(NULL != filename);
   DBG("Reading \"%s\"\n", filename);
 
   char * contents = NULL;
@@ -169,16 +170,15 @@ read_file(char * filename)
   }
 
   int file_size = -1;
-  fseek(file, 0L, SEEK_END);
+  fseek(file, 0L, SEEK_END); // FIXME check return value;
   file_size = ftell(file);
-  rewind(file);
-
   assert(file_size > 0);
+  rewind(file); // FIXME check return value;
 
   contents = malloc(file_size + 1);
-  fread(contents, sizeof(char), file_size, file);
+  fread(contents, sizeof(char), file_size, file); // FIXME check return value;
   contents[file_size] = '\0';
 
-  fclose(file);
+  fclose(file); // FIXME check return value;
   return contents;
 }
