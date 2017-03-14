@@ -70,12 +70,22 @@ int len_term_cell(struct terms_t * next);
 int len_atom_cell(struct atoms_t * next);
 int len_clause_cell(struct clauses_t * next);
 
-void free_term(struct term_t * term);
+void free_term(struct term_t term);
 void free_terms(struct terms_t * terms);
-void free_atom(struct atom_t * atom);
+void free_atom(struct atom_t atom);
 void free_atoms(struct atoms_t * atoms);
-void free_clause(struct clause_t * clause);
+void free_clause(struct clause_t clause);
 void free_clauses(struct clauses_t * clauses);
 void free_program(struct program_t * program);
+
+typedef int (*x_to_str_t)(void *, size_t * outbuf_size, char * outbuf);
+
+void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf));
+
+#ifdef DEBUG
+#define DBG_SYNTAX debug_out_syntax
+#else
+#define DBG_SYNTAX(...)
+#endif // DEBUG
 
 #endif // __TYM_AST_H__

@@ -17,8 +17,6 @@
 #include "lexer.h"
 #include "tym.h"
 
-#define BUF_SIZE 300
-
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 

@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "tym.h"
 
 int
 my_strcpy(char * dst, const char * src, size_t * space)
@@ -308,16 +309,16 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
 }
 
 void
-free_term(struct term_t * term)
+free_term(struct term_t term)
 {
-  free(term->identifier);
-  free(term);
+  free(term.identifier);
 }
 
 void
 free_terms(struct terms_t * terms)
 {
-  free_term(terms->term);
+  free_term(*(terms->term));
+  free(terms->term);
   if (NULL != terms->next) {
     free_terms(terms->next);
   }
@@ -325,19 +326,30 @@ free_terms(struct terms_t * terms)
 }
 
 void
-free_atom(struct atom_t * atom)
+free_atom(struct atom_t atom)
 {
-  free(atom->predicate);
-  for (int i = 0; i < atom->arity; i++) {
-    free_term(&(atom->args[i]));
+  DBG("Freeing atom: ");
+  DBG_SYNTAX((void *)&atom, (x_to_str_t)atom_to_str);
+  DBG("\n");
+
+  free(atom.predicate);
+  for (int i = 0; i < atom.arity; i++) {
+    free_term(atom.args[i]);
   }
-  free(atom);
+  // Since we allocated the space for all arguments, rather than for each argument,
+  // we deallocate it as such.
+  free(atom.args);
+
+  // NOTE since we are passed an atom value rather than a pointer to an atom, we
+  // don't deallocate the atom -- it's up to a caller to work out if it wants to
+  // do that.
 }
 
 void
 free_atoms(struct atoms_t * atoms)
 {
-  free_atom(atoms->atom);
+  free_atom(*(atoms->atom));
+  free(atoms->atom);
   if (NULL != atoms->next) {
     free_atoms(atoms->next);
   }
@@ -345,18 +357,22 @@ free_atoms(struct atoms_t * atoms)
 }
 
 void
-free_clause(struct clause_t * clause)
+free_clause(struct clause_t clause)
 {
-  for (int i = 0; i < clause->body_size; i++) {
-    free_atom(&(clause->body[i]));
+  // No need to free clause->head since that's freed when we free this clause's
+  // memory.
+  for (int i = 0; i < clause.body_size; i++) {
+    free_atom(clause.body[i]);
   }
-  free(clause);
+  // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
+  free(clause.body);
 }
 
 void
 free_clauses(struct clauses_t * clauses)
 {
-  free_clause(clauses->clause);
+  free_clause(*(clauses->clause));
+  free(clauses->clause);
   if (NULL != clauses->next) {
     free_clauses(clauses->next);
   }
@@ -367,7 +383,24 @@ void
 free_program(struct program_t * program)
 {
   for (int i = 0; i < program->no_clauses; i++) {
-    free_clause(program->program[i]);
+    DBG("Freeing clause %d: ", i);
+    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)clause_to_str);
+    DBG("\n");
+
+    free_clause(*(program->program[i])); // Free clause contents.
+    free(program->program[i]); // Free the clause itsenf.
   }
-  free(program);
+  free(program->program); // Free the array of pointers to clauses.
+  free(program); // Free the program struct.
+}
+
+// FIXME could allocate memory at start to amortise.
+void
+debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf))
+{
+  size_t buf_size = BUF_SIZE;
+  char * outbuf = (char *)malloc(buf_size);
+  x_to_str(x, &buf_size, outbuf);
+  DBG("%s", outbuf);
+  free(outbuf);
 }
