@@ -65,15 +65,15 @@ int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_me
 
 term : TK_CONST
        { char * identifier = strdup($1);
-         struct term_t * t = mk_term(Const, identifier);
+         struct term_t * t = mk_term(CONST, identifier);
          $$ = t; }
      | TK_VAR
        { char * identifier = strdup($1);
-         struct term_t * t = mk_term(Var, identifier);
+         struct term_t * t = mk_term(VAR, identifier);
          $$ = t; }
      | TK_STRING
        { char * identifier = strdup($1);
-         struct term_t * t = mk_term(Str, identifier);
+         struct term_t * t = mk_term(STR, identifier);
          $$ = t; }
 
 terms : term TK_R_RB
