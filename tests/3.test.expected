@@ -1,0 +1,11 @@
+input contents |   a2(b2).   a(b). 
+
+   a1(b1). 
+  a3(b3). 
+|
+(no query given)
+stringed file contents (size=30, remaining=270)
+|a2(b2).
+a(b).
+a1(b1).
+a3(b3).|
