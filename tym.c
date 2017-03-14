@@ -73,7 +73,7 @@ main (int argc, char ** argv)
     }
   }
 
-  if (verbosity) {
+  if (verbosity > 0) {
     VERBOSE("input = %s\n", source_file);
     VERBOSE("verbosity = %d\n", verbosity);
     VERBOSE("test_parsing = %d\n", test_parsing);
@@ -86,7 +86,7 @@ main (int argc, char ** argv)
       printf("input contents |%s|\n", source_file_contents);
     }
     parsed_source_file_contents = parse(source_file_contents);
-    if (verbosity && NULL != source_file_contents) {
+    if (verbosity > 0 && NULL != source_file_contents) {
       VERBOSE("input : %d clauses\n", parsed_source_file_contents->no_clauses);
     }
   } else if (test_parsing) {
@@ -94,11 +94,11 @@ main (int argc, char ** argv)
   }
 
   if (NULL != query) {
-    if (test_parsing && !verbosity) {
+    if (test_parsing && 0 == verbosity) {
       printf("query contents |%s|\n", query);
     }
     parsed_query = parse(query);
-    if (verbosity && NULL != query) {
+    if (0 == verbosity && NULL != query) {
       VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
     }
   } else if (test_parsing) {
@@ -164,7 +164,7 @@ read_file(char * filename)
 
   // FIXME check whether file exists.
   FILE *file = fopen(filename, "r");
-  if (!file) {
+  if (NULL == file) {
     // FIXME complain
   }
 
