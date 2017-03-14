@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef enum {VAR, CONST, STR} term_kind_t;
+typedef enum {VAR=0, CONST=1, STR=2} term_kind_t;
 
 struct term_t {
   term_kind_t kind;
