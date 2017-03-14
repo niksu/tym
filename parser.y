@@ -123,6 +123,10 @@ program : clauses
              struct program_t * p = mk_program(len_clause_cell(cls), cls);
              *program = p;
            }
+        |
+           { struct program_t * p = mk_program(0, NULL);
+             *program = p;
+           }
 
 %%
 
