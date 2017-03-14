@@ -18,7 +18,7 @@
 #define VERBOSE printf
 #define ERR(...) fprintf(stderr, __VA_ARGS__)
 
-#ifdef DEBUG
+#if DEBUG
 #define DBG printf
 #else
 #define DBG(...)

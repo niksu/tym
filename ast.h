@@ -82,7 +82,7 @@ typedef int (*x_to_str_t)(void *, size_t * outbuf_size, char * outbuf);
 
 void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf));
 
-#ifdef DEBUG
+#if DEBUG
 #define DBG_SYNTAX debug_out_syntax
 #else
 #define DBG_SYNTAX(...)
