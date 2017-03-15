@@ -136,6 +136,16 @@ main (int argc, char ** argv)
     return 0;
   }
 
+  if (NULL == source_file) {
+    ERR("No input file given.\n");
+  } else if (0 == parsed_source_file_contents->no_clauses) {
+    ERR("Input file (%s) is devoid of clauses.\n", source_file);
+  }
+
+
+  // FIXME this function is getting too long.
+
+
   // FIXME add main application logic.
 
 
