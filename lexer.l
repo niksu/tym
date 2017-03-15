@@ -12,6 +12,7 @@
 
 #include "ast.h"
 #include "parser.h"
+#include "tym.h"
 %}
 
 %option outfile="lexer.c" header-file="lexer.h"
@@ -52,6 +53,7 @@ STRING {QUOTE}[^{QUOTE}]*{QUOTE}
 {COMMA} {return TK_COMMA;}
 {IF} {return TK_IF;}
 {PERIOD} {return TK_PERIOD;}
+. {ERR("Unrecognised token: %s\n", yytext);}
 
 %%
 
