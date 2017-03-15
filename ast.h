@@ -20,6 +20,8 @@ struct term_t {
   char * identifier;
 };
 
+char hash_term(struct term_t);
+
 struct terms_t {
   struct term_t * term;
   struct terms_t * next;

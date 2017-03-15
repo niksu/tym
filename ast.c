@@ -36,6 +36,13 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
     // FIXME complain
   }
 
+#if DEBUG
+  sprintf(&(outbuf[l]), "{hash=%d}", hash_term(*term));
+  outbuf_size -= strlen(&(outbuf[l]));
+  l += strlen(&(outbuf[l]));
+  outbuf[l] = '\0';
+#endif
+
   return l;
 }
 
@@ -467,4 +474,22 @@ debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * 
   x_to_str(x, &buf_size, outbuf);
   DBG("%s", outbuf);
   free(outbuf);
+}
+
+char
+hash_term(struct term_t term)
+{
+  char result = 0;
+  char * cursor;
+
+  for (cursor = (char *)&term.kind; cursor < (char *)&term.kind + sizeof(term_kind_t); cursor ++) {
+    result ^= *cursor;
+  }
+
+  cursor = term.identifier;
+  while ('\0' != *cursor) {
+    result ^= *(cursor++);
+  }
+
+  return result;
 }
