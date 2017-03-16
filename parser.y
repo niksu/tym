@@ -142,11 +142,13 @@ parse(const char * string)
   yyscan_t scanner;
   YY_BUFFER_STATE state;
   if (yylex_init(&scanner)) {
+    ERR("yylex_init encountered a problem.");
     return NULL;
   }
 
   state = yy_scan_string(string, scanner);
   if (yyparse(&parsed, scanner)) {
+    ERR("yyparse encountered a problem.");
     return NULL;
   }
 
