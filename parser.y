@@ -15,7 +15,7 @@
 #include "lexer.h"
 #include "tym.h"
 
-#define YYERROR_VERBOSE 1:w
+#define YYERROR_VERBOSE 1
 
 #define TERM_BUFFER 300
 #define ATOM_BUFFER 300
