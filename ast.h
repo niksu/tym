@@ -20,8 +20,6 @@ struct term_t {
   char * identifier;
 };
 
-char hash_term(struct term_t);
-
 struct terms_t {
   struct term_t * term;
   struct terms_t * next;
@@ -89,5 +87,9 @@ void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, ch
 #else
 #define DBG_SYNTAX(...)
 #endif // DEBUG
+
+char hash_term(struct term_t);
+char hash_atom(struct atom_t);
+char hash_clause(struct clause_t);
 
 #endif // __TYM_AST_H__

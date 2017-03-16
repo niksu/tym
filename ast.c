@@ -37,11 +37,11 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
   }
 
 #if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%d}", hash_term(*term));
-  outbuf_size -= strlen(&(outbuf[l]));
+  sprintf(&(outbuf[l]), "{hash=%u}", hash_term(*term));
+  *outbuf_size -= strlen(&(outbuf[l]));
   l += strlen(&(outbuf[l]));
-  outbuf[l] = '\0';
 #endif
+  outbuf[l] = '\0';
 
   return l;
 }
@@ -98,6 +98,13 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 
   // FIXME batch these.
   outbuf[(*outbuf_size)--, l++] = ')';
+
+#if DEBUG
+  sprintf(&(outbuf[l]), "{hash=%u}", hash_atom(*atom));
+  *outbuf_size -= strlen(&(outbuf[l]));
+  l += strlen(&(outbuf[l]));
+#endif
+
   outbuf[(*outbuf_size)--, l++] = '\0';
 
   return l;
@@ -161,6 +168,13 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
 
   // FIXME batch these.
   outbuf[(*outbuf_size)--, l++] = '.';
+
+#if DEBUG
+  sprintf(&(outbuf[l]), "{hash=%u}", hash_clause(*clause));
+  *outbuf_size -= strlen(&(outbuf[l]));
+  l += strlen(&(outbuf[l]));
+#endif
+
   outbuf[(*outbuf_size)--, l++] = '\0';
 
   return l;
@@ -477,18 +491,50 @@ debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * 
 }
 
 char
-hash_term(struct term_t term)
+hash_str(char * str)
 {
   char result = 0;
+  char * cursor;
+
+  cursor = str;
+  while ('\0' != *cursor) {
+    result ^= *(cursor++);
+  }
+
+  return result;
+}
+
+char
+hash_term(struct term_t term)
+{
+  char result = hash_str(term.identifier);
   char * cursor;
 
   for (cursor = (char *)&term.kind; cursor < (char *)&term.kind + sizeof(term_kind_t); cursor ++) {
     result ^= *cursor;
   }
 
-  cursor = term.identifier;
-  while ('\0' != *cursor) {
-    result ^= *(cursor++);
+  return result;
+}
+
+char
+hash_atom(struct atom_t atom)
+{
+  char result = hash_str(atom.predicate);
+
+  for (int i = 0; i < atom.arity; i++) {
+    result = (result * hash_term(atom.args[i])) % 255;
+  }
+
+  return result;
+}
+
+char
+hash_clause(struct clause_t clause) {
+  char result = hash_atom(clause.head);
+
+  for (int i = 0; i < clause.body_size; i++) {
+    result ^= i + hash_atom(clause.body[i]);
   }
 
   return result;
