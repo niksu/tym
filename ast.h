@@ -53,6 +53,7 @@ struct program_t {
 };
 
 int my_strcpy(char * dst, const char * src, size_t * space);
+int term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
 int atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 int clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
 int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
@@ -88,6 +89,7 @@ void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, ch
 #define DBG_SYNTAX(...)
 #endif // DEBUG
 
+char hash_str(char * str);
 char hash_term(struct term_t);
 char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
