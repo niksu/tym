@@ -37,7 +37,7 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
   }
 
 #if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%u}", hash_term(*term));
+  sprintf(&(outbuf[l]), "{hash=%d}", hash_term(*term) + 127);
   *outbuf_size -= strlen(&(outbuf[l]));
   l += strlen(&(outbuf[l]));
 #endif
@@ -53,6 +53,12 @@ predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
   if (l < 0) {
     // FIXME complain
   }
+
+#if DEBUG
+  sprintf(&(outbuf[l]), "{hash=%d}", hash_str(atom->predicate) + 127);
+  *outbuf_size -= strlen(&(outbuf[l]));
+  l += strlen(&(outbuf[l]));
+#endif
 
   return l;
 }
@@ -100,7 +106,7 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
   outbuf[(*outbuf_size)--, l++] = ')';
 
 #if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%u}", hash_atom(*atom));
+  sprintf(&(outbuf[l]), "{hash=%d}", hash_atom(*atom) + 127);
   *outbuf_size -= strlen(&(outbuf[l]));
   l += strlen(&(outbuf[l]));
 #endif
@@ -170,7 +176,7 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
   outbuf[(*outbuf_size)--, l++] = '.';
 
 #if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%u}", hash_clause(*clause));
+  sprintf(&(outbuf[l]), "{hash=%d}", hash_clause(*clause) + 127);
   *outbuf_size -= strlen(&(outbuf[l]));
   l += strlen(&(outbuf[l]));
 #endif
@@ -523,7 +529,7 @@ hash_atom(struct atom_t atom)
   char result = hash_str(atom.predicate);
 
   for (int i = 0; i < atom.arity; i++) {
-    result = (result * hash_term(atom.args[i])) % 255;
+    result = ((result * hash_term(atom.args[i])) % 256) - 128;
   }
 
   return result;
@@ -534,7 +540,7 @@ hash_clause(struct clause_t clause) {
   char result = hash_atom(clause.head);
 
   for (int i = 0; i < clause.body_size; i++) {
-    result ^= i + hash_atom(clause.body[i]);
+    result ^= ((i + hash_atom(clause.body[i])) % 256) - 128;
   }
 
   return result;
