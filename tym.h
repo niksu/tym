@@ -16,7 +16,7 @@
 #define BUF_SIZE 300
 
 #define VERBOSE printf
-#define ERR(...) fprintf(stderr, __VA_ARGS__)
+#define ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
 
 #if DEBUG
 #define DBG printf
