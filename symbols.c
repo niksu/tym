@@ -65,25 +65,6 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   return exists;
 }
 
-//struct terms_t *
-//term_database_members(void)
-//{
-//  struct terms_t * result = NULL;
-//  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
-//    if (NULL != term_database[i]) {
-//      if (NULL == result) {
-//        
-//      }
-//      struct terms_t * cursor = term_database[i];
-//      while (NULL != cursor) {
-////        struct t
-//        cursor = cursor->next;
-//      }
-//    }
-//  }
-//  return result;
-//}
-
 int
 term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * outbuf)
 {
@@ -211,7 +192,6 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
       do {
         bool result;
         eq_pred_error_t error_code;
-//        if (eq_atom(*atom, *(cursor->predicate), &error_code, &result)) {
         if (eq_pred(*pred, *(cursor->predicate), &error_code, &result)) {
           exists = result;
           break;
