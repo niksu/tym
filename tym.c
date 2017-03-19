@@ -164,7 +164,7 @@ main (int argc, char ** argv)
   // FIXME add main application logic.
 
 
-  DBG("Cleaning up before exiting");
+  DBG("Cleaning up before exiting\n");
 
   if (NULL != params.source_file) {
     free_program(parsed_source_file_contents);
