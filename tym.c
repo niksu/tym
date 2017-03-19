@@ -20,11 +20,14 @@
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 
-char * source_file = NULL;
 char * source_file_contents = NULL;
-char verbosity = 0;
-char * query = NULL;
-bool test_parsing = false;
+
+struct param_t params = {
+  .source_file = NULL,
+  .verbosity = 0,
+  .query = NULL,
+  .test_parsing = false
+};
 
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
@@ -51,20 +54,20 @@ main (int argc, char ** argv)
     switch (option) {
     case LONG_OPT_INPUT:
     case 'i':
-      source_file = malloc(strlen(optarg) + 1);
-      strcpy(source_file, optarg);
+      params.source_file = malloc(strlen(optarg) + 1);
+      strcpy(params.source_file, optarg);
       break;
     case LONG_OPT_VERBOSE:
     case 'v':
-      verbosity = 1;
+      params.verbosity = 1;
       break;
     case LONG_OPT_QUERY:
     case 'q':
-      query = malloc(strlen(optarg) + 1);
-      strcpy(query, optarg);
+      params.query = malloc(strlen(optarg) + 1);
+      strcpy(params.query, optarg);
       break;
     case LONG_OPT_TESTPARSING:
-      test_parsing = true;
+      params.test_parsing = true;
       break;
     // FIXME add support for -h
     default:
@@ -73,44 +76,44 @@ main (int argc, char ** argv)
     }
   }
 
-  if (verbosity > 0) {
-    VERBOSE("input = %s\n", source_file);
-    VERBOSE("verbosity = %d\n", verbosity);
-    VERBOSE("test_parsing = %d\n", test_parsing);
-    VERBOSE("query = %s\n", query);
+  if (params.verbosity > 0) {
+    VERBOSE("input = %s\n", params.source_file);
+    VERBOSE("verbosity = %d\n", params.verbosity);
+    VERBOSE("test_parsing = %d\n", params.test_parsing);
+    VERBOSE("query = %s\n", params.query);
   }
 
-  if (NULL != source_file) {
-    source_file_contents = read_file(source_file);
-    if (test_parsing) {
+  if (NULL != params.source_file) {
+    source_file_contents = read_file(params.source_file);
+    if (params.test_parsing) {
       printf("input contents |%s|\n", source_file_contents);
     }
     parsed_source_file_contents = parse(source_file_contents);
-    if (verbosity > 0 && NULL != source_file_contents) {
+    if (params.verbosity > 0 && NULL != source_file_contents) {
       VERBOSE("input : %d clauses\n", parsed_source_file_contents->no_clauses);
     }
-  } else if (test_parsing) {
+  } else if (params.test_parsing) {
     printf("(no input file given)\n");
   }
 
-  if (NULL != query) {
-    if (test_parsing && 0 == verbosity) {
-      printf("query contents |%s|\n", query);
+  if (NULL != params.query) {
+    if (params.test_parsing && 0 == params.verbosity) {
+      printf("query contents |%s|\n", params.query);
     }
-    parsed_query = parse(query);
-    if (0 == verbosity && NULL != query) {
+    parsed_query = parse(params.query);
+    if (params.verbosity > 0 && NULL != params.query) {
       VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
     }
-  } else if (test_parsing) {
+  } else if (params.test_parsing) {
     printf("(no query given)\n");
   }
 
-  if (test_parsing) {
+  if (params.test_parsing) {
     size_t remaining_buf_size = BUF_SIZE;
     char * buf = (char *)malloc(remaining_buf_size);
     int used_buf_size;
 
-    if (NULL != source_file) {
+    if (NULL != params.source_file) {
       used_buf_size = program_to_str(parsed_source_file_contents,
           &remaining_buf_size, buf);
       printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n",
@@ -118,17 +121,17 @@ main (int argc, char ** argv)
 
       free_program(parsed_source_file_contents);
       free(source_file_contents);
-      free(source_file);
+      free(params.source_file);
     }
 
-    if (NULL != query) {
+    if (NULL != params.query) {
       remaining_buf_size = BUF_SIZE;
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
       printf("stringed query (size=%d, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
 
       free_program(parsed_query);
-      free(query);
+      free(params.query);
     }
 
     free(buf);
@@ -136,10 +139,10 @@ main (int argc, char ** argv)
     return 0;
   }
 
-  if (NULL == source_file) {
+  if (NULL == params.source_file) {
     ERR("No input file given.\n");
   } else if (0 == parsed_source_file_contents->no_clauses) {
-    ERR("Input file (%s) is devoid of clauses.\n", source_file);
+    ERR("Input file (%s) is devoid of clauses.\n", params.source_file);
   }
 
 
@@ -151,15 +154,15 @@ main (int argc, char ** argv)
 
   DBG("Cleaning up before exiting");
 
-  if (NULL != source_file) {
+  if (NULL != params.source_file) {
     free_program(parsed_source_file_contents);
     free(source_file_contents);
-    free(source_file);
+    free(params.source_file);
   }
 
-  if (NULL != query) {
+  if (NULL != params.query) {
     free_program(parsed_query);
-    free(query);
+    free(params.query);
   }
 
   return 0;

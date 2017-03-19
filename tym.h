@@ -11,6 +11,7 @@
 #define __TYM_H__
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #define BUF_SIZE 300
@@ -23,5 +24,12 @@
 #else
 #define DBG(...)
 #endif // DEBUG
+
+struct param_t {
+  char * source_file;
+  char verbosity;
+  char * query;
+  bool test_parsing;
+};
 
 #endif /* __TYM_H__ */
