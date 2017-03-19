@@ -202,7 +202,6 @@ program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
     offset += pre_offset;
 
     if (i < program->no_clauses - 1) {
-      //(*outbuf_size)++, offset--; // chomp trailing \0
       outbuf[offset - 1] = '\n';
     }
   }
