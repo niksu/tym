@@ -545,3 +545,39 @@ hash_clause(struct clause_t clause) {
 
   return result;
 }
+
+bool
+eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result)
+{
+  bool successful;
+
+  bool same_kind = false;
+  bool same_identifier = false;
+
+  if (&t1 == &t2) {
+    return true;
+  }
+
+  if (t1.kind == t2.kind) {
+    same_kind = true;
+  }
+
+  if (0 == strcmp(t1.identifier, t2.identifier)) {
+      same_identifier = true;
+  }
+
+  if (same_kind && !same_identifier) {
+    successful = false;
+    *error_code = DIFF_IDENTIFIER_SAME_KIND;
+  } else if (!same_kind && same_identifier) {
+    successful = false;
+    *error_code = DIFF_KIND_SAME_IDENTIFIER;
+  } else {
+    successful = true;
+    *error_code = NO_ERROR;
+    assert (same_kind == same_identifier);
+    *result = same_kind;
+  }
+
+  return successful;
+}

@@ -10,6 +10,7 @@
 #ifndef __TYM_AST_H__
 #define __TYM_AST_H__
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -93,5 +94,8 @@ char hash_str(char * str);
 char hash_term(struct term_t);
 char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
+
+typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
+bool eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
 
 #endif // __TYM_AST_H__
