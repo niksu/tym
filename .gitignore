@@ -1,0 +1,11 @@
+lexer.c
+lexer.h
+parser.c
+parser.h
+
+ast.o
+lexer.o
+parser.o
+tym.o
+
+tym
