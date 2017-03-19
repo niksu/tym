@@ -111,12 +111,12 @@ main (int argc, char ** argv)
   if (params.test_parsing) {
     size_t remaining_buf_size = BUF_SIZE;
     char * buf = (char *)malloc(remaining_buf_size);
-    int used_buf_size;
+    size_t used_buf_size;
 
     if (NULL != params.source_file) {
       used_buf_size = program_to_str(parsed_source_file_contents,
           &remaining_buf_size, buf);
-      printf("stringed file contents (size=%d, remaining=%zu)\n|%s|\n",
+      printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
 
       free_program(parsed_source_file_contents);
@@ -127,7 +127,7 @@ main (int argc, char ** argv)
     if (NULL != params.query) {
       remaining_buf_size = BUF_SIZE;
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
-      printf("stringed query (size=%d, remaining=%zu)\n|%s|\n",
+      printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
 
       free_program(parsed_query);
@@ -182,9 +182,12 @@ read_file(char * filename)
     // FIXME complain
   }
 
-  int file_size = -1;
   fseek(file, 0L, SEEK_END); // FIXME check return value;
-  file_size = ftell(file);
+  long pre_file_size = ftell(file);
+  if (pre_file_size < 0) {
+    // FIXME complain
+  };
+  size_t file_size = (size_t)pre_file_size;
   assert(file_size > 0);
   rewind(file); // FIXME check return value;
 

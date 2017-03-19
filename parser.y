@@ -27,6 +27,7 @@
 //#define MAX_CLAUSE_BODY_SIZE 30
 
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
+struct program_t * parse(const char * string);
 
 %}
 

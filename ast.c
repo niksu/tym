@@ -14,27 +14,24 @@
 #include "ast.h"
 #include "tym.h"
 
-int
+size_t
 my_strcpy(char * dst, const char * src, size_t * space)
 {
-  int l = strlen(src);
+  size_t l = strlen(src);
   if (l < *space) {
     strcpy(dst, src);
   } else {
-    return -1;
+    // FIXME complain
   }
 
   *space -= l;
   return l;
 }
 
-int
+size_t
 term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
 {
-  int l = my_strcpy(outbuf, term->identifier, outbuf_size);
-  if (l < 0) {
-    // FIXME complain
-  }
+  size_t l = my_strcpy(outbuf, term->identifier, outbuf_size); // FIXME add error checking
 
 #if DEBUG
   sprintf(&(outbuf[l]), "{hash=%d}", hash_term(*term) + 127);
@@ -46,13 +43,10 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
   return l;
 }
 
-int
+size_t
 predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
-  int l = my_strcpy(outbuf, atom->predicate, outbuf_size);
-  if (l < 0) {
-    // FIXME complain
-  }
+  size_t l = my_strcpy(outbuf, atom->predicate, outbuf_size); // FIXME add error checking
 
 #if DEBUG
   sprintf(&(outbuf[l]), "{hash=%d}", hash_str(atom->predicate) + 127);
@@ -63,29 +57,20 @@ predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
   return l;
 }
 
-int
+size_t
 atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
-  int l = predicate_to_str(atom, outbuf_size, outbuf);
-  if (l < 0) {
-    // FIXME complain
-    return l;
-  }
+  size_t l = predicate_to_str(atom, outbuf_size, outbuf); // FIXME add error checking
 
   // There needs to be space to store at least "()\0".
   if (*outbuf_size < 3) {
     // FIXME complain
-    return -1;
   }
 
   outbuf[(*outbuf_size)--, l++] = '(';
 
   for (int i = 0; i < atom->arity; i++) {
-    int l_sub = term_to_str(&(atom->args[i]), outbuf_size, outbuf + l);
-    if (l_sub < 0) {
-      // FIXME complain
-      return l_sub;
-    }
+    size_t l_sub = term_to_str(&(atom->args[i]), outbuf_size, outbuf + l); // FIXME add error checking
 
     l += l_sub;
 
@@ -93,7 +78,6 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
       // There needs to be space to store at least ", x)\0".
       if (*outbuf_size < 5) {
         // FIXME complain
-        return -1;
       }
 
       // FIXME batch these.
@@ -116,14 +100,10 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
   return l;
 }
 
-int
+size_t
 clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
 {
-  int l = atom_to_str(&(clause->head), outbuf_size, outbuf);
-  if (l < 0) {
-    // FIXME complain
-    return l;
-  }
+  size_t l = atom_to_str(&(clause->head), outbuf_size, outbuf); // FIXME add error checking
 
   (*outbuf_size)++, l--; // chomp the trailing \0.
 
@@ -131,7 +111,6 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
     // There needs to be space to store at least " :- x().".
     if (*outbuf_size < 8) {
       // FIXME complain
-      return -1;
     }
 
     // FIXME batch these.
@@ -141,12 +120,7 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
     outbuf[(*outbuf_size)--, l++] = ' ';
 
     for (int i = 0; i < clause->body_size; i++) {
-      int l_sub = atom_to_str(&(clause->body[i]), outbuf_size, outbuf + l);
-
-      if (l_sub < 0) {
-        // FIXME complain
-        return l_sub;
-      }
+      size_t l_sub = atom_to_str(&(clause->body[i]), outbuf_size, outbuf + l); // FIXME add error checking
 
       (*outbuf_size)++, l--; // chomp the trailing \0.
 
@@ -156,7 +130,6 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
         // There needs to be space to store at least ", x().\0".
         if (*outbuf_size < 7) {
           // FIXME complain
-          return -1;
         }
 
         // FIXME batch these.
@@ -169,7 +142,6 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
   // There needs to be space to store at least ".\0".
   if (*outbuf_size < 2) {
     // FIXME complain
-    return -1;
   }
 
   // FIXME batch these.
@@ -186,18 +158,14 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
   return l;
 }
 
-int
+size_t
 program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
 {
-  int offset = 0;
-  int pre_offset;
+  size_t offset = 0;
+  size_t pre_offset;
 
   for (int i = 0; i < program->no_clauses; i++) {
-    pre_offset = clause_to_str(program->program[i], outbuf_size, outbuf + offset);
-    if (pre_offset < 0) {
-      // FIXME complain
-      return -1;
-    }
+    pre_offset = clause_to_str(program->program[i], outbuf_size, outbuf + offset); // FIXME add error checking
 
     offset += pre_offset;
 
@@ -236,10 +204,10 @@ mk_term_cell(struct term_t * term, struct terms_t * next)
   return ts;
 }
 
-int
+uint8_t
 len_term_cell(const struct terms_t * next)
 {
-  int result = 0;
+  uint8_t result = 0;
 
   while (NULL != next) {
     result++;
@@ -286,10 +254,10 @@ mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
   return ats;
 }
 
-int
+uint8_t
 len_atom_cell(const struct atoms_t * next)
 {
-  int result = 0;
+  uint8_t result = 0;
 
   while (NULL != next) {
     result++;
@@ -336,10 +304,10 @@ mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
   return cls;
 }
 
-int
+uint8_t
 len_clause_cell(const struct clauses_t * next)
 {
-  int result = 0;
+  uint8_t result = 0;
 
   while (NULL != next) {
     result++;
@@ -370,6 +338,8 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
   return p;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_term(struct term_t term)
 {
@@ -377,6 +347,7 @@ free_term(struct term_t term)
 
   free((void *)term.identifier);
 }
+#pragma GCC diagnostic pop
 
 void
 free_terms(struct terms_t * terms)
@@ -529,7 +500,7 @@ hash_atom(struct atom_t atom)
   char result = hash_str(atom.predicate);
 
   for (int i = 0; i < atom.arity; i++) {
-    result = ((result * hash_term(atom.args[i])) % 256) - 128;
+    result = (char)((result * hash_term(atom.args[i])) % 256) - 128;
   }
 
   return result;

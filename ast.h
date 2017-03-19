@@ -53,11 +53,12 @@ struct program_t {
   struct clause_t ** program;
 };
 
-int my_strcpy(char * dst, const char * src, size_t * space);
-int term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
-int atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
-int clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
-int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
+size_t my_strcpy(char * dst, const char * src, size_t * space);
+size_t term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
+size_t predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
+size_t atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
+size_t clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
+size_t program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
 
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
@@ -69,9 +70,9 @@ struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
 struct atoms_t * mk_atom_cell(struct atom_t * term, struct atoms_t * next);
 struct clauses_t * mk_clause_cell(struct clause_t * term, struct clauses_t * next);
 
-int len_term_cell(const struct terms_t * next);
-int len_atom_cell(const struct atoms_t * next);
-int len_clause_cell(const struct clauses_t * next);
+uint8_t len_term_cell(const struct terms_t * next);
+uint8_t len_atom_cell(const struct atoms_t * next);
+uint8_t len_clause_cell(const struct clauses_t * next);
 
 void free_term(struct term_t term);
 void free_terms(struct terms_t * terms);
