@@ -5,8 +5,7 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-REDUCED_CFLAGS=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra
-CFLAGS=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Werror -Wextra
+CFLAGS=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra
 TGT=tym
 OBJ=tym.o ast.o
 PARSER_OBJ=lexer.o parser.o
@@ -22,11 +21,11 @@ parser: $(HEADERS)
 	bison -d -o parser.c parser.y
 	flex lexer.l
 	# We have to be more permissive with the C output of flex and bison :(
-	$(CC) -c -std=$(STD) $(REDUCED_CFLAGS) $(ADDITIONAL_CFLAGS) -o lexer.o lexer.c
-	$(CC) -c -std=$(STD) $(REDUCED_CFLAGS) $(ADDITIONAL_CFLAGS) -o parser.o parser.c
+	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o lexer.o lexer.c
+	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o parser.o parser.c
 
 %.o: %.c $(HEADERS) parser
-	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o $@ $<
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror $(ADDITIONAL_CFLAGS) -o $@ $<
 
 .PHONY: clean
 
