@@ -15,6 +15,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
+#include "symbols.h"
 #include "tym.h"
 
 struct program_t * parse(const char * string);
@@ -147,6 +148,17 @@ main (int argc, char ** argv)
 
 
   // FIXME this function is getting too long.
+
+
+  struct clause_database_t * cdb = mk_clause_database();
+
+  for (int i = 0; i < parsed_source_file_contents->no_clauses; i++) {
+    (void)clause_database_add(parsed_source_file_contents->program[i], cdb, NULL);
+  }
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = (char *)malloc(remaining_buf_size);
+  clause_database_str(cdb, &remaining_buf_size, buf);
+  printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
 
 
   // FIXME add main application logic.
