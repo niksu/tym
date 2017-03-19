@@ -564,7 +564,7 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
   }
 
   if (0 == strcmp(t1.identifier, t2.identifier)) {
-      same_identifier = true;
+    same_identifier = true;
   }
 
   if (same_kind && !same_identifier) {
