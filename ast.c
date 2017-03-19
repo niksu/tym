@@ -555,6 +555,7 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
   bool same_identifier = false;
 
   if (&t1 == &t2) {
+    *result = true;
     return true;
   }
 
