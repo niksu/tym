@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "tym.h"
 
 #define HASH_RANGE 256
 // NOTE value of TERM_DATABASE_SIZE must be >= the range of the hash function for terms.
@@ -67,5 +68,16 @@ typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 bool atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
 
 int atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf);
+
+struct clause_database_t {
+  struct atom_database_t * adb;
+  // FIXME include an index of clauses.
+};
+
+struct clause_database_t * mk_clause_database(void);
+
+bool clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, void *);
+
+bool clause_database_str(struct clause_database_t * cdb, size_t *, char *);
 
 #endif /* __SYMBOLS_H__ */

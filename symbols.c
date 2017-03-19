@@ -267,3 +267,32 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 
   return l;
 }
+
+struct clause_database_t *
+mk_clause_database(void)
+{
+  struct clause_database_t * result = (struct clause_database_t *)malloc(sizeof(struct clause_database_t));
+  result->adb = mk_atom_database();
+  return result;
+}
+
+bool
+clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, void * cdl_add_error)
+{
+  adl_add_error_t adl_add_error;
+  struct predicate_t ** result = (struct predicate_t **)malloc(sizeof(struct predicate_t **));
+  bool success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, result);
+  // FIXME can we simply discard result?
+  // FIXME check adl_add_error
+  for (int i = 0; i < clause->body_size; i++) {
+    success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, result);
+    // FIXME check adl_add_error
+  }
+  return success;
+}
+
+bool
+clause_database_str(struct clause_database_t * cdb, size_t * bufsize, char * buf)
+{
+  return atom_database_str(cdb->adb, bufsize, buf);
+}
