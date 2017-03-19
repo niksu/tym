@@ -61,7 +61,7 @@ struct atom_database_t * mk_atom_database(void);
 
 typedef enum {ADL_NO_ERROR, DIFF_ARITY} adl_lookup_error_t;
 
-bool atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t error_code, bool * result);
+bool atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, bool * result);
 
 typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 

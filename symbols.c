@@ -141,14 +141,14 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t error_code, bool * result)
+atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, bool * result)
 {
   bool success = true;
   if (NULL == adb) {
     success = true;
     *result = false;
   } else {
-    char h = hash_atom(*atom);
+    char h = hash_str(atom->predicate);
 
     struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
 
@@ -162,15 +162,20 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
       struct predicates_t * cursor = adb->atom_database[(int)h];
       do {
         bool result;
-        eq_pred_error_t error_code;
-        if (eq_pred(*pred, *(cursor->predicate), &error_code, &result)) {
-          exists = result;
-          break;
+        eq_pred_error_t eq_pred_error_code;
+        success &= (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &result));
+        if (success) {
+          if (result) {
+            exists = result;
+            break;
+          }
         } else {
           // FIXME analyse and and act on error_code.
           success = false;
         }
-      } while (NULL != cursor->next);
+
+        cursor = cursor->next;
+      } while (success && NULL != cursor);
 
       if (success) {
         *result = exists;
@@ -279,14 +284,37 @@ mk_clause_database(void)
 bool
 clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, void * cdl_add_error)
 {
+  adl_lookup_error_t adl_lookup_error;
   adl_add_error_t adl_add_error;
   struct predicate_t ** result = (struct predicate_t **)malloc(sizeof(struct predicate_t **));
-  bool success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, result);
+  bool * exists = (bool *)malloc(sizeof(bool *));
+  bool success = atom_database_member(&clause->head, cdb->adb, &adl_lookup_error, exists);
+  if (!success) {
+    // FIXME elaborate this further
+    ERR("Looking-up atom failed: %s\n", clause->head.predicate);
+  } else if (!*result) {
+    success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, result);
+    if (!success) {
+      // FIXME elaborate this further
+      ERR("Adding atom failed: %s\n", clause->head.predicate);
+    }
+  }
   // FIXME can we simply discard result?
   // FIXME check adl_add_error
-  for (int i = 0; i < clause->body_size; i++) {
-    success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, result);
-    // FIXME check adl_add_error
+  if (success) {
+    for (int i = 0; success && i < clause->body_size; i++) {
+      success &= atom_database_member(&clause->body[i], cdb->adb, &adl_lookup_error, exists);
+      if (!success) {
+        // FIXME elaborate this further
+        ERR("Looking-up atom failed: %s\n", clause->body[i].predicate);
+      } else if (!*result) {
+        success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, result);
+        if (!success) {
+          // FIXME elaborate this further
+          ERR("Adding atom failed: %s\n", clause->body[i].predicate);
+        }
+      }
+    }
   }
   return success;
 }
