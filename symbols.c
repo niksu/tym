@@ -28,6 +28,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   if (NULL == tdb->term_database[(int)h]) {
     tdb->term_database[(int)h] = mk_term_cell(term, NULL);
     tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+    DBG("Added to Herbrand universe: %s\n", term->identifier);
   } else {
     struct terms_t * cursor = tdb->term_database[(int)h];
     do {
@@ -44,6 +45,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
     if (!exists) {
       cursor->next = mk_term_cell(term, NULL);
       tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+      DBG("Added to Herbrand universe: %s\n", term->identifier);
     }
   }
 
@@ -53,6 +55,9 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
 int
 term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * outbuf)
 {
+  assert(NULL != tdb);
+  assert(NULL != outbuf);
+
   struct terms_t * cursor = tdb->herbrand_universe;
   int l = 0;
 
@@ -67,6 +72,8 @@ term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * out
 
     outbuf[(*outbuf_size)--, l++] = '\n';
     assert(*outbuf_size > 0);
+
+    cursor = cursor->next;
   }
 
   return l;
@@ -167,15 +174,6 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
 
       if (success) {
         *result = exists;
-
-        if (!exists) {
-          cursor->next = mk_pred_cell(pred, NULL);
-        }
-
-        assert(NULL != adb->tdb);
-        for (int i = 0; i < atom->arity; i++) {
-          (void)term_database_add(&(atom->args[i]), adb->tdb);
-        }
       }
     }
   }
@@ -204,6 +202,13 @@ atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_er
 
     *result = pred;
     success = true;
+
+    DBG("Added atom: %s\n", atom->predicate);
+
+    assert(NULL != adb->tdb);
+    for (int i = 0; i < atom->arity; i++) {
+      (void)term_database_add(&(atom->args[i]), adb->tdb);
+    }
   }
 
   return success;
@@ -216,13 +221,13 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   if (l < 0) {
     // FIXME complain
   }
-  int l_sub = term_database_str(adb->tdb, outbuf_size, outbuf);
+
+  int l_sub = term_database_str(adb->tdb, outbuf_size, outbuf + l);
   if (l_sub < 0) {
     // FIXME complain
   }
   l += l_sub;
   outbuf[(*outbuf_size)--, l++] = '\n';
-
   l_sub = my_strcpy(&outbuf[l], "Predicates:\n", outbuf_size);
   if (l_sub < 0) {
     // FIXME complain
