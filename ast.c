@@ -211,7 +211,7 @@ program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
 }
 
 struct term_t *
-mk_term(term_kind_t kind, char * identifier)
+mk_term(term_kind_t kind, const char * identifier)
 {
   assert(NULL != identifier);
 
@@ -237,7 +237,7 @@ mk_term_cell(struct term_t * term, struct terms_t * next)
 }
 
 int
-len_term_cell(struct terms_t * next)
+len_term_cell(const struct terms_t * next)
 {
   int result = 0;
 
@@ -287,7 +287,7 @@ mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
 }
 
 int
-len_atom_cell(struct atoms_t * next)
+len_atom_cell(const struct atoms_t * next)
 {
   int result = 0;
 
@@ -337,7 +337,7 @@ mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
 }
 
 int
-len_clause_cell(struct clauses_t * next)
+len_clause_cell(const struct clauses_t * next)
 {
   int result = 0;
 
@@ -375,7 +375,7 @@ free_term(struct term_t term)
 {
   assert(NULL != term.identifier);
 
-  free(term.identifier);
+  free((void *)term.identifier);
 }
 
 void
@@ -497,10 +497,10 @@ debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * 
 }
 
 char
-hash_str(char * str)
+hash_str(const char * str)
 {
   char result = 0;
-  char * cursor;
+  const char * cursor;
 
   cursor = str;
   while ('\0' != *cursor) {
