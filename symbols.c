@@ -207,10 +207,11 @@ atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_er
     *result = pred;
     success = true;
 
-    DBG("Added atom: %s\n", atom->predicate);
+    DBG("Added atom: %s{hash=%u}\n", atom->predicate, h);
 
     assert(NULL != adb->tdb);
     for (int i = 0; i < atom->arity; i++) {
+      // FIXME check return value
       (void)term_database_add(&(atom->args[i]), adb->tdb);
     }
   }
@@ -232,7 +233,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   }
   l += l_sub;
   outbuf[(*outbuf_size)--, l++] = '\n';
-  l_sub = my_strcpy(&outbuf[l], "Predicates:\n", outbuf_size);
+  l_sub = my_strcpy(&(outbuf[l]), "Predicates:\n", outbuf_size);
   if (l_sub < 0) {
     // FIXME complain
   }
@@ -246,7 +247,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
     while (NULL != cursor && *outbuf_size > 0) {
-      l_sub = my_strcpy(&outbuf[l], cursor->predicate->predicate, outbuf_size);
+      l_sub = my_strcpy(&(outbuf[l]), cursor->predicate->predicate, outbuf_size);
       if (l_sub < 0) {
         // FIXME complain
       }
@@ -254,10 +255,11 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 
       outbuf[(*outbuf_size)--, l++] = '/';
 
-      l_sub = sprintf(&outbuf[l], "%u", cursor->predicate->arity);
+      l_sub = sprintf(&(outbuf[l]), "%u", cursor->predicate->arity);
       if (l_sub < 0) {
         // FIXME complain
       }
+      *outbuf_size -= strlen(&(outbuf[l]));
       l += l_sub;
 
       outbuf[(*outbuf_size)--, l++] = '\n';
@@ -285,14 +287,14 @@ clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, vo
 {
   adl_lookup_error_t adl_lookup_error;
   adl_add_error_t adl_add_error;
-  struct predicate_t ** result = (struct predicate_t **)malloc(sizeof(struct predicate_t **));
-  bool * exists = (bool *)malloc(sizeof(bool *));
-  bool success = atom_database_member(&clause->head, cdb->adb, &adl_lookup_error, exists);
+  bool exists;
+  bool success = atom_database_member(&clause->head, cdb->adb, &adl_lookup_error, &exists);
   if (!success) {
     // FIXME elaborate this further
     ERR("Looking-up atom failed: %s\n", clause->head.predicate);
-  } else if (!*result) {
-    success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, result);
+  } else if (!exists) {
+    struct predicate_t * result;
+    success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, &result);
     if (!success) {
       // FIXME elaborate this further
       ERR("Adding atom failed: %s\n", clause->head.predicate);
@@ -302,12 +304,13 @@ clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, vo
   // FIXME check adl_add_error
   if (success) {
     for (int i = 0; success && i < clause->body_size; i++) {
-      success &= atom_database_member(&clause->body[i], cdb->adb, &adl_lookup_error, exists);
+      success &= atom_database_member(&clause->body[i], cdb->adb, &adl_lookup_error, &exists);
       if (!success) {
         // FIXME elaborate this further
         ERR("Looking-up atom failed: %s\n", clause->body[i].predicate);
-      } else if (!*result) {
-        success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, result);
+      } else if (!exists) {
+        struct predicate_t * result;
+        success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, &result);
         if (!success) {
           // FIXME elaborate this further
           ERR("Adding atom failed: %s\n", clause->body[i].predicate);
