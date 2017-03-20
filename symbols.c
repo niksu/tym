@@ -194,7 +194,7 @@ atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_er
     *error_code = NO_ATOM_DATABASE;
     success = false;
   } else {
-    char h = hash_atom(*atom);
+    char h = hash_str(atom->predicate);
 
     struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
 
