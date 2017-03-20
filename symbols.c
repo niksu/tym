@@ -155,7 +155,6 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
     if (NULL == adb->atom_database[(int)h]) {
       success = true;
       *result = false;
-      adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
     } else {
       bool exists = false;
 
