@@ -323,11 +323,22 @@ clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, vo
       }
     }
   }
+
+  if (success) {
+    // FIXME complete this.
+    // Having added the individual atoms (and their constants within) to the
+    // atom and Herbrand databases, add the clause to an index mapping its head
+    // to all its bodies in the program.
+
+  }
+
   return success;
 }
 
 bool
 clause_database_str(struct clause_database_t * cdb, size_t * bufsize, char * buf)
 {
+  // FIXME print the clause database, currently we only stringify the atoms database.
+
   return atom_database_str(cdb->adb, bufsize, buf);
 }
