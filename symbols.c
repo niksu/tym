@@ -25,6 +25,11 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
 {
   bool exists = false;
   char h = hash_term(*term);
+
+  if (CONST != term->kind) {
+    return false;
+  }
+
   if (NULL == tdb->term_database[(int)h]) {
     tdb->term_database[(int)h] = mk_term_cell(term, NULL);
     tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
