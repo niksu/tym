@@ -20,7 +20,7 @@
 #define ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
 
 #if DEBUG
-#define DBG printf
+#define DBG fflush(stdout); printf
 #else
 #define DBG(...)
 #endif // DEBUG
