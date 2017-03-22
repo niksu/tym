@@ -66,8 +66,8 @@ struct program_t * mk_program(uint8_t no_clauses, struct clauses_t * program);
 
 // FIXME qualify pointers with "const"
 struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
-struct atoms_t * mk_atom_cell(struct atom_t * term, struct atoms_t * next);
-struct clauses_t * mk_clause_cell(struct clause_t * term, struct clauses_t * next);
+struct atoms_t * mk_atom_cell(struct atom_t * atom, struct atoms_t * next);
+struct clauses_t * mk_clause_cell(struct clause_t * clause, struct clauses_t * next);
 
 int len_term_cell(const struct terms_t * next);
 int len_atom_cell(const struct atoms_t * next);
