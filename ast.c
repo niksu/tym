@@ -181,8 +181,6 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
   l += strlen(&(outbuf[l]));
 #endif
 
-  outbuf[(*outbuf_size)--, l++] = '\0';
-
   return l;
 }
 

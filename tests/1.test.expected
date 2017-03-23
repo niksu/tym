@@ -2,6 +2,6 @@ input contents |%hellom1123_AS12_1(a, B, a123) :- a(), b(c___,a1, "a").
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=18, remaining=282)
-|c() :- a().
+stringed file contents (size=16, remaining=284)
+|c() :- a()
 a(b).|
