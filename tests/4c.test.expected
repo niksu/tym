@@ -4,8 +4,8 @@ b(h2).
 c(h3).
 |
 (no query given)
-stringed file contents (size=40, remaining=260)
-|a(X, Y) :- b(X), c(Y)
-b(h1)
-b(h2)
+stringed file contents (size=43, remaining=257)
+|a(X, Y) :- b(X), c(Y).
+b(h1).
+b(h2).
 c(h3).|

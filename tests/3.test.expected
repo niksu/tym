@@ -5,9 +5,9 @@ input contents |   a2(b2).   a(b).
   a3(b4). 
 |
 (no query given)
-stringed file contents (size=33, remaining=267)
-|a2(b2)
-a(b)
-a1(b1)
-a3(b3)
+stringed file contents (size=37, remaining=263)
+|a2(b2).
+a(b).
+a1(b1).
+a3(b3).
 a3(b4).|
