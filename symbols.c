@@ -278,7 +278,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
           // FIXME complain
         }
         l += l_sub;
-        outbuf[l - 1] = '\n';
+        outbuf[(*outbuf_size)--, l++] = '\n';
 
         clause_cursor = clause_cursor->next;
       }
