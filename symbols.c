@@ -26,6 +26,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   bool exists = false;
   char h = hash_term(*term);
 
+  DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
+
   if (CONST != term->kind) {
     return false;
   }
@@ -89,11 +91,12 @@ mk_pred(const char * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 
-  struct predicate_t * p = (struct predicate_t *)malloc(sizeof(struct predicate_t *));
+  struct predicate_t * p = (struct predicate_t *)malloc(sizeof(struct predicate_t));
   assert(NULL != p);
 
   p->predicate = predicate;
   p->arity = arity;
+  p->bodies = NULL;
   return p;
 }
 
@@ -102,7 +105,7 @@ mk_pred_cell(struct predicate_t * pred, struct predicates_t * next)
 {
   assert(NULL != pred);
 
-  struct predicates_t * ps = (struct predicates_t *)malloc(sizeof(struct predicates_t *));
+  struct predicates_t * ps = (struct predicates_t *)malloc(sizeof(struct predicates_t));
   assert(NULL != ps);
 
   ps->predicate = pred;
@@ -146,12 +149,12 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, bool * result)
+atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record)
 {
-  bool success = true;
+  bool success;
   if (NULL == adb) {
     success = true;
-    *result = false;
+    *record = NULL;
   } else {
     char h = hash_str(atom->predicate);
 
@@ -159,34 +162,29 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
 
     if (NULL == adb->atom_database[(int)h]) {
       success = true;
-      *result = false;
+      *record = NULL;
     } else {
       bool exists = false;
 
       struct predicates_t * cursor = adb->atom_database[(int)h];
       do {
-        bool result;
         eq_pred_error_t eq_pred_error_code;
-        success &= (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &result));
+        success = (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &exists));
         if (success) {
-          if (result) {
-            exists = result;
-            break;
+          if (exists) {
+            *record = cursor->predicate;
+            return true;
           }
         } else {
           // FIXME analyse and and act on error_code.
-          success = false;
         }
 
         cursor = cursor->next;
       } while (success && NULL != cursor);
-
-      if (success) {
-        *result = exists;
-      }
     }
   }
 
+  *record = NULL;
   return success;
 }
 
@@ -269,53 +267,71 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 
       outbuf[(*outbuf_size)--, l++] = '\n';
 
+      struct clauses_t * clause_cursor = cursor->predicate->bodies;
+      while (NULL != clause_cursor) {
+        outbuf[(*outbuf_size)--, l++] = ' ';
+        outbuf[(*outbuf_size)--, l++] = ' ';
+        outbuf[(*outbuf_size)--, l++] = '*';
+        outbuf[(*outbuf_size)--, l++] = ' ';
+        l_sub = clause_to_str(clause_cursor->clause, outbuf_size, outbuf + l);
+        if (l_sub < 0) {
+          // FIXME complain
+        }
+        l += l_sub;
+        outbuf[l - 1] = '\n';
+
+        clause_cursor = clause_cursor->next;
+      }
+
       cursor = cursor->next;
     }
   }
 
-  outbuf[(*outbuf_size)--, l++] = '\n';
   assert(*outbuf_size > 0);
 
   return l;
 }
 
-struct clause_database_t *
-mk_clause_database(void)
-{
-  struct clause_database_t * result = (struct clause_database_t *)malloc(sizeof(struct clause_database_t));
-  result->adb = mk_atom_database();
-  return result;
-}
-
 bool
-clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, void * cdl_add_error)
+clause_database_add(struct clause_t * clause, struct atom_database_t * adb, void * cdl_add_error)
 {
   adl_lookup_error_t adl_lookup_error;
   adl_add_error_t adl_add_error;
-  bool exists;
-  bool success = atom_database_member(&clause->head, cdb->adb, &adl_lookup_error, &exists);
+  struct predicate_t * record;
+  bool success = atom_database_member(&clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
     // FIXME elaborate this further
     ERR("Looking-up atom failed: %s\n", clause->head.predicate);
-  } else if (!exists) {
+    return false; // FIXME set 'cdl_add_error'
+  } else if (NULL == record) {
     struct predicate_t * result;
-    success = atom_database_add(&clause->head, cdb->adb, &adl_add_error, &result);
+    success = atom_database_add(&clause->head, adb, &adl_add_error, &result);
+    result->bodies = mk_clause_cell(clause, NULL);
     if (!success) {
       // FIXME elaborate this further
       ERR("Adding atom failed: %s\n", clause->head.predicate);
     }
+  } else if (success && NULL != record) {
+    assert(NULL != adb->tdb);
+    for (int i = 0; i < clause->head.arity; i++) {
+      // FIXME check return value
+      (void)term_database_add(&(clause->head.args[i]), adb->tdb);
+    }
+
+    struct clauses_t * remainder = record->bodies;
+    record->bodies = mk_clause_cell(clause, remainder);
   }
-  // FIXME can we simply discard result?
+
   // FIXME check adl_add_error
   if (success) {
     for (int i = 0; success && i < clause->body_size; i++) {
-      success &= atom_database_member(&clause->body[i], cdb->adb, &adl_lookup_error, &exists);
+      success &= atom_database_member(&clause->body[i], adb, &adl_lookup_error, &record);
       if (!success) {
         // FIXME elaborate this further
         ERR("Looking-up atom failed: %s\n", clause->body[i].predicate);
-      } else if (!exists) {
+      } else if (NULL == record) {
         struct predicate_t * result;
-        success &= atom_database_add(&clause->body[i], cdb->adb, &adl_add_error, &result);
+        success &= atom_database_add(&clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
           // FIXME elaborate this further
           ERR("Adding atom failed: %s\n", clause->body[i].predicate);
@@ -324,21 +340,5 @@ clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, vo
     }
   }
 
-  if (success) {
-    // FIXME complete this.
-    // Having added the individual atoms (and their constants within) to the
-    // atom and Herbrand databases, add the clause to an index mapping its head
-    // to all its bodies in the program.
-
-  }
-
   return success;
-}
-
-bool
-clause_database_str(struct clause_database_t * cdb, size_t * bufsize, char * buf)
-{
-  // FIXME print the clause database, currently we only stringify the atoms database.
-
-  return atom_database_str(cdb->adb, bufsize, buf);
 }

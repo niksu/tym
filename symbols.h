@@ -34,6 +34,7 @@ int term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char *
 
 struct predicate_t {
   const char * predicate;
+  struct clauses_t * bodies;
   uint8_t arity;
 };
 
@@ -61,7 +62,7 @@ struct atom_database_t * mk_atom_database(void);
 
 typedef enum {ADL_NO_ERROR, DIFF_ARITY} adl_lookup_error_t;
 
-bool atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, bool * result);
+bool atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record);
 
 typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 
@@ -69,15 +70,6 @@ bool atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_a
 
 int atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf);
 
-struct clause_database_t {
-  struct atom_database_t * adb;
-  // FIXME include an index of clauses.
-};
-
-struct clause_database_t * mk_clause_database(void);
-
-bool clause_database_add(struct clause_t * clause, struct clause_database_t * cdb, void *);
-
-bool clause_database_str(struct clause_database_t * cdb, size_t *, char *);
+bool clause_database_add(struct clause_t * clause, struct atom_database_t * cdb, void *);
 
 #endif /* __SYMBOLS_H__ */
