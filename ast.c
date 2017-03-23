@@ -212,7 +212,7 @@ mk_term(term_kind_t kind, const char * identifier)
 {
   assert(NULL != identifier);
 
-  struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
+  struct term_t * t = malloc(sizeof(struct term_t));
   assert(NULL != t);
 
   t->kind = kind;
@@ -225,7 +225,7 @@ mk_term_cell(struct term_t * term, struct terms_t * next)
 {
   assert(NULL != term);
 
-  struct terms_t * ts = (struct terms_t *)malloc(sizeof(struct terms_t));
+  struct terms_t * ts = malloc(sizeof(struct terms_t));
   assert(NULL != ts);
 
   ts->term = term;
@@ -250,14 +250,14 @@ struct atom_t *
 mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   assert(NULL != predicate);
 
-  struct atom_t * at = (struct atom_t *)malloc(sizeof(struct atom_t));
+  struct atom_t * at = malloc(sizeof(struct atom_t));
   assert(NULL != at);
 
   at->predicate = predicate;
   at->arity = arity;
 
   if (at->arity > 0) {
-    at->args = (struct term_t *)malloc(sizeof(struct term_t) * at->arity);
+    at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = *(args->term);
       args = args->next;
@@ -274,7 +274,7 @@ mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
 {
   assert(NULL != atom);
 
-  struct atoms_t * ats = (struct atoms_t *)malloc(sizeof(struct atoms_t));
+  struct atoms_t * ats = malloc(sizeof(struct atoms_t));
   assert(NULL != ats);
 
   ats->atom = atom;
@@ -300,14 +300,14 @@ struct clause_t *
 mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
   assert(NULL != head);
 
-  struct clause_t * cl = (struct clause_t *)malloc(sizeof(struct clause_t));
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
   assert(NULL != cl);
 
   cl->head = *head;
   cl->body_size = body_size;
 
   if (cl->body_size > 0) {
-    cl->body = (struct atom_t *)malloc(sizeof(struct atom_t) * cl->body_size);
+    cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
       cl->body[i] = *(body->atom);
       body = body->next;
@@ -324,7 +324,7 @@ mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
 {
   assert(NULL != clause);
 
-  struct clauses_t * cls = (struct clauses_t *)malloc(sizeof(struct clauses_t));
+  struct clauses_t * cls = malloc(sizeof(struct clauses_t));
   assert(NULL != cls);
 
   cls->clause = clause;
@@ -349,13 +349,13 @@ len_clause_cell(const struct clauses_t * next)
 struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
-  struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
+  struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
 
   p->no_clauses = no_clauses;
 
   if (no_clauses > 0) {
-    p->program = (struct clause_t **)malloc(sizeof(struct clause_t **) * no_clauses);
+    p->program = malloc(sizeof(struct clause_t **) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
       program = program->next;
@@ -486,7 +486,7 @@ void
 debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf))
 {
   size_t buf_size = BUF_SIZE;
-  char * outbuf = (char *)malloc(buf_size);
+  char * outbuf = malloc(buf_size);
   assert(NULL != outbuf);
   x_to_str(x, &buf_size, outbuf);
   DBG("%s", outbuf);

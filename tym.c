@@ -111,7 +111,7 @@ main (int argc, char ** argv)
 
   if (params.test_parsing) {
     size_t remaining_buf_size = BUF_SIZE;
-    char * buf = (char *)malloc(remaining_buf_size);
+    char * buf = malloc(remaining_buf_size);
     int used_buf_size;
 
     if (NULL != params.source_file) {
@@ -156,7 +156,7 @@ main (int argc, char ** argv)
     (void)clause_database_add(parsed_source_file_contents->program[i], adb, NULL);
   }
   size_t remaining_buf_size = BUF_SIZE;
-  char * buf = (char *)malloc(remaining_buf_size);
+  char * buf = malloc(remaining_buf_size);
   atom_database_str(adb, &remaining_buf_size, buf);
   printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
 

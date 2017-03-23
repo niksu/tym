@@ -12,7 +12,7 @@
 struct term_database_t *
 mk_term_database(void)
 {
-  struct term_database_t * result = (struct term_database_t *)malloc(sizeof(struct term_database_t));
+  struct term_database_t * result = malloc(sizeof(struct term_database_t));
   result ->herbrand_universe = NULL;
   for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
     result->term_database[i] = NULL;
@@ -91,7 +91,7 @@ mk_pred(const char * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 
-  struct predicate_t * p = (struct predicate_t *)malloc(sizeof(struct predicate_t));
+  struct predicate_t * p = malloc(sizeof(struct predicate_t));
   assert(NULL != p);
 
   p->predicate = predicate;
@@ -105,7 +105,7 @@ mk_pred_cell(struct predicate_t * pred, struct predicates_t * next)
 {
   assert(NULL != pred);
 
-  struct predicates_t * ps = (struct predicates_t *)malloc(sizeof(struct predicates_t));
+  struct predicates_t * ps = malloc(sizeof(struct predicates_t));
   assert(NULL != ps);
 
   ps->predicate = pred;
@@ -140,7 +140,7 @@ eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_co
 struct atom_database_t *
 mk_atom_database(void)
 {
-  struct atom_database_t * result = (struct atom_database_t *)malloc(sizeof(struct atom_database_t));
+  struct atom_database_t * result = malloc(sizeof(struct atom_database_t));
   result->tdb = mk_term_database();
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     result->atom_database[i] = NULL;
