@@ -250,6 +250,12 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
     while (NULL != cursor && *outbuf_size > 0) {
+      l_sub = predicate_str(cursor->predicate, outbuf_size, outbuf + l);
+      if (l_sub < 0) {
+        // FIXME complain
+      }
+      l += l_sub;
+/*
       l_sub = my_strcpy(&(outbuf[l]), cursor->predicate->predicate, outbuf_size);
       if (l_sub < 0) {
         // FIXME complain
@@ -264,7 +270,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
       }
       *outbuf_size -= strlen(&(outbuf[l]));
       l += l_sub;
-
+*/
       outbuf[(*outbuf_size)--, l++] = '\n';
 
       struct clauses_t * clause_cursor = cursor->predicate->bodies;
@@ -290,6 +296,60 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   assert(*outbuf_size > 0);
 
   return l;
+}
+
+int
+predicate_str(struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
+{
+  int l = 0;
+  int l_sub = my_strcpy(&(outbuf[l]), pred->predicate, outbuf_size);
+  if (l_sub < 0) {
+    // FIXME complain
+  }
+  l += l_sub;
+
+  outbuf[(*outbuf_size)--, l++] = '/';
+
+  l_sub = sprintf(&(outbuf[l]), "%u", pred->arity);
+  if (l_sub < 0) {
+    // FIXME complain
+  }
+  *outbuf_size -= strlen(&(outbuf[l]));
+  l += l_sub;
+
+  assert(*outbuf_size > 0);
+
+  return l;
+}
+
+struct predicates_t *
+atom_database_to_predicates(struct atom_database_t * adb)
+{
+  struct predicates_t * result = NULL;
+  struct predicates_t * result_cursor;
+  struct predicates_t * cursor;
+
+  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+    cursor = adb->atom_database[i];
+    while (NULL != cursor) {
+      if (NULL == result) {
+        assert(NULL == result_cursor);
+        result_cursor = malloc(sizeof(*result_cursor));
+        result = result_cursor;
+      } else {
+        assert(NULL != result_cursor);
+        result_cursor->next = malloc(sizeof(*result_cursor));
+        result_cursor = result_cursor->next;
+      }
+
+      result_cursor->predicate = cursor->predicate;
+      result_cursor->next = NULL;
+
+      cursor = cursor->next;
+    }
+  }
+
+  return result;
 }
 
 bool
