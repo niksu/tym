@@ -255,22 +255,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
         // FIXME complain
       }
       l += l_sub;
-/*
-      l_sub = my_strcpy(&(outbuf[l]), cursor->predicate->predicate, outbuf_size);
-      if (l_sub < 0) {
-        // FIXME complain
-      }
-      l += l_sub;
 
-      outbuf[(*outbuf_size)--, l++] = '/';
-
-      l_sub = sprintf(&(outbuf[l]), "%u", cursor->predicate->arity);
-      if (l_sub < 0) {
-        // FIXME complain
-      }
-      *outbuf_size -= strlen(&(outbuf[l]));
-      l += l_sub;
-*/
       outbuf[(*outbuf_size)--, l++] = '\n';
 
       struct clauses_t * clause_cursor = cursor->predicate->bodies;
