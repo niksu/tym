@@ -161,7 +161,47 @@ main (int argc, char ** argv)
   printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
 
 
-  // FIXME add main application logic.
+  // 1. Generate prologue: universe sort, and its inhabitants.
+  printf("(declare-sort Universe 0)\n");
+  struct terms_t * terms_cursor = adb->tdb->herbrand_universe;
+  const char * prefix = "(declare-const ";
+  const char * suffix = " Universe)";
+  while (NULL != terms_cursor) {
+    size_t l = 0;
+    l += my_strcpy(buf + l, prefix, &remaining_buf_size);
+    l += term_to_str(terms_cursor->term, &remaining_buf_size, buf + l);
+    l += my_strcpy(buf + l, suffix, &remaining_buf_size);
+    printf("%s\n", buf);
+    terms_cursor = terms_cursor->next;
+  }
+
+  terms_cursor =  adb->tdb->herbrand_universe;
+  size_t l = 0;
+  while (NULL != terms_cursor) {
+    l += term_to_str(terms_cursor->term, &remaining_buf_size, buf + l);
+    if (NULL != terms_cursor->next) {
+      buf[remaining_buf_size--, l++] = ' ';
+    }
+    terms_cursor = terms_cursor->next;
+  }
+  buf[remaining_buf_size--, l++] = '\0';
+  printf("(assert (distinct %s))\n", buf);
+
+
+  // NOTE if we don't do this, remaining_buf_size will become 0 causing some
+  //      output to be dropped, then it might wrap back and output will resume,
+  //      so best to keep it topped up.
+  remaining_buf_size = BUF_SIZE;
+
+  // 2. Add axiom characterising the provability of all elements of the Hilbert base.
+  struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
+  while (NULL != preds_cursor) {
+    predicate_str(preds_cursor->predicate, &remaining_buf_size, buf);
+    printf("%s ", buf);
+    // FIXME translate to formulas
+    preds_cursor = preds_cursor->next;
+  }
+  printf("\n");
 
 
   DBG("Cleaning up before exiting\n");
