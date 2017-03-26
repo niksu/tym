@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "formula.h"
 #include "parser.h"
 #include "lexer.h"
 #include "symbols.h"
