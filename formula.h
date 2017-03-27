@@ -47,4 +47,11 @@ size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
 size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
 size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);
 
+struct fmlas_t {
+  struct fmla_t * fmla;
+  struct fmlas_t * next;
+};
+
+struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
+
 #endif /* __TYM_FORMULA_H__ */

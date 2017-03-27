@@ -210,3 +210,16 @@ test_formula()
   size_t l = fmla_str(test_quant, &remaining_buf_size, buf);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 }
+
+struct fmlas_t *
+mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next)
+{
+  assert(NULL != fmla);
+
+  struct fmlas_t * fs = malloc(sizeof(struct fmlas_t));
+  assert(NULL != fs);
+
+  fs->fmla = fmla;
+  fs->next = next;
+  return fs;
+}
