@@ -14,6 +14,18 @@
 #include "tym.h"
 
 struct fmla_t *
+mk_fmla_const(bool b)
+{
+  struct fmla_t * result = malloc(sizeof(struct fmla_t));
+  assert(NULL != result);
+
+  result->kind = FMLA_CONST;
+  result->param.const_value = b;
+
+  return result;
+}
+
+struct fmla_t *
 mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
@@ -76,6 +88,12 @@ mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   *(result_content + 1) = subfmlaR;
   result->param.args = result_content;
   return result;
+}
+
+struct fmla_t *
+mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
+{
+  return mk_fmla_or(mk_fmla_not(antecedent), consequent);
 }
 
 size_t
@@ -145,6 +163,15 @@ fmla_str(struct fmla_t * fmla, size_t * remaining, char * buf)
   size_t l = 0;
 
   switch (fmla->kind) {
+  case FMLA_CONST:
+    if (fmla->param.const_value) {
+      sprintf(&(buf[l]), "true");
+    } else {
+      sprintf(&(buf[l]), "false");
+    }
+    *remaining -= strlen(&(buf[l]));
+    l += strlen(&(buf[l]));
+    break;
   case FMLA_ATOM:
     l = fmla_atom_str(fmla->param.atom, remaining, buf + l);
     break;
