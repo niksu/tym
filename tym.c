@@ -204,8 +204,26 @@ main (int argc, char ** argv)
 //  universally quantified
 //  head (with variables as terms) "if" disjunction of bodies (conjunctions) (with conjoined variable evaluations)
 
-    //assert(NULL != preds_cursor->predicate->bodies); -- can happen if atom doens't have bodies.
-    if (NULL == preds_cursor->predicate->bodies) break;
+    size_t out_size;
+
+    if (NULL == preds_cursor->predicate->bodies) {
+      // "No bodies" means that the atom never appears as the head of a clause.
+      struct var_gen_t * vg = mk_var_gen("V");
+
+      char ** var_args = malloc(sizeof(char **) * preds_cursor->predicate->arity);
+
+      for (int i = 0; i < preds_cursor->predicate->arity; i++) {
+        *(var_args + i) = mk_new_var(vg);
+      }
+
+      struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
+          preds_cursor->predicate->arity, var_args);
+
+      out_size = fmla_str(atom, &remaining_buf_size, buf);
+      assert(out_size > 0);
+      printf("bodyless: %s\n", buf);
+      break;
+    }
 
     struct atom_t * head_atom = &(preds_cursor->predicate->bodies->clause->head);
     char ** args = malloc(sizeof(char **) * head_atom->arity);
@@ -221,7 +239,6 @@ main (int argc, char ** argv)
 
     struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
-    size_t out_size;
     out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
     assert(out_size > 0);
     printf("from: %s\n", buf);
