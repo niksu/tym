@@ -192,14 +192,38 @@ main (int argc, char ** argv)
   // NOTE if we don't do this, remaining_buf_size will become 0 causing some
   //      output to be dropped, then it might wrap back and output will resume,
   //      so best to keep it topped up.
+  // FIXME maybe should simply remove this parameter then, if it needs maintenance and doesn't yield obvious gain?
   remaining_buf_size = BUF_SIZE;
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
-    predicate_str(preds_cursor->predicate, &remaining_buf_size, buf);
-    printf("%s ", buf);
-    // FIXME translate to formulas
+    //predicate_str(preds_cursor->predicate, &remaining_buf_size, buf);
+    //printf("%s ", buf);
+//array of formulas
+//  universally quantified
+//  head (with variables as terms) "if" disjunction of bodies (conjunctions) (with conjoined variable evaluations)
+
+    //assert(NULL != preds_cursor->predicate->bodies); -- can happen if atom doens't have bodies.
+    if (NULL == preds_cursor->predicate->bodies) break;
+
+    struct atom_t * head_atom = &(preds_cursor->predicate->bodies->clause->head);
+    char ** args = malloc(sizeof(char **) * head_atom->arity);
+
+    for (int i = 0; i < head_atom->arity; i++) {
+      size_t buf_size = 20/* FIXME const */;
+      args[i] = malloc(sizeof(char) * buf_size);
+      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
+      if (l_sub < 0) {
+        // FIXME complain
+      }
+    }
+
+    struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
+
+    (void)fmla_str(head_fmla, &remaining_buf_size, buf);
+    printf("%s\n", buf);
+
     preds_cursor = preds_cursor->next;
   }
   printf("\n");
