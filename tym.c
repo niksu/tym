@@ -221,17 +221,24 @@ main (int argc, char ** argv)
 
     struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
-    (void)fmla_str(head_fmla, &remaining_buf_size, buf);
+    size_t out_size;
+    out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
+    assert(out_size > 0);
     printf("from: %s\n", buf);
 
     struct var_gen_t * vg = mk_var_gen("V");
     struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
     struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
-    (void)fmla_str(abs_head_fmla, &remaining_buf_size, buf);
+    out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
+    assert(out_size > 0);
     printf("to: %s\n", buf);
 
-    (void)valuation_str(*v, &remaining_buf_size, buf);
-    printf("  where: %s\n", buf);
+    out_size = valuation_str(*v, &remaining_buf_size, buf);
+    if (0 == out_size) {
+      printf("  where: (no substitutions)\n");
+    } else {
+      printf("  where: %s\n", buf);
+    }
 
     preds_cursor = preds_cursor->next;
   }
