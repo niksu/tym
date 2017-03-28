@@ -223,3 +223,24 @@ mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next)
   fs->next = next;
   return fs;
 }
+
+struct var_gen_t *
+mk_var_gen(const char * prefix)
+{
+  struct var_gen_t * result = malloc(sizeof(struct var_gen_t));
+  result->prefix = prefix;
+  result->index = 0;
+  return result;
+}
+
+char *
+mk_new_var(struct var_gen_t * vg)
+{
+  size_t i = strlen(vg->prefix);
+  int max_width = 10/*FIXME const*/;
+  char * result = malloc(i + 1 + max_width);
+  strcpy(result, vg->prefix);
+  snprintf(result + i, max_width, "%lu", vg->index);
+  vg->index += 1;
+  return result;
+}

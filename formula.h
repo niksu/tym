@@ -54,4 +54,12 @@ struct fmlas_t {
 
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
 
+struct var_gen_t {
+  const char * prefix;
+  size_t index;
+};
+
+struct var_gen_t * mk_var_gen(const char * prefix);
+char * mk_new_var(struct var_gen_t *);
+
 #endif /* __TYM_FORMULA_H__ */

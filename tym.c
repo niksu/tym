@@ -210,13 +210,15 @@ main (int argc, char ** argv)
     struct atom_t * head_atom = &(preds_cursor->predicate->bodies->clause->head);
     char ** args = malloc(sizeof(char **) * head_atom->arity);
 
+struct var_gen_t * vg = mk_var_gen("V");
     for (int i = 0; i < head_atom->arity; i++) {
-      size_t buf_size = 20/* FIXME const */;
-      args[i] = malloc(sizeof(char) * buf_size);
-      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
-      if (l_sub < 0) {
-        // FIXME complain
-      }
+//      size_t buf_size = 20/* FIXME const */;
+//      args[i] = malloc(sizeof(char) * buf_size);
+//      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
+//      if (l_sub < 0) {
+//        // FIXME complain
+//      }
+      args[i] = mk_new_var(vg);
     }
 
     struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
