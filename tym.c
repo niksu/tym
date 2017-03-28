@@ -210,21 +210,28 @@ main (int argc, char ** argv)
     struct atom_t * head_atom = &(preds_cursor->predicate->bodies->clause->head);
     char ** args = malloc(sizeof(char **) * head_atom->arity);
 
-struct var_gen_t * vg = mk_var_gen("V");
     for (int i = 0; i < head_atom->arity; i++) {
-//      size_t buf_size = 20/* FIXME const */;
-//      args[i] = malloc(sizeof(char) * buf_size);
-//      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
-//      if (l_sub < 0) {
-//        // FIXME complain
-//      }
-      args[i] = mk_new_var(vg);
+      size_t buf_size = 20/* FIXME const */;
+      args[i] = malloc(sizeof(char) * buf_size);
+      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
+      if (l_sub < 0) {
+        // FIXME complain
+      }
     }
 
     struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
     (void)fmla_str(head_fmla, &remaining_buf_size, buf);
-    printf("%s\n", buf);
+    printf("from: %s\n", buf);
+
+    struct var_gen_t * vg = mk_var_gen("V");
+    struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
+    struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
+    (void)fmla_str(abs_head_fmla, &remaining_buf_size, buf);
+    printf("to: %s\n", buf);
+
+    (void)valuation_str(*v, &remaining_buf_size, buf);
+    printf("  where: %s\n", buf);
 
     preds_cursor = preds_cursor->next;
   }

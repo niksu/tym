@@ -62,4 +62,16 @@ struct var_gen_t {
 struct var_gen_t * mk_var_gen(const char * prefix);
 char * mk_new_var(struct var_gen_t *);
 
+struct valuation_t {
+  char * var;
+  char * val;
+  struct valuation_t * next;
+};
+
+size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
+
+bool fmla_is_atom(struct fmla_t * fmla);
+struct fmla_atom_t * fmla_as_atom(struct fmla_t * fmla);
+struct fmla_t * mk_abstract_vars(struct fmla_t *, struct var_gen_t *, struct valuation_t **);
+
 #endif /* __TYM_FORMULA_H__ */

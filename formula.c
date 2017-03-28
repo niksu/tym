@@ -244,3 +244,79 @@ mk_new_var(struct var_gen_t * vg)
   vg->index += 1;
   return result;
 }
+
+bool
+fmla_is_atom(struct fmla_t * fmla)
+{
+  switch (fmla->kind) {
+  case FMLA_ATOM:
+    return true;
+  default:
+    return false;
+  }
+}
+
+struct fmla_atom_t *
+fmla_as_atom(struct fmla_t * fmla)
+{
+  if (fmla_is_atom(fmla)) {
+    return fmla->param.atom;
+  } else {
+    return NULL;
+  }
+}
+
+struct fmla_t *
+mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t ** v)
+{
+  struct fmla_atom_t * atom = fmla_as_atom(at);
+  assert(NULL != atom);
+
+  char ** var_args = malloc(sizeof(char **) * atom->arity);
+  *v = NULL;
+
+  struct valuation_t * v_cursor;
+  for (int i = 0; i < atom->arity; i++) {
+    if (0 == i) {
+      *v = malloc(sizeof(struct valuation_t));
+      v_cursor = *v;
+    } else {
+      assert(NULL != v_cursor);
+      v_cursor->next = malloc(sizeof(struct valuation_t));
+      v_cursor = v_cursor->next;
+    }
+    v_cursor->val = atom->predargs[i];
+    v_cursor->var = mk_new_var(vg);
+    *(var_args + i) = v_cursor->var;
+  }
+
+  return mk_fmla_atom(atom->pred_name, atom->arity, var_args);
+}
+
+
+size_t
+valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
+{
+  size_t l = 0;
+  struct valuation_t * v_cursor = v;
+
+  while (NULL != v_cursor) {
+    size_t l_sub;
+    l_sub = my_strcpy(buf + l, v_cursor->var, remaining);
+    // FIXME check and react to errors.
+    l += l_sub;
+    buf[(*remaining)--, l++] = '=';
+    l_sub = my_strcpy(buf + l, v_cursor->val, remaining);
+    // FIXME check and react to errors.
+    l += l_sub;
+
+    v_cursor = v_cursor->next;
+
+    if (NULL != v_cursor) {
+      buf[(*remaining)--, l++] = ',';
+      buf[(*remaining)--, l++] = ' ';
+    }
+  }
+
+  return l;
+}
