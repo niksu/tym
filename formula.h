@@ -77,4 +77,11 @@ bool fmla_is_atom(struct fmla_t * fmla);
 struct fmla_atom_t * fmla_as_atom(struct fmla_t * fmla);
 struct fmla_t * mk_abstract_vars(struct fmla_t *, struct var_gen_t *, struct valuation_t **);
 
+void free_fmla_atom(struct fmla_atom_t *);
+void free_fmla_quant(struct fmla_quant_t *);
+void free_fmla(struct fmla_t *);
+void free_fmlas(struct fmlas_t *);
+void free_var_gen(struct var_gen_t *);
+void free_valuation(struct valuation_t *);
+
 #endif /* __TYM_FORMULA_H__ */

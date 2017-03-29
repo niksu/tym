@@ -196,6 +196,9 @@ main (int argc, char ** argv)
   remaining_buf_size = BUF_SIZE;
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
+  char * vK = malloc(sizeof(char) * 2);
+  strcpy(vK, "V\0");
+  struct var_gen_t * vg = mk_var_gen(vK);
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
     //predicate_str(preds_cursor->predicate, &remaining_buf_size, buf);
@@ -208,7 +211,6 @@ main (int argc, char ** argv)
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
-      struct var_gen_t * vg = mk_var_gen("V");
 
       char ** var_args = malloc(sizeof(char **) * preds_cursor->predicate->arity);
 
@@ -222,6 +224,9 @@ main (int argc, char ** argv)
       out_size = fmla_str(atom, &remaining_buf_size, buf);
       assert(out_size > 0);
       printf("bodyless: %s\n", buf);
+
+      free_fmla(atom);
+
       break;
     }
 
@@ -243,7 +248,6 @@ main (int argc, char ** argv)
     assert(out_size > 0);
     printf("from: %s\n", buf);
 
-    struct var_gen_t * vg = mk_var_gen("V");
     struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
     struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
     out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
@@ -257,12 +261,22 @@ main (int argc, char ** argv)
       printf("  where: %s\n", buf);
     }
 
+    free_fmla(head_fmla);
+    free_fmla(abs_head_fmla);
+    if (NULL != *v) {
+      // i.e., the predicate isn't nullary.
+      free_valuation(*v);
+    }
+    free(v);
+
     preds_cursor = preds_cursor->next;
   }
   printf("\n");
 
 
   DBG("Cleaning up before exiting\n");
+
+  free_var_gen(vg);
 
   if (NULL != params.source_file) {
     free_program(parsed_source_file_contents);

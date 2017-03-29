@@ -13,6 +13,8 @@
 #include "formula.h"
 #include "tym.h"
 
+#define MAX_VAR_WIDTH 10/*FIXME const*/
+
 struct fmla_t *
 mk_fmla_const(bool b)
 {
@@ -33,12 +35,22 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   assert(NULL != result);
 
+  // FIXME can avoid copying?
+  char * pred_name_copy = malloc(sizeof(char) * strlen(pred_name));
+  assert(NULL != pred_name_copy);
+  strcpy(pred_name_copy, pred_name);
+  char ** predargs_copy = malloc(sizeof(char **) * arity);
+  for (int i = 0; i < arity; i++) {
+    *(predargs_copy + i) = malloc(sizeof(char *) * strlen(*(predargs + i)));
+    strcpy(*(predargs_copy + i), *(predargs + i));
+  }
+
   result->kind = FMLA_ATOM;
   result->param.atom = result_content;
 
-  result_content->pred_name = pred_name;
+  result_content->pred_name = pred_name_copy;
   result_content->arity = arity;
-  result_content->predargs = predargs;
+  result_content->predargs = predargs_copy;
 
   return result;
 }
@@ -264,10 +276,9 @@ char *
 mk_new_var(struct var_gen_t * vg)
 {
   size_t i = strlen(vg->prefix);
-  int max_width = 10/*FIXME const*/;
-  char * result = malloc(i + 1 + max_width);
+  char * result = malloc(i + 1 + MAX_VAR_WIDTH);
   strcpy(result, vg->prefix);
-  snprintf(result + i, max_width, "%lu", vg->index);
+  snprintf(result + i, MAX_VAR_WIDTH, "%lu", vg->index);
   vg->index += 1;
   return result;
 }
@@ -312,9 +323,14 @@ mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t *
       v_cursor->next = malloc(sizeof(struct valuation_t));
       v_cursor = v_cursor->next;
     }
-    v_cursor->val = atom->predargs[i];
+
+    v_cursor->val = malloc(strlen(atom->predargs[i]) + 1);
+    strcpy(v_cursor->val, atom->predargs[i]);
+
     v_cursor->var = mk_new_var(vg);
     *(var_args + i) = v_cursor->var;
+
+    v_cursor->next = NULL;
   }
 
   return mk_fmla_atom(atom->pred_name, atom->arity, var_args);
@@ -346,4 +362,111 @@ valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
   }
 
   return l;
+}
+
+void
+free_fmla_atom(struct fmla_atom_t * at)
+{
+  // FIXME being overly prudent in case the memory was shared with another
+  //       struct that has already been freed.
+  if (NULL != at->pred_name) {
+    free(at->pred_name);
+  }
+
+  for (int i = 0; i < at->arity; i++) {
+    if (NULL != at->predargs[i]) {
+      free(at->predargs[i]);
+    }
+  }
+
+  if (NULL != at->predargs) {
+    free(at->predargs);
+  }
+
+  free(at);
+}
+
+void
+free_fmla_quant(struct fmla_quant_t * q)
+{
+  if (NULL != q->bv) {
+    free((char *)q->bv);
+  }
+
+  if (NULL != q->body) {
+    free_fmla(q->body);
+  }
+
+  free(q);
+}
+
+void
+free_fmla(struct fmla_t * fmla)
+{
+  switch (fmla->kind) {
+  case FMLA_CONST:
+    // Nothing to free.
+    break;
+  case FMLA_ATOM:
+    free_fmla_atom(fmla->param.atom);
+    break;
+  case FMLA_AND:
+    free_fmla(fmla->param.args[0]);
+    free_fmla(fmla->param.args[1]);
+    break;
+  case FMLA_OR:
+    free_fmla(fmla->param.args[0]);
+    free_fmla(fmla->param.args[1]);
+    break;
+  case FMLA_NOT:
+    free_fmla(fmla->param.args[0]);
+    break;
+  case FMLA_ALL:
+    free_fmla_quant(fmla->param.quant);
+    break;
+  default:
+    // FIXME fail
+    break;
+  }
+
+  free(fmla);
+}
+
+void
+free_fmlas(struct fmlas_t * fmlas)
+{
+  if (NULL != fmlas->fmla) {
+    free_fmla(fmlas->fmla);
+  }
+
+  free_fmlas(fmlas->next);
+
+  free(fmlas);
+}
+
+void
+free_var_gen(struct var_gen_t * vg)
+{
+  if (NULL != vg->prefix) {
+    free((char *)vg->prefix);
+  }
+
+  free(vg);
+}
+
+void
+free_valuation(struct valuation_t * v)
+{
+  assert(NULL != v);
+
+  if (NULL != v->var) {
+    free(v->var);
+  }
+  if (NULL != v->val) {
+    free(v->val);
+  }
+  if (NULL != v->next) {
+    free_valuation(v->next);
+  }
+  free(v);
 }
