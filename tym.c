@@ -197,7 +197,7 @@ main (int argc, char ** argv)
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   char * vK = malloc(sizeof(char) * 2);
-  strcpy(vK, "V\0");
+  strcpy(vK, "V");
   struct var_gen_t * vg = mk_var_gen(vK);
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
