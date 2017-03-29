@@ -311,8 +311,8 @@ struct predicates_t *
 atom_database_to_predicates(struct atom_database_t * adb)
 {
   struct predicates_t * result = NULL;
-  struct predicates_t * result_cursor;
-  struct predicates_t * cursor;
+  struct predicates_t * result_cursor = NULL;
+  struct predicates_t * cursor = NULL;
 
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
