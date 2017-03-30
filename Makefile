@@ -5,7 +5,7 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-CFLAGS=-std=c99 -Wall -pedantic
+CFLAGS=-std=c99 -Wall -pedantic -g
 TGT=tym
 OBJ=ast.o formula.o lexer.o parser.o symbols.o tym.o
 HEADERS=ast.h formula.h lexer.h parser.h symbols.h tym.h
