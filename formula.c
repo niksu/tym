@@ -45,6 +45,10 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
     strcpy(*(predargs_copy + i), *(predargs + i));
   }
 
+  if (0 == arity) {
+    predargs_copy = NULL;
+  }
+
   result->kind = FMLA_ATOM;
   result->param.atom = result_content;
 
@@ -367,20 +371,17 @@ valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
 void
 free_fmla_atom(struct fmla_atom_t * at)
 {
-  // FIXME being overly prudent in case the memory was shared with another
-  //       struct that has already been freed.
-  if (NULL != at->pred_name) {
-    free(at->pred_name);
-  }
+  free(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
-    if (NULL != at->predargs[i]) {
-      free(at->predargs[i]);
-    }
+    free(at->predargs[i]);
   }
 
   if (NULL != at->predargs) {
+    assert(at->arity > 0);
     free(at->predargs);
+  } else {
+    assert(0 == at->arity);
   }
 
   free(at);
