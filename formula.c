@@ -436,9 +436,7 @@ free_fmla(struct fmla_t * fmla)
 void
 free_fmlas(struct fmlas_t * fmlas)
 {
-  if (NULL != fmlas->fmla) {
-    free_fmla(fmlas->fmla);
-  }
+  assert(NULL != fmlas->fmla);
 
   free_fmlas(fmlas->next);
 
