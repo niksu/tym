@@ -8,7 +8,7 @@ CC?=gcc
 CFLAGS=-std=c99 -Wall -pedantic -g
 TGT=tym
 OBJ=ast.o formula.o lexer.o parser.o symbols.o tym.o
-HEADERS=ast.h formula.h lexer.h parser.h symbols.h tym.h
+HEADERS=ast.h formula.h lexer.h parser.h statement.h symbols.h tym.h
 ADDITIONAL_CFLAGS?=
 
 $(TGT) : $(OBJ) $(HEADERS)
