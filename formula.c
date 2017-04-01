@@ -456,14 +456,15 @@ free_valuation(struct valuation_t * v)
 {
   assert(NULL != v);
 
-  if (NULL != v->var) {
-    free(v->var);
-  }
-  if (NULL != v->val) {
-    free(v->val);
-  }
+  assert(NULL != v->var);
+  free(v->var);
+
+  assert(NULL != v->val);
+  free(v->val);
+
   if (NULL != v->next) {
     free_valuation(v->next);
   }
+
   free(v);
 }
