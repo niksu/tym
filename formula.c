@@ -437,7 +437,6 @@ void
 free_fmlas(struct fmlas_t * fmlas)
 {
   assert(NULL != fmlas->fmla);
-
   free_fmlas(fmlas->next);
 
   free(fmlas);
@@ -446,9 +445,8 @@ free_fmlas(struct fmlas_t * fmlas)
 void
 free_var_gen(struct var_gen_t * vg)
 {
-  if (NULL != vg->prefix) {
-    free((char *)vg->prefix);
-  }
+  assert(NULL != vg->prefix);
+  free((char *)vg->prefix);
 
   free(vg);
 }
