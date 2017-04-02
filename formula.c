@@ -224,36 +224,6 @@ fmla_str(struct fmla_t * fmla, size_t * remaining, char * buf)
   return l;
 }
 
-void
-test_formula()
-{
-  char ** args = (char **)malloc(sizeof(char **) * 2);
-  *args = (char *)malloc(sizeof(char *) * 10);
-  *(args + 1) = (char *)malloc(sizeof(char *) * 10);
-  strcpy(*args, "arg0");
-  strcpy(*(args + 1), "arg1");
-
-  for (int i = 0; i < 2; i++) {
-    printf("  :%s\n", *(args + i));
-  }
-
-  struct fmla_t * test_atom = mk_fmla_atom("atom", 2, args);
-
-  for (int i = 0; i < 2; i++) {
-    printf("  ;%s\n", test_atom->param.atom->predargs[i]);
-  }
-
-  struct fmla_t * test_not = mk_fmla_not(test_atom);
-  struct fmla_t * test_and = mk_fmla_and(test_not, test_atom);
-  struct fmla_t * test_or = mk_fmla_or(test_not, test_and);
-  struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
-
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = (char *)malloc(remaining_buf_size);
-  size_t l = fmla_str(test_quant, &remaining_buf_size, buf);
-  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-}
-
 struct fmlas_t *
 mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next)
 {
@@ -467,4 +437,40 @@ free_valuation(struct valuation_t * v)
   }
 
   free(v);
+}
+
+void
+test_formula()
+{
+  char ** args = (char **)malloc(sizeof(char **) * 2);
+  *args = (char *)malloc(sizeof(char *) * 10);
+  *(args + 1) = (char *)malloc(sizeof(char *) * 10);
+  strcpy(*args, "arg0");
+  strcpy(*(args + 1), "arg1");
+
+  for (int i = 0; i < 2; i++) {
+    printf("  :%s\n", *(args + i));
+  }
+
+  struct fmla_t * test_atom = mk_fmla_atom("atom", 2, args);
+
+  for (int i = 0; i < 2; i++) {
+    printf("  ;%s\n", test_atom->param.atom->predargs[i]);
+  }
+
+  struct fmla_t * test_not = mk_fmla_not(test_atom);
+  struct fmla_t * test_and = mk_fmla_and(test_not, test_atom);
+  struct fmla_t * test_or = mk_fmla_or(test_not, test_and);
+  struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
+
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = (char *)malloc(remaining_buf_size);
+  size_t l = fmla_str(test_quant, &remaining_buf_size, buf);
+  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  free(args[0]);
+  free(args[1]);
+  free(args);
+  free(buf);
+  free_fmla(test_quant);
 }
