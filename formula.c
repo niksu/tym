@@ -60,6 +60,19 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
 }
 
 struct fmla_t *
+mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
+{
+  char ** args = malloc(sizeof(char *) * arity);
+  va_list varargs;
+  va_start(varargs, arity);
+  for (int i = 0; i < arity; i++) {
+    args[i] = va_arg(varargs, char *);
+  }
+  va_end(varargs);
+  return mk_fmla_atom(pred_name, arity, args);
+}
+
+struct fmla_t *
 mk_fmla_quant(const char * bv, struct fmla_t * body)
 {
   struct fmla_quant_t * result_content = (struct fmla_quant_t *)malloc(sizeof(struct fmla_quant_t *));
@@ -103,6 +116,50 @@ mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   *result_content = subfmlaL;
   *(result_content + 1) = subfmlaR;
   result->param.args = result_content;
+  return result;
+}
+
+struct fmla_t *
+mk_fmla_ands(struct fmlas_t * fmlas)
+{
+  struct fmla_t * result;
+  struct fmlas_t * cursor = fmlas;
+  if (NULL == cursor) {
+    result = mk_fmla_const(true);
+  } else {
+    if (NULL == fmlas->next) {
+      result = fmlas->fmla;
+    } else {
+      result = mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
+      cursor = fmlas->next->next;
+      while (NULL != cursor) {
+        result = mk_fmla_and(result, cursor->fmla);
+        cursor = cursor->next;
+      }
+    }
+  }
+  return result;
+}
+
+struct fmla_t *
+mk_fmla_ors(struct fmlas_t * fmlas)
+{
+  struct fmla_t * result;
+  struct fmlas_t * cursor = fmlas;
+  if (NULL == cursor) {
+    result = mk_fmla_const(false);
+  } else {
+    if (NULL == fmlas->next) {
+      result = fmlas->fmla;
+    } else {
+      result = mk_fmla_or(fmlas->fmla, fmlas->next->fmla);
+      cursor = fmlas->next->next;
+      while (NULL != cursor) {
+        result = mk_fmla_or(result, cursor->fmla);
+        cursor = cursor->next;
+      }
+    }
+  }
   return result;
 }
 

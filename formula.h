@@ -10,6 +10,7 @@
 #ifndef __TYM_FORMULA_H__
 #define __TYM_FORMULA_H__
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,24 +39,27 @@ struct fmla_t {
   } param;
 };
 
-struct fmla_t * mk_fmla_const(bool b);
-struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, char ** args);
-struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
-struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
-struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
-
-size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
-size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
-size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);
-
 struct fmlas_t {
   struct fmla_t * fmla;
   struct fmlas_t * next;
 };
 
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
+
+struct fmla_t * mk_fmla_const(bool b);
+struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, char ** args);
+struct fmla_t * mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
+struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
+struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
+struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
+struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
+struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas);
+struct fmla_t * mk_fmla_ors(struct fmlas_t * fmlas);
+struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
+
+size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
+size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
+size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);
 
 struct var_gen_t {
   const char * prefix;
