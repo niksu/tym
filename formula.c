@@ -98,8 +98,8 @@ mk_fmla_not(struct fmla_t * subfmla)
 struct fmla_t *
 mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 {
-  struct fmla_t ** result_content = (struct fmla_t **)malloc(sizeof(struct fmla_t **) * 2);
-  struct fmla_t * result = (struct fmla_t *)malloc(sizeof(struct fmla_t *));
+  struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
+  struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_AND;
   *result_content = subfmlaL;
   *(result_content + 1) = subfmlaR;
@@ -110,8 +110,8 @@ mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 struct fmla_t *
 mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 {
-  struct fmla_t ** result_content = (struct fmla_t **)malloc(sizeof(struct fmla_t **) * 2);
-  struct fmla_t * result = (struct fmla_t *)malloc(sizeof(struct fmla_t *));
+  struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
+  struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_OR;
   *result_content = subfmlaL;
   *(result_content + 1) = subfmlaR;
@@ -417,10 +417,10 @@ free_fmla_atom(struct fmla_atom_t * at)
 void
 free_fmla_quant(struct fmla_quant_t * q)
 {
+  // FIXME these checks are overly prudent -- turn them into asserts.
   if (NULL != q->bv) {
     free((char *)q->bv);
   }
-
   if (NULL != q->body) {
     free_fmla(q->body);
   }
@@ -431,6 +431,7 @@ free_fmla_quant(struct fmla_quant_t * q)
 void
 free_fmla(struct fmla_t * fmla)
 {
+  struct fmla_t ** args = NULL;
   switch (fmla->kind) {
   case FMLA_CONST:
     // Nothing to free.
@@ -439,8 +440,12 @@ free_fmla(struct fmla_t * fmla)
     free_fmla_atom(fmla->param.atom);
     break;
   case FMLA_AND:
-    free_fmla(fmla->param.args[0]);
-    free_fmla(fmla->param.args[1]);
+//    free_fmla(fmla->param.args[0]);
+//    free_fmla(fmla->param.args[1]);
+    args = fmla->param.args;
+    free_fmla(args[0]);
+    free_fmla(args[1]);
+    free(fmla->param.args);
     break;
   case FMLA_OR:
     free_fmla(fmla->param.args[0]);
@@ -528,6 +533,10 @@ test_formula()
   free(args[0]);
   free(args[1]);
   free(args);
+  // FIXME double-frees are a problem
+//  free_fmla(test_quant);
+//  free_fmla(test_and);
+//  free_fmla(test_atom);
+  free_fmla(test_not);
   free(buf);
-  free_fmla(test_quant);
 }
