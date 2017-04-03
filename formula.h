@@ -57,6 +57,8 @@ struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas);
 struct fmla_t * mk_fmla_ors(struct fmlas_t * fmlas);
 struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
 
+struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
+
 size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
 size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
 size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);

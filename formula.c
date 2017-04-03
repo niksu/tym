@@ -501,6 +501,21 @@ free_valuation(struct valuation_t * v)
   free(v);
 }
 
+struct fmlas_t *
+mk_fmlas(uint8_t no_fmlas, ...)
+{
+  va_list varargs;
+  va_start(varargs, no_fmlas);
+  struct fmlas_t * result = NULL;
+  for (int i = 0; i < no_fmlas; i++) {
+    struct fmla_t * cur_fmla = va_arg(varargs, struct fmla_t *);
+    assert(NULL != cur_fmla);
+    result = mk_fmla_cell(cur_fmla, result);
+  }
+  va_end(varargs);
+  return result;
+}
+
 void
 test_formula()
 {
@@ -538,5 +553,27 @@ test_formula()
 //  free_fmla(test_and);
 //  free_fmla(test_atom);
   free_fmla(test_not);
+
+  test_atom = mk_fmla_atom_varargs("testpred", 4, "ta1", "ta2", "ta3", "ta4");
+  struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom, test_atom);
+  test_and = mk_fmla_ands(test_fmlas);
+  test_or = mk_fmla_ors(test_fmlas);
+
+  remaining_buf_size = BUF_SIZE;
+  l = fmla_str(test_atom, &remaining_buf_size, buf);
+  printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  remaining_buf_size = BUF_SIZE;
+  l = fmla_str(test_and, &remaining_buf_size, buf);
+  printf("test_and formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  remaining_buf_size = BUF_SIZE;
+  l = fmla_str(test_or, &remaining_buf_size, buf);
+  printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  free_fmla(test_atom);
+  // FIXME double-frees are a problem
+//  free_fmla(test_and);
+//  free_fmla(test_or);
   free(buf);
 }
