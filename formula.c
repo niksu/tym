@@ -436,7 +436,6 @@ free_fmla_quant(struct fmla_quant_t * q)
 void
 free_fmla(struct fmla_t * fmla)
 {
-  struct fmla_t ** args = NULL;
   switch (fmla->kind) {
   case FMLA_CONST:
     // Nothing to free.
@@ -445,16 +444,14 @@ free_fmla(struct fmla_t * fmla)
     free_fmla_atom(fmla->param.atom);
     break;
   case FMLA_AND:
-//    free_fmla(fmla->param.args[0]);
-//    free_fmla(fmla->param.args[1]);
-    args = fmla->param.args;
-    free_fmla(args[0]);
-    free_fmla(args[1]);
+    free_fmla(fmla->param.args[0]);
+    free_fmla(fmla->param.args[1]);
     free(fmla->param.args);
     break;
   case FMLA_OR:
     free_fmla(fmla->param.args[0]);
     free_fmla(fmla->param.args[1]);
+    free(fmla->param.args);
     break;
   case FMLA_NOT:
     free_fmla(fmla->param.args[0]);
