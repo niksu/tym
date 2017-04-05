@@ -161,6 +161,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 
     buf[(*remaining)--, l++] = ')';
     break;
+
   case STMT_CONST_DEF:
     sprintf(&(buf[l]), "(define-fun %s (",
         stmt->param.const_def->const_name);
@@ -191,10 +192,12 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 
     buf[(*remaining)--, l++] = ')';
     break;
+
   default:
     // FIXME complain
     return 0;
   }
+
   return l;
 }
 
@@ -250,7 +253,6 @@ free_stmts(struct stmts_t * stmts)
   assert(NULL != stmts->stmt);
   free_stmt(stmts->stmt);
   free_stmts(stmts->next);
-
   free(stmts);
 }
 
