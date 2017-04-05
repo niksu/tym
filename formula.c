@@ -75,10 +75,15 @@ mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 struct fmla_t *
 mk_fmla_quant(const char * bv, struct fmla_t * body)
 {
-  struct fmla_quant_t * result_content = (struct fmla_quant_t *)malloc(sizeof(struct fmla_quant_t *));
-  struct fmla_t * result = (struct fmla_t *)malloc(sizeof(struct fmla_t *));
-  result_content->bv = bv;
-  result_content->body = body;
+  assert(NULL != bv);
+  assert(NULL != body);
+  struct fmla_quant_t * result_content = malloc(sizeof(struct fmla_quant_t));
+  struct fmla_t * result = malloc(sizeof(struct fmla_t));
+  char * bv_copy = malloc(sizeof(char) * strlen(bv));
+  strcpy(bv_copy, bv);
+  struct fmla_t * body_copy = copy_fmla(body);
+  result_content->bv = bv_copy;
+  result_content->body = body_copy;
   result->kind = FMLA_ALL;
   result->param.quant = result_content;
   return result;
@@ -90,7 +95,7 @@ mk_fmla_not(struct fmla_t * subfmla)
   struct fmla_t ** result_content = (struct fmla_t **)malloc(sizeof(struct fmla_t **) * 1);
   struct fmla_t * result = (struct fmla_t *)malloc(sizeof(struct fmla_t *));
   result->kind = FMLA_NOT;
-  *result_content = subfmla;
+  *result_content = copy_fmla(subfmla);
   result->param.args = result_content;
   return result;
 }
@@ -101,8 +106,8 @@ mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_AND;
-  *result_content = subfmlaL;
-  *(result_content + 1) = subfmlaR;
+  *result_content = copy_fmla(subfmlaL);
+  *(result_content + 1) = copy_fmla(subfmlaR);
   result->param.args = result_content;
   return result;
 }
@@ -113,8 +118,8 @@ mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_OR;
-  *result_content = subfmlaL;
-  *(result_content + 1) = subfmlaR;
+  *result_content = copy_fmla(subfmlaL);
+  *(result_content + 1) = copy_fmla(subfmlaR);
   result->param.args = result_content;
   return result;
 }
@@ -453,6 +458,7 @@ free_fmla(struct fmla_t * fmla)
     break;
   case FMLA_NOT:
     free_fmla(fmla->param.args[0]);
+    free(fmla->param.args);
     break;
   case FMLA_ALL:
     free_fmla_quant(fmla->param.quant);
@@ -516,6 +522,37 @@ mk_fmlas(uint8_t no_fmlas, ...)
   return result;
 }
 
+struct fmla_t *
+copy_fmla(const struct fmla_t * const fmla)
+{
+  struct fmla_t * result = NULL;
+  switch (fmla->kind) {
+  case FMLA_CONST:
+    result = mk_fmla_const(fmla->param.const_value);
+    break;
+  case FMLA_ATOM:
+    result = mk_fmla_atom(fmla->param.atom->pred_name, fmla->param.atom->arity, fmla->param.atom->predargs);
+    break;
+  case FMLA_AND:
+    result = mk_fmla_and(fmla->param.args[0], fmla->param.args[1]);
+    break;
+  case FMLA_OR:
+    result = mk_fmla_or(fmla->param.args[0], fmla->param.args[1]);
+    break;
+  case FMLA_NOT:
+    result = mk_fmla_not(fmla->param.args[0]);
+    break;
+  case FMLA_ALL:
+    result = mk_fmla_quant(fmla->param.quant->bv, fmla->param.quant->body);
+    break;
+  default:
+    // FIXME fail
+    break;
+  }
+
+  return result;
+}
+
 void
 test_formula()
 {
@@ -548,10 +585,9 @@ test_formula()
   free(args[0]);
   free(args[1]);
   free(args);
-  // FIXME double-frees are a problem
-//  free_fmla(test_quant);
-//  free_fmla(test_and);
-//  free_fmla(test_atom);
+  free_fmla(test_quant);
+  free_fmla(test_and);
+  free_fmla(test_atom);
   free_fmla(test_not);
 
   test_atom = mk_fmla_atom_varargs("testpred", 4, "ta1", "ta2", "ta3", "ta4");
@@ -572,8 +608,7 @@ test_formula()
   printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
   free_fmla(test_atom);
-  // FIXME double-frees are a problem
-//  free_fmla(test_and);
-//  free_fmla(test_or);
+  free_fmla(test_and);
+  free_fmla(test_or);
   free(buf);
 }
