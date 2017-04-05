@@ -43,21 +43,35 @@ mk_universe(struct terms_t * terms)
   return result;
 }
 
-// FIXME have a printer to SMTLIB
 size_t
 universe_str(struct universe_t * uni, size_t * remaining, char * buf)
 {
   size_t l = 0;
-  buf[(*remaining)--, l++] = '{';
+
   for (int i = 0; i < uni->cardinality; i++) {
-    size_t l_sub;
-    l_sub = my_strcpy(buf + l, uni->element[i], remaining);
+    sprintf(&(buf[l]), "(declare-const %s Universe)\n",
+        uni->element[i]);
+    *remaining -= strlen(&(buf[l]));
+    l += strlen(&(buf[l]));
+  }
+
+  sprintf(&(buf[l]), "(assert (distinct ");
+  *remaining -= strlen(&(buf[l]));
+  l += strlen(&(buf[l]));
+  for (int i = 0; i < uni->cardinality; i++) {
+    sprintf(&(buf[l]), "%s", uni->element[i]);
+    *remaining -= strlen(&(buf[l]));
+    l += strlen(&(buf[l]));
+
     if (i < uni->cardinality - 1) {
-      buf[(*remaining)--, l++] = ',';
       buf[(*remaining)--, l++] = ' ';
     }
   }
-  buf[(*remaining)--, l++] = '}';
+
+  buf[(*remaining)--, l++] = ')';
+  buf[(*remaining)--, l++] = ')';
+  buf[(*remaining)--, l++] = '\n';
+
   buf[l] = '\0';
   return l;
 }
