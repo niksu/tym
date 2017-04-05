@@ -31,13 +31,11 @@ mk_universe(struct terms_t * terms)
   }
 
   assert(result->cardinality > 0);
-
   result->element = malloc(sizeof(char *) * result->cardinality);
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-    // FIXME can write as result->element[i]?
-    *(result->element + i) = malloc(sizeof(char) * strlen(cursor->term->identifier));
+    result->element[i] = malloc(sizeof(char) * strlen(cursor->term->identifier));
     strcpy(result->element[i], cursor->term->identifier);
     cursor = cursor->next;
   }
