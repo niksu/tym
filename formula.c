@@ -39,10 +39,10 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
   char * pred_name_copy = malloc(sizeof(char) * strlen(pred_name));
   assert(NULL != pred_name_copy);
   strcpy(pred_name_copy, pred_name);
-  char ** predargs_copy = malloc(sizeof(char **) * arity);
+  char ** predargs_copy = malloc(sizeof(char *) * arity);
   for (int i = 0; i < arity; i++) {
-    *(predargs_copy + i) = malloc(sizeof(char *) * strlen(*(predargs + i)));
-    strcpy(*(predargs_copy + i), *(predargs + i));
+    predargs_copy[i] = malloc(sizeof(char) * strlen(predargs[i]));
+    strcpy(predargs_copy[i], predargs[i]);
   }
 
   if (0 == arity) {
@@ -92,10 +92,10 @@ mk_fmla_quant(const char * bv, struct fmla_t * body)
 struct fmla_t *
 mk_fmla_not(struct fmla_t * subfmla)
 {
-  struct fmla_t ** result_content = (struct fmla_t **)malloc(sizeof(struct fmla_t **) * 1);
-  struct fmla_t * result = (struct fmla_t *)malloc(sizeof(struct fmla_t *));
+  struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 1);
+  struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_NOT;
-  *result_content = copy_fmla(subfmla);
+  result_content[0] = copy_fmla(subfmla);
   result->param.args = result_content;
   return result;
 }
@@ -106,8 +106,8 @@ mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_AND;
-  *result_content = copy_fmla(subfmlaL);
-  *(result_content + 1) = copy_fmla(subfmlaR);
+  result_content[0] = copy_fmla(subfmlaL);
+  result_content[1] = copy_fmla(subfmlaR);
   result->param.args = result_content;
   return result;
 }
@@ -118,8 +118,8 @@ mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_OR;
-  *result_content = copy_fmla(subfmlaL);
-  *(result_content + 1) = copy_fmla(subfmlaR);
+  result_content[0] = copy_fmla(subfmlaL);
+  result_content[1] = copy_fmla(subfmlaR);
   result->param.args = result_content;
   return result;
 }
@@ -346,7 +346,7 @@ mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t *
   struct fmla_atom_t * atom = fmla_as_atom(at);
   assert(NULL != atom);
 
-  char ** var_args = malloc(sizeof(char **) * atom->arity);
+  char ** var_args = malloc(sizeof(char *) * atom->arity);
   *v = NULL;
 
   struct valuation_t * v_cursor;
@@ -364,7 +364,7 @@ mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t *
     strcpy(v_cursor->val, atom->predargs[i]);
 
     v_cursor->var = mk_new_var(vg);
-    *(var_args + i) = v_cursor->var;
+    var_args[i] = v_cursor->var;
 
     v_cursor->next = NULL;
   }
