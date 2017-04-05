@@ -220,16 +220,43 @@ free_stmt(struct stmt_t * stmt)
   free(stmt);
 }
 
+struct stmts_t *
+mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next)
+{
+  assert(NULL != stmt);
+
+  struct stmts_t * ss = malloc(sizeof(struct stmts_t));
+  assert(NULL != ss);
+
+  ss->stmt = stmt;
+  ss->next = next;
+  return ss;
+}
+
+size_t
+stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf)
+{
+  size_t l = 0;
+  struct stmts_t * cursor = stmts;
+  while (NULL != cursor) {
+    l += stmt_str(cursor->stmt, remaining, buf);
+    buf[(*remaining)--, l++] = '\n';
+    cursor = cursor->next;
+  }
+  return l;
+}
+
+void
+free_stmts(struct stmts_t * stmts)
+{
+  assert(NULL != stmts->stmt);
+  free_stmt(stmts->stmt);
+  free_stmts(stmts->next);
+
+  free(stmts);
+}
+
 /*
-struct stmts_t {
-  struct stmt_t * stmt;
-  struct stmts_t * next;
-};
-
-struct stmts_t * mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next);
-size_t stmts_str(struct stmts_t *, size_t * remaining, char * buf);
-void free_stmts(struct stmts_t *);
-
 struct model_t {
   struct universe_t universe;
   struct stmts_t stmts;
