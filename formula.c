@@ -576,7 +576,7 @@ test_formula()
   struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
 
   size_t remaining_buf_size = BUF_SIZE;
-  char * buf = (char *)malloc(remaining_buf_size);
+  char * buf = malloc(remaining_buf_size);
   size_t l = fmla_str(test_quant, &remaining_buf_size, buf);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
