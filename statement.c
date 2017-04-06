@@ -116,28 +116,13 @@ mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body)
   return result;
 }
 
-struct fmla_t *
-universe_fmla(char * const_name, struct universe_t * uni)
+struct stmt_t *
+mk_stmt_const(char * const_name, struct universe_t * uni)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  struct fmlas_t * fmlas = NULL;
-
-  for (int i = 0; i < uni->cardinality; i++) {
-    struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2, const_name, uni->element[i]);
-    fmlas = mk_fmla_cell(fmla, fmlas);
-  }
-
-  return mk_fmla_ors(fmlas);
-}
-
-// FIXME use "(distinct ...)" statement".
-// FIXME use this for declaring constants rather than for enumerating the universe.
-struct stmt_t *
-mk_stmt_const(char * const_name, struct universe_t * uni)
-{
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
 
@@ -147,10 +132,8 @@ mk_stmt_const(char * const_name, struct universe_t * uni)
   struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    if (!strcmp(const_name, uni->element[i])) {
-      struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2, const_name, uni->element[i]);
-      fmlas = mk_fmla_cell(mk_fmla_not(fmla), fmlas);
-    }
+    struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2, const_name, uni->element[i]);
+    fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
   sub_result->body = mk_fmla_ors(fmlas);
@@ -177,6 +160,8 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
     break;
 
   case STMT_CONST_DEF:
+    // FIXME check arity, and use define-fun or declare-const as appropriate.
+
     sprintf(&(buf[l]), "(define-fun %s (",
         stmt->param.const_def->const_name);
     *remaining -= strlen(&(buf[l]));
