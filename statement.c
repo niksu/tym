@@ -160,36 +160,53 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
     break;
 
   case STMT_CONST_DEF:
-    // FIXME check arity, and use define-fun or declare-const as appropriate.
+    // Check arity, and use define-fun or declare-const as appropriate.
 
-    sprintf(&(buf[l]), "(define-fun %s (",
-        stmt->param.const_def->const_name);
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
-
-    struct terms_t * params_cursor = stmt->param.const_def->params;
-    while (NULL != params_cursor) {
-      buf[(*remaining)--, l++] = '(';
-
-      l += term_to_str(params_cursor->term, remaining, buf);
-
-      sprintf(&(buf[l]), " Universe)");
+    if (NULL == stmt->param.const_def->params) {
+      // We're dealing with a nullary constant.
+      sprintf(&(buf[l]), "(declare-const %s Universe)\n",
+          stmt->param.const_def->const_name);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      params_cursor = params_cursor->next;
-      if (NULL != params_cursor) {
-        buf[(*remaining)--, l++] = ' ';
+      sprintf(&(buf[l]), "(assert (");
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
+
+      l += fmla_str(stmt->param.const_def->body, remaining, buf);
+
+      buf[(*remaining)--, l++] = ')';
+      buf[(*remaining)--, l++] = ')';
+    } else {
+      sprintf(&(buf[l]), "(define-fun %s (",
+          stmt->param.const_def->const_name);
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
+
+      struct terms_t * params_cursor = stmt->param.const_def->params;
+      while (NULL != params_cursor) {
+        buf[(*remaining)--, l++] = '(';
+
+        l += term_to_str(params_cursor->term, remaining, buf);
+
+        sprintf(&(buf[l]), " Universe)");
+        *remaining -= strlen(&(buf[l]));
+        l += strlen(&(buf[l]));
+
+        params_cursor = params_cursor->next;
+        if (NULL != params_cursor) {
+          buf[(*remaining)--, l++] = ' ';
+        }
       }
+
+      sprintf(&(buf[l]), "Bool)\n  ");
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
+
+      l += fmla_str(stmt->param.const_def->body, remaining, buf);
+
+      buf[(*remaining)--, l++] = ')';
     }
-
-    sprintf(&(buf[l]), "Bool)\n  ");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
-
-    l += fmla_str(stmt->param.const_def->body, remaining, buf);
-
-    buf[(*remaining)--, l++] = ')';
     break;
 
   default:
