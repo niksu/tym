@@ -52,8 +52,8 @@ size_t stmts_str(struct stmts_t *, size_t * remaining, char * buf);
 void free_stmts(struct stmts_t *);
 
 struct model_t {
-  struct universe_t universe;
-  struct stmts_t stmts;
+  struct universe_t * universe;
+  struct stmts_t * stmts;
 };
 
 struct model_t * mk_model(struct universe_t *);

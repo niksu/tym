@@ -272,14 +272,34 @@ free_stmts(struct stmts_t * stmts)
   free(stmts);
 }
 
-/*
-struct model_t {
-  struct universe_t universe;
-  struct stmts_t stmts;
-};
+struct model_t *
+mk_model(struct universe_t * uni)
+{
+  struct model_t * result = malloc(sizeof(struct model_t));
+  result->universe = uni;
+  result->stmts = NULL;
+  return result;
+}
 
-struct model_t * mk_model(struct universe_t *);
-size_t model_str(struct model_t *, size_t * remaining, char * buf);
-void free_model(struct model_t *);
-void strengthen_model(struct model_t *, struct stmt_t *);
-*/
+size_t
+model_str(struct model_t * m, size_t * remaining, char * buf)
+{
+  size_t l = 0;
+  l += universe_str(m->universe, remaining, buf);
+  l += stmts_str(m->stmts, remaining, buf);
+  return l;
+}
+
+void
+free_model(struct model_t * m)
+{
+  free_universe(m->universe);
+  free_stmts(m->stmts);
+  free(m);
+}
+
+void
+strengthen_model(struct model_t * m, struct stmt_t * stmt)
+{
+  m->stmts = mk_stmt_cell(stmt, m->stmts);
+}
