@@ -104,11 +104,12 @@ mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body)
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
 // FIXME copy
-//  char * pred_name_copy = malloc(sizeof(char) * strlen(pred_name));
 //  struct terms_t * params_copy =
 //  struct fmla_t * body_copy =
+  char * const_name_copy = malloc(sizeof(char) * strlen(pred_name));
+  strcpy(const_name_copy, pred_name);
+  sub_result->const_name = const_name_copy;
 
-  sub_result->const_name =pred_name;
   sub_result->params = params;
   sub_result->body = body;
 
@@ -202,11 +203,13 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
         }
       }
 
-      sprintf(&(buf[l]), "Bool)\n  ");
+      sprintf(&(buf[l]), ") Bool\n  ");
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      l += fmla_str(stmt->param.const_def->body, remaining, buf);
+      buf[(*remaining)--, l++] = '(';
+      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
+      buf[(*remaining)--, l++] = ')';
 
       buf[(*remaining)--, l++] = ')';
     }
@@ -292,7 +295,12 @@ size_t
 model_str(struct model_t * m, size_t * remaining, char * buf)
 {
   size_t l = 0;
-  l += universe_str(m->universe, remaining, buf);
+
+  sprintf(&(buf[l]), "(declare-sort Universe 0)\n");
+  *remaining -= strlen(&(buf[l]));
+  l += strlen(&(buf[l]));
+
+  l += universe_str(m->universe, remaining, buf + l);
   l += stmts_str(m->stmts, remaining, buf + l);
   buf[l] = '\0';
   return l;
@@ -323,11 +331,17 @@ test_statement()
   struct model_t * m = mk_model(mk_universe(terms));
 
   struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
-//  struct stmt_t * s2S = mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body);
+  char * vX = malloc(sizeof(char) * 2);
+  strcpy(vX, "X");
+  char * vY = malloc(sizeof(char) * 2);
+  strcpy(vY, "Y");
+  terms = mk_term_cell(mk_term(VAR, vX), NULL);
+  terms = mk_term_cell(mk_term(VAR, vY), terms);
+  struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
   struct stmt_t * s3S = mk_stmt_const("x", m->universe);
 
   strengthen_model(m, s1S);
-//  strengthen_model(m, s2S);
+  strengthen_model(m, s2S);
   strengthen_model(m, s3S);
 
   size_t remaining_buf_size = BUF_SIZE;
