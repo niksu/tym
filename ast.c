@@ -579,3 +579,27 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
 
   return successful;
 }
+
+void
+test_clause(void) {
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
+  struct atom_t * at = malloc(sizeof(struct atom_t));
+  struct term_t * t = malloc(sizeof(struct term_t));
+  t->kind = CONST;
+  t->identifier = "ok";
+
+  at->predicate = "world";
+  at->arity = 1;
+  at->args = t;
+
+  cl->head.predicate = "hello";
+  cl->head.arity = 0;
+  cl->head.args = NULL;
+  cl->body_size = 1;
+  cl->body = at;
+
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  size_t l = clause_to_str(cl, &remaining_buf_size, buf);
+  printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+}
