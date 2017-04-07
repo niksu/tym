@@ -16,6 +16,7 @@
 #include "formula.h"
 #include "parser.h"
 #include "lexer.h"
+#include "statement.h"
 #include "symbols.h"
 #include "tym.h"
 
@@ -34,9 +35,19 @@ struct param_t params = {
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
+void test_clause(void);
+void test_formula(void);
+void test_statement(void);
+
 int
 main (int argc, char ** argv)
 {
+#ifdef TESTING
+  test_clause();
+  test_formula();
+  test_statement();
+  exit(0);
+#endif
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
