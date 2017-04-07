@@ -157,7 +157,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
     *remaining -= strlen(&(buf[l]));
     l += strlen(&(buf[l]));
 
-    l += fmla_str(stmt->param.axiom, remaining, buf);
+    l += fmla_str(stmt->param.axiom, remaining, buf + l);
 
     buf[(*remaining)--, l++] = ')';
     break;
@@ -261,7 +261,7 @@ stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf)
   size_t l = 0;
   struct stmts_t * cursor = stmts;
   while (NULL != cursor) {
-    l += stmt_str(cursor->stmt, remaining, buf);
+    l += stmt_str(cursor->stmt, remaining, buf + l);
     buf[(*remaining)--, l++] = '\n';
     cursor = cursor->next;
   }
@@ -322,11 +322,11 @@ test_statement()
 
   struct model_t * m = mk_model(mk_universe(terms));
 
-//  struct stmt_t * s1S = mk_stmt_axiom(struct fmla_t * axiom);
+  struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
 //  struct stmt_t * s2S = mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body);
   struct stmt_t * s3S = mk_stmt_const("x", m->universe);
 
-//  strengthen_model(m, s1S);
+  strengthen_model(m, s1S);
 //  strengthen_model(m, s2S);
   strengthen_model(m, s3S);
 
