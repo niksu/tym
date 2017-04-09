@@ -39,6 +39,39 @@ void test_clause(void);
 void test_formula(void);
 void test_statement(void);
 
+struct fmla_t *
+translate_atom (struct atom_t * at)
+{
+  assert(NULL != at);
+  char ** args = malloc(sizeof(char *) * at->arity);
+  for (int i = 0; i < at->arity; i++) {
+    args[i] = (char *)at->args[i].identifier;
+  }
+  return mk_fmla_atom(at->predicate, at->arity, args);
+}
+
+struct fmla_t *
+translate_body (struct clause_t * cl)
+{
+  struct fmlas_t * fmlas = NULL;
+  for (int i = 0; i < cl->body_size; i++) {
+    fmlas = mk_fmla_cell(translate_atom(cl->body + i), fmlas);
+  }
+  return mk_fmla_ands(fmlas);
+}
+
+struct fmla_t *
+translate_bodies (struct clauses_t * cls)
+{
+  struct clauses_t * cursor = cls;
+  struct fmlas_t * fmlas = NULL;
+  while (NULL != cursor) {
+    fmlas = mk_fmla_cell(translate_body(cursor->clause), fmlas);
+    cursor = cursor->next;
+  }
+  return mk_fmla_ors(fmlas);
+}
+
 int
 main (int argc, char ** argv)
 {
@@ -207,6 +240,13 @@ main (int argc, char ** argv)
     printf("no_bodies = %zu\n", no_bodies);
 
     size_t out_size;
+
+    struct fmla_t * fmla = translate_bodies(preds_cursor->predicate->bodies);
+    remaining_buf_size = BUF_SIZE;
+    out_size = fmla_str(fmla, &remaining_buf_size, buf);
+    assert(out_size > 0);
+    buf[out_size] = '\0'; // FIXME have fmla_str do this.
+    printf("translated: %s\n", buf);
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
