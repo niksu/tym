@@ -198,6 +198,14 @@ main (int argc, char ** argv)
 //  universally quantified
 //  head (with variables as terms) "if" disjunction of bodies (conjunctions) (with conjoined variable evaluations)
 
+    size_t no_bodies = 0;
+    struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+    while (NULL != body_cursor) {
+      no_bodies++;
+      body_cursor = body_cursor->next;
+    }
+    printf("no_bodies = %zu\n", no_bodies);
+
     size_t out_size;
 
     if (NULL == preds_cursor->predicate->bodies) {
@@ -233,6 +241,7 @@ main (int argc, char ** argv)
       }
     }
 
+    // Abstract the atom's parameters.
     struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
     out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
