@@ -552,7 +552,7 @@ copy_fmla(const struct fmla_t * const fmla)
 }
 
 void
-test_formula()
+test_formula(void)
 {
   char ** args = (char **)malloc(sizeof(char **) * 2);
   *args = (char *)malloc(sizeof(char *) * 10);
