@@ -174,31 +174,11 @@ main (int argc, char ** argv)
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
-  printf("(declare-sort Universe 0)\n");
-  struct terms_t * terms_cursor = adb->tdb->herbrand_universe;
-  const char * prefix = "(declare-const ";
-  const char * suffix = " Universe)";
-  while (NULL != terms_cursor) {
-    size_t l = 0;
-    l += my_strcpy(buf + l, prefix, &remaining_buf_size);
-    l += term_to_str(terms_cursor->term, &remaining_buf_size, buf + l);
-    l += my_strcpy(buf + l, suffix, &remaining_buf_size);
-    printf("%s\n", buf);
-    terms_cursor = terms_cursor->next;
-  }
+  struct model_t * m = mk_model(mk_universe(adb->tdb->herbrand_universe));
 
-  terms_cursor =  adb->tdb->herbrand_universe;
-  size_t l = 0;
-  while (NULL != terms_cursor) {
-    l += term_to_str(terms_cursor->term, &remaining_buf_size, buf + l);
-    if (NULL != terms_cursor->next) {
-      buf[remaining_buf_size--, l++] = ' ';
-    }
-    terms_cursor = terms_cursor->next;
-  }
-  buf[remaining_buf_size--, l++] = '\0';
-  printf("(assert (distinct %s))\n", buf);
-
+  remaining_buf_size = BUF_SIZE;
+  size_t l = model_str(m, &remaining_buf_size, buf);
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
   // NOTE if we don't do this, remaining_buf_size will become 0 causing some
   //      output to be dropped, then it might wrap back and output will resume,
