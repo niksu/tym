@@ -239,7 +239,6 @@ main (int argc, char ** argv)
     remaining_buf_size = BUF_SIZE;
     out_size = fmla_str(fmla, &remaining_buf_size, buf);
     assert(out_size > 0);
-    buf[out_size] = '\0'; // FIXME have fmla_str do this.
     printf("translated: %s\n", buf);
 
     if (NULL == preds_cursor->predicate->bodies) {

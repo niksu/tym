@@ -194,6 +194,7 @@ fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf)
     // FIXME check and react to errors.
     l += l_sub;
   }
+  buf[l] = '\0';
   return l;
 }
 
@@ -219,6 +220,8 @@ fmla_quant_str(struct fmla_quant_t * quant, size_t * remaining, char * buf)
   // FIXME check and react to errors.
   l += fmla_str(quant->body, remaining, buf + l);
   buf[(*remaining)--, l++] = ')';
+
+  buf[l] = '\0';
   return l;
 }
 
@@ -232,6 +235,8 @@ fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, size_t * remaini
   buf[(*remaining)--, l++] = '(';
   l += fmla_str(fmlaR, remaining, buf + l);
   buf[(*remaining)--, l++] = ')';
+
+  buf[l] = '\0';
   return l;
 }
 
@@ -283,6 +288,7 @@ fmla_str(struct fmla_t * fmla, size_t * remaining, char * buf)
     break;
   }
 
+  buf[l] = '\0';
   return l;
 }
 
@@ -397,6 +403,7 @@ valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
     }
   }
 
+  buf[l] = '\0';
   return l;
 }
 
