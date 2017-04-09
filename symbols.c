@@ -387,3 +387,15 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, void
 
   return success;
 }
+
+size_t
+num_predicate_bodies (struct predicate_t * p)
+{
+  size_t no_bodies = 0;
+  struct clauses_t * body_cursor = p->bodies;
+  while (NULL != body_cursor) {
+    no_bodies++;
+    body_cursor = body_cursor->next;
+  }
+  return no_bodies;
+}

@@ -74,4 +74,6 @@ int predicate_str(struct predicate_t * pred, size_t * outbuf_size, char * outbuf
 
 bool clause_database_add(struct clause_t * clause, struct atom_database_t * cdb, void *);
 
+size_t num_predicate_bodies (struct predicate_t *);
+
 #endif /* __SYMBOLS_H__ */

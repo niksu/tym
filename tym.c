@@ -231,13 +231,7 @@ main (int argc, char ** argv)
 //  universally quantified
 //  head (with variables as terms) "if" disjunction of bodies (conjunctions) (with conjoined variable evaluations)
 
-    size_t no_bodies = 0;
-    struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
-    while (NULL != body_cursor) {
-      no_bodies++;
-      body_cursor = body_cursor->next;
-    }
-    printf("no_bodies = %zu\n", no_bodies);
+    printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 
     size_t out_size;
 
