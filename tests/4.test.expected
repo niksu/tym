@@ -1,5 +1,6 @@
 input contents |a(X, Y) :- b(X), c(Y), d().
 a(X, bla) :- b(X), c(X), f(X).
+a(X, X).
 b(h1).
 b(h2).
 c(h3).
@@ -7,9 +8,10 @@ d().
 e(h1).
 |
 (no query given)
-stringed file contents (size=91, remaining=209)
+stringed file contents (size=100, remaining=200)
 |a(X, Y) :- b(X), c(Y), d().
 a(X, bla) :- b(X), c(X), f(X).
+a(X, X).
 b(h1).
 b(h2).
 c(h3).
