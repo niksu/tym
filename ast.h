@@ -99,4 +99,6 @@ char hash_clause(struct clause_t);
 typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
 bool eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
 
+struct term_t * copy_term(const struct term_t * const term);
+
 #endif // __TYM_AST_H__

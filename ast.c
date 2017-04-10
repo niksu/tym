@@ -603,3 +603,11 @@ test_clause(void) {
   size_t l = clause_to_str(cl, &remaining_buf_size, buf);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 }
+
+struct term_t *
+copy_term(const struct term_t * const term)
+{
+  char * ident_copy = malloc(sizeof(char) * strlen(term->identifier));
+  strcpy(ident_copy, term->identifier);
+  return mk_term(term->kind, ident_copy);
+}
