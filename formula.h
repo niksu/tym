@@ -70,6 +70,7 @@ struct var_gen_t {
 };
 
 struct var_gen_t * mk_var_gen(const char * prefix);
+struct var_gen_t * copy_var_gen(const struct var_gen_t * const);
 char * mk_new_var(struct var_gen_t *);
 
 struct valuation_t {

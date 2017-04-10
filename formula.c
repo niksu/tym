@@ -314,6 +314,17 @@ mk_var_gen(const char * prefix)
   return result;
 }
 
+struct var_gen_t *
+copy_var_gen(const struct var_gen_t * const orig)
+{
+  struct var_gen_t * result = malloc(sizeof(struct var_gen_t));
+  char * prefix_copy = malloc(sizeof(char) * strlen(orig->prefix));
+  strcpy(prefix_copy, orig->prefix);
+  result->prefix = prefix_copy;
+  result->index = orig->index;
+  return result;
+}
+
 char *
 mk_new_var(struct var_gen_t * vg)
 {
