@@ -247,7 +247,7 @@ main (int argc, char ** argv)
       char ** var_args = malloc(sizeof(char **) * preds_cursor->predicate->arity);
 
       for (int i = 0; i < preds_cursor->predicate->arity; i++) {
-        *(var_args + i) = mk_new_var(vg);
+        var_args[i] = mk_new_var(vg);
       }
 
       struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
