@@ -46,10 +46,13 @@ struct fmlas_t {
 
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
 
+struct terms_t * filter_vars(uint8_t num_terms, const struct term_t * const terms);
+
 struct fmla_t * mk_fmla_const(bool b);
 struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, char ** args);
 struct fmla_t * mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
 struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
+struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body);
 struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
 struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
 struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);

@@ -628,3 +628,32 @@ test_formula(void)
   free_fmla(test_or);
   free(buf);
 }
+
+struct terms_t *
+filter_vars(uint8_t num_terms, const struct term_t * const terms)
+{
+  struct terms_t * result = NULL;
+  for (int i = 0; i < num_terms; i++) {
+    if (VAR == terms[i].kind) {
+      struct term_t * t_copy = copy_term(&(terms[i]));
+      result = mk_term_cell(t_copy, result);
+    }
+  }
+  return result;
+}
+
+struct fmla_t *
+mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
+{
+  struct fmla_t * result = copy_fmla(body);
+  const struct terms_t * cursor = vars;
+  while (NULL != cursor) {
+    assert(VAR == cursor->term->kind);
+    struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
+    result = pre_result;
+
+    cursor = cursor->next;
+  }
+
+  return result;
+}
