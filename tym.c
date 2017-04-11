@@ -260,51 +260,59 @@ main (int argc, char ** argv)
       free_fmla(atom);
 
       break;
-    }
+    } else {
+      struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+      while (NULL != body_cursor) {
+        printf(">");
 
-    struct atom_t * head_atom = &(preds_cursor->predicate->bodies->clause->head);
-    char ** args = malloc(sizeof(char **) * head_atom->arity);
+        struct atom_t * head_atom = &(body_cursor->clause->head);
+        char ** args = malloc(sizeof(char **) * head_atom->arity);
 
-    for (int i = 0; i < head_atom->arity; i++) {
-      size_t buf_size = 20/* FIXME const */;
-      args[i] = malloc(sizeof(char) * buf_size);
-      int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
-      if (l_sub < 0) {
-        // FIXME complain
+        for (int i = 0; i < head_atom->arity; i++) {
+          size_t buf_size = 20/* FIXME const */;
+          args[i] = malloc(sizeof(char) * buf_size);
+          int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
+          if (l_sub < 0) {
+            // FIXME complain
+          }
+        }
+
+        // Abstract the atom's parameters.
+        struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
+
+        out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
+        assert(out_size > 0);
+        printf("from: %s\n", buf);
+
+        struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
+        struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
+        out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
+        assert(out_size > 0);
+        printf("to: %s\n", buf);
+
+        out_size = valuation_str(*v, &remaining_buf_size, buf);
+        if (0 == out_size) {
+          printf("  where: (no substitutions)\n");
+        } else {
+          printf("  where: %s\n", buf);
+        }
+
+        free_fmla(head_fmla);
+        free_fmla(abs_head_fmla);
+        if (NULL != *v) {
+          // i.e., the predicate isn't nullary.
+          free_valuation(*v);
+        }
+        free(v);
+
+        body_cursor = body_cursor->next;
       }
     }
 
-    // Abstract the atom's parameters.
-    struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
-
-    out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
-    assert(out_size > 0);
-    printf("from: %s\n", buf);
-
-    struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
-    struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
-    out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
-    assert(out_size > 0);
-    printf("to: %s\n", buf);
-
-    out_size = valuation_str(*v, &remaining_buf_size, buf);
-    if (0 == out_size) {
-      printf("  where: (no substitutions)\n");
-    } else {
-      printf("  where: %s\n", buf);
-    }
-
-    free_fmla(head_fmla);
-    free_fmla(abs_head_fmla);
-    if (NULL != *v) {
-      // i.e., the predicate isn't nullary.
-      free_valuation(*v);
-    }
-    free(v);
-
     preds_cursor = preds_cursor->next;
+
+    printf("\n");
   }
-  printf("\n");
 
 
   DBG("Cleaning up before exiting\n");
