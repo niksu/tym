@@ -258,8 +258,6 @@ main (int argc, char ** argv)
       printf("bodyless: %s\n", buf);
 
       free_fmla(atom);
-
-      break;
     } else {
       struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
       while (NULL != body_cursor) {
