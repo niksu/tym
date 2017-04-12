@@ -60,7 +60,7 @@ translate_body (struct clause_t * cl)
   return mk_fmla_ands(fmlas);
 }
 
-struct fmla_t *
+struct fmlas_t *
 translate_bodies (struct clauses_t * cls)
 {
   struct clauses_t * cursor = cls;
@@ -69,7 +69,30 @@ translate_bodies (struct clauses_t * cls)
     fmlas = mk_fmla_cell(translate_body(cursor->clause), fmlas);
     cursor = cursor->next;
   }
-  return mk_fmla_ors(fmlas);
+  return fmlas;
+}
+
+struct fmla_t *
+translate_valuation (struct valuation_t * v)
+{
+  struct fmlas_t * result = NULL;
+  struct valuation_t * cursor = v;
+  while (NULL != cursor) {
+    result = mk_fmla_cell(mk_fmla_atom_varargs("=", 2, v->var, v->val), result);
+    cursor = cursor->next;
+  }
+  return mk_fmla_ors(result);
+}
+
+struct fmla_t *
+abstract_vars (struct valuation_t * v, struct fmla_t * fmla)
+{
+  struct valuation_t * cursor = v;
+  while (NULL != cursor) {
+    fmla = mk_fmla_quant(v->var, fmla);
+    cursor = cursor->next;
+  }
+  return fmla;
 }
 
 int
@@ -235,11 +258,13 @@ main (int argc, char ** argv)
 
     size_t out_size;
 
-    struct fmla_t * fmla = translate_bodies(preds_cursor->predicate->bodies);
-    remaining_buf_size = BUF_SIZE;
-    out_size = fmla_str(fmla, &remaining_buf_size, buf);
-    assert(out_size > 0);
-    printf("translated: %s\n", buf);
+    struct fmlas_t * fmlas = translate_bodies(preds_cursor->predicate->bodies);
+    struct fmlas_t * fmlas_cursor = fmlas;
+
+//    remaining_buf_size = BUF_SIZE;
+//    out_size = fmla_str(fmla, &remaining_buf_size, buf);
+//    assert(out_size > 0);
+//    printf("translated: %s\n", buf);
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
@@ -260,6 +285,7 @@ main (int argc, char ** argv)
       free_fmla(atom);
     } else {
       struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+
       while (NULL != body_cursor) {
         printf(">");
 
@@ -290,6 +316,11 @@ main (int argc, char ** argv)
         assert(out_size > 0);
         printf("to: %s\n", buf);
 
+
+        struct fmla_t * valuation_fmla = translate_valuation (*v);
+        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
+        fmlas_cursor->fmla = abstract_vars(*v, fmlas_cursor->fmla);
+
         out_size = valuation_str(*v, &remaining_buf_size, buf);
         if (0 == out_size) {
           printf("  where: (no substitutions)\n");
@@ -306,6 +337,7 @@ main (int argc, char ** argv)
         free(v);
 
         body_cursor = body_cursor->next;
+        fmlas_cursor = fmlas_cursor->next;
         if (NULL == body_cursor) {
           struct var_gen_t * tmp = vg;
           vg = vg_copy;
@@ -313,6 +345,12 @@ main (int argc, char ** argv)
         }
         free_var_gen(vg_copy);
       }
+
+      struct fmla_t * fmla = mk_fmla_ors(fmlas);
+      remaining_buf_size = BUF_SIZE;
+      out_size = fmla_str(fmla, &remaining_buf_size, buf);
+      assert(out_size > 0);
+      printf("pre-result: %s\n", buf);
     }
 
     preds_cursor = preds_cursor->next;
