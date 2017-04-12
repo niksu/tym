@@ -263,6 +263,8 @@ main (int argc, char ** argv)
       while (NULL != body_cursor) {
         printf(">");
 
+        struct var_gen_t * vg_copy = copy_var_gen(vg);
+
         struct atom_t * head_atom = &(body_cursor->clause->head);
         char ** args = malloc(sizeof(char **) * head_atom->arity);
 
@@ -283,7 +285,7 @@ main (int argc, char ** argv)
         printf("from: %s\n", buf);
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
-        struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg, v);
+        struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
         out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
         printf("to: %s\n", buf);
@@ -304,6 +306,12 @@ main (int argc, char ** argv)
         free(v);
 
         body_cursor = body_cursor->next;
+        if (NULL == body_cursor) {
+          struct var_gen_t * tmp = vg;
+          vg = vg_copy;
+          vg_copy = tmp;
+        }
+        free_var_gen(vg_copy);
       }
     }
 
