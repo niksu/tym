@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define BUF_SIZE 300
+#define BUF_SIZE 1600
 
 #define VERBOSE printf
 #define ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
