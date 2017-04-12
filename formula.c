@@ -657,3 +657,14 @@ mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
 
   return result;
 }
+
+size_t
+valuation_len(const struct valuation_t * v)
+{
+  size_t l = 0;
+  while (NULL != v) {
+    l++;
+    v = v->next;
+  }
+  return l;
+}

@@ -82,6 +82,7 @@ struct valuation_t {
   struct valuation_t * next;
 };
 
+size_t valuation_len(const struct valuation_t * const v);
 size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
 
 bool fmla_is_atom(struct fmla_t * fmla);
