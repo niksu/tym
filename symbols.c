@@ -342,7 +342,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, void
 {
   adl_lookup_error_t adl_lookup_error;
   adl_add_error_t adl_add_error;
-  struct predicate_t * record;
+  struct predicate_t * record = NULL;
   bool success = atom_database_member(&clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
     // FIXME elaborate this further
