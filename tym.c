@@ -40,7 +40,7 @@ void test_formula(void);
 void test_statement(void);
 
 struct fmla_t *
-translate_atom (struct atom_t * at)
+translate_atom(struct atom_t * at)
 {
   assert(NULL != at);
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
@@ -51,7 +51,7 @@ translate_atom (struct atom_t * at)
 }
 
 struct fmla_t *
-translate_body (struct clause_t * cl)
+translate_body(struct clause_t * cl)
 {
   struct fmlas_t * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
@@ -61,7 +61,7 @@ translate_body (struct clause_t * cl)
 }
 
 struct fmlas_t *
-translate_bodies (struct clauses_t * cls)
+translate_bodies(struct clauses_t * cls)
 {
   struct clauses_t * cursor = cls;
   struct fmlas_t * fmlas = NULL;
@@ -73,7 +73,7 @@ translate_bodies (struct clauses_t * cls)
 }
 
 struct fmla_t *
-translate_valuation (struct valuation_t * const v)
+translate_valuation(struct valuation_t * const v)
 {
   struct fmlas_t * result = NULL;
   struct valuation_t * cursor = v;
@@ -85,7 +85,7 @@ translate_valuation (struct valuation_t * const v)
 }
 
 int
-main (int argc, char ** argv)
+main(int argc, char ** argv)
 {
 #ifdef TESTING
   test_clause();
