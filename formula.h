@@ -22,7 +22,7 @@ struct fmla_atom_t {
   struct term_t ** predargs;
 };
 
-enum fmla_kind_t {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_ALL, FMLA_CONST};
+enum fmla_kind_t {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST};
 
 struct fmla_quant_t {
   const char * bv;

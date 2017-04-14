@@ -83,7 +83,7 @@ mk_fmla_quant(const char * bv, struct fmla_t * body)
   struct fmla_t * body_copy = copy_fmla(body);
   result_content->bv = bv_copy;
   result_content->body = body_copy;
-  result->kind = FMLA_ALL;
+  result->kind = FMLA_EX;
   result->param.quant = result_content;
   return result;
 }
@@ -273,8 +273,8 @@ fmla_str(struct fmla_t * fmla, size_t * remaining, char * buf)
     l += fmla_str(fmla->param.args[0], remaining, buf + l);
     buf[(*remaining)--, l++] = ')';
     break;
-  case FMLA_ALL:
-    sprintf(&(buf[l]), "forall ");
+  case FMLA_EX:
+    sprintf(&(buf[l]), "exists ");
     *remaining -= strlen(&(buf[l]));
     l += strlen(&(buf[l]));
     l += fmla_quant_str(fmla->param.quant, remaining, buf + l);
@@ -473,7 +473,7 @@ free_fmla(struct fmla_t * fmla)
     free_fmla(fmla->param.args[0]);
     free(fmla->param.args);
     break;
-  case FMLA_ALL:
+  case FMLA_EX:
     free_fmla_quant(fmla->param.quant);
     break;
   default:
@@ -556,7 +556,7 @@ copy_fmla(const struct fmla_t * const fmla)
   case FMLA_NOT:
     result = mk_fmla_not(fmla->param.args[0]);
     break;
-  case FMLA_ALL:
+  case FMLA_EX:
     result = mk_fmla_quant(fmla->param.quant->bv, fmla->param.quant->body);
     break;
   default:
