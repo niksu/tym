@@ -11,7 +11,10 @@ then
   QUIET="-q"
 fi
 
-set -e
+if [ "${FAIL_EARLY}" == "1" ]
+then
+  set -e
+fi
 
 for FILE in $(ls tests/*.test)
 do
