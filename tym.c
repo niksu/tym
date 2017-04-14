@@ -43,9 +43,9 @@ struct fmla_t *
 translate_atom (struct atom_t * at)
 {
   assert(NULL != at);
-  char ** args = malloc(sizeof(char *) * at->arity);
+  struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
-    args[i] = (char *)at->args[i].identifier;
+    args[i] = copy_term(&(at->args[i]));
   }
   return mk_fmla_atom(at->predicate, at->arity, args);
 }
@@ -65,23 +65,23 @@ translate_bodies (struct clauses_t * cls)
 {
   struct clauses_t * cursor = cls;
   struct fmlas_t * fmlas = NULL;
-  while (NULL != cursor) {
-    fmlas = mk_fmla_cell(translate_body(cursor->clause), fmlas);
-    cursor = cursor->next;
+  if (NULL != cursor) {
+    fmlas = mk_fmla_cell(translate_body(cursor->clause),
+      translate_bodies(cursor->next));
   }
   return fmlas;
 }
 
 struct fmla_t *
-translate_valuation (struct valuation_t * v)
+translate_valuation (struct valuation_t * const v)
 {
   struct fmlas_t * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
-    result = mk_fmla_cell(mk_fmla_atom_varargs("=", 2, v->var, v->val), result);
+    result = mk_fmla_cell(mk_fmla_atom_varargs("=", 2, mk_term(VAR, cursor->var), cursor->val), result);
     cursor = cursor->next;
   }
-  return mk_fmla_ors(result);
+  return mk_fmla_ands(result);
 }
 
 struct fmla_t *
@@ -230,10 +230,10 @@ main (int argc, char ** argv)
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
-  struct model_t * m = mk_model(mk_universe(adb->tdb->herbrand_universe));
+  struct model_t * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
 
   remaining_buf_size = BUF_SIZE;
-  size_t l = model_str(m, &remaining_buf_size, buf);
+  size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
   // NOTE if we don't do this, remaining_buf_size will become 0 causing some
@@ -269,10 +269,10 @@ main (int argc, char ** argv)
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
 
-      char ** var_args = malloc(sizeof(char **) * preds_cursor->predicate->arity);
+      struct term_t ** var_args = malloc(sizeof(struct term_t *) * preds_cursor->predicate->arity);
 
       for (int i = 0; i < preds_cursor->predicate->arity; i++) {
-        var_args[i] = mk_new_var(vg);
+        var_args[i] = mk_term(VAR, mk_new_var(vg));
       }
 
       struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
@@ -285,6 +285,7 @@ main (int argc, char ** argv)
       free_fmla(atom);
     } else {
       struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+      struct fmla_t * abs_head_fmla;
 
       while (NULL != body_cursor) {
         printf(">");
@@ -292,15 +293,10 @@ main (int argc, char ** argv)
         struct var_gen_t * vg_copy = copy_var_gen(vg);
 
         struct atom_t * head_atom = &(body_cursor->clause->head);
-        char ** args = malloc(sizeof(char **) * head_atom->arity);
+        struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
 
         for (int i = 0; i < head_atom->arity; i++) {
-          size_t buf_size = 20/* FIXME const */;
-          args[i] = malloc(sizeof(char) * buf_size);
-          int l_sub = term_to_str(&(head_atom->args[i]), &buf_size, args[i]);
-          if (l_sub < 0) {
-            // FIXME complain
-          }
+          args[i] = copy_term(&(head_atom->args[i]));
         }
 
         // Abstract the atom's parameters.
@@ -311,15 +307,10 @@ main (int argc, char ** argv)
         printf("from: %s\n", buf);
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
-        struct fmla_t * abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
+        abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
         out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
         printf("to: %s\n", buf);
-
-
-        struct fmla_t * valuation_fmla = translate_valuation (*v);
-        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
-        fmlas_cursor->fmla = abstract_vars(*v, fmlas_cursor->fmla);
 
         out_size = valuation_str(*v, &remaining_buf_size, buf);
         if (0 == out_size) {
@@ -328,8 +319,18 @@ main (int argc, char ** argv)
           printf("  where: %s\n", buf);
         }
 
+        struct fmla_t * valuation_fmla = translate_valuation(*v);
+        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
+//        fmlas_cursor->fmla = abstract_vars(*v, fmlas_cursor->fmla); // FIXME no longer needed
+        struct terms_t * ts = filter_var_values(*v);
+        fmlas_cursor->fmla = mk_fmla_quants(ts, fmlas_cursor->fmla);
+
+        remaining_buf_size = BUF_SIZE;
+        fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
+        printf("  :|%s|\n", buf);
+
+
         free_fmla(head_fmla);
-        free_fmla(abs_head_fmla);
         if (NULL != *v) {
           // i.e., the predicate isn't nullary.
           free_valuation(*v);
@@ -351,6 +352,12 @@ main (int argc, char ** argv)
       out_size = fmla_str(fmla, &remaining_buf_size, buf);
       assert(out_size > 0);
       printf("pre-result: %s\n", buf);
+
+      struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
+      // FIXME free up the intermediate structures.
+      strengthen_model(mdl,
+          mk_stmt_pred(head->pred_name, arguments_of_atom(head), fmla));
+      free_fmla(abs_head_fmla);
     }
 
     preds_cursor = preds_cursor->next;
@@ -358,6 +365,9 @@ main (int argc, char ** argv)
     printf("\n");
   }
 
+  remaining_buf_size = BUF_SIZE;
+  l = model_str(mdl, &remaining_buf_size, buf);
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
   DBG("Cleaning up before exiting\n");
 

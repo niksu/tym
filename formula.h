@@ -19,7 +19,7 @@
 struct fmla_atom_t {
   char * pred_name;
   uint8_t arity;
-  char ** predargs;
+  struct term_t ** predargs;
 };
 
 enum fmla_kind_t {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_ALL, FMLA_CONST};
@@ -46,10 +46,8 @@ struct fmlas_t {
 
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
 
-struct terms_t * filter_vars(uint8_t num_terms, const struct term_t * const terms);
-
 struct fmla_t * mk_fmla_const(bool b);
-struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, char ** args);
+struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** args);
 struct fmla_t * mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
 struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
 struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body);
@@ -78,7 +76,7 @@ char * mk_new_var(struct var_gen_t *);
 
 struct valuation_t {
   char * var;
-  char * val;
+  struct term_t * val;
   struct valuation_t * next;
 };
 
@@ -88,6 +86,7 @@ size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
 bool fmla_is_atom(struct fmla_t * fmla);
 struct fmla_atom_t * fmla_as_atom(struct fmla_t * fmla);
 struct fmla_t * mk_abstract_vars(struct fmla_t *, struct var_gen_t *, struct valuation_t **);
+struct terms_t * arguments_of_atom(struct fmla_atom_t * fmla);
 
 void free_fmla_atom(struct fmla_atom_t *);
 void free_fmla_quant(struct fmla_quant_t *);
@@ -95,5 +94,7 @@ void free_fmla(struct fmla_t *);
 void free_fmlas(struct fmlas_t *);
 void free_var_gen(struct var_gen_t *);
 void free_valuation(struct valuation_t *);
+
+struct terms_t * filter_var_values(struct valuation_t * const v);
 
 #endif /* __TYM_FORMULA_H__ */

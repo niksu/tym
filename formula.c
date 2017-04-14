@@ -28,7 +28,7 @@ mk_fmla_const(bool b)
 }
 
 struct fmla_t *
-mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
+mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
   assert(NULL != result_content);
@@ -39,10 +39,9 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
   char * pred_name_copy = malloc(sizeof(char) * strlen(pred_name));
   assert(NULL != pred_name_copy);
   strcpy(pred_name_copy, pred_name);
-  char ** predargs_copy = malloc(sizeof(char *) * arity);
+  struct term_t ** predargs_copy = malloc(sizeof(struct term_t *) * arity);
   for (int i = 0; i < arity; i++) {
-    predargs_copy[i] = malloc(sizeof(char) * strlen(predargs[i]));
-    strcpy(predargs_copy[i], predargs[i]);
+    predargs_copy[i] = copy_term(predargs[i]);
   }
 
   if (0 == arity) {
@@ -62,11 +61,11 @@ mk_fmla_atom(char * pred_name, uint8_t arity, char ** predargs)
 struct fmla_t *
 mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 {
-  char ** args = malloc(sizeof(char *) * arity);
+  struct term_t ** args = malloc(sizeof(struct term_t *) * arity);
   va_list varargs;
   va_start(varargs, arity);
   for (int i = 0; i < arity; i++) {
-    args[i] = va_arg(varargs, char *);
+    args[i] = va_arg(varargs, struct term_t *);
   }
   va_end(varargs);
   return mk_fmla_atom(pred_name, arity, args);
@@ -187,10 +186,7 @@ fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf)
 
   for (int i = 0; i < at->arity; i++) {
     buf[(*remaining)--, l++] = ' ';
-    char * dst = buf + l;
-    char * src = at->predargs[i];
-    // FIXME inline expressions above into expression below?
-    size_t l_sub = my_strcpy(dst, src, remaining);
+    size_t l_sub = term_to_str(at->predargs[i], remaining, buf + l);
     // FIXME check and react to errors.
     l += l_sub;
   }
@@ -364,6 +360,7 @@ mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t *
   assert(NULL != atom);
 
   char ** var_args = malloc(sizeof(char *) * atom->arity);
+  struct term_t ** var_args_T = malloc(sizeof(struct term_t *) * atom->arity);
   *v = NULL;
 
   struct valuation_t * v_cursor;
@@ -377,16 +374,16 @@ mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t *
       v_cursor = v_cursor->next;
     }
 
-    v_cursor->val = malloc(strlen(atom->predargs[i]) + 1);
-    strcpy(v_cursor->val, atom->predargs[i]);
+    v_cursor->val = copy_term(atom->predargs[i]);
 
     v_cursor->var = mk_new_var(vg);
     var_args[i] = v_cursor->var;
+    var_args_T[i] = mk_term(VAR, v_cursor->var);
 
     v_cursor->next = NULL;
   }
 
-  return mk_fmla_atom(atom->pred_name, atom->arity, var_args);
+  return mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
 }
 
 
@@ -402,7 +399,8 @@ valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
     // FIXME check and react to errors.
     l += l_sub;
     buf[(*remaining)--, l++] = '=';
-    l_sub = my_strcpy(buf + l, v_cursor->val, remaining);
+
+    l_sub = term_to_str(v_cursor->val, remaining, buf + l);
     // FIXME check and react to errors.
     l += l_sub;
 
@@ -572,20 +570,18 @@ copy_fmla(const struct fmla_t * const fmla)
 void
 test_formula(void)
 {
-  char ** args = (char **)malloc(sizeof(char **) * 2);
-  *args = (char *)malloc(sizeof(char *) * 10);
-  *(args + 1) = (char *)malloc(sizeof(char *) * 10);
-  strcpy(*args, "arg0");
-  strcpy(*(args + 1), "arg1");
+  struct term_t ** args = malloc(sizeof(struct term_t *) * 2);
+  *args = mk_term(CONST, "arg0");
+  *(args + 1) = mk_term(CONST, "arg1");
 
   for (int i = 0; i < 2; i++) {
-    printf("  :%s\n", *(args + i));
+    printf("  :%s\n", args[i]->identifier);
   }
 
   struct fmla_t * test_atom = mk_fmla_atom("atom", 2, args);
 
   for (int i = 0; i < 2; i++) {
-    printf("  ;%s\n", test_atom->param.atom->predargs[i]);
+    printf("  ;%s\n", test_atom->param.atom->predargs[i]->identifier);
   }
 
   struct fmla_t * test_not = mk_fmla_not(test_atom);
@@ -630,14 +626,16 @@ test_formula(void)
 }
 
 struct terms_t *
-filter_vars(uint8_t num_terms, const struct term_t * const terms)
+filter_var_values(struct valuation_t * const v)
 {
   struct terms_t * result = NULL;
-  for (int i = 0; i < num_terms; i++) {
-    if (VAR == terms[i].kind) {
-      struct term_t * t_copy = copy_term(&(terms[i]));
+  struct valuation_t * cursor = v;
+  while (NULL != cursor) {
+    if (VAR == cursor->val->kind) {
+      struct term_t * t_copy = copy_term(cursor->val);
       result = mk_term_cell(t_copy, result);
     }
+    cursor = cursor->next;
   }
   return result;
 }
@@ -667,4 +665,14 @@ valuation_len(const struct valuation_t * v)
     v = v->next;
   }
   return l;
+}
+
+struct terms_t *
+arguments_of_atom(struct fmla_atom_t * fmla)
+{
+  struct terms_t * result = NULL;
+  for (int i = fmla->arity - 1; i >= 0; i--) {
+    result = mk_term_cell(copy_term(fmla->predargs[i]), result);
+  }
+  return result;
 }
