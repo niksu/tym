@@ -84,17 +84,6 @@ translate_valuation (struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-struct fmla_t *
-abstract_vars (struct valuation_t * v, struct fmla_t * fmla)
-{
-  struct valuation_t * cursor = v;
-  while (NULL != cursor) {
-    fmla = mk_fmla_quant(v->var, fmla);
-    cursor = cursor->next;
-  }
-  return fmla;
-}
-
 int
 main (int argc, char ** argv)
 {
@@ -321,7 +310,6 @@ main (int argc, char ** argv)
 
         struct fmla_t * valuation_fmla = translate_valuation(*v);
         fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
-//        fmlas_cursor->fmla = abstract_vars(*v, fmlas_cursor->fmla); // FIXME no longer needed
         struct terms_t * ts = filter_var_values(*v);
         fmlas_cursor->fmla = mk_fmla_quants(ts, fmlas_cursor->fmla);
 
