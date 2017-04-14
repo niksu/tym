@@ -237,23 +237,12 @@ main(int argc, char ** argv)
   struct var_gen_t * vg = mk_var_gen(vK);
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
-    //predicate_str(preds_cursor->predicate, &remaining_buf_size, buf);
-    //printf("%s ", buf);
-//array of formulas
-//  universally quantified
-//  head (with variables as terms) "if" disjunction of bodies (conjunctions) (with conjoined variable evaluations)
-
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 
     size_t out_size;
 
     struct fmlas_t * fmlas = translate_bodies(preds_cursor->predicate->bodies);
     struct fmlas_t * fmlas_cursor = fmlas;
-
-//    remaining_buf_size = BUF_SIZE;
-//    out_size = fmla_str(fmla, &remaining_buf_size, buf);
-//    assert(out_size > 0);
-//    printf("translated: %s\n", buf);
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
