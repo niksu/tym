@@ -158,9 +158,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
     *remaining -= strlen(&(buf[l]));
     l += strlen(&(buf[l]));
 
-    buf[(*remaining)--, l++] = '(';
     l += fmla_str(stmt->param.axiom, remaining, buf + l);
-    buf[(*remaining)--, l++] = ')';
 
     buf[(*remaining)--, l++] = ')';
     break;
@@ -209,9 +207,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      buf[(*remaining)--, l++] = '(';
       l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
-      buf[(*remaining)--, l++] = ')';
 
       buf[(*remaining)--, l++] = ')';
     }

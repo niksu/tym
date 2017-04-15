@@ -190,6 +190,7 @@ fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf)
     // FIXME check and react to errors.
     l += l_sub;
   }
+
   buf[l] = '\0';
   return l;
 }
@@ -212,10 +213,8 @@ fmla_quant_str(struct fmla_quant_t * quant, size_t * remaining, char * buf)
   buf[(*remaining)--, l++] = ')';
   buf[(*remaining)--, l++] = ' ';
 
-  buf[(*remaining)--, l++] = '(';
   // FIXME check and react to errors.
   l += fmla_str(quant->body, remaining, buf + l);
-  buf[(*remaining)--, l++] = ')';
 
   buf[l] = '\0';
   return l;
@@ -226,11 +225,8 @@ fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, size_t * remaini
 {
   size_t l = 0;
   l += fmla_str(fmlaL, remaining, buf + l);
-  buf[(*remaining)--, l++] = ')';
   buf[(*remaining)--, l++] = ' ';
-  buf[(*remaining)--, l++] = '(';
   l += fmla_str(fmlaR, remaining, buf + l);
-  buf[(*remaining)--, l++] = ')';
 
   buf[l] = '\0';
   return l;
@@ -241,47 +237,55 @@ fmla_str(struct fmla_t * fmla, size_t * remaining, char * buf)
 {
   size_t l = 0;
 
+  const size_t fmla_sz = fmla_size(fmla);
+  if (fmla_sz > 1) {
+    buf[(*remaining)--, l++] = '(';
+  }
+
   switch (fmla->kind) {
   case FMLA_CONST:
     if (fmla->param.const_value) {
-      sprintf(&(buf[l]), "true");
+      sprintf(buf + l, "true");
     } else {
-      sprintf(&(buf[l]), "false");
+      sprintf(buf + l, "false");
     }
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
+    *remaining -= strlen(buf + l);
+    l += strlen(buf + l);
     break;
   case FMLA_ATOM:
-    l = fmla_atom_str(fmla->param.atom, remaining, buf + l);
+    l += fmla_atom_str(fmla->param.atom, remaining, buf + l);
     break;
   case FMLA_AND:
-    sprintf(&(buf[l]), "and (");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
+    sprintf(buf + l, "and ");
+    *remaining -= strlen(buf + l);
+    l += strlen(buf + l);
     l += fmla_junction_str(fmla->param.args[0], fmla->param.args[1], remaining, buf + l);
     break;
   case FMLA_OR:
-    sprintf(&(buf[l]), "or (");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
+    sprintf(buf + l, "or ");
+    *remaining -= strlen(buf + l);
+    l += strlen(buf + l);
     l += fmla_junction_str(fmla->param.args[0], fmla->param.args[1], remaining, buf + l);
     break;
   case FMLA_NOT:
-    sprintf(&(buf[l]), "not (");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
+    sprintf(buf + l, "not ");
+    *remaining -= strlen(buf + l);
+    l += strlen(buf + l);
     l += fmla_str(fmla->param.args[0], remaining, buf + l);
-    buf[(*remaining)--, l++] = ')';
     break;
   case FMLA_EX:
-    sprintf(&(buf[l]), "exists ");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
+    sprintf(buf + l, "exists ");
+    *remaining -= strlen(buf + l);
+    l += strlen(buf + l);
     l += fmla_quant_str(fmla->param.quant, remaining, buf + l);
     break;
   default:
     // FIXME fail
     break;
+  }
+
+  if (fmla_sz > 1) {
+    buf[(*remaining)--, l++] = ')';
   }
 
   buf[l] = '\0';
@@ -674,5 +678,36 @@ arguments_of_atom(struct fmla_atom_t * fmla)
   for (int i = fmla->arity - 1; i >= 0; i--) {
     result = mk_term_cell(copy_term(fmla->predargs[i]), result);
   }
+  return result;
+}
+
+size_t
+fmla_size(const struct fmla_t * const fmla)
+{
+  size_t result = 0;
+  switch (fmla->kind) {
+  case FMLA_CONST:
+    result = 1;
+    break;
+  case FMLA_ATOM:
+    result = 1 + fmla->param.atom->arity;
+    break;
+  case FMLA_AND:
+    result = 1 + fmla_size(fmla->param.args[0]) + fmla_size(fmla->param.args[1]);
+    break;
+  case FMLA_OR:
+    result = 1 + fmla_size(fmla->param.args[0]) + fmla_size(fmla->param.args[1]);
+    break;
+  case FMLA_NOT:
+    result = 1 + fmla_size(fmla->param.args[0]);
+    break;
+  case FMLA_EX:
+    result = 1 + fmla_size(fmla->param.quant->body);
+    break;
+  default:
+    // FIXME fail
+    break;
+  }
+
   return result;
 }

@@ -97,4 +97,6 @@ void free_valuation(struct valuation_t *);
 
 struct terms_t * filter_var_values(struct valuation_t * const v);
 
+size_t fmla_size(const struct fmla_t * const);
+
 #endif /* __TYM_FORMULA_H__ */
