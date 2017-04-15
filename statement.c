@@ -99,7 +99,7 @@ mk_stmt_axiom(struct fmla_t * axiom)
 }
 
 struct stmt_t *
-mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body)
+mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_t * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));

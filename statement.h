@@ -37,7 +37,7 @@ size_t universe_str(struct universe_t *, size_t * remaining, char * buf);
 void free_universe(struct universe_t *);
 
 struct stmt_t * mk_stmt_axiom(struct fmla_t * axiom);
-struct stmt_t * mk_stmt_pred(char * pred_name, struct terms_t * params, struct fmla_t * body);
+struct stmt_t * mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_t * body);
 struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *);
 size_t stmt_str(struct stmt_t *, size_t * remaining, char * buf);
 void free_stmt(struct stmt_t *);
