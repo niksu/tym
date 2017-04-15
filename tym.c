@@ -179,9 +179,14 @@ translate(void) // FIXME pass parameters,
         }
 
         struct fmla_t * valuation_fmla = translate_valuation(*v);
-        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
+        struct fmla_t * fmla = fmlas_cursor->fmla;
+        fmlas_cursor->fmla = mk_fmla_and(fmla, valuation_fmla);
+        free_fmla(fmla);
+        free_fmla(valuation_fmla);
         struct terms_t * ts = filter_var_values(*v);
-        fmlas_cursor->fmla = mk_fmla_quants(ts, fmlas_cursor->fmla);
+        fmla = fmlas_cursor->fmla;
+        fmlas_cursor->fmla = mk_fmla_quants(ts, fmla);
+        free_fmla(fmla);
 
         remaining_buf_size = BUF_SIZE;
         fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
@@ -212,7 +217,6 @@ translate(void) // FIXME pass parameters,
       printf("pre-result: %s\n", buf);
 
       struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
-      // FIXME free up the intermediate structures.
       strengthen_model(mdl,
           mk_stmt_pred(head->pred_name, arguments_of_atom(head), fmla));
       free_fmla(abs_head_fmla);
