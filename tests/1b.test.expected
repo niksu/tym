@@ -2,6 +2,6 @@ input contents |%hello
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=17, remaining=283)
+stringed file contents (size=17, remaining=1583)
 |c() :- a().
 a(b).|
