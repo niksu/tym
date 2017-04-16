@@ -84,9 +84,8 @@ translate_valuation(struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-void
-translate(void) // FIXME pass parameters,
-                //       and return the model.
+struct model_t *
+translate(struct var_gen_t * vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -113,9 +112,6 @@ translate(void) // FIXME pass parameters,
   remaining_buf_size = BUF_SIZE;
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
-  char * vK = malloc(sizeof(char) * 2);
-  strcpy(vK, "V");
-  struct var_gen_t * vg = mk_var_gen(vK);
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
@@ -227,11 +223,9 @@ translate(void) // FIXME pass parameters,
     printf("\n");
   }
 
-  remaining_buf_size = BUF_SIZE;
-  l = model_str(mdl, &remaining_buf_size, buf);
-  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+  free(buf);
 
-  free_var_gen(vg);
+  return mdl;
 }
 
 int
@@ -353,7 +347,17 @@ main(int argc, char ** argv)
     ERR("Input file (%s) is devoid of clauses.\n", params.source_file);
   }
 
-  translate();
+  char * vK = malloc(sizeof(char) * 2);
+  strcpy(vK, "V");
+  struct var_gen_t * vg = mk_var_gen(vK);
+  struct model_t * mdl = translate(vg);
+
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  size_t l = model_str(mdl, &remaining_buf_size, buf);
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+  free_var_gen(vg);
+  free_model(mdl);
 
   DBG("Cleaning up before exiting\n");
 
