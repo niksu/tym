@@ -136,7 +136,9 @@ mk_stmt_const(char * const_name, struct universe_t * uni)
   struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2, const_name, uni->element[i]);
+    struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2,
+      mk_term(CONST, const_name),
+      mk_term(CONST, uni->element[i]));
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
