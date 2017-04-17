@@ -137,6 +137,9 @@ translate(struct var_gen_t * vg)
       assert(out_size > 0);
       printf("bodyless: %s\n", buf);
 
+      strengthen_model(mdl,
+          mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+
       free_fmla(atom);
     } else {
       struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
