@@ -305,19 +305,19 @@ mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next)
   return fs;
 }
 
-struct var_gen_t *
-mk_var_gen(const char * prefix)
+struct sym_gen_t *
+mk_sym_gen(const char * prefix)
 {
-  struct var_gen_t * result = malloc(sizeof(struct var_gen_t));
+  struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
   result->prefix = prefix;
   result->index = 0;
   return result;
 }
 
-struct var_gen_t *
-copy_var_gen(const struct var_gen_t * const orig)
+struct sym_gen_t *
+copy_sym_gen(const struct sym_gen_t * const orig)
 {
-  struct var_gen_t * result = malloc(sizeof(struct var_gen_t));
+  struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
   char * prefix_copy = malloc(sizeof(char) * strlen(orig->prefix));
   strcpy(prefix_copy, orig->prefix);
   result->prefix = prefix_copy;
@@ -326,7 +326,7 @@ copy_var_gen(const struct var_gen_t * const orig)
 }
 
 char *
-mk_new_var(struct var_gen_t * vg)
+mk_new_var(struct sym_gen_t * vg)
 {
   size_t i = strlen(vg->prefix);
   char * result = malloc(i + 1 + MAX_VAR_WIDTH);
@@ -358,7 +358,7 @@ fmla_as_atom(struct fmla_t * fmla)
 }
 
 struct fmla_t *
-mk_abstract_vars(struct fmla_t * at, struct var_gen_t * vg, struct valuation_t ** v)
+mk_abstract_vars(struct fmla_t * at, struct sym_gen_t * vg, struct valuation_t ** v)
 {
   struct fmla_atom_t * atom = fmla_as_atom(at);
   assert(NULL != atom);
@@ -499,7 +499,7 @@ free_fmlas(struct fmlas_t * fmlas)
 }
 
 void
-free_var_gen(struct var_gen_t * vg)
+free_sym_gen(struct sym_gen_t * vg)
 {
   assert(NULL != vg->prefix);
   free((char *)vg->prefix);

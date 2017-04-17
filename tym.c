@@ -85,7 +85,7 @@ translate_valuation(struct valuation_t * const v)
 }
 
 struct model_t *
-translate(struct var_gen_t * vg)
+translate(struct sym_gen_t * vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -148,7 +148,7 @@ translate(struct var_gen_t * vg)
       while (NULL != body_cursor) {
         printf(">");
 
-        struct var_gen_t * vg_copy = copy_var_gen(vg);
+        struct sym_gen_t * vg_copy = copy_sym_gen(vg);
 
         struct atom_t * head_atom = &(body_cursor->clause->head);
         struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
@@ -202,11 +202,11 @@ translate(struct var_gen_t * vg)
         body_cursor = body_cursor->next;
         fmlas_cursor = fmlas_cursor->next;
         if (NULL == body_cursor) {
-          struct var_gen_t * tmp = vg;
+          struct sym_gen_t * tmp = vg;
           vg = vg_copy;
           vg_copy = tmp;
         }
-        free_var_gen(vg_copy);
+        free_sym_gen(vg_copy);
       }
 
       struct fmla_t * fmla = mk_fmla_ors(fmlas);
@@ -352,14 +352,14 @@ main(int argc, char ** argv)
 
   char * vK = malloc(sizeof(char) * 2);
   strcpy(vK, "V");
-  struct var_gen_t * vg = mk_var_gen(vK);
+  struct sym_gen_t * vg = mk_sym_gen(vK);
   struct model_t * mdl = translate(vg);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-  free_var_gen(vg);
+  free_sym_gen(vg);
   free_model(mdl);
 
   DBG("Cleaning up before exiting\n");

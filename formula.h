@@ -65,14 +65,14 @@ size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
 size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
 size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);
 
-struct var_gen_t {
+struct sym_gen_t {
   const char * prefix;
   size_t index;
 };
 
-struct var_gen_t * mk_var_gen(const char * prefix);
-struct var_gen_t * copy_var_gen(const struct var_gen_t * const);
-char * mk_new_var(struct var_gen_t *);
+struct sym_gen_t * mk_sym_gen(const char * prefix);
+struct sym_gen_t * copy_sym_gen(const struct sym_gen_t * const);
+char * mk_new_var(struct sym_gen_t *);
 
 struct valuation_t {
   char * var;
@@ -85,14 +85,14 @@ size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
 
 bool fmla_is_atom(struct fmla_t * fmla);
 struct fmla_atom_t * fmla_as_atom(struct fmla_t * fmla);
-struct fmla_t * mk_abstract_vars(struct fmla_t *, struct var_gen_t *, struct valuation_t **);
+struct fmla_t * mk_abstract_vars(struct fmla_t *, struct sym_gen_t *, struct valuation_t **);
 struct terms_t * arguments_of_atom(struct fmla_atom_t * fmla);
 
 void free_fmla_atom(struct fmla_atom_t *);
 void free_fmla_quant(struct fmla_quant_t *);
 void free_fmla(struct fmla_t *);
 void free_fmlas(struct fmlas_t *);
-void free_var_gen(struct var_gen_t *);
+void free_sym_gen(struct sym_gen_t *);
 void free_valuation(struct valuation_t *);
 
 struct terms_t * filter_var_values(struct valuation_t * const v);
