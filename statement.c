@@ -134,8 +134,11 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 
   char * const_name_copy = malloc(sizeof(char) * strlen(const_name));
   strcpy(const_name_copy, const_name);
-  sub_result->const_name = const_name_copy;
-  sub_result->params = NULL;
+  *sub_result = (struct stmt_const_t)
+    {.const_name = const_name_copy,
+     .params = NULL,
+     .body = NULL,
+     .ty = ty};
 
   struct fmlas_t * fmlas = NULL;
 
@@ -176,7 +179,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
       // We're dealing with a nullary constant.
       sprintf(&(buf[l]), "(declare-const %s %s)\n",
           stmt->param.const_def->const_name,
-          universe_ty);
+          stmt->param.const_def->ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
@@ -210,7 +213,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
         }
       }
 
-      sprintf(&(buf[l]), ") %s\n  ", bool_ty);
+      sprintf(&(buf[l]), ") %s\n  ", stmt->param.const_def->ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
