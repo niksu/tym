@@ -110,9 +110,11 @@ mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_
   strcpy(const_name_copy, pred_name);
   sub_result->const_name = const_name_copy;
 
-  sub_result->params = params;
-  sub_result->body = body;
-  sub_result->ty = &bool_ty;
+  *sub_result = (struct stmt_const_t)
+      {.const_name = const_name_copy,
+       .params = params,
+       .body = body,
+       .ty = &bool_ty};
 
   result->kind = STMT_CONST_DEF;
   result->param.const_def = sub_result;
