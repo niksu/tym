@@ -16,15 +16,14 @@ struct universe_t {
   char ** element;
 };
 
-static char bool_ty[] = "Bool";
-static char universe_ty[] = "Universe";
+static const char * const bool_ty = "Bool";
+static const char * const universe_ty = "Universe";
 
 struct stmt_const_t {
   const char * const_name;
   struct terms_t * params;
   struct fmla_t * body;
-//  const char * const ty; FIXME ideally it should be like this
-  char * ty;
+  const char * const ty;
 };
 
 enum stmt_kind_t {STMT_AXIOM, STMT_CONST_DEF};
