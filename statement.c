@@ -210,7 +210,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
         }
       }
 
-      sprintf(&(buf[l]), ") Bool\n  ");
+      sprintf(&(buf[l]), ") %s\n  ", bool_ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
