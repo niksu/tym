@@ -299,7 +299,7 @@ mk_model(struct universe_t * uni)
 }
 
 size_t
-model_str(struct model_t * m, size_t * remaining, char * buf)
+model_str(struct model_t * mdl, size_t * remaining, char * buf)
 {
   size_t l = 0;
 
@@ -307,24 +307,24 @@ model_str(struct model_t * m, size_t * remaining, char * buf)
   *remaining -= strlen(&(buf[l]));
   l += strlen(&(buf[l]));
 
-  l += universe_str(m->universe, remaining, buf + l);
-  l += stmts_str(m->stmts, remaining, buf + l);
+  l += universe_str(mdl->universe, remaining, buf + l);
+  l += stmts_str(mdl->stmts, remaining, buf + l);
   buf[l] = '\0';
   return l;
 }
 
 void
-free_model(struct model_t * m)
+free_model(struct model_t * mdl)
 {
-  free_universe(m->universe);
-  free_stmts(m->stmts);
-  free(m);
+  free_universe(mdl->universe);
+  free_stmts(mdl->stmts);
+  free(mdl);
 }
 
 void
-strengthen_model(struct model_t * m, struct stmt_t * stmt)
+strengthen_model(struct model_t * mdl, struct stmt_t * stmt)
 {
-  m->stmts = mk_stmt_cell(stmt, m->stmts);
+  mdl->stmts = mk_stmt_cell(stmt, mdl->stmts);
 }
 
 void
@@ -335,7 +335,7 @@ test_statement()
   struct terms_t * terms = mk_term_cell(aT, NULL);
   terms = mk_term_cell(bT, terms);
 
-  struct model_t * m = mk_model(mk_universe(terms));
+  struct model_t * mdl = mk_model(mk_universe(terms));
 
   struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
   char * vX = malloc(sizeof(char) * 2);
@@ -345,17 +345,17 @@ test_statement()
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
   struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
-  struct stmt_t * s3S = mk_stmt_const("x", m->universe, (const char * const)&universe_ty);
+  struct stmt_t * s3S = mk_stmt_const("x", mdl->universe, (const char * const)&universe_ty);
 
-  strengthen_model(m, s1S);
-  strengthen_model(m, s2S);
-  strengthen_model(m, s3S);
+  strengthen_model(mdl, s1S);
+  strengthen_model(mdl, s2S);
+  strengthen_model(mdl, s3S);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
-  size_t l = model_str(m, &remaining_buf_size, buf);
+  size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
-  free_model(m);
+  free_model(mdl);
   free(buf);
 }
