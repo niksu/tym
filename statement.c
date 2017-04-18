@@ -158,20 +158,18 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 }
 
 size_t
-stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf, bool decls_not_fmlas)
+stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 {
   size_t l = 0;
   switch (stmt->kind) {
   case STMT_AXIOM:
-    if (!decls_not_fmlas) {
-      sprintf(&(buf[l]), "(assert ");
-      *remaining -= strlen(&(buf[l]));
-      l += strlen(&(buf[l]));
+    sprintf(&(buf[l]), "(assert ");
+    *remaining -= strlen(&(buf[l]));
+    l += strlen(&(buf[l]));
 
-      l += fmla_str(stmt->param.axiom, remaining, buf + l);
+    l += fmla_str(stmt->param.axiom, remaining, buf + l);
 
-      buf[(*remaining)--, l++] = ')';
-    }
+    buf[(*remaining)--, l++] = ')';
     break;
 
   case STMT_CONST_DEF:
@@ -179,52 +177,48 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf, bool decls_not_fm
 
     if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
       // We're dealing with a nullary constant.
-      if (decls_not_fmlas) {
-        sprintf(&(buf[l]), "(declare-const %s %s)\n",
-            stmt->param.const_def->const_name,
-            stmt->param.const_def->ty);
-        *remaining -= strlen(&(buf[l]));
-        l += strlen(&(buf[l]));
-      } else {
-        sprintf(&(buf[l]), "(assert ");
-        *remaining -= strlen(&(buf[l]));
-        l += strlen(&(buf[l]));
+      sprintf(&(buf[l]), "(declare-const %s %s)\n",
+          stmt->param.const_def->const_name,
+          stmt->param.const_def->ty);
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
 
-        l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
+      sprintf(&(buf[l]), "(assert ");
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
 
-        buf[(*remaining)--, l++] = ')';
-      }
+      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
+
+      buf[(*remaining)--, l++] = ')';
     } else {
-      if (!decls_not_fmlas) {
-        sprintf(&(buf[l]), "(define-fun %s (",
-            stmt->param.const_def->const_name);
+      sprintf(&(buf[l]), "(define-fun %s (",
+          stmt->param.const_def->const_name);
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
+
+      struct terms_t * params_cursor = stmt->param.const_def->params;
+      while (NULL != params_cursor) {
+        buf[(*remaining)--, l++] = '(';
+
+        l += term_to_str(params_cursor->term, remaining, buf + l);
+
+        sprintf(&(buf[l]), " %s)", universe_ty);
         *remaining -= strlen(&(buf[l]));
         l += strlen(&(buf[l]));
 
-        struct terms_t * params_cursor = stmt->param.const_def->params;
-        while (NULL != params_cursor) {
-          buf[(*remaining)--, l++] = '(';
-
-          l += term_to_str(params_cursor->term, remaining, buf + l);
-
-          sprintf(&(buf[l]), " %s)", universe_ty);
-          *remaining -= strlen(&(buf[l]));
-          l += strlen(&(buf[l]));
-
-          params_cursor = params_cursor->next;
-          if (NULL != params_cursor) {
-            buf[(*remaining)--, l++] = ' ';
-          }
+        params_cursor = params_cursor->next;
+        if (NULL != params_cursor) {
+          buf[(*remaining)--, l++] = ' ';
         }
-
-        sprintf(&(buf[l]), ") %s\n  ", stmt->param.const_def->ty);
-        *remaining -= strlen(&(buf[l]));
-        l += strlen(&(buf[l]));
-
-        l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
-
-        buf[(*remaining)--, l++] = ')';
       }
+
+      sprintf(&(buf[l]), ") %s\n  ", stmt->param.const_def->ty);
+      *remaining -= strlen(&(buf[l]));
+      l += strlen(&(buf[l]));
+
+      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
+
+      buf[(*remaining)--, l++] = ')';
     }
     break;
 
@@ -272,12 +266,12 @@ mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next)
 }
 
 size_t
-stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf, bool decls_not_fmlas)
+stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf)
 {
   size_t l = 0;
   struct stmts_t * cursor = stmts;
   while (NULL != cursor) {
-    l += stmt_str(cursor->stmt, remaining, buf + l, decls_not_fmlas);
+    l += stmt_str(cursor->stmt, remaining, buf + l);
     buf[(*remaining)--, l++] = '\n';
     cursor = cursor->next;
   }
@@ -314,8 +308,7 @@ model_str(struct model_t * mdl, size_t * remaining, char * buf)
   l += strlen(&(buf[l]));
 
   l += universe_str(mdl->universe, remaining, buf + l);
-  l += stmts_str(mdl->stmts, remaining, buf + l, true);
-  l += stmts_str(mdl->stmts, remaining, buf + l, false);
+  l += stmts_str(mdl->stmts, remaining, buf + l);
   buf[l] = '\0';
   return l;
 }
