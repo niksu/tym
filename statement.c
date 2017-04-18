@@ -183,13 +183,12 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      sprintf(&(buf[l]), "(assert (");
+      sprintf(&(buf[l]), "(assert ");
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
       l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
 
-      buf[(*remaining)--, l++] = ')';
       buf[(*remaining)--, l++] = ')';
     } else {
       sprintf(&(buf[l]), "(define-fun %s (",
