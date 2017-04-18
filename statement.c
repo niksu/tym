@@ -50,8 +50,9 @@ universe_str(struct universe_t * uni, size_t * remaining, char * buf)
   size_t l = 0;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    sprintf(&(buf[l]), "(declare-const %s Universe)\n",
-        uni->element[i]);
+    sprintf(&(buf[l]), "(declare-const %s %s)\n",
+        uni->element[i],
+        universe_ty);
     *remaining -= strlen(&(buf[l]));
     l += strlen(&(buf[l]));
   }
@@ -173,8 +174,9 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 
     if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
       // We're dealing with a nullary constant.
-      sprintf(&(buf[l]), "(declare-const %s Universe)\n",
-          stmt->param.const_def->const_name);
+      sprintf(&(buf[l]), "(declare-const %s %s)\n",
+          stmt->param.const_def->const_name,
+          universe_ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
@@ -198,7 +200,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 
         l += term_to_str(params_cursor->term, remaining, buf + l);
 
-        sprintf(&(buf[l]), " Universe)");
+        sprintf(&(buf[l]), " %s)", universe_ty);
         *remaining -= strlen(&(buf[l]));
         l += strlen(&(buf[l]));
 
@@ -299,7 +301,7 @@ model_str(struct model_t * m, size_t * remaining, char * buf)
 {
   size_t l = 0;
 
-  sprintf(&(buf[l]), "(declare-sort Universe 0)\n");
+  sprintf(&(buf[l]), "(declare-sort %s 0)\n", universe_ty);
   *remaining -= strlen(&(buf[l]));
   l += strlen(&(buf[l]));
 
