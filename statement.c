@@ -112,6 +112,7 @@ mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_
 
   sub_result->params = params;
   sub_result->body = body;
+  sub_result->ty = &bool_ty;
 
   result->kind = STMT_CONST_DEF;
   result->param.const_def = sub_result;
@@ -119,7 +120,7 @@ mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_
 }
 
 struct stmt_t *
-mk_stmt_const(char * const_name, struct universe_t * uni)
+mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -168,7 +169,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
   case STMT_CONST_DEF:
     // Check arity, and use define-fun or declare-const as appropriate.
 
-    if (NULL == stmt->param.const_def->params) {
+    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == &universe_ty) {
       // We're dealing with a nullary constant.
       sprintf(&(buf[l]), "(declare-const %s Universe)\n",
           stmt->param.const_def->const_name);
@@ -338,7 +339,7 @@ test_statement()
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
   struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
-  struct stmt_t * s3S = mk_stmt_const("x", m->universe);
+  struct stmt_t * s3S = mk_stmt_const("x", m->universe, (const char * const)&universe_ty);
 
   strengthen_model(m, s1S);
   strengthen_model(m, s2S);

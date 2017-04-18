@@ -16,10 +16,15 @@ struct universe_t {
   char ** element;
 };
 
+static char bool_ty[] = "Bool";
+static char universe_ty[] = "Universe";
+
 struct stmt_const_t {
   const char * const_name;
   struct terms_t * params;
   struct fmla_t * body;
+//  const char * const ty; FIXME ideally it should be like this
+  char * ty;
 };
 
 enum stmt_kind_t {STMT_AXIOM, STMT_CONST_DEF};
@@ -38,7 +43,7 @@ void free_universe(struct universe_t *);
 
 struct stmt_t * mk_stmt_axiom(struct fmla_t * axiom);
 struct stmt_t * mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_t * body);
-struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *);
+struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, const char * const ty);
 size_t stmt_str(struct stmt_t *, size_t * remaining, char * buf);
 void free_stmt(struct stmt_t *);
 
