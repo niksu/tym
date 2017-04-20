@@ -35,9 +35,11 @@ struct param_t params = {
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
-void test_clause(void);
-void test_formula(void);
-void test_statement(void);
+#ifdef TESTING
+  void test_clause(void);
+  void test_formula(void);
+  void test_statement(void);
+#endif
 
 struct fmla_t *
 translate_atom(struct atom_t * at)
