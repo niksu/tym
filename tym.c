@@ -85,19 +85,16 @@ translate_valuation(struct valuation_t * const v)
 }
 
 struct fmla_t *
-translate_query_fmla_atom(struct model_t * mdl, const struct fmla_atom_t * at)
+translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at)
 {
-  char tmp[] = "c_"; // FIXME naming!  
-
   struct fmla_t * result = NULL;
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
     if (VAR == at->predargs[i]->kind) {
-      char * tmp_ = malloc(sizeof(tmp));
-      strcpy(tmp_, tmp);
-      args[i] = mk_term(CONST, tmp_);
+      char * placeholder = mk_new_var(cg);
+      args[i] = mk_term(CONST, placeholder);
 
-      struct stmt_t * stmt = mk_stmt_const(tmp, mdl->universe, universe_ty);
+      struct stmt_t * stmt = mk_stmt_const(placeholder, mdl->universe, universe_ty);
       strengthen_model(mdl, stmt);
     } else {
       args[i] = copy_term(at->predargs[i]);
@@ -107,10 +104,10 @@ translate_query_fmla_atom(struct model_t * mdl, const struct fmla_atom_t * at)
   return result;
 }
 
-struct fmla_t * translate_query_fmla(struct model_t * mdl, const struct fmla_t * fmla);
+struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla);
 
 struct fmla_t *
-translate_query_fmla(struct model_t * mdl, const struct fmla_t * fmla)
+translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla)
 {
   struct fmla_t * result = NULL;
   struct fmla_t * fmla_2 = NULL;
@@ -122,20 +119,20 @@ translate_query_fmla(struct model_t * mdl, const struct fmla_t * fmla)
     result = copy_fmla(fmla);
     break;
   case FMLA_ATOM:
-    result = translate_query_fmla_atom(mdl, fmla->param.atom);
+    result = translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
-    fmla_2 = translate_query_fmla(mdl, fmla->param.args[0]);
-    fmla_3 = translate_query_fmla(mdl, fmla->param.args[1]);
+    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    fmla_3 = translate_query_fmla(mdl, cg, fmla->param.args[1]);
     result = mk_fmla_and(fmla_2, fmla_3);
     break;
   case FMLA_OR:
-    fmla_2 = translate_query_fmla(mdl, fmla->param.args[0]);
-    fmla_3 = translate_query_fmla(mdl, fmla->param.args[1]);
+    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    fmla_3 = translate_query_fmla(mdl, cg, fmla->param.args[1]);
     result = mk_fmla_or(fmla_2, fmla_3);
     break;
   case FMLA_NOT:
-    fmla_2 = translate_query_fmla(mdl, fmla->param.args[0]);
+    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
     result = mk_fmla_not(fmla_2);
     break;
   case FMLA_EX:
@@ -150,12 +147,12 @@ translate_query_fmla(struct model_t * mdl, const struct fmla_t * fmla)
 }
 
 void
-translate_query(struct model_t * mdl)
+translate_query(struct model_t * mdl, struct sym_gen_t * cg)
 {
   printf("|query|=%d\n", parsed_query->no_clauses);
   struct clause_t * q_cl = parsed_query/* FIXME implicit arg8? */->program[0]; // FIXME hardcoding
   struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
-  struct fmla_t * translated_q = translate_query_fmla(mdl, q_fmla);
+  struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
@@ -439,7 +436,10 @@ main(int argc, char ** argv)
   struct sym_gen_t * vg = mk_sym_gen(vK);
   struct model_t * mdl = translate(vg);
 
-  translate_query(mdl);
+  char * cK = malloc(sizeof(char) * 2);
+  strcpy(cK, "c");
+  struct sym_gen_t * cg = mk_sym_gen(cK);
+  translate_query(mdl, cg);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
