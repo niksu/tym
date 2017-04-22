@@ -11,19 +11,11 @@
 #define __TYM_TRANSLATE_H__
 
 #include <assert.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "ast.h"
 #include "formula.h"
-#include "parser.h"
-#include "lexer.h"
 #include "statement.h"
 #include "symbols.h"
-#include "tym.h"
 
 struct fmla_t * translate_atom(struct atom_t * at);
 
