@@ -54,6 +54,7 @@ struct stmts_t {
 struct stmts_t * mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next);
 size_t stmts_str(struct stmts_t *, size_t * remaining, char * buf);
 void free_stmts(struct stmts_t *);
+struct stmts_t * reverse_stmts(struct stmts_t * stmts);
 
 struct model_t {
   struct universe_t * universe;

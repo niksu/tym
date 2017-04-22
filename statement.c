@@ -359,3 +359,21 @@ test_statement()
   free_model(mdl);
   free(buf);
 }
+
+struct stmts_t *
+reverse_stmts(struct stmts_t * stmts)
+{
+  struct stmts_t * cursor = stmts;
+  struct stmts_t * result = NULL;
+  struct stmts_t * last = NULL;
+  while (NULL != cursor) {
+    assert(NULL != cursor->stmt);
+    last = mk_stmt_cell(cursor->stmt, last);
+    if (NULL == last->next) {
+      result = last;
+    }
+    cursor = cursor->next;
+  }
+  free(stmts);
+  return result;
+}
