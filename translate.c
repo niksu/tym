@@ -132,3 +132,150 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   struct stmt_t * stmt = mk_stmt_axiom(translated_q);
   strengthen_model(mdl, stmt);
 }
+
+struct model_t *
+translate_program(struct program_t * program, struct sym_gen_t * vg)
+{
+  struct atom_database_t * adb = mk_atom_database();
+
+  for (int i = 0; i < program->no_clauses; i++) {
+    (void)clause_database_add(program->program[i], adb, NULL);
+  }
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  atom_database_str(adb, &remaining_buf_size, buf);
+  printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
+
+
+  // 1. Generate prologue: universe sort, and its inhabitants.
+  struct model_t * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
+
+  remaining_buf_size = BUF_SIZE;
+  size_t l = model_str(mdl, &remaining_buf_size, buf);
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  // NOTE if we don't do this, remaining_buf_size will become 0 causing some
+  //      output to be dropped, then it might wrap back and output will resume,
+  //      so best to keep it topped up.
+  // FIXME maybe should simply remove this parameter then, if it needs maintenance and doesn't yield obvious gain?
+  remaining_buf_size = BUF_SIZE;
+
+  // 2. Add axiom characterising the provability of all elements of the Hilbert base.
+  struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
+  while (NULL != preds_cursor) {
+    printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
+
+    size_t out_size;
+
+    struct fmlas_t * fmlas = translate_bodies(preds_cursor->predicate->bodies);
+    struct fmlas_t * fmlas_cursor = fmlas;
+
+    if (NULL == preds_cursor->predicate->bodies) {
+      // "No bodies" means that the atom never appears as the head of a clause.
+
+      struct term_t ** var_args = malloc(sizeof(struct term_t *) * preds_cursor->predicate->arity);
+
+      for (int i = 0; i < preds_cursor->predicate->arity; i++) {
+        var_args[i] = mk_term(VAR, mk_new_var(vg));
+      }
+
+      struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
+          preds_cursor->predicate->arity, var_args);
+
+      out_size = fmla_str(atom, &remaining_buf_size, buf);
+      assert(out_size > 0);
+      printf("bodyless: %s\n", buf);
+
+      strengthen_model(mdl,
+          mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+
+      free_fmla(atom);
+    } else {
+      struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+      struct fmla_t * abs_head_fmla;
+
+      while (NULL != body_cursor) {
+        printf(">");
+
+        struct sym_gen_t * vg_copy = copy_sym_gen(vg);
+
+        struct atom_t * head_atom = &(body_cursor->clause->head);
+        struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
+
+        for (int i = 0; i < head_atom->arity; i++) {
+          args[i] = copy_term(&(head_atom->args[i]));
+        }
+
+        // Abstract the atom's parameters.
+        struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
+
+        out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
+        assert(out_size > 0);
+        printf("from: %s\n", buf);
+
+        struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
+        abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
+        out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
+        assert(out_size > 0);
+        printf("to: %s\n", buf);
+
+        out_size = valuation_str(*v, &remaining_buf_size, buf);
+        if (0 == out_size) {
+          printf("  where: (no substitutions)\n");
+        } else {
+          printf("  where: %s\n", buf);
+        }
+
+        struct fmla_t * valuation_fmla = translate_valuation(*v);
+        struct fmla_t * fmla = fmlas_cursor->fmla;
+        fmlas_cursor->fmla = mk_fmla_and(fmla, valuation_fmla);
+        free_fmla(fmla);
+        free_fmla(valuation_fmla);
+        struct terms_t * ts = filter_var_values(*v);
+        fmla = fmlas_cursor->fmla;
+        fmlas_cursor->fmla = mk_fmla_quants(ts, fmla);
+        free_fmla(fmla);
+
+        remaining_buf_size = BUF_SIZE;
+        fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
+        printf("  :|%s|\n", buf);
+
+
+        free_fmla(head_fmla);
+        if (NULL != *v) {
+          // i.e., the predicate isn't nullary.
+          free_valuation(*v);
+        }
+        free(v);
+
+        body_cursor = body_cursor->next;
+        fmlas_cursor = fmlas_cursor->next;
+        if (NULL == body_cursor) {
+          struct sym_gen_t * tmp = vg;
+          vg = vg_copy;
+          vg_copy = tmp;
+        }
+        free_sym_gen(vg_copy);
+      }
+
+      struct fmla_t * fmla = mk_fmla_ors(fmlas);
+      remaining_buf_size = BUF_SIZE;
+      out_size = fmla_str(fmla, &remaining_buf_size, buf);
+      assert(out_size > 0);
+      printf("pre-result: %s\n", buf);
+
+      struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
+      strengthen_model(mdl,
+          mk_stmt_pred(head->pred_name, arguments_of_atom(head), fmla));
+      free_fmla(abs_head_fmla);
+    }
+
+    preds_cursor = preds_cursor->next;
+
+    printf("\n");
+  }
+
+  free(buf);
+
+  return mdl;
+}

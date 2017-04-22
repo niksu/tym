@@ -39,4 +39,6 @@ struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg
 
 void translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg);
 
+struct model_t * translate_program(struct program_t * program, struct sym_gen_t * vg);
+
 #endif /* __TYM_TRANSLATE_H__ */
