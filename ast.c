@@ -611,3 +611,34 @@ copy_term(const struct term_t * const term)
   strcpy(ident_copy, term->identifier);
   return mk_term(term->kind, ident_copy);
 }
+
+// FIXME naive implementation
+bool
+terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
+{
+  bool result = true;
+  while (NULL != ss) {
+    const struct terms_t * cursor = ts;
+    bool found = false;
+    eq_term_error_t error_code;
+    while (NULL != cursor) {
+      if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
+        if (found) {
+          break;
+        }
+      } else {
+        // FIXME handle error
+      }
+      cursor = cursor->next;
+    }
+
+    if (!found) {
+      result = false;
+      break;
+    }
+
+    ss = ss->next;
+  }
+
+  return result;
+}
