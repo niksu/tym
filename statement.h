@@ -66,4 +66,7 @@ size_t model_str(struct model_t *, size_t * remaining, char * buf);
 void free_model(struct model_t *);
 void strengthen_model(struct model_t *, struct stmt_t *);
 
+struct term_t * new_const_in_stmt(struct stmt_t * stmt);
+struct terms_t * consts_in_stmt(struct stmt_t * stmt);
+
 #endif /* __TYM_STATEMENT_H__ */

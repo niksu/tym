@@ -377,3 +377,46 @@ reverse_stmts(struct stmts_t * stmts)
   free(stmts);
   return result;
 }
+
+struct term_t *
+new_const_in_stmt(struct stmt_t * stmt)
+{
+  struct term_t * result = NULL;
+  switch (stmt->kind) {
+  case STMT_AXIOM:
+    result = NULL;
+    break;
+  case STMT_CONST_DEF:
+    // Non-Bool constants are all declared at the start.
+    if (bool_ty == stmt->param.const_def->ty) {
+      result = mk_term(CONST, stmt->param.const_def->const_name);
+    } else {
+      result = NULL;
+    }
+    break;
+  default:
+    // FIXME complain -- impossible result
+    break;
+  }
+  return result;
+}
+
+struct terms_t *
+consts_in_stmt(struct stmt_t * stmt)
+{
+  struct terms_t * result = NULL;
+  switch (stmt->kind) {
+  case STMT_AXIOM:
+    result = consts_in_fmla(stmt->param.axiom, NULL);
+    break;
+  case STMT_CONST_DEF:
+    if (NULL != stmt->param.const_def->body) {
+      result = consts_in_fmla(stmt->param.const_def->body, NULL);
+    }
+    break;
+  default:
+    // FIXME complain -- impossible result
+    break;
+  }
+  return result;
+}

@@ -99,4 +99,6 @@ struct terms_t * filter_var_values(struct valuation_t * const v);
 
 size_t fmla_size(const struct fmla_t * const);
 
+struct terms_t * consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc);
+
 #endif /* __TYM_FORMULA_H__ */

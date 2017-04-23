@@ -711,3 +711,32 @@ fmla_size(const struct fmla_t * const fmla)
 
   return result;
 }
+
+struct terms_t *
+consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
+{
+  struct terms_t * result = acc;
+  switch (fmla->kind) {
+  case FMLA_CONST:
+    result = acc;
+    break;
+  case FMLA_ATOM:
+    result = mk_term_cell(mk_term(CONST, fmla->param.atom->pred_name), acc);
+    break;
+  case FMLA_AND:
+  case FMLA_OR:
+    acc = consts_in_fmla(fmla->param.args[0], acc);
+    result = consts_in_fmla(fmla->param.args[1], acc);
+    break;
+  case FMLA_NOT:
+    result = consts_in_fmla(fmla->param.args[0], acc);
+    break;
+  case FMLA_EX:
+    result = consts_in_fmla(fmla->param.quant->body, acc);
+    break;
+  default:
+    // FIXME fail
+    break;
+  }
+  return result;
+}
