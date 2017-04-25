@@ -722,6 +722,12 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     break;
   case FMLA_ATOM:
     result = mk_term_cell(mk_term(CONST, fmla->param.atom->pred_name), acc);
+    for (int i = 0; i < fmla->param.atom->arity; i++) {
+      struct term_t * t = fmla->param.atom->predargs[i];
+      if (CONST == t->kind) {
+        result = mk_term_cell(t, result);
+      }
+    }
     break;
   case FMLA_AND:
   case FMLA_OR:
