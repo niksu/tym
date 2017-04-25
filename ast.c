@@ -619,7 +619,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
   bool result = true;
   while (NULL != ss) {
     const struct terms_t * cursor = ts;
-    bool found = false;
+    bool found = true;
     eq_term_error_t error_code;
     while (NULL != cursor) {
       if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
