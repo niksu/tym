@@ -317,7 +317,9 @@ void
 free_model(struct model_t * mdl)
 {
   free_universe(mdl->universe);
-  free_stmts(mdl->stmts);
+  if (NULL != mdl->stmts) {
+    free_stmts(mdl->stmts);
+  }
   free(mdl);
 }
 
