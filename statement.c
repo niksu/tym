@@ -367,13 +367,9 @@ reverse_stmts(struct stmts_t * stmts)
 {
   struct stmts_t * cursor = stmts;
   struct stmts_t * result = NULL;
-  struct stmts_t * last = NULL;
   while (NULL != cursor) {
     assert(NULL != cursor->stmt);
-    last = mk_stmt_cell(cursor->stmt, last);
-    if (NULL == last->next) {
-      result = last;
-    }
+    result = mk_stmt_cell(cursor->stmt, result);
     cursor = cursor->next;
   }
   free(stmts);
