@@ -33,4 +33,6 @@ void translate_query(struct program_t * query, struct model_t * mdl, struct sym_
 
 struct model_t * translate_program(struct program_t * program, struct sym_gen_t * vg);
 
+struct stmts_t * order_statements(struct stmts_t * stmts);
+
 #endif /* __TYM_TRANSLATE_H__ */

@@ -173,6 +173,7 @@ main(int argc, char ** argv)
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
+  mdl->stmts = order_statements(mdl->stmts);
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
   free_sym_gen(vg);

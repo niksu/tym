@@ -279,3 +279,35 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
   return mdl;
 }
+
+// FIXME naive implementation
+struct stmts_t *
+order_statements(struct stmts_t * stmts)
+{
+  struct stmts_t * cursor = stmts;
+  struct stmts_t * waiting = NULL;
+  struct stmts_t * result = NULL;
+  struct terms_t * declared = NULL;
+  while (NULL != cursor || NULL != waiting) {
+    if (NULL == cursor && NULL != waiting) {
+      cursor = waiting;
+      waiting = NULL;
+      continue;
+    }
+
+    struct term_t * t = new_const_in_stmt(cursor->stmt);
+    struct terms_t * term_consts = consts_in_stmt(cursor->stmt);
+    if (terms_subsumed_by(term_consts, declared)) {
+      if (NULL != t) {
+        declared = mk_term_cell(t, declared);
+      }
+      result = mk_stmt_cell(cursor->stmt, result);
+    } else {
+      waiting = mk_stmt_cell(cursor->stmt, waiting);
+    }
+
+    cursor = cursor->next;
+  }
+  free(stmts);
+  return reverse_stmts(result);
+}
