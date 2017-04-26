@@ -14,7 +14,6 @@ ADDITIONAL_CFLAGS?=
 
 $(TGT) : $(LIB) $(HEADERS)
 	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) -L. -ltym
-#	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $(LIB) -L.
 
 $(LIB) : $(OBJ) $(HEADERS)
 	ar crv $@ $(OBJ)
