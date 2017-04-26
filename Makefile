@@ -5,14 +5,19 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-CFLAGS=-std=c99 -Wall -pedantic
+CFLAGS=-std=c99 -Wall -pedantic -g
 TGT=tym
-OBJ=ast.o lexer.o parser.o symbols.o tym.o
-HEADERS=ast.h lexer.h parser.h symbols.h tym.h
+LIB=libtym.a
+OBJ=ast.o formula.o lexer.o parser.o statement.o symbols.o translate.o tym.o
+HEADERS=ast.h formula.h lexer.h parser.h statement.h symbols.h translate.h tym.h
 ADDITIONAL_CFLAGS?=
 
-$(TGT) : $(OBJ) $(HEADERS)
-	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $(OBJ)
+$(TGT) : $(LIB) $(HEADERS)
+	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) -L. -ltym
+#	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $(LIB) -L.
+
+$(LIB) : $(OBJ) $(HEADERS)
+	ar crv $@ $(OBJ)
 
 lexer.c : lexer.l
 	flex $<
@@ -32,4 +37,4 @@ parser.c : parser.y
 .PHONY: clean
 
 clean:
-	rm -f $(TGT) *.o lexer.{c,h} parser.{c,h}
+	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}

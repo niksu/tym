@@ -69,7 +69,11 @@ typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 bool atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
 
 int atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf);
+struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
+int predicate_str(struct predicate_t * pred, size_t * outbuf_size, char * outbuf);
 
 bool clause_database_add(struct clause_t * clause, struct atom_database_t * cdb, void *);
+
+size_t num_predicate_bodies (struct predicate_t *);
 
 #endif /* __SYMBOLS_H__ */

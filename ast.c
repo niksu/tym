@@ -579,3 +579,108 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
 
   return successful;
 }
+
+void
+test_clause(void) {
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
+  struct atom_t * at = malloc(sizeof(struct atom_t));
+  struct term_t * t = malloc(sizeof(struct term_t));
+  t->kind = CONST;
+  t->identifier = "ok";
+
+  at->predicate = "world";
+  at->arity = 1;
+  at->args = t;
+
+  cl->head.predicate = "hello";
+  cl->head.arity = 0;
+  cl->head.args = NULL;
+  cl->body_size = 1;
+  cl->body = at;
+
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  size_t l = clause_to_str(cl, &remaining_buf_size, buf);
+  printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+}
+
+struct term_t *
+copy_term(const struct term_t * const term)
+{
+  char * ident_copy = malloc(sizeof(char) * strlen(term->identifier));
+  strcpy(ident_copy, term->identifier);
+  return mk_term(term->kind, ident_copy);
+}
+
+// FIXME naive implementation
+bool
+terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
+{
+  bool result = true;
+
+#if DEBUG
+  printf("Subsumption check initially %d", result);
+#endif
+  while (NULL != ss) {
+#if DEBUG
+    printf(".");
+#endif
+    const struct terms_t * cursor = ts;
+    bool found = (NULL == cursor);
+    eq_term_error_t error_code;
+    while (NULL != cursor) {
+      if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
+        if (found) {
+          break;
+        }
+      } else {
+        // FIXME handle error
+      }
+      cursor = cursor->next;
+    }
+
+    if (!found) {
+#if DEBUG
+      size_t remaining_buf_size = BUF_SIZE;
+      char * buf = malloc(remaining_buf_size);
+      size_t l = term_to_str(ss->term, &remaining_buf_size, buf);
+      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+      free(buf);
+#endif
+      result = false;
+      break;
+    }
+
+    ss = ss->next;
+  }
+
+#if DEBUG
+  printf(" ultimately %d\n", result);
+#endif
+
+  return result;
+}
+
+int
+terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf)
+{
+  int l = 0;
+  while (NULL != terms) {
+    int l_sub = term_to_str(terms->term, outbuf_size, outbuf + l);
+    if (l_sub < 0) {
+      // FIXME complain
+    }
+    l += l_sub;
+
+    if (NULL != terms->next) {
+      outbuf[(*outbuf_size)--, l++] = ',';
+      outbuf[(*outbuf_size)--, l++] = ' ';
+    }
+
+    terms = terms->next;
+  }
+
+  outbuf[l] = '\0';
+
+  return l;
+}

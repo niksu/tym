@@ -55,6 +55,7 @@ struct program_t {
 
 int my_strcpy(char * dst, const char * src, size_t * space);
 int term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
+int terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf);
 int atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 int clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
 int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
@@ -97,6 +98,10 @@ char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
 
 typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
-bool eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
+bool eq_term(/* FIXME make compared terms into pointers */struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
+
+struct term_t * copy_term(const struct term_t * const term);
+
+bool terms_subsumed_by(const struct terms_t * const, const struct terms_t *);
 
 #endif // __TYM_AST_H__
