@@ -149,7 +149,8 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
-  sub_result->body = mk_fmla_ors(fmlas);
+//  sub_result->body = mk_fmla_ors(fmlas); // FIXME separate const declaration from a related formula
+  sub_result->body = mk_fmla_const(true);
   //free_fmlas(fmlas); FIXME include this to free memory used in intermediate computation.
 
   result->kind = STMT_CONST_DEF;
@@ -177,19 +178,20 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 
     if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
       // We're dealing with a nullary constant.
-      sprintf(&(buf[l]), "(declare-const %s %s)\n",
+      sprintf(&(buf[l]), "(declare-const %s %s)",
           stmt->param.const_def->const_name,
           stmt->param.const_def->ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      sprintf(&(buf[l]), "(assert ");
-      *remaining -= strlen(&(buf[l]));
-      l += strlen(&(buf[l]));
-
-      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
-
-      buf[(*remaining)--, l++] = ')';
+// FIXME separate const declaration from a related formula
+//      sprintf(&(buf[l]), "(assert ");
+//      *remaining -= strlen(&(buf[l]));
+//      l += strlen(&(buf[l]));
+//
+//      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
+//
+//      buf[(*remaining)--, l++] = ')';
     } else {
       sprintf(&(buf[l]), "(define-fun %s (",
           stmt->param.const_def->const_name);
@@ -307,7 +309,6 @@ model_str(struct model_t * mdl, size_t * remaining, char * buf)
   *remaining -= strlen(&(buf[l]));
   l += strlen(&(buf[l]));
 
-  l += universe_str(mdl->universe, remaining, buf + l);
   l += stmts_str(mdl->stmts, remaining, buf + l);
   buf[l] = '\0';
   return l;
@@ -385,12 +386,7 @@ new_const_in_stmt(struct stmt_t * stmt)
     result = NULL;
     break;
   case STMT_CONST_DEF:
-    // Non-Bool constants are all declared at the start.
-    if (bool_ty == stmt->param.const_def->ty) {
-      result = mk_term(CONST, stmt->param.const_def->const_name);
-    } else {
-      result = NULL;
-    }
+    result = mk_term(CONST, stmt->param.const_def->const_name);
     break;
   default:
     // FIXME complain -- impossible result
@@ -417,4 +413,20 @@ consts_in_stmt(struct stmt_t * stmt)
     break;
   }
   return result;
+}
+
+void
+statementise_universe(struct model_t * mdl)
+{
+  for (int i = 0; i < mdl->universe->cardinality; i++) {
+    strengthen_model(mdl, mk_stmt_const(mdl->universe->element[i], mdl->universe, universe_ty));
+  }
+
+  struct term_t ** args = malloc(sizeof(struct term_t *) * mdl->universe->cardinality);
+  for (int i = 0; i < mdl->universe->cardinality; i++) {
+    args[i] = mk_term(CONST, mdl->universe->element[i]);
+  }
+  struct fmla_t * distinctness_fmla =
+    mk_fmla_atom(distinct_pred, mdl->universe->cardinality, args);
+  strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }

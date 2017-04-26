@@ -617,9 +617,16 @@ bool
 terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 {
   bool result = true;
+
+#if DEBUG
+  printf("Subsumption check initially %d", result);
+#endif
   while (NULL != ss) {
+#if DEBUG
+    printf(".");
+#endif
     const struct terms_t * cursor = ts;
-    bool found = true;
+    bool found = (NULL == cursor);
     eq_term_error_t error_code;
     while (NULL != cursor) {
       if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
@@ -633,6 +640,13 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
     }
 
     if (!found) {
+#if DEBUG
+      size_t remaining_buf_size = BUF_SIZE;
+      char * buf = malloc(remaining_buf_size);
+      size_t l = term_to_str(ss->term, &remaining_buf_size, buf);
+      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+      free(buf);
+#endif
       result = false;
       break;
     }
@@ -640,5 +654,33 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
     ss = ss->next;
   }
 
+#if DEBUG
+  printf(" ultimately %d\n", result);
+#endif
+
   return result;
+}
+
+int
+terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf)
+{
+  int l = 0;
+  while (NULL != terms) {
+    int l_sub = term_to_str(terms->term, outbuf_size, outbuf + l);
+    if (l_sub < 0) {
+      // FIXME complain
+    }
+    l += l_sub;
+
+    if (NULL != terms->next) {
+      outbuf[(*outbuf_size)--, l++] = ',';
+      outbuf[(*outbuf_size)--, l++] = ' ';
+    }
+
+    terms = terms->next;
+  }
+
+  outbuf[l] = '\0';
+
+  return l;
 }

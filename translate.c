@@ -287,22 +287,77 @@ order_statements(struct stmts_t * stmts)
   struct stmts_t * cursor = stmts;
   struct stmts_t * waiting = NULL;
   struct stmts_t * result = NULL;
+
   struct terms_t * declared = NULL;
+  declared = mk_term_cell(mk_term(CONST, "="/* FIXME const */), declared);
+  declared = mk_term_cell(mk_term(CONST, "distinct"/* FIXME const */), declared);
+
   while (NULL != cursor || NULL != waiting) {
+
+#if DEBUG
+    size_t remaining_buf_size = BUF_SIZE;
+    char * buf = malloc(remaining_buf_size);
+    size_t l;
+
+#if 0
+    remaining_buf_size = BUF_SIZE;
+    l = stmts_str(cursor, &remaining_buf_size, buf);
+    printf("cursor (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+    remaining_buf_size = BUF_SIZE;
+    l = stmts_str(waiting, &remaining_buf_size, buf);
+    printf("waiting (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+
+    printf("|declared| = %d\n", len_term_cell(declared));
+    remaining_buf_size = BUF_SIZE;
+    l = terms_to_str(declared, &remaining_buf_size, buf);
+    printf("declared (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+    free(buf);
+#endif
+
     if (NULL == cursor && NULL != waiting) {
+#if DEBUG
+      printf("Making 'waiting' into 'cursor'.\n");
+#endif
       cursor = waiting;
       waiting = NULL;
       continue;
     }
+#if DEBUG
+    else {
+      printf("Not making 'waiting' into 'cursor'.\n");
+    }
+#endif
+
+#if DEBUG
+    remaining_buf_size = BUF_SIZE;
+    l = stmt_str(cursor->stmt, &remaining_buf_size, buf);
+    printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
     struct term_t * t = new_const_in_stmt(cursor->stmt);
     struct terms_t * term_consts = consts_in_stmt(cursor->stmt);
-    if (terms_subsumed_by(term_consts, declared)) {
+    if (terms_subsumed_by(declared, term_consts)) { // FIXME should swap params?
       if (NULL != t) {
+#if DEBUG
+        printf("Term subsumption for %s\n", t->identifier);
+#endif
         declared = mk_term_cell(t, declared);
       }
+#if DEBUG
+      else {
+        printf("NULL == t\n");
+      }
+#endif
       result = mk_stmt_cell(cursor->stmt, result);
     } else {
+#if DEBUG
+      if (NULL != t) {
+        printf("NO term subsumption for %s\n", t->identifier);
+      }
+#endif
       waiting = mk_stmt_cell(cursor->stmt, waiting);
     }
 

@@ -165,6 +165,7 @@ main(int argc, char ** argv)
   strcpy(vK, "V");
   struct sym_gen_t * vg = mk_sym_gen(vK);
   struct model_t * mdl = translate_program(parsed_source_file_contents, vg);
+  statementise_universe(mdl);
 
   char * cK = malloc(sizeof(char) * 2);
   strcpy(cK, "c");
@@ -173,9 +174,14 @@ main(int argc, char ** argv)
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
-  mdl->stmts = order_statements(mdl->stmts);
   size_t l = model_str(mdl, &remaining_buf_size, buf);
+  printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
+  mdl->stmts = order_statements(mdl->stmts);
+  remaining_buf_size = BUF_SIZE;
+  l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+
   free_sym_gen(vg);
   free_model(mdl);
 

@@ -18,6 +18,7 @@ struct universe_t {
 
 static const char * const bool_ty = "Bool";
 static const char * const universe_ty = "Universe";
+static const char * const distinct_pred = "distinct";
 
 struct stmt_const_t {
   const char * const_name;
@@ -68,5 +69,7 @@ void strengthen_model(struct model_t *, struct stmt_t *);
 
 struct term_t * new_const_in_stmt(struct stmt_t * stmt);
 struct terms_t * consts_in_stmt(struct stmt_t * stmt);
+
+void statementise_universe(struct model_t * mdl);
 
 #endif /* __TYM_STATEMENT_H__ */

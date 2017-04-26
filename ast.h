@@ -55,6 +55,7 @@ struct program_t {
 
 int my_strcpy(char * dst, const char * src, size_t * space);
 int term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
+int terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf);
 int atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 int clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
 int program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
