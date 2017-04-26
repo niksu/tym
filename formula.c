@@ -28,7 +28,7 @@ mk_fmla_const(bool b)
 }
 
 struct fmla_t *
-mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
+mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
   assert(NULL != result_content);
@@ -59,7 +59,7 @@ mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
 }
 
 struct fmla_t *
-mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
+mk_fmla_atom_varargs(const char * pred_name, uint8_t arity, ...)
 {
   struct term_t ** args = malloc(sizeof(struct term_t *) * arity);
   va_list varargs;

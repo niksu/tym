@@ -47,8 +47,8 @@ struct fmlas_t {
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
 
 struct fmla_t * mk_fmla_const(bool b);
-struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** args);
-struct fmla_t * mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
+struct fmla_t * mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** args);
+struct fmla_t * mk_fmla_atom_varargs(const char * pred_name, uint8_t arity, ...);
 struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
 struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body);
 struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
