@@ -12,14 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ast.h"
-#include "formula.h"
-#include "parser.h"
-#include "lexer.h"
-#include "statement.h"
-#include "symbols.h"
-#include "translate.h"
-#include "tym.h"
+#include "libtym.h"
 
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
