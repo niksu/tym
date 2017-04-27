@@ -168,12 +168,16 @@ main(int argc, char ** argv)
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = model_str(mdl, &remaining_buf_size, buf);
+#if DEBUG
   printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
   mdl->stmts = order_statements(mdl->stmts);
   remaining_buf_size = BUF_SIZE;
   l = model_str(mdl, &remaining_buf_size, buf);
+#if DEBUG
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
   free_sym_gen(vg);
   free_model(mdl);
