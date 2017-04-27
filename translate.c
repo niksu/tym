@@ -117,7 +117,9 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct f
 void
 translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg)
 {
+#if DEBUG
   printf("|query|=%d\n", query->no_clauses);
+#endif
   struct clause_t * q_cl = query/* FIXME implicit arg8? */->program[0]; // FIXME hardcoding
   struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
   struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
@@ -125,9 +127,13 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = fmla_str(q_fmla, &remaining_buf_size, buf);
+#if DEBUG
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
   l = fmla_str(translated_q, &remaining_buf_size, buf);
+#if DEBUG
   printf("translated_q (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
   struct stmt_t * stmt = mk_stmt_axiom(translated_q);
   strengthen_model(mdl, stmt);
@@ -144,7 +150,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   atom_database_str(adb, &remaining_buf_size, buf);
+#if DEBUG
   printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
+#endif
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
@@ -152,7 +160,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
   remaining_buf_size = BUF_SIZE;
   size_t l = model_str(mdl, &remaining_buf_size, buf);
+#if DEBUG
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
   // NOTE if we don't do this, remaining_buf_size will become 0 causing some
   //      output to be dropped, then it might wrap back and output will resume,
@@ -163,7 +173,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
+#if DEBUG
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
+#endif
 
     size_t out_size;
 
@@ -184,7 +196,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
       out_size = fmla_str(atom, &remaining_buf_size, buf);
       assert(out_size > 0);
+#if DEBUG
       printf("bodyless: %s\n", buf);
+#endif
 
       strengthen_model(mdl,
           mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
@@ -195,7 +209,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
       struct fmla_t * abs_head_fmla;
 
       while (NULL != body_cursor) {
+#if DEBUG
         printf(">");
+#endif
 
         struct sym_gen_t * vg_copy = copy_sym_gen(vg);
 
@@ -211,20 +227,26 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
         out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
+#if DEBUG
         printf("from: %s\n", buf);
+#endif
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
         out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
+#if DEBUG
         printf("to: %s\n", buf);
+#endif
 
         out_size = valuation_str(*v, &remaining_buf_size, buf);
+#if DEBUG
         if (0 == out_size) {
           printf("  where: (no substitutions)\n");
         } else {
           printf("  where: %s\n", buf);
         }
+#endif
 
         struct fmla_t * valuation_fmla = translate_valuation(*v);
         struct fmla_t * fmla = fmlas_cursor->fmla;
@@ -238,7 +260,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
         remaining_buf_size = BUF_SIZE;
         fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
+#if DEBUG
         printf("  :|%s|\n", buf);
+#endif
 
 
         free_fmla(head_fmla);
@@ -262,7 +286,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
       remaining_buf_size = BUF_SIZE;
       out_size = fmla_str(fmla, &remaining_buf_size, buf);
       assert(out_size > 0);
+#if DEBUG
       printf("pre-result: %s\n", buf);
+#endif
 
       struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
       strengthen_model(mdl,
@@ -272,7 +298,9 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
     preds_cursor = preds_cursor->next;
 
+#if DEBUG
     printf("\n");
+#endif
   }
 
   free(buf);
@@ -309,10 +337,14 @@ order_statements(struct stmts_t * stmts)
     printf("waiting (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
+#if DEBUG
     printf("|declared| = %d\n", len_term_cell(declared));
+#endif
     remaining_buf_size = BUF_SIZE;
     l = terms_to_str(declared, &remaining_buf_size, buf);
+#if DEBUG
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
     free(buf);
 #endif
