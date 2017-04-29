@@ -33,7 +33,7 @@ parser: $(HEADERS)
 .PHONY: clean test
 
 test:
-	@TYMDIR=`pwd` ./scripts/test.sh
+	@TYMDIR=`pwd` ./scripts/run_tests.sh
 
 clean:
 	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}
