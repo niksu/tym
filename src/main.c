@@ -19,6 +19,13 @@ char * read_file(char * filename);
 
 char * source_file_contents = NULL;
 
+struct param_t {
+  char * source_file;
+  char verbosity;
+  char * query;
+  bool test_parsing;
+};
+
 struct param_t params = {
   .source_file = NULL,
   .verbosity = 0,

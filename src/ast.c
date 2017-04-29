@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "ast.h"
-#include "tym.h"
+#include "util.h"
 
 void test_clause(void);
 

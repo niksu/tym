@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "ast.h"
-#include "tym.h"
+#include "util.h"
 
 #define HASH_RANGE 256
 // NOTE value of TERM_DATABASE_SIZE must be >= the range of the hash function for terms.

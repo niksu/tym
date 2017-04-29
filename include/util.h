@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_H__
-#define __TYM_H__
+#ifndef __TYM_UTIL_H__
+#define __TYM_UTIL_H__
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -25,11 +25,4 @@
 #define DBG(...)
 #endif // DEBUG
 
-struct param_t {
-  char * source_file;
-  char verbosity;
-  char * query;
-  bool test_parsing;
-};
-
-#endif /* __TYM_H__ */
+#endif /* __TYM_UTIL_H__ */

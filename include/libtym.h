@@ -17,6 +17,6 @@
 #include "statement.h"
 #include "symbols.h"
 #include "translate.h"
-#include "tym.h"
+#include "util.h"
 
 #endif /* __LIBTYM_H__ */

@@ -13,7 +13,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
-#include "tym.h"
+#include "util.h"
 
 #define YYERROR_VERBOSE 1
 

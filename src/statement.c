@@ -15,7 +15,7 @@
 #include "ast.h"
 #include "formula.h"
 #include "statement.h"
-#include "tym.h"
+#include "util.h"
 
 void test_statement(void);
 

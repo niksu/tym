@@ -11,7 +11,7 @@
 
 #include "ast.h"
 #include "formula.h"
-#include "tym.h"
+#include "util.h"
 
 #define MAX_VAR_WIDTH 10/*FIXME const*/
 

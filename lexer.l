@@ -12,7 +12,7 @@
 
 #include "ast.h"
 #include "parser.h"
-#include "tym.h"
+#include "util.h"
 %}
 
 %option outfile="lexer.c" header-file="lexer.h"
