@@ -10,12 +10,14 @@ TGT=tym
 LIB=libtym.a
 PARSER_OBJ=lexer.o parser.o
 OBJ=ast.o formula.o statement.o symbols.o translate.o tym.o
-HEADERS=ast.h formula.h statement.h symbols.h translate.h tym.h
+HEADER_FILES=ast.h formula.h statement.h symbols.h translate.h tym.h
+HEADER_DIR=include
+HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
 ADDITIONAL_CFLAGS?=
 
 $(TGT) : $(LIB) $(HEADERS)
-	$(CC) -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o $@ $(OBJ) $(PARSER_OBJ) -L. -ltym
+	$(CC) -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o $@ $(OBJ) $(PARSER_OBJ) -L. -ltym -I $(HEADER_DIR)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	ar crv $@ $(OBJ)
@@ -24,11 +26,11 @@ parser: $(HEADERS)
 	bison -d -o parser.c parser.y
 	flex lexer.l
 	# We have to be more permissive with the C output of flex and bison :(
-	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o lexer.o lexer.c
-	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o parser.o parser.c
+	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -I $(HEADER_DIR) -o lexer.o lexer.c
+	$(CC) -c -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -I $(HEADER_DIR) -o parser.o parser.c
 
 %.o: %.c $(HEADERS) parser
-	$(CC) -c -std=$(STD) $(CFLAGS) -Werror $(ADDITIONAL_CFLAGS) -o $@ $<
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror $(ADDITIONAL_CFLAGS) -I $(HEADER_DIR) -I . -o $@ $<
 
 .PHONY: clean test
 
