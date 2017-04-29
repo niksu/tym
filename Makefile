@@ -28,7 +28,7 @@ parser: $(HEADERS)
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o lexer.o lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o parser.o parser.c
 
-%.o: %.c $(HEADERS) parser
+%.o: src/%.c $(HEADERS) parser
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I . -o $@ $<
 
 .PHONY: clean test
