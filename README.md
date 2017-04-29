@@ -8,7 +8,7 @@ This is a simple implementation of Datalog.
 `./tym`
 
 # Tests
-`./test.sh`
+`make test`
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).

@@ -30,7 +30,10 @@ parser: $(HEADERS)
 %.o: %.c $(HEADERS) parser
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror $(ADDITIONAL_CFLAGS) -o $@ $<
 
-.PHONY: clean
+.PHONY: clean test
+
+test:
+	./test.sh
 
 clean:
 	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}
