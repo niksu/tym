@@ -14,6 +14,8 @@
 #include "ast.h"
 #include "tym.h"
 
+void test_clause(void);
+
 size_t
 my_strcpy(char * dst, const char * src, size_t * space)
 {
@@ -153,8 +155,6 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
   l += strlen(&(outbuf[l]));
 #endif
 
-  outbuf[(*outbuf_size)--, l++] = '\0';
-
   return l;
 }
 
@@ -170,8 +170,7 @@ program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
     offset += pre_offset;
 
     if (i < program->no_clauses - 1) {
-      //(*outbuf_size)++, offset--; // chomp trailing \0
-      outbuf[offset - 1] = '\n';
+      outbuf[(*outbuf_size)--, offset++] = '\n';
     }
   }
 
@@ -183,7 +182,7 @@ mk_term(term_kind_t kind, const char * identifier)
 {
   assert(NULL != identifier);
 
-  struct term_t * t = (struct term_t *)malloc(sizeof(struct term_t));
+  struct term_t * t = malloc(sizeof(struct term_t));
   assert(NULL != t);
 
   t->kind = kind;
@@ -196,7 +195,7 @@ mk_term_cell(struct term_t * term, struct terms_t * next)
 {
   assert(NULL != term);
 
-  struct terms_t * ts = (struct terms_t *)malloc(sizeof(struct terms_t));
+  struct terms_t * ts = malloc(sizeof(struct terms_t));
   assert(NULL != ts);
 
   ts->term = term;
@@ -221,14 +220,14 @@ struct atom_t *
 mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   assert(NULL != predicate);
 
-  struct atom_t * at = (struct atom_t *)malloc(sizeof(struct atom_t));
+  struct atom_t * at = malloc(sizeof(struct atom_t));
   assert(NULL != at);
 
   at->predicate = predicate;
   at->arity = arity;
 
   if (at->arity > 0) {
-    at->args = (struct term_t *)malloc(sizeof(struct term_t) * at->arity);
+    at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = *(args->term);
       args = args->next;
@@ -245,7 +244,7 @@ mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
 {
   assert(NULL != atom);
 
-  struct atoms_t * ats = (struct atoms_t *)malloc(sizeof(struct atoms_t));
+  struct atoms_t * ats = malloc(sizeof(struct atoms_t));
   assert(NULL != ats);
 
   ats->atom = atom;
@@ -271,14 +270,14 @@ struct clause_t *
 mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
   assert(NULL != head);
 
-  struct clause_t * cl = (struct clause_t *)malloc(sizeof(struct clause_t));
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
   assert(NULL != cl);
 
   cl->head = *head;
   cl->body_size = body_size;
 
   if (cl->body_size > 0) {
-    cl->body = (struct atom_t *)malloc(sizeof(struct atom_t) * cl->body_size);
+    cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
       cl->body[i] = *(body->atom);
       body = body->next;
@@ -295,7 +294,7 @@ mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
 {
   assert(NULL != clause);
 
-  struct clauses_t * cls = (struct clauses_t *)malloc(sizeof(struct clauses_t));
+  struct clauses_t * cls = malloc(sizeof(struct clauses_t));
   assert(NULL != cls);
 
   cls->clause = clause;
@@ -320,13 +319,13 @@ len_clause_cell(const struct clauses_t * next)
 struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
-  struct program_t * p = (struct program_t *)malloc(sizeof(struct program_t));
+  struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
 
   p->no_clauses = no_clauses;
 
   if (no_clauses > 0) {
-    p->program = (struct clause_t **)malloc(sizeof(struct clause_t **) * no_clauses);
+    p->program = malloc(sizeof(struct clause_t **) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
       program = program->next;
@@ -460,7 +459,7 @@ void
 debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf))
 {
   size_t buf_size = BUF_SIZE;
-  char * outbuf = (char *)malloc(buf_size);
+  char * outbuf = malloc(buf_size);
   assert(NULL != outbuf);
   x_to_str(x, &buf_size, outbuf);
   DBG("%s", outbuf);
@@ -552,4 +551,105 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
   }
 
   return successful;
+}
+
+void
+test_clause(void) {
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
+  struct atom_t * at = malloc(sizeof(struct atom_t));
+  struct term_t * t = malloc(sizeof(struct term_t));
+  t->kind = CONST;
+  t->identifier = "ok";
+
+  at->predicate = "world";
+  at->arity = 1;
+  at->args = t;
+
+  cl->head.predicate = "hello";
+  cl->head.arity = 0;
+  cl->head.args = NULL;
+  cl->body_size = 1;
+  cl->body = at;
+
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  size_t l = clause_to_str(cl, &remaining_buf_size, buf);
+  printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+}
+
+struct term_t *
+copy_term(const struct term_t * const term)
+{
+  char * ident_copy = malloc(sizeof(char) * strlen(term->identifier));
+  strcpy(ident_copy, term->identifier);
+  return mk_term(term->kind, ident_copy);
+}
+
+// FIXME naive implementation
+bool
+terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
+{
+  bool result = true;
+
+#if DEBUG
+  printf("Subsumption check initially %d", result);
+#endif
+  while (NULL != ss) {
+#if DEBUG
+    printf(".");
+#endif
+    const struct terms_t * cursor = ts;
+    bool found = (NULL == cursor);
+    eq_term_error_t error_code;
+    while (NULL != cursor) {
+      if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
+        if (found) {
+          break;
+        }
+      } else {
+        // FIXME handle error
+      }
+      cursor = cursor->next;
+    }
+
+    if (!found) {
+#if DEBUG
+      size_t remaining_buf_size = BUF_SIZE;
+      char * buf = malloc(remaining_buf_size);
+      size_t l = term_to_str(ss->term, &remaining_buf_size, buf);
+      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+      free(buf);
+#endif
+      result = false;
+      break;
+    }
+
+    ss = ss->next;
+  }
+
+#if DEBUG
+  printf(" ultimately %d\n", result);
+#endif
+
+  return result;
+}
+
+size_t
+terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf)
+{
+  size_t l = 0;
+  while (NULL != terms) {
+    l += term_to_str(terms->term, outbuf_size, outbuf + l); // FIXME add error checking
+
+    if (NULL != terms->next) {
+      outbuf[(*outbuf_size)--, l++] = ',';
+      outbuf[(*outbuf_size)--, l++] = ' ';
+    }
+
+    terms = terms->next;
+  }
+
+  outbuf[l] = '\0';
+
+  return l;
 }

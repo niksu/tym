@@ -5,17 +5,20 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-CFLAGS=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra
+CFLAGS=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g
 TGT=tym
-OBJ=tym.o ast.o
+LIB=libtym.a
 PARSER_OBJ=lexer.o parser.o
-#HEADERS=ast.h lexer.h parser.h tym.h
-HEADERS=ast.h tym.h
+OBJ=ast.o formula.o statement.o symbols.o translate.o tym.o
+HEADERS=ast.h formula.h statement.h symbols.h translate.h tym.h
 STD=iso9899:1999
 ADDITIONAL_CFLAGS?=
 
-$(TGT) : $(OBJ) $(HEADERS)
-	$(CC) -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o $@ $(OBJ) $(PARSER_OBJ)
+$(TGT) : $(LIB) $(HEADERS)
+	$(CC) -std=$(STD) $(CFLAGS) $(ADDITIONAL_CFLAGS) -o $@ $(OBJ) $(PARSER_OBJ) -L. -ltym
+
+$(LIB) : $(OBJ) $(HEADERS)
+	ar crv $@ $(OBJ)
 
 parser: $(HEADERS)
 	bison -d -o parser.c parser.y
@@ -30,4 +33,4 @@ parser: $(HEADERS)
 .PHONY: clean
 
 clean:
-	rm -f $(TGT) *.o lexer.{c,h} parser.{c,h}
+	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}

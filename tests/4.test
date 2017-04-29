@@ -1,0 +1,8 @@
+a(X, Y) :- b(X), c(Y), d().
+a(X, bla) :- b(X), c(X), f(X).
+a(X, X).
+b(h1).
+b(h2).
+c(h3).
+d().
+e(h1).

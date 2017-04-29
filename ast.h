@@ -55,6 +55,7 @@ struct program_t {
 
 size_t my_strcpy(char * dst, const char * src, size_t * space);
 size_t term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
+size_t terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf);
 size_t predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 size_t atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
 size_t clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
@@ -67,8 +68,8 @@ struct program_t * mk_program(uint8_t no_clauses, struct clauses_t * program);
 
 // FIXME qualify pointers with "const"
 struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
-struct atoms_t * mk_atom_cell(struct atom_t * term, struct atoms_t * next);
-struct clauses_t * mk_clause_cell(struct clause_t * term, struct clauses_t * next);
+struct atoms_t * mk_atom_cell(struct atom_t * atom, struct atoms_t * next);
+struct clauses_t * mk_clause_cell(struct clause_t * clause, struct clauses_t * next);
 
 uint8_t len_term_cell(const struct terms_t * next);
 uint8_t len_atom_cell(const struct atoms_t * next);
@@ -98,6 +99,10 @@ char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
 
 typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
-bool eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
+bool eq_term(/* FIXME make compared terms into pointers */struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
+
+struct term_t * copy_term(const struct term_t * const term);
+
+bool terms_subsumed_by(const struct terms_t * const, const struct terms_t *);
 
 #endif // __TYM_AST_H__

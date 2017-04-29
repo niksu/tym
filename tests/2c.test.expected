@@ -1,0 +1,5 @@
+input contents |c() :- a().
+|
+(no query given)
+stringed file contents (size=11, remaining=1589)
+|c() :- a().|

@@ -12,10 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ast.h"
-#include "parser.h"
-#include "lexer.h"
-#include "tym.h"
+#include "libtym.h"
 
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
@@ -32,9 +29,21 @@ struct param_t params = {
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
+#ifdef TESTING
+  void test_clause(void);
+  void test_formula(void);
+  void test_statement(void);
+#endif
+
 int
-main (int argc, char ** argv)
+main(int argc, char ** argv)
 {
+#ifdef TESTING
+  test_clause();
+  test_formula();
+  test_statement();
+  exit(0);
+#endif
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
@@ -110,7 +119,7 @@ main (int argc, char ** argv)
 
   if (params.test_parsing) {
     size_t remaining_buf_size = BUF_SIZE;
-    char * buf = (char *)malloc(remaining_buf_size);
+    char * buf = malloc(remaining_buf_size); // FIXME check if succeeds
     size_t used_buf_size;
 
     if (NULL != params.source_file) {
@@ -145,14 +154,35 @@ main (int argc, char ** argv)
     ERR("Input file (%s) is devoid of clauses.\n", params.source_file);
   }
 
+  char * vK = malloc(sizeof(char) * 2);
+  strcpy(vK, "V");
+  struct sym_gen_t * vg = mk_sym_gen(vK);
+  struct model_t * mdl = translate_program(parsed_source_file_contents, vg);
+  statementise_universe(mdl);
 
-  // FIXME this function is getting too long.
+  char * cK = malloc(sizeof(char) * 2);
+  strcpy(cK, "c");
+  struct sym_gen_t * cg = mk_sym_gen(cK);
+  translate_query(parsed_query, mdl, cg);
 
+  size_t remaining_buf_size = BUF_SIZE;
+  char * buf = malloc(remaining_buf_size);
+  size_t l = model_str(mdl, &remaining_buf_size, buf);
+#if DEBUG
+  printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
-  // FIXME add main application logic.
+  mdl->stmts = order_statements(mdl->stmts);
+  remaining_buf_size = BUF_SIZE;
+  l = model_str(mdl, &remaining_buf_size, buf);
+#if DEBUG
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
+  free_sym_gen(vg);
+  free_model(mdl);
 
-  DBG("Cleaning up before exiting");
+  DBG("Cleaning up before exiting\n");
 
   if (NULL != params.source_file) {
     free_program(parsed_source_file_contents);

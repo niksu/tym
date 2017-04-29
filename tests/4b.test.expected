@@ -1,0 +1,9 @@
+input contents |a(X, Y) :- b(X), c(Y).
+b(h2).
+c(h3).
+|
+(no query given)
+stringed file contents (size=36, remaining=1564)
+|a(X, Y) :- b(X), c(Y).
+b(h2).
+c(h3).|

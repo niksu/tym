@@ -1,0 +1,17 @@
+lexer.c
+lexer.h
+parser.c
+parser.h
+
+ast.o
+formula.o
+lexer.o
+parser.o
+statement.o
+symbols.o
+translate.o
+tym.o
+
+tym
+
+.*.swp
