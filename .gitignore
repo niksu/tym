@@ -6,11 +6,11 @@ parser.h
 ast.o
 formula.o
 lexer.o
+main.o
 parser.o
 statement.o
 symbols.o
 translate.o
-tym.o
 
 tym
 libtym.a
