@@ -8,9 +8,11 @@ CC?=gcc
 CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g
 TGT=tym
 LIB=libtym.a
+OUT_DIR=out
 PARSER_OBJ=lexer.o parser.o
-OBJ=ast.o formula.o statement.o symbols.o translate.o
-OBJ_OF_TGT=main.o
+OBJ_FILES=ast.o formula.o statement.o symbols.o translate.o
+OBJ=$(addprefix $(OUT_DIR)/, $(OBJ_FILES))
+OBJ_OF_TGT=$(OUT_DIR)/main.o
 HEADER_FILES=ast.h formula.h statement.h symbols.h translate.h util.h
 HEADER_DIR=include
 HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
@@ -29,7 +31,7 @@ parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o lexer.o lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o parser.o parser.c
 
-%.o: src/%.c $(HEADERS) parser
+out/%.o: src/%.c $(HEADERS) parser
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I . -o $@ $<
 
 .PHONY: clean test
