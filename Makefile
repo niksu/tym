@@ -19,12 +19,15 @@ HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
 
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
+	mkdir -p $(OUT_DIR)
 	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR)
 
 $(LIB) : $(OBJ) $(HEADERS)
+	mkdir -p $(OUT_DIR)
 	ar crv $(OUT_DIR)/$@ $(OBJ)
 
 parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
+	mkdir -p $(OUT_DIR)
 	bison -d -o parser.c src_parser/parser.y
 	flex src_parser/lexer.l
 	mv lexer.{c,h} $(OUT_DIR)
@@ -34,6 +37,7 @@ parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
 out/%.o: src/%.c $(HEADERS) parser
+	mkdir -p $(OUT_DIR)
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) -o $@ $<
 
 .PHONY: clean test
