@@ -22,9 +22,9 @@ $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 $(LIB) : $(OBJ) $(HEADERS)
 	ar crv $@ $(OBJ)
 
-parser: $(HEADERS)
-	bison -d -o parser.c parser.y
-	flex lexer.l
+parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
+	bison -d -o parser.c src_parser/parser.y
+	flex src_parser/lexer.l
 	# We have to be more permissive with the C output of flex and bison :(
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o lexer.o lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o parser.o parser.c
