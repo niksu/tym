@@ -5,7 +5,9 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g
+CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
+				-Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g \
+#				-fprofile-arcs -ftest-coverage -O0
 TGT=tym
 LIB=libtym.a
 OUT_DIR=out
