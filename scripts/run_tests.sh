@@ -20,7 +20,7 @@ fi
 
 for FILE in $(ls ${TYMDIR}/tests/*.test)
 do
-  CMD="${TYMDIR}/tym -i ${FILE} --test_parsing 2>&1"
+  CMD="${TYMDIR}/out/tym -i ${FILE} --test_parsing 2>&1"
   echo "Running \"${CMD}\""
   diff ${QUIET} <(eval ${CMD}) ${FILE}.expected
 done

@@ -9,7 +9,7 @@ CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstri
 TGT=tym
 LIB=libtym.a
 OUT_DIR=out
-PARSER_OBJ=lexer.o parser.o
+PARSER_OBJ=$(OUT_DIR)/lexer.o $(OUT_DIR)/parser.o
 OBJ_FILES=ast.o formula.o statement.o symbols.o translate.o
 OBJ=$(addprefix $(OUT_DIR)/, $(OBJ_FILES))
 OBJ_OF_TGT=$(OUT_DIR)/main.o
@@ -19,20 +19,22 @@ HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
 
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
-	$(CC) -std=$(STD) $(CFLAGS) -o $@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L. -ltym -I $(HEADER_DIR)
+	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR)
 
 $(LIB) : $(OBJ) $(HEADERS)
-	ar crv $@ $(OBJ)
+	ar crv $(OUT_DIR)/$@ $(OBJ)
 
 parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
 	bison -d -o parser.c src_parser/parser.y
 	flex src_parser/lexer.l
+	mv lexer.{c,h} $(OUT_DIR)
+	mv parser.{c,h} $(OUT_DIR)
 	# We have to be more permissive with the C output of flex and bison :(
-	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o lexer.o lexer.c
-	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o parser.o parser.c
+	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/lexer.o $(OUT_DIR)/lexer.c
+	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
 out/%.o: src/%.c $(HEADERS) parser
-	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I . -o $@ $<
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) -o $@ $<
 
 .PHONY: clean test
 
@@ -40,4 +42,4 @@ test:
 	@TYMDIR=`pwd` ./scripts/run_tests.sh
 
 clean:
-	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}
+	rm -f $(OUT_DIR)/$(TGT) $(OUT_DIR)/$(LIB) $(OUT_DIR)/*.o $(OUT_DIR)/lexer.{c,h} $(OUT_DIR)/parser.{c,h}
