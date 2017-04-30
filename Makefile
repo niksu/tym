@@ -9,14 +9,15 @@ CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstri
 TGT=tym
 LIB=libtym.a
 PARSER_OBJ=lexer.o parser.o
-OBJ=ast.o formula.o main.o statement.o symbols.o translate.o
+OBJ=ast.o formula.o statement.o symbols.o translate.o
+OBJ_OF_TGT=main.o
 HEADER_FILES=ast.h formula.h statement.h symbols.h translate.h util.h
 HEADER_DIR=include
 HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
 
-$(TGT) : $(LIB) $(HEADERS)
-	$(CC) -std=$(STD) $(CFLAGS) -o $@ $(OBJ) $(PARSER_OBJ) -L. -ltym -I $(HEADER_DIR)
+$(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
+	$(CC) -std=$(STD) $(CFLAGS) -o $@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L. -ltym -I $(HEADER_DIR)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	ar crv $@ $(OBJ)
