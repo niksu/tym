@@ -39,10 +39,7 @@ struct fmla_t {
   } param;
 };
 
-struct fmlas_t {
-  struct fmla_t * fmla;
-  struct fmlas_t * next;
-};
+DECLARE_LIST_TYPE(fmlas_t, fmla, fmla_t)
 
 struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
 

@@ -25,4 +25,11 @@
 #define DBG(...)
 #endif // DEBUG
 
+#define DECLARE_LIST_TYPE(type_name, field_name, elements_ty) \
+  struct type_name { \
+    struct elements_ty * field_name; \
+    struct type_name * next; \
+  };
+// FIXME include functions for LEN and STR and NEW
+
 #endif /* __TYM_UTIL_H__ */

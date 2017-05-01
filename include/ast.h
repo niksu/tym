@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "util.h"
+
 typedef enum {VAR=0, CONST=1, STR=2} term_kind_t;
 
 struct term_t {
@@ -21,10 +23,7 @@ struct term_t {
   const char * identifier;
 };
 
-struct terms_t {
-  struct term_t * term;
-  struct terms_t * next;
-};
+DECLARE_LIST_TYPE(terms_t, term, term_t)
 
 struct atom_t {
   char * predicate;
@@ -32,10 +31,7 @@ struct atom_t {
   struct term_t * args;
 };
 
-struct atoms_t {
-  struct atom_t * atom;
-  struct atoms_t * next;
-};
+DECLARE_LIST_TYPE(atoms_t, atom, atom_t)
 
 struct clause_t {
   struct atom_t head;
@@ -43,10 +39,7 @@ struct clause_t {
   struct atom_t * body;
 };
 
-struct clauses_t {
-  struct clause_t * clause;
-  struct clauses_t * next;
-};
+DECLARE_LIST_TYPE(clauses_t, clause, clause_t)
 
 struct program_t {
   uint8_t no_clauses;

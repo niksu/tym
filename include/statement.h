@@ -47,10 +47,7 @@ struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, const char
 size_t stmt_str(struct stmt_t *, size_t * remaining, char * buf);
 void free_stmt(struct stmt_t *);
 
-struct stmts_t {
-  struct stmt_t * stmt;
-  struct stmts_t * next;
-};
+DECLARE_LIST_TYPE(stmts_t, stmt, stmt_t)
 
 struct stmts_t * mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next);
 size_t stmts_str(struct stmts_t *, size_t * remaining, char * buf);
