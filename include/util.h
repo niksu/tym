@@ -25,10 +25,10 @@
 #define DBG(...)
 #endif // DEBUG
 
-#define DECLARE_LIST_TYPE(type_name, field_name, elements_ty) \
-  struct type_name { \
-    struct elements_ty * field_name; \
-    struct type_name * next; \
+#define DECLARE_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
+  struct TYPE_NAME { \
+    struct ELEMENTS_TY * FIELD_NAME; \
+    struct TYPE_NAME * next; \
   };
 // FIXME include functions for LEN and STR and NEW
 
