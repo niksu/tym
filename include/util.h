@@ -30,6 +30,21 @@
     struct ELEMENTS_TY * FIELD_NAME; \
     struct TYPE_NAME * next; \
   };
-// FIXME include functions for LEN and STR and NEW
+// FIXME include functions for STR and NEW
+
+#define DECLARE_U8_LIST_LEN(TYPE_NAME) \
+  uint8_t len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME ## _t * next);
+
+#define DEFINE_U8_LIST_LEN(TYPE_NAME) \
+  uint8_t \
+  len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME ## _t * next) \
+  { \
+    uint8_t result = 0; \
+    while (NULL != next) { \
+      result++; \
+      next = next->next; \
+    } \
+    return result; \
+  }
 
 #endif /* __TYM_UTIL_H__ */

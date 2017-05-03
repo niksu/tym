@@ -94,7 +94,7 @@ terms : term TK_R_RB
 atom : TK_CONST TK_L_RB terms
        { char * predicate = strdup($1);
          struct terms_t * ts = $3;
-         struct atom_t * atom = mk_atom(predicate, len_term_cell(ts), ts);
+         struct atom_t * atom = mk_atom(predicate, len_terms_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom

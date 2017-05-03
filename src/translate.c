@@ -340,7 +340,7 @@ order_statements(struct stmts_t * stmts)
 #endif
 
 #if DEBUG
-    printf("|declared| = %d\n", len_term_cell(declared));
+    printf("|declared| = %d\n", len_terms_cell(declared));
 #endif
     remaining_buf_size = BUF_SIZE;
     l = terms_to_str(declared, &remaining_buf_size, buf);

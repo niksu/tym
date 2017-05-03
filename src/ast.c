@@ -203,18 +203,7 @@ mk_term_cell(struct term_t * term, struct terms_t * next)
   return ts;
 }
 
-uint8_t
-len_term_cell(const struct terms_t * next)
-{
-  uint8_t result = 0;
-
-  while (NULL != next) {
-    result++;
-    next = next->next;
-  }
-
-  return result;
-}
+DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
 mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
