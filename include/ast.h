@@ -65,8 +65,8 @@ struct atoms_t * mk_atom_cell(struct atom_t * atom, struct atoms_t * next);
 struct clauses_t * mk_clause_cell(struct clause_t * clause, struct clauses_t * next);
 
 DECLARE_U8_LIST_LEN(terms)
-uint8_t len_atom_cell(const struct atoms_t * next);
-uint8_t len_clause_cell(const struct clauses_t * next);
+DECLARE_U8_LIST_LEN(atoms)
+DECLARE_U8_LIST_LEN(clauses)
 
 void free_term(struct term_t term);
 void free_terms(struct terms_t * terms);

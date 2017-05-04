@@ -242,18 +242,7 @@ mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
   return ats;
 }
 
-uint8_t
-len_atom_cell(const struct atoms_t * next)
-{
-  uint8_t result = 0;
-
-  while (NULL != next) {
-    result++;
-    next = next->next;
-  }
-
-  return result;
-}
+DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
 mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
@@ -292,18 +281,7 @@ mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
   return cls;
 }
 
-uint8_t
-len_clause_cell(const struct clauses_t * next)
-{
-  uint8_t result = 0;
-
-  while (NULL != next) {
-    result++;
-    next = next->next;
-  }
-
-  return result;
-}
+DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)

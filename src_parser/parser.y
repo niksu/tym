@@ -109,7 +109,7 @@ clause : atom TK_PERIOD
            $$ = cl; }
        | atom TK_IF atoms TK_PERIOD
          { struct atoms_t * ats = $3;
-           struct clause_t * cl = mk_clause($1, len_atom_cell(ats), ats);
+           struct clause_t * cl = mk_clause($1, len_atoms_cell(ats), ats);
            $$ = cl; }
 
 clauses : clause
@@ -121,7 +121,7 @@ clauses : clause
 
 program : clauses
            { struct clauses_t * cls = $1;
-             struct program_t * p = mk_program(len_clause_cell(cls), cls);
+             struct program_t * p = mk_program(len_clauses_cell(cls), cls);
              *program = p;
            }
         |
