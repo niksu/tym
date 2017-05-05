@@ -40,7 +40,7 @@ struct fmla_t {
 };
 
 DECLARE_LIST_TYPE(fmlas_t, fmla, fmla_t)
-DECLARE_EXTTAIL_LIST_TYPE(mutable_fmlas_t, fmla, fmla_t)
+DECLARE_MUTABLE_LIST_TYPE(mutable_fmlas_t, fmla, fmla_t)
 
 const struct fmlas_t * mk_fmla_cell(const struct fmla_t * fmla, const struct fmlas_t * next);
 

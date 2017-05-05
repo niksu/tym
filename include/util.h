@@ -31,7 +31,7 @@
     const struct TYPE_NAME * next; \
   };
 
-#define DECLARE_EXTTAIL_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
+#define DECLARE_MUTABLE_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
   struct TYPE_NAME { \
     struct ELEMENTS_TY * FIELD_NAME; \
     struct TYPE_NAME * next; \
