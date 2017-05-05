@@ -31,7 +31,7 @@ my_strcpy(char * dst, const char * src, size_t * space)
 }
 
 size_t
-term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
+term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
 {
   size_t l = my_strcpy(outbuf, term->identifier, outbuf_size); // FIXME add error checking
 
@@ -46,7 +46,7 @@ term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf)
 }
 
 size_t
-predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
+predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
   size_t l = my_strcpy(outbuf, atom->predicate, outbuf_size); // FIXME add error checking
 
@@ -60,7 +60,7 @@ predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 }
 
 size_t
-atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
+atom_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
   size_t l = predicate_to_str(atom, outbuf_size, outbuf); // FIXME add error checking
 
@@ -103,7 +103,7 @@ atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 }
 
 size_t
-clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
+clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbuf)
 {
   size_t l = atom_to_str(&(clause->head), outbuf_size, outbuf); // FIXME add error checking
 
@@ -159,7 +159,7 @@ clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf)
 }
 
 size_t
-program_to_str(struct program_t * program, size_t * outbuf_size, char * outbuf)
+program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
 {
   size_t offset = 0;
   size_t pre_offset;
@@ -191,22 +191,21 @@ mk_term(term_kind_t kind, const char * identifier)
 }
 
 struct terms_t *
-mk_term_cell(struct term_t * term, struct terms_t * next)
+mk_term_cell(const struct term_t * const term, const struct terms_t * const next)
 {
   assert(NULL != term);
 
   struct terms_t * ts = malloc(sizeof(struct terms_t));
   assert(NULL != ts);
 
-  ts->term = term;
-  ts->next = next;
+  *ts = (struct terms_t){.term = term, .next = next};
   return ts;
 }
 
 DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
+mk_atom(char * predicate, uint8_t arity, const struct terms_t * args) {
   assert(NULL != predicate);
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
@@ -229,23 +228,21 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
 }
 
 struct atoms_t *
-mk_atom_cell(struct atom_t * atom, struct atoms_t * next)
+mk_atom_cell(const struct atom_t * const atom, const struct atoms_t * const next)
 {
   assert(NULL != atom);
 
   struct atoms_t * ats = malloc(sizeof(struct atoms_t));
   assert(NULL != ats);
 
-  ats->atom = atom;
-  ats->next = next;
-
+  *ats = (struct atoms_t){.atom = atom, .next = next};
   return ats;
 }
 
 DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
+mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) {
   assert(NULL != head);
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
@@ -268,23 +265,21 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
 }
 
 struct clauses_t *
-mk_clause_cell(struct clause_t * clause, struct clauses_t * next)
+mk_clause_cell(const struct clause_t * const clause, const struct clauses_t * const next)
 {
   assert(NULL != clause);
 
   struct clauses_t * cls = malloc(sizeof(struct clauses_t));
   assert(NULL != cls);
 
-  cls->clause = clause;
-  cls->next = next;
-
+  *cls = (struct clauses_t){.clause = clause, .next = next};
   return cls;
 }
 
 DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
-mk_program(uint8_t no_clauses, struct clauses_t * program)
+mk_program(uint8_t no_clauses, const struct clauses_t * program)
 {
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
@@ -315,6 +310,8 @@ free_term(struct term_t term)
 }
 #pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_terms(struct terms_t * terms)
 {
@@ -322,12 +319,13 @@ free_terms(struct terms_t * terms)
 
   assert(NULL != terms->term);
   free_term(*(terms->term));
-  free(terms->term);
+  free((void *)terms->term);
   if (NULL != terms->next) {
-    free_terms(terms->next);
+    free_terms((void *)terms->next);
   }
   free(terms);
 }
+#pragma GCC diagnostic pop
 
 void
 free_atom(struct atom_t atom)
@@ -353,6 +351,8 @@ free_atom(struct atom_t atom)
   // do that.
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_atoms(struct atoms_t * atoms)
 {
@@ -360,12 +360,13 @@ free_atoms(struct atoms_t * atoms)
 
   assert(NULL != atoms->atom);
   free_atom(*(atoms->atom));
-  free(atoms->atom);
+  free((void *)atoms->atom);
   if (NULL != atoms->next) {
-    free_atoms(atoms->next);
+    free_atoms((void *)atoms->next);
   }
   free(atoms);
 }
+#pragma GCC diagnostic pop
 
 void
 free_clause(struct clause_t clause)
@@ -385,6 +386,8 @@ free_clause(struct clause_t clause)
   }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_clauses(struct clauses_t * clauses)
 {
@@ -392,13 +395,16 @@ free_clauses(struct clauses_t * clauses)
 
   assert(NULL != clauses->clause);
   free_clause(*(clauses->clause));
-  free(clauses->clause);
+  free((void *)clauses->clause);
   if (NULL != clauses->next) {
-    free_clauses(clauses->next);
+    free_clauses((void *)clauses->next);
   }
   free(clauses);
 }
+#pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_program(struct program_t * program)
 {
@@ -411,7 +417,7 @@ free_program(struct program_t * program)
 
     assert(NULL != (program->program[i]));
     free_clause(*(program->program[i])); // Free clause contents.
-    free(program->program[i]); // Free the clause itsenf.
+    free((void *)program->program[i]); // Free the clause itsenf.
   }
 
   if (program->no_clauses > 0) {
@@ -420,6 +426,7 @@ free_program(struct program_t * program)
 
   free(program); // Free the program struct.
 }
+#pragma GCC diagnostic pop
 
 // FIXME could allocate memory at start to amortise.
 void
@@ -602,18 +609,19 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 }
 
 size_t
-terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf)
+terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf)
 {
+  const struct terms_t * cursor = terms;
   size_t l = 0;
   while (NULL != terms) {
-    l += term_to_str(terms->term, outbuf_size, outbuf + l); // FIXME add error checking
+    l += term_to_str(cursor->term, outbuf_size, outbuf + l); // FIXME add error checking
 
     if (NULL != terms->next) {
       outbuf[(*outbuf_size)--, l++] = ',';
       outbuf[(*outbuf_size)--, l++] = ' ';
     }
 
-    terms = terms->next;
+    cursor = cursor->next;
   }
 
   outbuf[l] = '\0';

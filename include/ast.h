@@ -43,26 +43,25 @@ DECLARE_LIST_TYPE(clauses_t, clause, clause_t)
 
 struct program_t {
   uint8_t no_clauses;
-  struct clause_t ** program;
+  const struct clause_t ** program;
 };
 
 size_t my_strcpy(char * dst, const char * src, size_t * space);
-size_t term_to_str(struct term_t * term, size_t * outbuf_size, char * outbuf);
-size_t terms_to_str(struct terms_t * terms, size_t * outbuf_size, char * outbuf);
-size_t predicate_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
-size_t atom_to_str(struct atom_t * atom, size_t * outbuf_size, char * outbuf);
-size_t clause_to_str(struct clause_t * clause, size_t * outbuf_size, char * outbuf);
-size_t program_to_str(struct program_t * clause, size_t * outbuf_size, char * outbuf);
+size_t term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf);
+size_t terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf);
+size_t predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf);
+size_t atom_to_str(const struct atom_t * const atom, size_t * outbuf_size, char * outbuf);
+size_t clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf);
+size_t program_to_str(const struct program_t * const clause, size_t * outbuf_size, char * outbuf);
 
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body);
-struct program_t * mk_program(uint8_t no_clauses, struct clauses_t * program);
+struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * args);
+struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body);
+struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * program);
 
-// FIXME qualify pointers with "const"
-struct terms_t * mk_term_cell(struct term_t * term, struct terms_t * next);
-struct atoms_t * mk_atom_cell(struct atom_t * atom, struct atoms_t * next);
-struct clauses_t * mk_clause_cell(struct clause_t * clause, struct clauses_t * next);
+struct terms_t * mk_term_cell(const struct term_t * const term, const struct terms_t * const next);
+struct atoms_t * mk_atom_cell(const struct atom_t * const atom, const struct atoms_t * const next);
+struct clauses_t * mk_clause_cell(const struct clause_t * const clause, const struct clauses_t * const next);
 
 DECLARE_U8_LIST_LEN(terms)
 DECLARE_U8_LIST_LEN(atoms)

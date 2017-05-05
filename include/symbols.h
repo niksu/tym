@@ -44,7 +44,7 @@ typedef enum {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY} eq_pred_error_t;
 
 bool eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_code, bool * result);
 
-DECLARE_LIST_TYPE(predicates_t, predicate, predicate_t)
+DECLARE_EXTTAIL_LIST_TYPE(predicates_t, predicate, predicate_t)
 
 struct predicates_t * mk_pred_cell(struct predicate_t * pred, struct predicates_t * next);
 
@@ -59,17 +59,17 @@ struct atom_database_t * mk_atom_database(void);
 
 typedef enum {ADL_NO_ERROR, DIFF_ARITY} adl_lookup_error_t;
 
-bool atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record);
+bool atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record);
 
 typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 
-bool atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
+bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
 
 size_t atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf);
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
-size_t predicate_str(struct predicate_t * pred, size_t * outbuf_size, char * outbuf);
+size_t predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf);
 
-bool clause_database_add(struct clause_t * clause, struct atom_database_t * cdb, void *);
+bool clause_database_add(const struct clause_t * clause, struct atom_database_t * cdb, void *);
 
 size_t num_predicate_bodies (struct predicate_t *);
 

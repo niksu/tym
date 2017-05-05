@@ -26,7 +26,7 @@ mk_universe(struct terms_t * terms)
   result->cardinality = 0;
   result->element = NULL;
 
-  struct terms_t * cursor = terms;
+  const struct terms_t * cursor = terms;
   while (NULL != cursor) {
     result->cardinality++;
     assert(CONST == cursor->term->kind);
@@ -92,17 +92,16 @@ free_universe(struct universe_t * uni)
   free(uni);
 }
 
-struct stmt_t *
-mk_stmt_axiom(struct fmla_t * axiom)
+const struct stmt_t *
+mk_stmt_axiom(const struct fmla_t * axiom)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
-  result->kind = STMT_AXIOM;
-  result->param.axiom = axiom;
+  *result = (struct stmt_t){.kind = STMT_AXIOM, .param.axiom = axiom};
   return result;
 }
 
-struct stmt_t *
-mk_stmt_pred(const char * const pred_name, struct terms_t * params, struct fmla_t * body)
+const struct stmt_t *
+mk_stmt_pred(const char * const pred_name, struct terms_t * params, const struct fmla_t * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
@@ -142,10 +141,10 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
      .body = NULL,
      .ty = ty};
 
-  struct fmlas_t * fmlas = NULL;
+  const struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2,
+    const struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2,
       mk_term(CONST, const_name),
       mk_term(CONST, uni->element[i]));
     fmlas = mk_fmla_cell(fmla, fmlas);
@@ -161,7 +160,7 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 }
 
 size_t
-stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
+stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
 {
   size_t l = 0;
   switch (stmt->kind) {
@@ -200,7 +199,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
 
-      struct terms_t * params_cursor = stmt->param.const_def->params;
+      const struct terms_t * params_cursor = stmt->param.const_def->params;
       while (NULL != params_cursor) {
         buf[(*remaining)--, l++] = '(';
 
@@ -237,7 +236,7 @@ stmt_str(struct stmt_t * stmt, size_t * remaining, char * buf)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_stmt(struct stmt_t * stmt)
+free_stmt(const struct stmt_t * stmt)
 {
   switch (stmt->kind) {
   case STMT_AXIOM:
@@ -255,12 +254,12 @@ free_stmt(struct stmt_t * stmt)
     // FIXME complain
     break;
   }
-  free(stmt);
+  free((void *)stmt);
 }
 #pragma GCC diagnostic pop
 
-struct stmts_t *
-mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next)
+const struct stmts_t *
+mk_stmt_cell(const struct stmt_t * stmt, const struct stmts_t * next)
 {
   assert(NULL != stmt);
 
@@ -273,10 +272,10 @@ mk_stmt_cell(struct stmt_t * stmt, struct stmts_t * next)
 }
 
 size_t
-stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf)
+stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
 {
   size_t l = 0;
-  struct stmts_t * cursor = stmts;
+  const struct stmts_t * cursor = stmts;
   while (NULL != cursor) {
     l += stmt_str(cursor->stmt, remaining, buf + l);
     buf[(*remaining)--, l++] = '\n';
@@ -285,16 +284,19 @@ stmts_str(struct stmts_t * stmts, size_t * remaining, char * buf)
   return l;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_stmts(struct stmts_t * stmts)
+free_stmts(const struct stmts_t * stmts)
 {
   assert(NULL != stmts->stmt);
   free_stmt(stmts->stmt);
   if (NULL != stmts->next) {
     free_stmts(stmts->next);
   }
-  free(stmts);
+  free((void *)stmts);
 }
+#pragma GCC diagnostic pop
 
 struct model_t *
 mk_model(struct universe_t * uni)
@@ -319,18 +321,21 @@ model_str(struct model_t * mdl, size_t * remaining, char * buf)
   return l;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_model(struct model_t * mdl)
+free_model(const struct model_t * mdl)
 {
   free_universe(mdl->universe);
   if (NULL != mdl->stmts) {
     free_stmts(mdl->stmts);
   }
-  free(mdl);
+  free((void *)mdl);
 }
+#pragma GCC diagnostic pop
 
 void
-strengthen_model(struct model_t * mdl, struct stmt_t * stmt)
+strengthen_model(struct model_t * mdl, const struct stmt_t * stmt)
 {
   mdl->stmts = mk_stmt_cell(stmt, mdl->stmts);
 }
@@ -345,14 +350,14 @@ test_statement(void)
 
   struct model_t * mdl = mk_model(mk_universe(terms));
 
-  struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
+  const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
   char * vX = malloc(sizeof(char) * 2);
   strcpy(vX, "X");
   char * vY = malloc(sizeof(char) * 2);
   strcpy(vY, "Y");
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
-  struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
+  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
   struct stmt_t * s3S = mk_stmt_const("x", mdl->universe, (const char * const)&universe_ty);
 
   strengthen_model(mdl, s1S);
@@ -368,22 +373,26 @@ test_statement(void)
   free(buf);
 }
 
-struct stmts_t *
-reverse_stmts(struct stmts_t * stmts)
+// FIXME why restricted to const alone?
+const struct stmts_t *
+reverse_stmts(const struct stmts_t * stmts)
 {
-  struct stmts_t * cursor = stmts;
-  struct stmts_t * result = NULL;
+  const struct stmts_t * cursor = stmts;
+  const struct stmts_t * result = NULL;
   while (NULL != cursor) {
     assert(NULL != cursor->stmt);
     result = mk_stmt_cell(cursor->stmt, result);
     cursor = cursor->next;
   }
-  free(stmts);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)stmts);
+#pragma GCC diagnostic pop
   return result;
 }
 
 struct term_t *
-new_const_in_stmt(struct stmt_t * stmt)
+new_const_in_stmt(const struct stmt_t * stmt)
 {
   struct term_t * result = NULL;
   switch (stmt->kind) {
@@ -401,7 +410,7 @@ new_const_in_stmt(struct stmt_t * stmt)
 }
 
 struct terms_t *
-consts_in_stmt(struct stmt_t * stmt)
+consts_in_stmt(const struct stmt_t * stmt)
 {
   struct terms_t * result = NULL;
   switch (stmt->kind) {
@@ -431,7 +440,7 @@ statementise_universe(struct model_t * mdl)
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = mk_term(CONST, mdl->universe->element[i]);
   }
-  struct fmla_t * distinctness_fmla =
+  const struct fmla_t * distinctness_fmla =
     mk_fmla_atom(distinct_pred, mdl->universe->cardinality, args);
   strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }

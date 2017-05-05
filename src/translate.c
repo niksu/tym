@@ -9,8 +9,8 @@
 
 #include "translate.h"
 
-struct fmla_t *
-translate_atom(struct atom_t * at)
+const struct fmla_t *
+translate_atom(const struct atom_t * at)
 {
   assert(NULL != at);
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
@@ -20,10 +20,10 @@ translate_atom(struct atom_t * at)
   return mk_fmla_atom(at->predicate, at->arity, args);
 }
 
-struct fmla_t *
-translate_body(struct clause_t * cl)
+const struct fmla_t *
+translate_body(const struct clause_t * cl)
 {
-  struct fmlas_t * fmlas = NULL;
+  const struct fmlas_t * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
     fmlas = mk_fmla_cell(translate_atom(cl->body + i), fmlas);
   }
@@ -31,21 +31,26 @@ translate_body(struct clause_t * cl)
 }
 
 struct fmlas_t *
-translate_bodies(struct clauses_t * cls)
+translate_bodies(const struct clauses_t * cls)
 {
-  struct clauses_t * cursor = cls;
+  const struct clauses_t * cursor = cls;
   struct fmlas_t * fmlas = NULL;
   if (NULL != cursor) {
-    fmlas = mk_fmla_cell(translate_body(cursor->clause),
+// FIXME check if the translation involved any sharing (i.e., should the result
+//       type by a const?)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    fmlas = (struct fmlas_t *)mk_fmla_cell(translate_body(cursor->clause),
       translate_bodies(cursor->next));
+#pragma GCC diagnostic pop
   }
   return fmlas;
 }
 
-struct fmla_t *
+const struct fmla_t *
 translate_valuation(struct valuation_t * const v)
 {
-  struct fmlas_t * result = NULL;
+  const struct fmlas_t * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
     result = mk_fmla_cell(mk_fmla_atom_varargs("=", 2, mk_term(VAR, cursor->var), cursor->val), result);
@@ -54,10 +59,10 @@ translate_valuation(struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-struct fmla_t *
+const struct fmla_t *
 translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at)
 {
-  struct fmla_t * result = NULL;
+  const struct fmla_t * result = NULL;
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
     if (VAR == at->predargs[i]->kind) {
@@ -74,12 +79,12 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const str
   return result;
 }
 
-struct fmla_t *
+const struct fmla_t *
 translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla)
 {
-  struct fmla_t * result = NULL;
-  struct fmla_t * fmla_2 = NULL;
-  struct fmla_t * fmla_3 = NULL;
+  const struct fmla_t * result = NULL;
+  const struct fmla_t * fmla_2 = NULL;
+  const struct fmla_t * fmla_3 = NULL;
   // FIXME free intermediate allocations.
 
   switch (fmla->kind) {
@@ -120,9 +125,9 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
 #endif
-  struct clause_t * q_cl = query/* FIXME implicit arg8? */->program[0]; // FIXME hardcoding
-  struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
-  struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
+  const struct clause_t * q_cl = query/* FIXME implicit arg8? */->program[0]; // FIXME hardcoding
+  const struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
+  const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
@@ -135,7 +140,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   printf("translated_q (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
-  struct stmt_t * stmt = mk_stmt_axiom(translated_q);
+  const struct stmt_t * stmt = mk_stmt_axiom(translated_q);
   strengthen_model(mdl, stmt);
 }
 
@@ -181,8 +186,8 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
     size_t out_size;
 
-    struct fmlas_t * fmlas = translate_bodies(preds_cursor->predicate->bodies);
-    struct fmlas_t * fmlas_cursor = fmlas;
+    struct mutable_fmlas_t * fmlas = (struct mutable_fmlas_t *)translate_bodies(preds_cursor->predicate->bodies);
+    struct mutable_fmlas_t * fmlas_cursor = fmlas;
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
@@ -193,7 +198,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         var_args[i] = mk_term(VAR, mk_new_var(vg));
       }
 
-      struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
+      const struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
           preds_cursor->predicate->arity, var_args);
 
       out_size = fmla_str(atom, &remaining_buf_size, buf);
@@ -207,8 +212,8 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
       free_fmla(atom);
     } else {
-      struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
-      struct fmla_t * abs_head_fmla;
+      const struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+      const struct fmla_t * abs_head_fmla;
 
       while (NULL != body_cursor) {
 #if DEBUG
@@ -217,7 +222,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 
         struct sym_gen_t * vg_copy = copy_sym_gen(vg);
 
-        struct atom_t * head_atom = &(body_cursor->clause->head);
+        const struct atom_t * head_atom = &(body_cursor->clause->head);
         struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
 
         for (int i = 0; i < head_atom->arity; i++) {
@@ -225,7 +230,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         }
 
         // Abstract the atom's parameters.
-        struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
+        const struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
         out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
@@ -250,15 +255,19 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         }
 #endif
 
-        struct fmla_t * valuation_fmla = translate_valuation(*v);
-        struct fmla_t * fmla = fmlas_cursor->fmla;
-        fmlas_cursor->fmla = mk_fmla_and(fmla, valuation_fmla);
+        const struct fmla_t * valuation_fmla = translate_valuation(*v);
+        const struct fmla_t * fmla = fmlas_cursor->fmla;
+        const struct fmla_t * anded_fmla = mk_fmla_and(fmla, valuation_fmla);
+        fmlas_cursor->fmla = copy_fmla(anded_fmla);
         free_fmla(fmla);
+        free_fmla(anded_fmla);
         free_fmla(valuation_fmla);
         struct terms_t * ts = filter_var_values(*v);
         fmla = fmlas_cursor->fmla;
-        fmlas_cursor->fmla = mk_fmla_quants(ts, fmla);
+        const struct fmla_t * quantified_fmla = mk_fmla_quants(ts, fmla);
+        fmlas_cursor->fmla = copy_fmla(quantified_fmla);
         free_fmla(fmla);
+        free_fmla(quantified_fmla);
 
         remaining_buf_size = BUF_SIZE;
         fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
@@ -284,7 +293,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         free_sym_gen(vg_copy);
       }
 
-      struct fmla_t * fmla = mk_fmla_ors(fmlas);
+      const struct fmla_t * fmla = mk_fmla_ors((struct fmlas_t *)fmlas);
       remaining_buf_size = BUF_SIZE;
       out_size = fmla_str(fmla, &remaining_buf_size, buf);
       assert(out_size > 0);
@@ -311,12 +320,12 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
 }
 
 // FIXME naive implementation
-struct stmts_t *
-order_statements(struct stmts_t * stmts)
+const struct stmts_t *
+order_statements(const struct stmts_t * stmts)
 {
-  struct stmts_t * cursor = stmts;
-  struct stmts_t * waiting = NULL;
-  struct stmts_t * result = NULL;
+  const struct stmts_t * cursor = stmts;
+  const struct stmts_t * waiting = NULL;
+  const struct stmts_t * result = NULL;
 
   struct terms_t * declared = NULL;
   declared = mk_term_cell(mk_term(CONST, "="/* FIXME const */), declared);
@@ -397,6 +406,5 @@ order_statements(struct stmts_t * stmts)
 
     cursor = cursor->next;
   }
-  free(stmts);
   return reverse_stmts(result);
 }

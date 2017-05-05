@@ -27,10 +27,15 @@
 
 #define DECLARE_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
   struct TYPE_NAME { \
+    const struct ELEMENTS_TY * FIELD_NAME; \
+    const struct TYPE_NAME * next; \
+  };
+
+#define DECLARE_EXTTAIL_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
+  struct TYPE_NAME { \
     struct ELEMENTS_TY * FIELD_NAME; \
     struct TYPE_NAME * next; \
   };
-// FIXME include functions for STR and NEW
 
 #define DECLARE_U8_LIST_LEN(TYPE_NAME) \
   uint8_t len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME ## _t * next);
@@ -46,5 +51,7 @@
     } \
     return result; \
   }
+
+// FIXME include functions for NEW and STR wrt list.
 
 #endif /* __TYM_UTIL_H__ */

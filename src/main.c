@@ -179,7 +179,13 @@ main(int argc, char ** argv)
   printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
-  mdl->stmts = order_statements(mdl->stmts);
+  const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
+// FIXME crude
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)mdl->stmts);
+#pragma GCC diagnostic pop
+  mdl->stmts = reordered_stmts;
   remaining_buf_size = BUF_SIZE;
   l = model_str(mdl, &remaining_buf_size, buf);
 #if DEBUG

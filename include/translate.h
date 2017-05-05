@@ -17,22 +17,22 @@
 #include "statement.h"
 #include "symbols.h"
 
-struct fmla_t * translate_atom(struct atom_t * at);
+const struct fmla_t * translate_atom(const struct atom_t * at);
 
-struct fmla_t * translate_body(struct clause_t * cl);
+const struct fmla_t * translate_body(const struct clause_t * cl);
 
-struct fmlas_t * translate_bodies(struct clauses_t * cls);
+struct fmlas_t * translate_bodies(const struct clauses_t * cls);
 
-struct fmla_t * translate_valuation(struct valuation_t * const v);
+const struct fmla_t * translate_valuation(struct valuation_t * const v);
 
-struct fmla_t * translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at);
+const struct fmla_t * translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at);
 
-struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla);
+const struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla);
 
 void translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg);
 
 struct model_t * translate_program(struct program_t * program, struct sym_gen_t * vg);
 
-struct stmts_t * order_statements(struct stmts_t * stmts);
+const struct stmts_t * order_statements(const struct stmts_t * stmts);
 
 #endif /* __TYM_TRANSLATE_H__ */

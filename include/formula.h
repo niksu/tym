@@ -40,27 +40,28 @@ struct fmla_t {
 };
 
 DECLARE_LIST_TYPE(fmlas_t, fmla, fmla_t)
+DECLARE_EXTTAIL_LIST_TYPE(mutable_fmlas_t, fmla, fmla_t)
 
-struct fmlas_t * mk_fmla_cell(struct fmla_t * fmla, struct fmlas_t * next);
+const struct fmlas_t * mk_fmla_cell(const struct fmla_t * fmla, const struct fmlas_t * next);
 
-struct fmla_t * mk_fmla_const(bool b);
-struct fmla_t * mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** args);
-struct fmla_t * mk_fmla_atom_varargs(const char * pred_name, uint8_t arity, ...);
-struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
-struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body);
-struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
-struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas);
-struct fmla_t * mk_fmla_ors(struct fmlas_t * fmlas);
-struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
+const struct fmla_t * mk_fmla_const(bool b);
+const struct fmla_t * mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** args);
+const struct fmla_t * mk_fmla_atom_varargs(const char * pred_name, uint8_t arity, ...);
+const struct fmla_t * mk_fmla_quant(const char * bv, const struct fmla_t * body);
+const struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * body);
+const struct fmla_t * mk_fmla_not(const struct fmla_t * subfmla);
+const struct fmla_t * mk_fmla_and(const struct fmla_t * subfmlaL, const struct fmla_t * subfmlaR);
+const struct fmla_t * mk_fmla_or(const struct fmla_t * subfmlaL, const struct fmla_t * subfmlaR);
+const struct fmla_t * mk_fmla_ands(const struct fmlas_t * fmlas);
+const struct fmla_t * mk_fmla_ors(const struct fmlas_t * fmlas);
+const struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
 struct fmla_t * copy_fmla(const struct fmla_t * const);
 
-struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
+const struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
 
 size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
 size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
-size_t fmla_str(struct fmla_t * at, size_t * remaining, char * buf);
+size_t fmla_str(const struct fmla_t * at, size_t * remaining, char * buf);
 
 struct sym_gen_t {
   const char * prefix;
@@ -80,15 +81,15 @@ struct valuation_t {
 size_t valuation_len(const struct valuation_t * const v);
 size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
 
-bool fmla_is_atom(struct fmla_t * fmla);
-struct fmla_atom_t * fmla_as_atom(struct fmla_t * fmla);
-struct fmla_t * mk_abstract_vars(struct fmla_t *, struct sym_gen_t *, struct valuation_t **);
+bool fmla_is_atom(const struct fmla_t * fmla);
+struct fmla_atom_t * fmla_as_atom(const struct fmla_t * fmla);
+const struct fmla_t * mk_abstract_vars(const struct fmla_t *, struct sym_gen_t *, struct valuation_t **);
 struct terms_t * arguments_of_atom(struct fmla_atom_t * fmla);
 
 void free_fmla_atom(struct fmla_atom_t *);
 void free_fmla_quant(struct fmla_quant_t *);
-void free_fmla(struct fmla_t *);
-void free_fmlas(struct fmlas_t *);
+void free_fmla(const struct fmla_t *);
+void free_fmlas(const struct fmlas_t *);
 void free_sym_gen(struct sym_gen_t *);
 void free_valuation(struct valuation_t *);
 

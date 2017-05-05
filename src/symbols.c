@@ -65,7 +65,7 @@ term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * out
   assert(NULL != tdb);
   assert(NULL != outbuf);
 
-  struct terms_t * cursor = tdb->herbrand_universe;
+  const struct terms_t * cursor = tdb->herbrand_universe;
   size_t l = 0;
 
   while (NULL != cursor && *outbuf_size > 0) {
@@ -145,7 +145,7 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record)
+atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record)
 {
   bool success;
   if (NULL == adb) {
@@ -186,7 +186,7 @@ atom_database_member(struct atom_t * atom, struct atom_database_t * adb, adl_loo
 }
 
 bool
-atom_database_add(struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result)
+atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result)
 {
   bool success;
 
@@ -236,7 +236,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   // FIXME any time we detect that *outbuf_size > 0 then
   //       switch to failure mode.
 
-  struct predicates_t * cursor;
+  const struct predicates_t * cursor;
 
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
@@ -247,7 +247,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 
       outbuf[(*outbuf_size)--, l++] = '\n';
 
-      struct clauses_t * clause_cursor = cursor->predicate->bodies;
+      const struct clauses_t * clause_cursor = cursor->predicate->bodies;
       while (NULL != clause_cursor) {
         outbuf[(*outbuf_size)--, l++] = ' ';
         outbuf[(*outbuf_size)--, l++] = ' ';
@@ -271,7 +271,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 }
 
 size_t
-predicate_str(struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
+predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
 {
   size_t l = 0;
   size_t l_sub = my_strcpy(&(outbuf[l]), pred->predicate, outbuf_size);
@@ -297,7 +297,7 @@ atom_database_to_predicates(struct atom_database_t * adb)
 {
   struct predicates_t * result = NULL;
   struct predicates_t * result_cursor = NULL;
-  struct predicates_t * cursor = NULL;
+  const struct predicates_t * cursor = NULL;
 
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
@@ -323,7 +323,7 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(struct clause_t * clause, struct atom_database_t * adb, void * cdl_add_error)
+clause_database_add(const struct clause_t * clause, struct atom_database_t * adb, void * cdl_add_error)
 {
   adl_lookup_error_t adl_lookup_error;
   adl_add_error_t adl_add_error;
@@ -378,7 +378,7 @@ size_t
 num_predicate_bodies (struct predicate_t * p)
 {
   size_t no_bodies = 0;
-  struct clauses_t * body_cursor = p->bodies;
+  const struct clauses_t * body_cursor = p->bodies;
   while (NULL != body_cursor) {
     no_bodies++;
     body_cursor = body_cursor->next;
