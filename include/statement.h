@@ -52,7 +52,8 @@ DECLARE_LIST_TYPE(stmts_t, stmt, stmt_t)
 const struct stmts_t * mk_stmt_cell(const struct stmt_t * stmt, const struct stmts_t * next);
 size_t stmts_str(const struct stmts_t *, size_t * remaining, char * buf);
 void free_stmts(const struct stmts_t *);
-const struct stmts_t * reverse_stmts(const struct stmts_t * stmts);
+
+DECLARE_LIST_REV(stmts, const, struct stmts_t, const)
 
 struct model_t {
   struct universe_t * universe;

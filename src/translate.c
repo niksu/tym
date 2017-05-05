@@ -406,5 +406,11 @@ order_statements(const struct stmts_t * stmts)
 
     cursor = cursor->next;
   }
-  return reverse_stmts(result);
+
+  const struct stmts_t * reversed = reverse_stmts(result);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)result);
+#pragma GCC diagnostic pop
+  return reversed;
 }

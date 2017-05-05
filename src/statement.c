@@ -373,23 +373,7 @@ test_statement(void)
   free(buf);
 }
 
-// FIXME why restricted to const alone?
-const struct stmts_t *
-reverse_stmts(const struct stmts_t * stmts)
-{
-  const struct stmts_t * cursor = stmts;
-  const struct stmts_t * result = NULL;
-  while (NULL != cursor) {
-    assert(NULL != cursor->stmt);
-    result = mk_stmt_cell(cursor->stmt, result);
-    cursor = cursor->next;
-  }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-  free((void *)stmts);
-#pragma GCC diagnostic pop
-  return result;
-}
+DEFINE_LIST_REV(stmts, const, struct stmts_t, const)
 
 struct term_t *
 new_const_in_stmt(const struct stmt_t * stmt)
