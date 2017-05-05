@@ -44,7 +44,7 @@ out/%.o: src/%.c $(HEADERS) parser
 
 .PHONY: clean test
 
-test:
+test_regression:
 	@TYMDIR=`pwd` ./scripts/run_tests.sh
 
 clean:
