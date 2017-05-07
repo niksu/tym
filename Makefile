@@ -44,6 +44,11 @@ out/%.o: src/%.c $(HEADERS) parser
 
 .PHONY: clean test
 
+test_units:
+	make clean
+	CFLAGS=-DTESTING make $(TGT)
+	./$(OUT_DIR)/$(TGT)
+
 test_regression:
 	@TYMDIR=`pwd` ./scripts/run_tests.sh
 
