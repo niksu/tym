@@ -52,7 +52,7 @@
     return result; \
   }
 
-// FIXME include functions for NEW and STR wrt list.
+// FIXME include functions for NEW and FREE and STR wrt list.
 
 #define __DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   TYPE_OP_POST TYPE_NAME * reverse_ ## NAME (TYPE_OP_PRE TYPE_NAME * lst)
