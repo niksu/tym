@@ -52,7 +52,24 @@
     return result; \
   }
 
-// FIXME include functions for NEW and FREE and STR wrt list.
+// FIXME include functions for FREE and STR wrt list.
+
+#define __DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE) \
+  const LIST_TYPE mk_ ## NAME ## _cell (const EL_TYPE el, const LIST_TYPE lst)
+#define DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE) \
+  __DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE);
+#define DEFINE_LIST_MK(FIELD_NAME, NAME, EL_TYPE, LIST_TYPE) \
+  __DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE) \
+  { \
+    assert(NULL != el); \
+  \
+    struct stmts_t * lsts = malloc(sizeof(LIST_TYPE)); \
+    assert(NULL != lsts); \
+  \
+    lsts->FIELD_NAME = el; \
+    lsts->next = lst; \
+    return lsts; \
+  }
 
 #define __DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   TYPE_OP_POST TYPE_NAME * reverse_ ## NAME (TYPE_OP_PRE TYPE_NAME * lst)

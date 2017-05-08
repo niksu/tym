@@ -258,18 +258,7 @@ free_stmt(const struct stmt_t * stmt)
 }
 #pragma GCC diagnostic pop
 
-const struct stmts_t *
-mk_stmt_cell(const struct stmt_t * stmt, const struct stmts_t * next)
-{
-  assert(NULL != stmt);
-
-  struct stmts_t * ss = malloc(sizeof(struct stmts_t));
-  assert(NULL != ss);
-
-  ss->stmt = stmt;
-  ss->next = next;
-  return ss;
-}
+DEFINE_LIST_MK(stmt, stmt, struct stmt_t *, struct stmts_t *)
 
 size_t
 stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)

@@ -48,8 +48,7 @@ size_t stmt_str(const struct stmt_t *, size_t * remaining, char * buf);
 void free_stmt(const struct stmt_t *);
 
 DECLARE_LIST_TYPE(stmts_t, stmt, stmt_t)
-
-const struct stmts_t * mk_stmt_cell(const struct stmt_t * stmt, const struct stmts_t * next);
+DECLARE_LIST_MK(stmt, struct stmt_t *, struct stmts_t *)
 size_t stmts_str(const struct stmts_t *, size_t * remaining, char * buf);
 void free_stmts(const struct stmts_t *);
 
