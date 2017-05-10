@@ -76,14 +76,13 @@
 #define DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   __DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST);
 // FIXME "const" is sticky, in that if TYPE_OP_PRE==const then must be that TYPE_OP_POST==const
-// FIXME relies on mk_stmt_cell
-#define DEFINE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
+#define DEFINE_LIST_REV(NAME, CELL_MAKER, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   __DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   { \
     TYPE_OP_POST TYPE_NAME * result = NULL; \
     while (NULL != lst) { \
       assert(NULL != lst->stmt); \
-      result = mk_stmt_cell(lst->stmt, result); \
+      result = CELL_MAKER(lst->stmt, result); \
       lst = lst->next; \
     } \
     return result; \

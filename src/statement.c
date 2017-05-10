@@ -362,7 +362,7 @@ test_statement(void)
   free(buf);
 }
 
-DEFINE_LIST_REV(stmts, const, struct stmts_t, const)
+DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
 
 struct term_t *
 new_const_in_stmt(const struct stmt_t * stmt)
