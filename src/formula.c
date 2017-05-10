@@ -293,17 +293,7 @@ fmla_str(const struct fmla_t * fmla, size_t * remaining, char * buf)
   return l;
 }
 
-const struct fmlas_t *
-mk_fmla_cell(const struct fmla_t * fmla, const struct fmlas_t * next)
-{
-  assert(NULL != fmla);
-
-  struct fmlas_t * fs = malloc(sizeof(struct fmlas_t));
-  assert(NULL != fs);
-
-  *fs = (struct fmlas_t){.fmla = fmla, .next = next};
-  return fs;
-}
+DEFINE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
 
 struct sym_gen_t *
 mk_sym_gen(const char * prefix)
