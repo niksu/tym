@@ -24,6 +24,7 @@ struct term_t {
 };
 
 DECLARE_LIST_TYPE(terms_t, term, term_t)
+DECLARE_LIST_MK(term, struct term_t, struct terms_t, /*no const*/)
 
 struct atom_t {
   char * predicate;
@@ -32,6 +33,7 @@ struct atom_t {
 };
 
 DECLARE_LIST_TYPE(atoms_t, atom, atom_t)
+DECLARE_LIST_MK(atom, struct atom_t, struct atoms_t, /*no const*/)
 
 struct clause_t {
   struct atom_t head;
@@ -40,6 +42,7 @@ struct clause_t {
 };
 
 DECLARE_LIST_TYPE(clauses_t, clause, clause_t)
+DECLARE_LIST_MK(clause, struct clause_t, struct clauses_t, /*no const*/)
 
 struct program_t {
   uint8_t no_clauses;
@@ -58,10 +61,6 @@ struct term_t * mk_term(term_kind_t kind, const char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body);
 struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * program);
-
-struct terms_t * mk_term_cell(const struct term_t * const term, const struct terms_t * const next);
-struct atoms_t * mk_atom_cell(const struct atom_t * const atom, const struct atoms_t * const next);
-struct clauses_t * mk_clause_cell(const struct clause_t * const clause, const struct clauses_t * const next);
 
 DECLARE_U8_LIST_LEN(terms)
 DECLARE_U8_LIST_LEN(atoms)

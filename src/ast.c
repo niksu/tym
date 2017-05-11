@@ -190,17 +190,7 @@ mk_term(term_kind_t kind, const char * identifier)
   return t;
 }
 
-struct terms_t *
-mk_term_cell(const struct term_t * const term, const struct terms_t * const next)
-{
-  assert(NULL != term);
-
-  struct terms_t * ts = malloc(sizeof(struct terms_t));
-  assert(NULL != ts);
-
-  *ts = (struct terms_t){.term = term, .next = next};
-  return ts;
-}
+DEFINE_LIST_MK(term, term, struct term_t, struct terms_t, /*no const*/)
 
 DEFINE_U8_LIST_LEN(terms)
 
@@ -227,17 +217,7 @@ mk_atom(char * predicate, uint8_t arity, const struct terms_t * args) {
   return at;
 }
 
-struct atoms_t *
-mk_atom_cell(const struct atom_t * const atom, const struct atoms_t * const next)
-{
-  assert(NULL != atom);
-
-  struct atoms_t * ats = malloc(sizeof(struct atoms_t));
-  assert(NULL != ats);
-
-  *ats = (struct atoms_t){.atom = atom, .next = next};
-  return ats;
-}
+DEFINE_LIST_MK(atom, atom, struct atom_t, struct atoms_t, /*no const*/)
 
 DEFINE_U8_LIST_LEN(atoms)
 
@@ -264,17 +244,7 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) 
   return cl;
 }
 
-struct clauses_t *
-mk_clause_cell(const struct clause_t * const clause, const struct clauses_t * const next)
-{
-  assert(NULL != clause);
-
-  struct clauses_t * cls = malloc(sizeof(struct clauses_t));
-  assert(NULL != cls);
-
-  *cls = (struct clauses_t){.clause = clause, .next = next};
-  return cls;
-}
+DEFINE_LIST_MK(clause, clause, struct clause_t, struct clauses_t, /*no const*/)
 
 DEFINE_U8_LIST_LEN(clauses)
 

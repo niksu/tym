@@ -41,7 +41,7 @@ struct fmla_t {
 
 DECLARE_LIST_TYPE(fmlas_t, fmla, fmla_t)
 DECLARE_MUTABLE_LIST_TYPE(mutable_fmlas_t, fmla, fmla_t)
-DECLARE_LIST_MK(fmla, struct fmla_t, struct fmlas_t)
+DECLARE_LIST_MK(fmla, struct fmla_t, struct fmlas_t, /*no const*/)
 
 const struct fmla_t * mk_fmla_const(bool b);
 const struct fmla_t * mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** args);

@@ -293,7 +293,7 @@ fmla_str(const struct fmla_t * fmla, size_t * remaining, char * buf)
   return l;
 }
 
-DEFINE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
+DEFINE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t, /*no const*/)
 
 struct sym_gen_t *
 mk_sym_gen(const char * prefix)

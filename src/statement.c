@@ -258,7 +258,7 @@ free_stmt(const struct stmt_t * stmt)
 }
 #pragma GCC diagnostic pop
 
-DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t)
+DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
 size_t
 stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
