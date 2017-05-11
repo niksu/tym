@@ -14,7 +14,8 @@ e.g., `./tym -i tests/4.test`
 The `-v` flag activates verbose output.
 
 # Tests
-`make test`
+`make test_units`
+`make test_regression`
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
