@@ -45,8 +45,7 @@ typedef enum {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY} eq_pred_error_t;
 bool eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_code, bool * result);
 
 DECLARE_MUTABLE_LIST_TYPE(predicates_t, predicate, predicate_t)
-
-struct predicates_t * mk_pred_cell(struct predicate_t * pred, struct predicates_t * next);
+DECLARE_MUTABLE_LIST_MK(pred, struct predicate_t, struct predicates_t)
 
 #define ATOM_DATABASE_SIZE HASH_RANGE
 

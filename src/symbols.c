@@ -96,18 +96,7 @@ mk_pred(const char * predicate, uint8_t arity)
   return p;
 }
 
-struct predicates_t *
-mk_pred_cell(struct predicate_t * pred, struct predicates_t * next)
-{
-  assert(NULL != pred);
-
-  struct predicates_t * ps = malloc(sizeof(struct predicates_t));
-  assert(NULL != ps);
-
-  ps->predicate = pred;
-  ps->next = next;
-  return ps;
-}
+DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
 bool
 eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_code, bool * result)
