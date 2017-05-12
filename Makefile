@@ -28,10 +28,10 @@ $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
 	ar crv $(OUT_DIR)/$@ $(OBJ)
 
-parser: $(HEADERS) src_parser/parser.y src_parser/lexer.l
+parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	mkdir -p $(OUT_DIR)
-	bison -d -o parser.c src_parser/parser.y
-	flex src_parser/lexer.l
+	bison -d -o parser.c parser_src/parser.y
+	flex parser_src/lexer.l
 	mv lexer.{c,h} $(OUT_DIR)
 	mv parser.{c,h} $(OUT_DIR)
 	# We have to be more permissive with the C output of flex and bison :(
