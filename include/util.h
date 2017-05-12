@@ -66,8 +66,7 @@
     LIST_TYPE * lsts = malloc(sizeof(LIST_TYPE)); \
     assert(NULL != lsts); \
   \
-    lsts->FIELD_NAME = el; \
-    lsts->next = lst; \
+    *lsts = (LIST_TYPE){el, lst}; \
     return lsts; \
   }
 
