@@ -339,14 +339,14 @@ test_statement(void)
 
   struct model_t * mdl = mk_model(mk_universe(terms));
 
-  const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, "a", "a"));
+  const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
   char * vX = malloc(sizeof(char) * 2);
   strcpy(vX, "X");
   char * vY = malloc(sizeof(char) * 2);
   strcpy(vY, "Y");
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
-  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, "X", "Y")));
+  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"))));
   struct stmt_t * s3S = mk_stmt_const("x", mdl->universe, (const char * const)&universe_ty);
 
   strengthen_model(mdl, s1S);

@@ -626,7 +626,7 @@ test_formula(void)
   free_fmla(test_atom);
   free_fmla(test_not);
 
-  test_atom = mk_fmla_atom_varargs("testpred", 4, "ta1", "ta2", "ta3", "ta4");
+  test_atom = mk_fmla_atom_varargs("testpred", 4, mk_const("ta1"), mk_const("ta2"), mk_const("ta3"), mk_const("ta4"));
   const struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom, test_atom);
   const struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
   const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);

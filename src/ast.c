@@ -178,6 +178,18 @@ program_to_str(const struct program_t * const program, size_t * outbuf_size, cha
 }
 
 struct term_t *
+mk_const(const char * identifier)
+{
+  return mk_term(CONST, identifier);
+}
+
+struct term_t *
+mk_var(const char * identifier)
+{
+  return mk_term(VAR, identifier);
+}
+
+struct term_t *
 mk_term(term_kind_t kind, const char * identifier)
 {
   assert(NULL != identifier);

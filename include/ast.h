@@ -57,6 +57,8 @@ size_t atom_to_str(const struct atom_t * const atom, size_t * outbuf_size, char 
 size_t clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf);
 size_t program_to_str(const struct program_t * const clause, size_t * outbuf_size, char * outbuf);
 
+struct term_t * mk_const(const char * identifier);
+struct term_t * mk_var(const char * identifier);
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
 struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body);
