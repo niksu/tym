@@ -595,7 +595,7 @@ terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * ou
 {
   const struct terms_t * cursor = terms;
   size_t l = 0;
-  while (NULL != terms) {
+  while (NULL != cursor) {
     l += term_to_str(cursor->term, outbuf_size, outbuf + l); // FIXME add error checking
 
     if (NULL != terms->next) {
