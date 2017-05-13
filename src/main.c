@@ -167,10 +167,17 @@ main(int argc, char ** argv)
   struct model_t * mdl = translate_program(parsed_source_file_contents, vg);
   statementise_universe(mdl);
 
-  char * cK = malloc(sizeof(char) * 2);
-  strcpy(cK, "c");
-  struct sym_gen_t * cg = mk_sym_gen(cK);
-  translate_query(parsed_query, mdl, cg);
+  if (NULL != parsed_query) {
+    char * cK = malloc(sizeof(char) * 2);
+    strcpy(cK, "c");
+    struct sym_gen_t * cg = mk_sym_gen(cK);
+    translate_query(parsed_query, mdl, cg);
+  }
+#if DEBUG
+  else {
+    printf("(No query is being printed, since none was given as a parameter)\n");
+  }
+#endif
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
