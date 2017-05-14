@@ -31,7 +31,7 @@ const struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_
 
 void translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg);
 
-struct model_t * translate_program(struct program_t * program, struct sym_gen_t * vg);
+struct model_t * translate_program(struct program_t * program, struct sym_gen_t ** vg);
 
 const struct stmts_t * order_statements(const struct stmts_t * stmts);
 

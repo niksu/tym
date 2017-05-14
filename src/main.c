@@ -163,7 +163,8 @@ main(int argc, char ** argv)
 
   char * vK = malloc(sizeof(char) * 2);
   strcpy(vK, "V");
-  struct sym_gen_t * vg = mk_sym_gen(vK);
+  struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
+  *vg = mk_sym_gen(vK);
   struct model_t * mdl = translate_program(parsed_source_file_contents, vg);
   statementise_universe(mdl);
 
@@ -199,7 +200,7 @@ main(int argc, char ** argv)
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
-  free_sym_gen(vg);
+  free_sym_gen(*vg);
   free_model(mdl);
 
   DBG("Cleaning up before exiting\n");

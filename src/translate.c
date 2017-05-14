@@ -145,7 +145,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 }
 
 struct model_t *
-translate_program(struct program_t * program, struct sym_gen_t * vg)
+translate_program(struct program_t * program, struct sym_gen_t ** vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -195,7 +195,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
       struct term_t ** var_args = malloc(sizeof(struct term_t *) * preds_cursor->predicate->arity);
 
       for (int i = 0; i < preds_cursor->predicate->arity; i++) {
-        var_args[i] = mk_term(VAR, mk_new_var(vg));
+        var_args[i] = mk_term(VAR, mk_new_var(*vg));
       }
 
       const struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
@@ -220,7 +220,7 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         printf(">");
 #endif
 
-        struct sym_gen_t * vg_copy = copy_sym_gen(vg);
+        struct sym_gen_t * vg_copy = copy_sym_gen(*vg);
 
         const struct atom_t * head_atom = &(body_cursor->clause->head);
         struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
@@ -286,8 +286,8 @@ translate_program(struct program_t * program, struct sym_gen_t * vg)
         body_cursor = body_cursor->next;
         fmlas_cursor = fmlas_cursor->next;
         if (NULL == body_cursor) {
-          struct sym_gen_t * tmp = vg;
-          vg = vg_copy;
+          struct sym_gen_t * tmp = *vg;
+          *vg = vg_copy;
           vg_copy = tmp;
         }
         free_sym_gen(vg_copy);
