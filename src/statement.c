@@ -140,6 +140,18 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
      .body = NULL,
      .ty = ty};
 
+  result->kind = STMT_CONST_DEF;
+  result->param.const_def = sub_result;
+  return result;
+}
+
+const struct stmt_t *
+mk_stmt_const_def(char * const_name, struct universe_t * uni)
+{
+  assert(NULL != const_name);
+  assert(NULL != uni);
+  assert(uni->cardinality > 0);
+
   const struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
@@ -149,13 +161,7 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
-//  sub_result->body = mk_fmla_ors(fmlas); // FIXME separate const declaration from a related formula
-  sub_result->body = mk_fmla_const(true);
-  //free_fmlas(fmlas); FIXME include this to free memory used in intermediate computation.
-
-  result->kind = STMT_CONST_DEF;
-  result->param.const_def = sub_result;
-  return result;
+  return mk_stmt_axiom(mk_fmla_ors(fmlas));
 }
 
 size_t
@@ -183,15 +189,6 @@ stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
           stmt->param.const_def->ty);
       *remaining -= strlen(&(buf[l]));
       l += strlen(&(buf[l]));
-
-// FIXME separate const declaration from a related formula
-//      sprintf(&(buf[l]), "(assert ");
-//      *remaining -= strlen(&(buf[l]));
-//      l += strlen(&(buf[l]));
-//
-//      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
-//
-//      buf[(*remaining)--, l++] = ')';
     } else {
       sprintf(&(buf[l]), "(define-fun %s (",
           stmt->param.const_def->const_name);
@@ -246,7 +243,9 @@ free_stmt(const struct stmt_t * stmt)
     if (NULL != stmt->param.const_def->params) {
       free_terms(stmt->param.const_def->params);
     }
-    free_fmla(stmt->param.const_def->body);
+    if (NULL != stmt->param.const_def->body) {
+      free_fmla(stmt->param.const_def->body);
+    }
     free(stmt->param.const_def);
     break;
   default:
@@ -347,11 +346,13 @@ test_statement(void)
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
   const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"))));
-  struct stmt_t * s3S = mk_stmt_const("x", mdl->universe, (const char * const)&universe_ty);
+  struct stmt_t * s3AS = mk_stmt_const("x", mdl->universe, universe_ty);
+  const struct stmt_t * s3BS = mk_stmt_const_def("x", mdl->universe);
 
   strengthen_model(mdl, s1S);
   strengthen_model(mdl, s2S);
-  strengthen_model(mdl, s3S);
+  strengthen_model(mdl, s3AS);
+  strengthen_model(mdl, s3BS);
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
