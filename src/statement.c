@@ -14,10 +14,9 @@
 
 #include "ast.h"
 #include "formula.h"
+#include "module_tests.h"
 #include "statement.h"
 #include "util.h"
-
-void test_statement(void);
 
 struct universe_t *
 mk_universe(struct terms_t * terms)

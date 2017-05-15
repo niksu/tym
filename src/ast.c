@@ -12,9 +12,8 @@
 #include <string.h>
 
 #include "ast.h"
+#include "module_tests.h"
 #include "util.h"
-
-void test_clause(void);
 
 size_t
 my_strcpy(char * dst, const char * src, size_t * space)

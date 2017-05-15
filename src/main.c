@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "libtym.h"
+#include "module_tests.h"
 
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
@@ -35,12 +36,6 @@ struct param_t params = {
 
 struct program_t * parsed_source_file_contents = NULL;
 struct program_t * parsed_query = NULL;
-
-#ifdef TESTING
-  void test_clause(void);
-  void test_formula(void);
-  void test_statement(void);
-#endif
 
 int
 main(int argc, char ** argv)

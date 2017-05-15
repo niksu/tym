@@ -44,7 +44,7 @@ out/%.o: src/%.c $(HEADERS) parser
 
 .PHONY: clean test
 
-test_units:
+test_modules:
 	make clean
 	CFLAGS=-DTESTING make $(TGT)
 	./$(OUT_DIR)/$(TGT)

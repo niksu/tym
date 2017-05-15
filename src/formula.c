@@ -11,11 +11,11 @@
 
 #include "ast.h"
 #include "formula.h"
+#include "module_tests.h"
 #include "util.h"
 
 #define MAX_VAR_WIDTH 10/*FIXME const*/
 
-void test_formula(void);
 size_t fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, size_t * remaining, char * buf);
 
 const struct fmla_t *
