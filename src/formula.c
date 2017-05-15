@@ -594,6 +594,7 @@ copy_fmla(const struct fmla_t * const fmla)
 void
 test_formula(void)
 {
+  printf("***test_formula***\n");
   struct term_t ** args = malloc(sizeof(struct term_t *) * 2);
   *args = mk_term(CONST, "arg0");
   *(args + 1) = mk_term(CONST, "arg1");

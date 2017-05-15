@@ -510,6 +510,7 @@ eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool *
 
 void
 test_clause(void) {
+  printf("***test_clause***\n");
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   struct atom_t * at = malloc(sizeof(struct atom_t));
   struct term_t * t = malloc(sizeof(struct term_t));

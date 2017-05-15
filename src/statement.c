@@ -331,6 +331,7 @@ strengthen_model(struct model_t * mdl, const struct stmt_t * stmt)
 void
 test_statement(void)
 {
+  printf("***test_statement***\n");
   struct term_t * aT = mk_term(CONST, "a");
   struct term_t * bT = mk_term(CONST, "b");
   struct terms_t * terms = mk_term_cell(aT, NULL);
