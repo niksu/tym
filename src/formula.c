@@ -39,7 +39,7 @@ mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** predargs)
   assert(NULL != result);
 
   // FIXME can avoid copying?
-  char * pred_name_copy = malloc(sizeof(char) * strlen(pred_name));
+  char * pred_name_copy = malloc(sizeof(char) * (strlen(pred_name) + 1));
   assert(NULL != pred_name_copy);
   strcpy(pred_name_copy, pred_name);
   struct term_t ** predargs_copy = malloc(sizeof(struct term_t *) * arity);
@@ -81,7 +81,7 @@ mk_fmla_quant(const char * bv, const struct fmla_t * body)
   assert(NULL != body);
   struct fmla_quant_t * result_content = malloc(sizeof(struct fmla_quant_t));
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
-  char * bv_copy = malloc(sizeof(char) * strlen(bv));
+  char * bv_copy = malloc(sizeof(char) * (strlen(bv) + 1));
   strcpy(bv_copy, bv);
   struct fmla_t * body_copy = copy_fmla(body);
   result_content->bv = bv_copy;
@@ -308,7 +308,7 @@ struct sym_gen_t *
 copy_sym_gen(const struct sym_gen_t * const orig)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
-  char * prefix_copy = malloc(sizeof(char) * strlen(orig->prefix));
+  char * prefix_copy = malloc(sizeof(char) * (strlen(orig->prefix) + 1));
   strcpy(prefix_copy, orig->prefix);
   result->prefix = prefix_copy;
   result->index = orig->index;

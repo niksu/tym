@@ -37,7 +37,7 @@ mk_universe(struct terms_t * terms)
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-    result->element[i] = malloc(sizeof(char) * strlen(cursor->term->identifier));
+    result->element[i] = malloc(sizeof(char) * (strlen(cursor->term->identifier) + 1));
     strcpy(result->element[i], cursor->term->identifier);
     cursor = cursor->next;
   }
@@ -107,7 +107,7 @@ mk_stmt_pred(const char * const pred_name, struct terms_t * params, const struct
 // FIXME copy
 //  struct terms_t * params_copy =
 //  struct fmla_t * body_copy =
-  char * const_name_copy = malloc(sizeof(char) * strlen(pred_name));
+  char * const_name_copy = malloc(sizeof(char) * (strlen(pred_name) + 1));
   strcpy(const_name_copy, pred_name);
   sub_result->const_name = const_name_copy;
 
@@ -132,7 +132,7 @@ mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
 
-  char * const_name_copy = malloc(sizeof(char) * strlen(const_name));
+  char * const_name_copy = malloc(sizeof(char) * (strlen(const_name) + 1));
   strcpy(const_name_copy, const_name);
   *sub_result = (struct stmt_const_t)
     {.const_name = const_name_copy,

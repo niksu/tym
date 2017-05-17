@@ -536,7 +536,7 @@ test_clause(void) {
 struct term_t *
 copy_term(const struct term_t * const term)
 {
-  char * ident_copy = malloc(sizeof(char) * strlen(term->identifier));
+  char * ident_copy = malloc(sizeof(char) * (strlen(term->identifier) + 1));
   strcpy(ident_copy, term->identifier);
   return mk_term(term->kind, ident_copy);
 }
