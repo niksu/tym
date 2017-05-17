@@ -154,6 +154,8 @@ clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbu
   l += strlen(&(outbuf[l]));
 #endif
 
+  outbuf[l] = '\0';
+
   return l;
 }
 
