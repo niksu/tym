@@ -160,8 +160,12 @@ main(int argc, char ** argv)
   strcpy(vK, "V");
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
   *vg = mk_sym_gen(vK);
-  struct model_t * mdl = translate_program(parsed_source_file_contents, vg);
-  statementise_universe(mdl);
+
+  struct model_t * mdl = NULL;
+  if (NULL != parsed_source_file_contents) {
+    mdl = translate_program(parsed_source_file_contents, vg);
+    statementise_universe(mdl);
+  }
 
   if (NULL != parsed_query) {
     char * cK = malloc(sizeof(char) * 2);
@@ -177,26 +181,31 @@ main(int argc, char ** argv)
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
-  size_t l = model_str(mdl, &remaining_buf_size, buf);
+  *buf = '\0'; // FIXME initialise in a neater way?
+  size_t l = 0;
+  if (NULL != mdl) {
+    model_str(mdl, &remaining_buf_size, buf);
 #if DEBUG
-  printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
-  const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
+    const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
 // FIXME crude
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-  free((void *)mdl->stmts);
+    free((void *)mdl->stmts);
 #pragma GCC diagnostic pop
-  mdl->stmts = reordered_stmts;
-  remaining_buf_size = BUF_SIZE;
-  l = model_str(mdl, &remaining_buf_size, buf);
+    mdl->stmts = reordered_stmts;
+    remaining_buf_size = BUF_SIZE;
+    l = model_str(mdl, &remaining_buf_size, buf);
 #if DEBUG
-  printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+    printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
+    free_model(mdl);
+  }
+
   free_sym_gen(*vg);
-  free_model(mdl);
 
   DBG("Cleaning up before exiting\n");
 
