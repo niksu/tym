@@ -167,7 +167,9 @@ main(int argc, char ** argv)
     statementise_universe(mdl);
   }
 
-  if (NULL != parsed_query) {
+  if (NULL != parsed_query &&
+      // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
+      NULL != mdl) {
     char * cK = malloc(sizeof(char) * 2);
     strcpy(cK, "c");
     struct sym_gen_t * cg = mk_sym_gen(cK);
