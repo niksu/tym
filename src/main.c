@@ -208,6 +208,7 @@ main(int argc, char ** argv)
   }
 
   free_sym_gen(*vg);
+  free(buf);
 
   DBG("Cleaning up before exiting\n");
 
