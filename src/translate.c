@@ -238,7 +238,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         printf("from: %s\n", buf);
 #endif
 
-        struct valuation_t ** v = malloc(sizeof(struct valuation_t **));
+        struct valuation_t ** v = malloc(sizeof(struct valuation_t *));
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
         out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
