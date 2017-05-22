@@ -299,6 +299,8 @@ struct sym_gen_t *
 mk_sym_gen(const char * prefix)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
+  // FIXME copy the prefix
+  // FIXME use naming convention to indicate which parameters are copied, and which aren't.
   result->prefix = prefix;
   result->index = 0;
   return result;
