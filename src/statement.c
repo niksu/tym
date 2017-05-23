@@ -406,6 +406,10 @@ consts_in_stmt(const struct stmt_t * stmt)
 void
 statementise_universe(struct model_t * mdl)
 {
+  if (0 == mdl->universe->cardinality) {
+    return;
+  }
+
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     strengthen_model(mdl, mk_stmt_const(mdl->universe->element[i], mdl->universe, universe_ty));
   }
