@@ -42,13 +42,15 @@ mk_fmla_atom(const char * pred_name, uint8_t arity, struct term_t ** predargs)
   char * pred_name_copy = malloc(sizeof(char) * (strlen(pred_name) + 1));
   assert(NULL != pred_name_copy);
   strcpy(pred_name_copy, pred_name);
-  struct term_t ** predargs_copy = malloc(sizeof(struct term_t *) * arity);
-  for (int i = 0; i < arity; i++) {
-    predargs_copy[i] = copy_term(predargs[i]);
+
+  struct term_t ** predargs_copy = NULL;
+
+  if (arity > 0) {
+    predargs_copy = malloc(sizeof(struct term_t *) * arity);
   }
 
-  if (0 == arity) {
-    predargs_copy = NULL;
+  for (int i = 0; i < arity; i++) {
+    predargs_copy[i] = copy_term(predargs[i]);
   }
 
   result->kind = FMLA_ATOM;
