@@ -96,6 +96,14 @@ mk_pred(const char * predicate, uint8_t arity)
   return p;
 }
 
+void
+free_pred(struct predicate_t * pred)
+{
+  // NOTE we assume that the data in the pred's fields are shared,
+  //      so we don't free that memory.
+  free(pred);
+}
+
 DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
 bool
@@ -143,21 +151,23 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, a
   } else {
     char h = hash_str(atom->predicate);
 
-    struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
-
     if (NULL == adb->atom_database[(int)h]) {
       success = true;
       *record = NULL;
     } else {
       bool exists = false;
 
+      struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
+
       struct predicates_t * cursor = adb->atom_database[(int)h];
+
       do {
         eq_pred_error_t eq_pred_error_code;
         success = (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &exists));
         if (success) {
           if (exists) {
             *record = cursor->predicate;
+            free_pred(pred);
             return true;
           }
         } else {
@@ -167,6 +177,8 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, a
 
         cursor = cursor->next;
       } while (success && NULL != cursor);
+
+      free_pred(pred);
     }
   }
 

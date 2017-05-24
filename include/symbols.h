@@ -39,6 +39,7 @@ struct predicate_t {
 };
 
 struct predicate_t * mk_pred(const char * predicate, uint8_t arity);
+void free_pred(struct predicate_t * pred);
 
 typedef enum {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY} eq_pred_error_t;
 
