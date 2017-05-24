@@ -161,6 +161,10 @@ main(int argc, char ** argv)
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
   *vg = mk_sym_gen(vK);
 
+  char * cK = malloc(sizeof(char) * 2);
+  strcpy(cK, "c");
+  struct sym_gen_t * cg = mk_sym_gen(cK);
+
   struct model_t * mdl = NULL;
   if (NULL != parsed_source_file_contents) {
     mdl = translate_program(parsed_source_file_contents, vg);
@@ -170,9 +174,6 @@ main(int argc, char ** argv)
   if (NULL != parsed_query &&
       // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
       NULL != mdl) {
-    char * cK = malloc(sizeof(char) * 2);
-    strcpy(cK, "c");
-    struct sym_gen_t * cg = mk_sym_gen(cK);
     translate_query(parsed_query, mdl, cg);
   }
 #if DEBUG
@@ -209,6 +210,9 @@ main(int argc, char ** argv)
 
   free_sym_gen(*vg);
   free(vg);
+  free(vK);
+  free(cg);
+  free(cK);
   free(buf);
 
   DBG("Cleaning up before exiting\n");
