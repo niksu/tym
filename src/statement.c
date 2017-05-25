@@ -359,6 +359,9 @@ test_statement(void)
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 
+  free(vX);
+  free(vY);
+  free_terms(terms);
   free_model(mdl);
   free(buf);
 }
