@@ -129,15 +129,12 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   const struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
   const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
+#if DEBUG
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
-  size_t l = 0;
-#if DEBUG
-  l = fmla_str(q_fmla, &remaining_buf_size, buf);
+  size_t l = fmla_str(q_fmla, &remaining_buf_size, buf);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
   l = fmla_str(translated_q, &remaining_buf_size, buf);
-#if DEBUG
   printf("translated_q (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
