@@ -131,8 +131,9 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
-  size_t l = fmla_str(q_fmla, &remaining_buf_size, buf);
+  size_t l = 0;
 #if DEBUG
+  l = fmla_str(q_fmla, &remaining_buf_size, buf);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
   l = fmla_str(translated_q, &remaining_buf_size, buf);
