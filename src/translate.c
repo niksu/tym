@@ -245,6 +245,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #endif
 
         out_size = valuation_str(*v, &remaining_buf_size, buf);
+        assert(out_size >= 0);
 #if DEBUG
         if (0 == out_size) {
           printf("  where: (no substitutions)\n");
