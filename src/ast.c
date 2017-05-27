@@ -533,6 +533,9 @@ test_clause(void) {
   char * buf = malloc(remaining_buf_size);
   size_t l = clause_to_str(cl, &remaining_buf_size, buf);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+  free(buf);
+  free_clause(*cl);
+  free(cl);
 }
 
 struct term_t *
