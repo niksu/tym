@@ -311,22 +311,22 @@ free_terms(struct terms_t * terms)
 #pragma GCC diagnostic pop
 
 void
-free_atom(struct atom_t atom)
+free_atom(struct atom_t at)
 {
-  assert(NULL != atom.predicate);
+  assert(NULL != at.predicate);
 
   DBG("Freeing atom: ");
-  DBG_SYNTAX((void *)&atom, (x_to_str_t)atom_to_str);
+  DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
   DBG("\n");
 
-  free(atom.predicate);
-  for (int i = 0; i < atom.arity; i++) {
-    free_term(atom.args[i]);
+  free(at.predicate);
+  for (int i = 0; i < at.arity; i++) {
+    free_term(at.args[i]);
   }
-  if (atom.arity > 0) {
+  if (at.arity > 0) {
     // Since we allocated the space for all arguments, rather than for each argument,
     // we deallocate it as such.
-    free(atom.args);
+    free(at.args);
   }
 
   // NOTE since we are passed an atom value rather than a pointer to an atom, we
