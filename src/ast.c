@@ -270,7 +270,7 @@ mk_program(uint8_t no_clauses, const struct clauses_t * program)
   p->no_clauses = no_clauses;
 
   if (no_clauses > 0) {
-    p->program = malloc(sizeof(struct clause_t **) * no_clauses);
+    p->program = malloc(sizeof(struct clause_t *) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
       program = program->next;
