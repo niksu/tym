@@ -73,7 +73,15 @@ mk_fmla_atom_varargs(const char * pred_name, uint8_t arity, ...)
     args[i] = va_arg(varargs, struct term_t *);
   }
   va_end(varargs);
-  return mk_fmla_atom(pred_name, arity, args);
+
+  const struct fmla_t * result = mk_fmla_atom(pred_name, arity, args);
+  for (int i = 0; i < arity; i++) {
+    free_term(*args[i]);
+    free(args[i]);
+  }
+  free(args);
+
+  return result;
 }
 
 const struct fmla_t *
@@ -173,7 +181,10 @@ mk_fmla_ors(const struct fmlas_t * fmlas)
 const struct fmla_t *
 mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
 {
-  return mk_fmla_or(mk_fmla_not(antecedent), consequent);
+  const struct fmla_t * subfmla = mk_fmla_not(antecedent);
+  const struct fmla_t * result = mk_fmla_or(subfmla, consequent);
+  free_fmla(subfmla);
+  return result;
 }
 
 size_t
