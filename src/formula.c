@@ -312,9 +312,10 @@ struct sym_gen_t *
 mk_sym_gen(const char * prefix)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
-  // FIXME copy the prefix
+  char * prefix_copy = malloc(sizeof(char) * (strlen(prefix) + 1));
+  strcpy(prefix_copy, prefix);
   // FIXME use naming convention to indicate which parameters are copied, and which aren't.
-  result->prefix = prefix;
+  result->prefix = prefix_copy;
   result->index = 0;
   return result;
 }
@@ -696,6 +697,9 @@ mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * body)
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
     const struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
+
+    free_fmla(result);
+
     result = pre_result;
 
     cursor = cursor->next;
