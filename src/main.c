@@ -182,13 +182,15 @@ main(int argc, char ** argv)
   }
 #endif
 
+#if DEBUG
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   *buf = '\0'; // FIXME initialise in a neater way?
   size_t l = 0;
+#endif
   if (NULL != mdl) {
-    model_str(mdl, &remaining_buf_size, buf);
 #if DEBUG
+    model_str(mdl, &remaining_buf_size, buf);
     printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
 
@@ -199,23 +201,26 @@ main(int argc, char ** argv)
     free((void *)mdl->stmts);
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
+#if DEBUG
     remaining_buf_size = BUF_SIZE;
     l = model_str(mdl, &remaining_buf_size, buf);
-#if DEBUG
     printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
-
-    free_model(mdl);
   }
 
+  DBG("Cleaning up before exiting\n");
+
+  if (NULL != mdl) {
+    free_model(mdl);
+  }
   free_sym_gen(*vg);
   free(vg);
   free(vK);
   free(cg);
   free(cK);
+#if DEBUG
   free(buf);
-
-  DBG("Cleaning up before exiting\n");
+#endif
 
   if (NULL != params.source_file) {
     free_program(parsed_source_file_contents);
