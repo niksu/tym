@@ -381,7 +381,14 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
     v_cursor->next = NULL;
   }
 
-  return mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
+  free(var_args);
+  const struct fmla_t * result = mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
+  for (int i = 0; i < atom->arity; i++) {
+    free_term(*var_args_T[i]);
+    free(var_args_T[i]);
+  }
+  free(var_args_T); // since mk_fmla_atom copies the formula.
+  return result;
 }
 
 
@@ -650,6 +657,7 @@ test_formula(void)
 
   free_fmla(test_atom);
   free_fmla(test_and2);
+  free_fmla(test_or);
   free_fmla(test_or2);
   free(buf);
 }
