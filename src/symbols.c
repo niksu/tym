@@ -41,7 +41,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
     do {
       bool result;
       eq_term_error_t error_code;
-      if (eq_term(*term, *(cursor->term), &error_code, &result)) {
+      if (eq_term(term, cursor->term, &error_code, &result)) {
           exists = result;
           break;
       } else {

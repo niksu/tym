@@ -92,7 +92,7 @@ char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
 
 typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
-bool eq_term(/* FIXME make compared terms into pointers */struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result);
+bool eq_term(const struct term_t * const t1, const struct term_t * const t2, eq_term_error_t * error_code, bool * result);
 
 struct term_t * copy_term(const struct term_t * const term);
 

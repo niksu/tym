@@ -474,23 +474,23 @@ hash_clause(struct clause_t clause) {
 }
 
 bool
-eq_term(struct term_t t1, struct term_t t2, eq_term_error_t * error_code, bool * result)
+eq_term(const struct term_t * const t1, const struct term_t * const t2, eq_term_error_t * error_code, bool * result)
 {
   bool successful;
 
   bool same_kind = false;
   bool same_identifier = false;
 
-  if (&t1 == &t2) {
+  if (t1 == t2) {
     *result = true;
     return true;
   }
 
-  if (t1.kind == t2.kind) {
+  if (t1->kind == t2->kind) {
     same_kind = true;
   }
 
-  if (0 == strcmp(t1.identifier, t2.identifier)) {
+  if (0 == strcmp(t1->identifier, t2->identifier)) {
     same_identifier = true;
   }
 
@@ -569,7 +569,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
     bool found = (NULL == cursor);
     eq_term_error_t error_code;
     while (NULL != cursor) {
-      if (eq_term(*(cursor->term), *(ss->term), &error_code, &found)) {
+      if (eq_term(cursor->term, ss->term, &error_code, &found)) {
         if (found) {
           break;
         }
