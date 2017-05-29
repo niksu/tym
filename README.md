@@ -7,9 +7,9 @@ This is a simple implementation of Datalog.
 or for debug output: `CFLAGS=-DDEBUG make`
 
 # Running
-`out/tym`
+`./out/tym`
 
-e.g., `out/tym -i tests/4.test`
+e.g., `./out/tym -i tests/4.test`
 
 The `-v` flag activates verbose output.
 
