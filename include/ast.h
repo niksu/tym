@@ -86,13 +86,13 @@ void free_clause(struct clause_t clause);
 void free_clauses(struct clauses_t * clauses);
 void free_program(struct program_t * program);
 
-typedef int (*x_to_str_t)(void *, size_t * outbuf_size, char * outbuf);
+typedef struct buffer_write_result * (*x_to_str_t)(void *, struct buffer_info * dst);
 
 void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf));
 void Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst));
 
 #if DEBUG
-#define DBG_SYNTAX debug_out_syntax
+#define DBG_SYNTAX Bdebug_out_syntax
 #else
 #define DBG_SYNTAX(...)
 #endif // DEBUG

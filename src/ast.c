@@ -524,7 +524,7 @@ free_atom(struct atom_t at)
   assert(NULL != at.predicate);
 
   DBG("Freeing atom: ");
-  DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
+  DBG_SYNTAX((void *)&at, (x_to_str_t)Batom_to_str);
   DBG("\n");
 
   free(at.predicate);
@@ -603,7 +603,7 @@ free_program(struct program_t * program)
 
   for (int i = 0; i < program->no_clauses; i++) {
     DBG("Freeing clause %d: ", i);
-    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)clause_to_str);
+    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)Bclause_to_str);
     DBG("\n");
 
     assert(NULL != (program->program[i]));
@@ -813,11 +813,20 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 
     if (!found) {
 #if DEBUG
+#if 0
       size_t remaining_buf_size = BUF_SIZE;
       char * buf = malloc(remaining_buf_size);
       size_t l = term_to_str(ss->term, &remaining_buf_size, buf);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
       free(buf);
+#endif
+      struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+      struct buffer_write_result * res = Bterm_to_str(ss->term, dst);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
+          outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+      free_buffer(outbuf);
 #endif
       result = false;
       break;
