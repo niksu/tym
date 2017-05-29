@@ -32,7 +32,7 @@ my_strcpy(char * dst, const char * src, size_t * space)
 struct buffer_write_result *
 buf_strcpy(struct buffer_info * dst, const char * src)
 {
-  size_t l = strlen(src);
+  size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
   if (have_space(dst, l)) {
     strcpy(dst->buffer + dst->idx, src);
     dst->idx += l;
@@ -66,12 +66,15 @@ Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
   assert(is_ok_buffer_write_result(res));
   free(res);
 
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+
 #if DEBUG
   char local_buf[BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_term(*term) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (have_space(dst, 1)) {
@@ -105,12 +108,15 @@ Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
   assert(is_ok_buffer_write_result(res));
   free(res);
 
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+
 #if DEBUG
   char local_buf[BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_str(atom->predicate) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (have_space(dst, 1)) {
@@ -211,6 +217,7 @@ Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (have_space(dst, 1)) {
@@ -329,6 +336,7 @@ Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
+  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (have_space(dst, 1)) {
