@@ -464,13 +464,17 @@ Bprogram_to_str(const struct program_t * const program, struct buffer_info * dst
 struct term_t *
 mk_const(const char * identifier)
 {
-  return mk_term(CONST, identifier);
+  char * ident_copy = malloc(sizeof(char) * (strlen(identifier) + 1));
+  strcpy(ident_copy, identifier);
+  return mk_term(CONST, ident_copy);
 }
 
 struct term_t *
 mk_var(const char * identifier)
 {
-  return mk_term(VAR, identifier);
+  char * ident_copy = malloc(sizeof(char) * (strlen(identifier) + 1));
+  strcpy(ident_copy, identifier);
+  return mk_term(VAR, ident_copy);
 }
 
 struct term_t *
