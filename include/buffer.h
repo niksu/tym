@@ -27,6 +27,8 @@ void unsafe_buffer_char(struct buffer_info * buf, char c);
 void unsafe_buffer_str(struct buffer_info * buf, char * s);
 void unsafe_dec_idx(struct buffer_info * buf, size_t n);
 
+struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * src);
+
 enum buffer_errors {BUFF_ERR_OVERFLOW};
 
 MAYBE_ERROR(buffer_write_result, size_t, enum buffer_errors)

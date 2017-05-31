@@ -64,6 +64,20 @@ unsafe_dec_idx(struct buffer_info * buf, size_t n)
   buf->idx -= n;
 }
 
+struct buffer_write_result *
+buf_strcpy(struct buffer_info * dst, const char * src)
+{
+  size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
+  if (have_space(dst, l)) {
+    strcpy(dst->buffer + dst->idx, src);
+    dst->idx += l;
+    return mkval_buffer_write_result(l);
+  } else {
+    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+  }
+}
+
+
 MAYBE_ERROR__IS_OK_DEF(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__VAL_OF_DEF(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__ERRVAL_OF_DEF(buffer_write_result, size_t, enum buffer_errors)

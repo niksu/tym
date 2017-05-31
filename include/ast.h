@@ -58,8 +58,6 @@ size_t term_to_str(const struct term_t * const term, size_t * outbuf_size, char 
 size_t clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf);
 size_t program_to_str(const struct program_t * const clause, size_t * outbuf_size, char * outbuf);
 
-// FIXME move buf_strcpy to "buffer" module.
-struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * src);
 struct buffer_write_result * Bterm_to_str(const struct term_t * const term, struct buffer_info * dst);
 struct buffer_write_result * Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst);
 struct buffer_write_result * Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst);

@@ -50,19 +50,6 @@ my_strcpy(char * dst, const char * src, size_t * space)
   return l;
 }
 
-struct buffer_write_result *
-buf_strcpy(struct buffer_info * dst, const char * src)
-{
-  size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
-  if (have_space(dst, l)) {
-    strcpy(dst->buffer + dst->idx, src);
-    dst->idx += l;
-    return mkval_buffer_write_result(l);
-  } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
-  }
-}
-
 #if 0
 size_t
 term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
