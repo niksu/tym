@@ -82,6 +82,31 @@ term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * out
   return l;
 }
 
+struct buffer_write_result *
+Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst)
+{
+  assert(NULL != tdb);
+  assert(NULL != dst);
+
+  size_t initial_idx = dst->idx;
+
+  const struct terms_t * cursor = tdb->herbrand_universe;
+
+  struct buffer_write_result * res = NULL;
+
+  while (NULL != cursor) {
+    res = Bterm_to_str(cursor->term, dst);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, '\n');
+
+    cursor = cursor->next;
+  }
+
+  return mkval_buffer_write_result(dst->idx - initial_idx);
+}
+
 struct predicate_t *
 mk_pred(const char * predicate, uint8_t arity)
 {
@@ -271,6 +296,67 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
   return l;
 }
 
+struct buffer_write_result *
+Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+
+  struct buffer_write_result * res = buf_strcpy(dst, "Terms:");
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, '\n');
+
+  res = Bterm_database_str(adb->tdb, dst);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, '\n');
+
+  res = buf_strcpy(dst, "Predicates:");
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, '\n');
+
+  const struct predicates_t * cursor;
+
+  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+    cursor = adb->atom_database[i];
+    while (NULL != cursor) {
+      res = Bpredicate_str(cursor->predicate, dst);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, '\n');
+
+      const struct clauses_t * clause_cursor = cursor->predicate->bodies;
+
+      while (NULL != clause_cursor) {
+
+        if (have_space(dst, 1)) {
+          unsafe_buffer_str(dst, "  *");
+          safe_buffer_replace_last(dst, ' ');
+        } else {
+          return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+        }
+
+        res = Bclause_to_str(clause_cursor->clause, dst);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
+
+        safe_buffer_replace_last(dst, '\n');
+
+        clause_cursor = clause_cursor->next;
+      }
+
+      cursor = cursor->next;
+    }
+  }
+
+  return mkval_buffer_write_result(dst->idx - initial_idx);
+}
+
 size_t
 predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
 {
@@ -291,6 +377,28 @@ predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outb
   assert(*outbuf_size > 0);
 
   return l;
+}
+
+struct buffer_write_result *
+Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+
+  struct buffer_write_result * res = buf_strcpy(dst, pred->predicate);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, '/');
+
+  char buf[BUF_SIZE];
+  int check = sprintf(buf, "%u", pred->arity);
+  assert(check > 0);
+
+  res = buf_strcpy(dst, buf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  return mkval_buffer_write_result(dst->idx - initial_idx);
 }
 
 struct predicates_t *

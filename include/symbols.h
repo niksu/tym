@@ -31,6 +31,7 @@ struct term_database_t {
 struct term_database_t * mk_term_database(void);
 bool term_database_add(struct term_t * term, struct term_database_t * tdb);
 size_t term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * outbuf);
+struct buffer_write_result * Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst);
 
 struct predicate_t {
   const char * predicate;
@@ -66,8 +67,10 @@ typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
 bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
 
 size_t atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf);
+struct buffer_write_result * Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst);
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
 size_t predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf);
+struct buffer_write_result * Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst);
 
 bool clause_database_add(const struct clause_t * clause, struct atom_database_t * cdb, void *);
 
