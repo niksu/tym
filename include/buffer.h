@@ -11,6 +11,7 @@
 #define __TYM_BUFFER_H__
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "util.h"
 
@@ -38,5 +39,7 @@ MAYBE_ERROR__VAL_OF_DEC(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__ERRVAL_OF_DEC(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKERRVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
+
+char * to_heap(char * s);
 
 #endif /* __TYM_BUFFER_H__ */
