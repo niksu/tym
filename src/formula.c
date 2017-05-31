@@ -913,6 +913,7 @@ test_formula(void)
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free(args[0]);
   free(args[1]);
@@ -948,6 +949,7 @@ test_formula(void)
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = Bfmla_str(test_and2, outbuf);
@@ -957,6 +959,7 @@ test_formula(void)
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = Bfmla_str(test_or, outbuf);
@@ -966,6 +969,7 @@ test_formula(void)
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free_fmla(test_atom);
   free_fmla(test_and2);

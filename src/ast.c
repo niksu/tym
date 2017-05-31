@@ -848,6 +848,7 @@ test_clause(void) {
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free_clause(*cl);
   free(cl);
