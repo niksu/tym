@@ -30,7 +30,7 @@ void safe_buffer_replace_last(struct buffer_info * buf, char c);
 
 struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * src);
 
-enum buffer_errors {BUFF_ERR_OVERFLOW};
+enum buffer_errors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
 
 MAYBE_ERROR(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__IS_OK_DEC(buffer_write_result, size_t, enum buffer_errors)
