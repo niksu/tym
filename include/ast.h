@@ -52,9 +52,9 @@ struct program_t {
 
 size_t my_strcpy(char * dst, const char * src, size_t * space);
 size_t term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf);
-size_t terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf);
-size_t predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf);
-size_t atom_to_str(const struct atom_t * const atom, size_t * outbuf_size, char * outbuf);
+//size_t terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf);
+//size_t predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf);
+//size_t atom_to_str(const struct atom_t * const atom, size_t * outbuf_size, char * outbuf);
 size_t clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf);
 size_t program_to_str(const struct program_t * const clause, size_t * outbuf_size, char * outbuf);
 

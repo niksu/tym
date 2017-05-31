@@ -15,6 +15,7 @@
 #include "module_tests.h"
 #include "util.h"
 
+#if 0
 size_t
 my_strcpy(char * dst, const char * src, size_t * space)
 {
@@ -26,6 +27,26 @@ my_strcpy(char * dst, const char * src, size_t * space)
   }
 
   *space -= l;
+  return l;
+}
+#endif
+// FIXME this is simply a wrapper for the B-version of the function.
+size_t
+my_strcpy(char * dst, const char * src, size_t * space)
+{
+  struct buffer_info b =
+    {
+      .buffer = dst,
+      .idx = 0,
+      .buffer_size = *space
+    };
+
+  struct buffer_write_result * res = buf_strcpy(&b, src);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  size_t l = b.idx;
+
   return l;
 }
 
@@ -42,6 +63,7 @@ buf_strcpy(struct buffer_info * dst, const char * src)
   }
 }
 
+#if 0
 size_t
 term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
 {
@@ -53,6 +75,26 @@ term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbu
   l += strlen(&(outbuf[l]));
 #endif
   outbuf[l] = '\0';
+
+  return l;
+}
+#endif
+// FIXME this is simply a wrapper for the B-version of the function.
+size_t
+term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
+{
+  struct buffer_info b =
+    {
+      .buffer = outbuf,
+      .idx = 0,
+      .buffer_size = *outbuf_size
+    };
+
+  struct buffer_write_result * res = Bterm_to_str(term, &b);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  size_t l = b.idx;
 
   return l;
 }
@@ -85,6 +127,7 @@ Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
   }
 }
 
+#if 0
 size_t
 predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
@@ -98,6 +141,7 @@ predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
@@ -127,6 +171,7 @@ Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
   }
 }
 
+#if 0
 size_t
 atom_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 {
@@ -169,6 +214,7 @@ atom_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
@@ -228,6 +274,7 @@ Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 }
 
+#if 0
 size_t
 clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbuf)
 {
@@ -282,6 +329,26 @@ clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbu
 #endif
 
   outbuf[l] = '\0';
+
+  return l;
+}
+#endif
+// FIXME this is simply a wrapper for the B-version of the function.
+size_t
+clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf)
+{
+  struct buffer_info b =
+    {
+      .buffer = outbuf,
+      .idx = 0,
+      .buffer_size = *outbuf_size
+    };
+
+  struct buffer_write_result * res = Bclause_to_str(clause, &b);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  size_t l = b.idx;
 
   return l;
 }
@@ -347,6 +414,7 @@ Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
   }
 }
 
+#if 0
 size_t
 program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
 {
@@ -364,6 +432,26 @@ program_to_str(const struct program_t * const program, size_t * outbuf_size, cha
   }
 
   return offset;
+}
+#endif
+// FIXME this is simply a wrapper for the B-version of the function.
+size_t
+program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
+{
+  struct buffer_info b =
+    {
+      .buffer = outbuf,
+      .idx = 0,
+      .buffer_size = *outbuf_size
+    };
+
+  struct buffer_write_result * res = Bprogram_to_str(program, &b);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  size_t l = b.idx;
+
+  return l;
 }
 
 struct buffer_write_result *
@@ -757,11 +845,13 @@ test_clause(void) {
   cl->body_size = 1;
   cl->body = at;
 
+#if 0
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = clause_to_str(cl, &remaining_buf_size, buf);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
   free(buf);
+#endif
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = Bclause_to_str(cl, outbuf);
@@ -842,6 +932,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
   return result;
 }
 
+#if 0
 size_t
 terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf)
 {
@@ -862,6 +953,7 @@ terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * ou
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
