@@ -26,6 +26,7 @@ bool have_space(struct buffer_info * buf, size_t n);
 void unsafe_buffer_char(struct buffer_info * buf, char c);
 void unsafe_buffer_str(struct buffer_info * buf, char * s);
 void unsafe_dec_idx(struct buffer_info * buf, size_t n);
+void safe_buffer_replace_last(struct buffer_info * buf, char c);
 
 struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * src);
 

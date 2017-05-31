@@ -50,6 +50,14 @@ unsafe_buffer_char(struct buffer_info * buf, char c)
 }
 
 inline void
+safe_buffer_replace_last(struct buffer_info * buf, char c)
+{
+  assert(NULL != buf);
+  assert(buf->idx > 0);
+  buf->buffer[buf->idx - 1] = c;
+}
+
+inline void
 unsafe_buffer_str(struct buffer_info * buf, char * s)
 {
   strcpy(buf->buffer + buf->idx, s);
