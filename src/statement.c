@@ -79,6 +79,65 @@ universe_str(struct universe_t * uni, size_t * remaining, char * buf)
   return l;
 }
 
+struct buffer_write_result *
+Buniverse_str(const struct universe_t * const uni, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+
+  struct buffer_write_result * res = NULL;
+
+  for (int i = 0; i < uni->cardinality; i++) {
+    res = buf_strcpy(dst, "(declare-const");
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+    res = buf_strcpy(dst, uni->element[i]);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+    res = buf_strcpy(dst, universe_ty);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+
+    if (have_space(dst, 1)) {
+      unsafe_buffer_char(dst, '\n');
+    } else {
+      return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    }
+  }
+
+  res = buf_strcpy(dst, "(assert (distinct");
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+  for (int i = 0; i < uni->cardinality; i++) {
+    res = buf_strcpy(dst, uni->element[i]);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    if (i < uni->cardinality - 1) {
+      safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    } else {
+      safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+    }
+  }
+
+  if (have_space(dst, 3)) {
+    unsafe_buffer_str(dst, ")\n");
+    return mkval_buffer_write_result(dst->idx - initial_idx);
+  } else {
+    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+  }
+}
+
 void
 free_universe(struct universe_t * uni)
 {
@@ -229,6 +288,137 @@ stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
   return l;
 }
 
+struct buffer_write_result *
+Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+
+  struct buffer_write_result * res = NULL;
+
+  switch (stmt->kind) {
+  case STMT_AXIOM:
+    res = buf_strcpy(dst, "(assert");
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+    res = Bfmla_str(stmt->param.axiom, dst);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+    break;
+
+  case STMT_CONST_DEF:
+    // Check arity, and use define-fun or declare-const as appropriate.
+
+    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
+      // We're dealing with a nullary constant.
+      res = buf_strcpy(dst, "(declare-const");
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+      res = buf_strcpy(dst, stmt->param.const_def->const_name);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+      res = buf_strcpy(dst, stmt->param.const_def->ty);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+    } else {
+      res = buf_strcpy(dst, "(define-fun");
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+      res = buf_strcpy(dst, stmt->param.const_def->const_name);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+      if (have_space(dst, 1)) {
+        unsafe_buffer_char(dst, '(');
+      } else {
+        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      }
+
+      const struct terms_t * params_cursor = stmt->param.const_def->params;
+      while (NULL != params_cursor) {
+        if (have_space(dst, 1)) {
+          unsafe_buffer_char(dst, '(');
+        } else {
+          return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+        }
+
+        res = Bterm_to_str(params_cursor->term, dst);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
+
+        safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+        res = buf_strcpy(dst, universe_ty);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
+
+        safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+
+        params_cursor = params_cursor->next;
+        if (NULL != params_cursor) {
+          if (have_space(dst, 1)) {
+            unsafe_buffer_char(dst, ' ');
+          } else {
+            return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+          }
+        }
+      }
+
+      if (have_space(dst, 2)) {
+        unsafe_buffer_char(dst, ')');
+        unsafe_buffer_char(dst, ' ');
+      } else {
+        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      }
+
+      res = buf_strcpy(dst, stmt->param.const_def->ty);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
+
+      if (have_space(dst, 1)) {
+        unsafe_buffer_char(dst, ' ');
+      } else {
+        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      }
+
+      res = Bfmla_str(stmt->param.const_def->body, dst);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+
+      safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+    }
+    break;
+  default:
+    return mkerrval_buffer_write_result(NON_BUFF_ERROR);
+  }
+
+  if (have_space(dst, 1)) {
+    unsafe_buffer_char(dst, '\0');
+    return mkval_buffer_write_result(dst->idx - initial_idx);
+  } else {
+    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+  }
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
@@ -271,6 +461,32 @@ stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
   return l;
 }
 
+struct buffer_write_result *
+Bstmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+  const struct stmts_t * cursor = stmts;
+
+  struct buffer_write_result * res = NULL;
+
+  while (NULL != cursor) {
+    res = Bstmt_str(cursor->stmt, dst);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+
+    safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
+
+    cursor = cursor->next;
+  }
+
+  if (have_space(dst, 1)) {
+    unsafe_buffer_char(dst, '\0');
+    return mkval_buffer_write_result(dst->idx - initial_idx);
+  } else {
+    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+  }
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
@@ -308,6 +524,38 @@ model_str(struct model_t * mdl, size_t * remaining, char * buf)
   return l;
 }
 
+struct buffer_write_result *
+Bmodel_str(const struct model_t * const mdl, struct buffer_info * dst)
+{
+  size_t initial_idx = dst->idx;
+
+  struct buffer_write_result * res = buf_strcpy(dst, "(declare-sort");
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+  res = buf_strcpy(dst, universe_ty);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+
+  if (have_space(dst, 3)) {
+    unsafe_buffer_str(dst, "0)");
+  } else {
+    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+  }
+
+  safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
+
+  res = Bstmts_str(mdl->stmts, dst);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+
+  return mkval_buffer_write_result(dst->idx - initial_idx);
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
@@ -331,21 +579,22 @@ void
 test_statement(void)
 {
   printf("***test_statement***\n");
-  struct term_t * aT = mk_term(CONST, "a");
-  struct term_t * bT = mk_term(CONST, "b");
+  struct term_t * aT = mk_term(CONST, to_heap("a"));
+  struct term_t * bT = mk_term(CONST, to_heap("b"));
   struct terms_t * terms = mk_term_cell(aT, NULL);
   terms = mk_term_cell(bT, terms);
 
   struct model_t * mdl = mk_model(mk_universe(terms));
 
-  const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
+  const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs(to_heap("="), 2, mk_const("a"), mk_const("a")));
   char * vX = malloc(sizeof(char) * 2);
   strcpy(vX, "X");
   char * vY = malloc(sizeof(char) * 2);
   strcpy(vY, "Y");
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
-  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms, mk_fmla_not(mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"))));
+  const struct stmt_t * s2S = mk_stmt_pred(to_heap("some_predicate"), terms,
+      mk_fmla_not(mk_fmla_atom_varargs(to_heap("="), 2, mk_var("X"), mk_var("Y"))));
   struct stmt_t * s3AS = mk_stmt_const("x", mdl->universe, universe_ty);
   const struct stmt_t * s3BS = mk_stmt_const_def("x", mdl->universe);
 
@@ -354,16 +603,28 @@ test_statement(void)
   strengthen_model(mdl, s3AS);
   strengthen_model(mdl, s3BS);
 
+#if 0
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
 
-  free(vX);
-  free(vY);
-  free_terms(terms);
-  free_model(mdl);
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = Bmodel_str(mdl, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+  printf("test model (size=%zu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+  free_buffer(outbuf);
+  printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+
+  free_model(mdl); // NOTE this also frees "terms", the freeing of which also
+                   //      frees "vX" and "vY".
+#if 0
   free(buf);
+#endif
 }
 
 DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
