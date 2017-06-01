@@ -560,7 +560,7 @@ free_fmla(const struct fmla_t * fmla)
     free_fmla_quant(fmla->param.quant);
     break;
   default:
-    // FIXME fail
+    assert(false);
     break;
   }
 
@@ -668,7 +668,7 @@ copy_fmla(const struct fmla_t * const fmla)
 #pragma GCC diagnostic pop
     break;
   default:
-    // FIXME fail
+    assert(false);
     break;
   }
 
@@ -836,7 +836,7 @@ fmla_size(const struct fmla_t * const fmla)
     result = 1 + fmla_size(fmla->param.quant->body);
     break;
   default:
-    // FIXME fail
+    assert(false);
     break;
   }
 
@@ -872,7 +872,7 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     result = consts_in_fmla(fmla->param.quant->body, acc);
     break;
   default:
-    // FIXME fail
+    assert(false);
     break;
   }
   return result;
