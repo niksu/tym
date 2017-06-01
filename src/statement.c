@@ -340,7 +340,7 @@ free_stmt(const struct stmt_t * stmt)
     free(stmt->param.const_def);
     break;
   default:
-    // FIXME complain
+    assert(false);
     break;
   }
   free((void *)stmt);
@@ -505,7 +505,7 @@ new_const_in_stmt(const struct stmt_t * stmt)
     result = mk_term(CONST, stmt->param.const_def->const_name);
     break;
   default:
-    // FIXME complain -- impossible result
+    assert(false);
     break;
   }
   return result;
@@ -525,7 +525,7 @@ consts_in_stmt(const struct stmt_t * stmt)
     }
     break;
   default:
-    // FIXME complain -- impossible result
+    assert(false);
     break;
   }
   return result;
