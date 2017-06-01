@@ -50,6 +50,7 @@ struct program_t {
   const struct clause_t ** program;
 };
 
+#if 0
 size_t my_strcpy(char * dst, const char * src, size_t * space);
 size_t term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf);
 //size_t terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf);
@@ -57,6 +58,7 @@ size_t term_to_str(const struct term_t * const term, size_t * outbuf_size, char 
 //size_t atom_to_str(const struct atom_t * const atom, size_t * outbuf_size, char * outbuf);
 size_t clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf);
 size_t program_to_str(const struct program_t * const clause, size_t * outbuf_size, char * outbuf);
+#endif
 
 struct buffer_write_result * Bterm_to_str(const struct term_t * const term, struct buffer_info * dst);
 struct buffer_write_result * Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst);
@@ -86,7 +88,9 @@ void free_program(struct program_t * program);
 
 typedef struct buffer_write_result * (*x_to_str_t)(void *, struct buffer_info * dst);
 
+#if 0
 void debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf));
+#endif
 void Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst));
 
 #if DEBUG

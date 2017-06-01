@@ -401,7 +401,7 @@ fmla_str(const struct fmla_t * fmla, size_t * remaining, char * buf)
   buf[l] = '\0';
   return l;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 fmla_str(const struct fmla_t * fmla, size_t * outbuf_size, char * outbuf)
@@ -421,6 +421,7 @@ fmla_str(const struct fmla_t * fmla, size_t * outbuf_size, char * outbuf)
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
@@ -633,7 +634,7 @@ valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
   buf[l] = '\0';
   return l;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 valuation_str(struct valuation_t * v, size_t * outbuf_size, char * outbuf)
@@ -653,6 +654,7 @@ valuation_str(struct valuation_t * v, size_t * outbuf_size, char * outbuf)
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bvaluation_str(struct valuation_t * v, struct buffer_info * dst)

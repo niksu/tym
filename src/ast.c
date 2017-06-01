@@ -29,7 +29,7 @@ my_strcpy(char * dst, const char * src, size_t * space)
   *space -= l;
   return l;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 my_strcpy(char * dst, const char * src, size_t * space)
@@ -49,6 +49,7 @@ my_strcpy(char * dst, const char * src, size_t * space)
 
   return l;
 }
+#endif
 
 #if 0
 size_t
@@ -65,7 +66,7 @@ term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbu
 
   return l;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
@@ -85,6 +86,7 @@ term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbu
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
@@ -319,7 +321,7 @@ clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbu
 
   return l;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf)
@@ -339,6 +341,7 @@ clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char *
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
@@ -420,7 +423,7 @@ program_to_str(const struct program_t * const program, size_t * outbuf_size, cha
 
   return offset;
 }
-#endif
+
 // FIXME this is simply a wrapper for the B-version of the function.
 size_t
 program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
@@ -440,6 +443,7 @@ program_to_str(const struct program_t * const program, size_t * outbuf_size, cha
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bprogram_to_str(const struct program_t * const program, struct buffer_info * dst)
@@ -698,6 +702,7 @@ free_program(struct program_t * program)
 }
 #pragma GCC diagnostic pop
 
+#if 0
 // FIXME could allocate memory at start to amortise.
 void
 debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf))
@@ -709,6 +714,7 @@ debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * 
   DBG("%s", outbuf);
   free(outbuf);
 }
+#endif
 
 void
 Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst))

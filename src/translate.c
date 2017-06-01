@@ -150,9 +150,15 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   for (int i = 0; i < program->no_clauses; i++) {
     (void)clause_database_add(program->program[i], adb, NULL);
   }
+#if 0
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   atom_database_str(adb, &remaining_buf_size, buf);
+#endif
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = Batom_database_str(adb, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
 #if DEBUG
   printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
 #endif
@@ -161,19 +167,28 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   // 1. Generate prologue: universe sort, and its inhabitants.
   struct model_t * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
 
+#if 0
   remaining_buf_size = BUF_SIZE;
+#endif
 #if DEBUG
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #else
+#if 0
   (void)model_str(mdl, &remaining_buf_size, buf);
 #endif
+  res = Bmodel_str(mdl, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+#endif
 
+#if 0
   // NOTE if we don't do this, remaining_buf_size will become 0 causing some
   //      output to be dropped, then it might wrap back and output will resume,
   //      so best to keep it topped up.
   // FIXME maybe should simply remove this parameter then, if it needs maintenance and doesn't yield obvious gain?
   remaining_buf_size = BUF_SIZE;
+#endif
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
@@ -182,7 +197,9 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 #endif
 
+#if 0
     size_t out_size;
+#endif
 
     struct mutable_fmlas_t * fmlas = (struct mutable_fmlas_t *)translate_bodies(preds_cursor->predicate->bodies);
     struct mutable_fmlas_t * fmlas_cursor = fmlas;
@@ -199,8 +216,13 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       const struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
           preds_cursor->predicate->arity, var_args);
 
+#if 0
       out_size = fmla_str(atom, &remaining_buf_size, buf);
       assert(out_size > 0);
+#endif
+      res = Bfmla_str(atom, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
 #if DEBUG
       printf("bodyless: %s\n", buf);
 #endif
@@ -230,22 +252,37 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         // Abstract the atom's parameters.
         const struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
+#if 0
         out_size = fmla_str(head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
+#endif
+        res = Bfmla_str(head_fmla, outbuf);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
 #if DEBUG
         printf("from: %s\n", buf);
 #endif
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t *));
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
+#if 0
         out_size = fmla_str(abs_head_fmla, &remaining_buf_size, buf);
         assert(out_size > 0);
+#endif
+        res = Bfmla_str(abs_head_fmla, outbuf);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
 #if DEBUG
         printf("to: %s\n", buf);
 #endif
 
+#if 0
         out_size = valuation_str(*v, &remaining_buf_size, buf);
         assert(out_size >= 0);
+#endif
+        res = Bvaluation_str(*v, outbuf);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
 #if DEBUG
         if (0 == out_size) {
           printf("  where: (no substitutions)\n");
@@ -268,8 +305,13 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free_fmla(fmla);
         free_fmla(quantified_fmla);
 
+#if 0
         remaining_buf_size = BUF_SIZE;
         fmla_str(fmlas_cursor->fmla, &remaining_buf_size, buf);
+#endif
+        res = Bfmla_str(fmlas_cursor->fmla, outbuf);
+        assert(is_ok_buffer_write_result(res));
+        free(res);
 #if DEBUG
         printf("  :|%s|\n", buf);
 #endif
@@ -293,9 +335,14 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       }
 
       const struct fmla_t * fmla = mk_fmla_ors((struct fmlas_t *)fmlas);
+#if 0
       remaining_buf_size = BUF_SIZE;
       out_size = fmla_str(fmla, &remaining_buf_size, buf);
       assert(out_size > 0);
+#endif
+      res = Bfmla_str(fmla, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
 #if DEBUG
       printf("pre-result: %s\n", buf);
 #endif
@@ -313,7 +360,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #endif
   }
 
+#if 0
   free(buf);
+#endif
+  free_buffer(outbuf);
 
   return mdl;
 }

@@ -45,6 +45,7 @@ mk_universe(struct terms_t * terms)
   return result;
 }
 
+#if 0
 size_t
 universe_str(struct universe_t * uni, size_t * remaining, char * buf)
 {
@@ -78,6 +79,7 @@ universe_str(struct universe_t * uni, size_t * remaining, char * buf)
   buf[l] = '\0';
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Buniverse_str(const struct universe_t * const uni, struct buffer_info * dst)
@@ -223,6 +225,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   return mk_stmt_axiom(mk_fmla_ors(fmlas));
 }
 
+#if 0
 size_t
 stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
 {
@@ -287,6 +290,7 @@ stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
@@ -448,6 +452,7 @@ free_stmt(const struct stmt_t * stmt)
 
 DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
+#if 0
 size_t
 stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
 {
@@ -460,6 +465,7 @@ stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
   }
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bstmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
@@ -510,6 +516,7 @@ mk_model(struct universe_t * uni)
   return result;
 }
 
+#if 0
 size_t
 model_str(struct model_t * mdl, size_t * remaining, char * buf)
 {
@@ -523,6 +530,7 @@ model_str(struct model_t * mdl, size_t * remaining, char * buf)
   buf[l] = '\0';
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bmodel_str(const struct model_t * const mdl, struct buffer_info * dst)

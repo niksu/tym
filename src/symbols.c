@@ -59,6 +59,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   return exists;
 }
 
+#if 0
 size_t
 term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * outbuf)
 {
@@ -81,6 +82,7 @@ term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * out
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst)
@@ -245,6 +247,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_
   return success;
 }
 
+#if 0
 size_t
 atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf)
 {
@@ -295,6 +298,7 @@ atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * out
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
@@ -357,6 +361,7 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
 
+#if 0
 size_t
 predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
 {
@@ -378,6 +383,7 @@ predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outb
 
   return l;
 }
+#endif
 
 struct buffer_write_result *
 Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst)

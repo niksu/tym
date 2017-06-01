@@ -120,15 +120,26 @@ main(int argc, char ** argv)
   }
 
   if (params.test_parsing) {
+#if 0
     size_t remaining_buf_size = BUF_SIZE;
     char * buf = malloc(remaining_buf_size); // FIXME check if succeeds
     size_t used_buf_size;
+#endif
+    struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+    struct buffer_write_result * res = NULL;
 
     if (NULL != params.source_file) {
+#if 0
       used_buf_size = program_to_str(parsed_source_file_contents,
           &remaining_buf_size, buf);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
+#endif
+      res = Bprogram_to_str(parsed_source_file_contents, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+      printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
       free_program(parsed_source_file_contents);
       free(source_file_contents);
@@ -136,16 +147,26 @@ main(int argc, char ** argv)
     }
 
     if (NULL != params.query) {
+#if 0
       remaining_buf_size = BUF_SIZE;
       used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
           used_buf_size, remaining_buf_size, buf);
+#endif
+      res = Bprogram_to_str(parsed_query, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
+      printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
       free_program(parsed_query);
       free(params.query);
     }
 
+#if 0
     free(buf);
+#endif
+    free_buffer(outbuf);
 
     return 0;
   }
