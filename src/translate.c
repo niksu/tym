@@ -109,10 +109,10 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct f
     result = mk_fmla_not(fmla_2);
     break;
   case FMLA_EX:
-    // FIXME cannot appear in queries -- complain.
+    assert(false); // Existential quantifier cannot appear in queries.
     break;
   default:
-    // FIXME fail
+    assert(false); // No other formula constructor exists.
     break;
   }
 

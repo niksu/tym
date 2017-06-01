@@ -617,7 +617,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
           break;
         }
       } else {
-        // FIXME handle error
+        assert(false);
       }
       cursor = cursor->next;
     }
