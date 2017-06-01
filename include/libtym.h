@@ -11,6 +11,7 @@
 #define __LIBTYM_H__
 
 #include "ast.h"
+#include "buffer.h"
 #include "formula.h"
 #include "parser.h"
 #include "lexer.h"

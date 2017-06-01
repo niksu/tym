@@ -120,15 +120,15 @@ main(int argc, char ** argv)
   }
 
   if (params.test_parsing) {
-    size_t remaining_buf_size = BUF_SIZE;
-    char * buf = malloc(remaining_buf_size); // FIXME check if succeeds
-    size_t used_buf_size;
+    struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+    struct buffer_write_result * res = NULL;
 
     if (NULL != params.source_file) {
-      used_buf_size = program_to_str(parsed_source_file_contents,
-          &remaining_buf_size, buf);
+      res = Bprogram_to_str(parsed_source_file_contents, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
-          used_buf_size, remaining_buf_size, buf);
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
       free_program(parsed_source_file_contents);
       free(source_file_contents);
@@ -136,16 +136,17 @@ main(int argc, char ** argv)
     }
 
     if (NULL != params.query) {
-      remaining_buf_size = BUF_SIZE;
-      used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
+      res = Bprogram_to_str(parsed_query, outbuf);
+      assert(is_ok_buffer_write_result(res));
+      free(res);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
-          used_buf_size, remaining_buf_size, buf);
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
       free_program(parsed_query);
       free(params.query);
     }
 
-    free(buf);
+    free_buffer(outbuf);
 
     return 0;
   }
@@ -183,15 +184,16 @@ main(int argc, char ** argv)
 #endif
 
 #if DEBUG
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = malloc(remaining_buf_size);
-  *buf = '\0'; // FIXME initialise in a neater way?
-  size_t l = 0;
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = NULL;
 #endif
   if (NULL != mdl) {
 #if DEBUG
-    model_str(mdl, &remaining_buf_size, buf);
-    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+    res = Bmodel_str(mdl, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
     const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
@@ -202,9 +204,11 @@ main(int argc, char ** argv)
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
 #if DEBUG
-    remaining_buf_size = BUF_SIZE;
-    l = model_str(mdl, &remaining_buf_size, buf);
-    printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+    res = Bmodel_str(mdl, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+    printf("model (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
   }
 
@@ -219,7 +223,7 @@ main(int argc, char ** argv)
   free(cg);
   free(cK);
 #if DEBUG
-  free(buf);
+  free_buffer(outbuf);
 #endif
 
   if (NULL != params.source_file) {
