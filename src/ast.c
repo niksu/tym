@@ -15,79 +15,6 @@
 #include "module_tests.h"
 #include "util.h"
 
-#if 0
-size_t
-my_strcpy(char * dst, const char * src, size_t * space)
-{
-  size_t l = strlen(src);
-  if (l < *space) {
-    strcpy(dst, src);
-  } else {
-    // FIXME complain
-  }
-
-  *space -= l;
-  return l;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-my_strcpy(char * dst, const char * src, size_t * space)
-{
-  struct buffer_info b =
-    {
-      .buffer = dst,
-      .idx = 0,
-      .buffer_size = *space
-    };
-
-  struct buffer_write_result * res = buf_strcpy(&b, src);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
-
-#if 0
-size_t
-term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = my_strcpy(outbuf, term->identifier, outbuf_size); // FIXME add error checking
-
-#if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%d}", hash_term(*term) + 127);
-  *outbuf_size -= strlen(&(outbuf[l]));
-  l += strlen(&(outbuf[l]));
-#endif
-  outbuf[l] = '\0';
-
-  return l;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-term_to_str(const struct term_t * const term, size_t * outbuf_size, char * outbuf)
-{
-  struct buffer_info b =
-    {
-      .buffer = outbuf,
-      .idx = 0,
-      .buffer_size = *outbuf_size
-    };
-
-  struct buffer_write_result * res = Bterm_to_str(term, &b);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
 {
@@ -116,22 +43,6 @@ Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
   }
 }
 
-#if 0
-size_t
-predicate_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = my_strcpy(outbuf, atom->predicate, outbuf_size); // FIXME add error checking
-
-#if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%d}", hash_str(atom->predicate) + 127);
-  *outbuf_size -= strlen(&(outbuf[l]));
-  l += strlen(&(outbuf[l]));
-#endif
-
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
 {
@@ -159,51 +70,6 @@ Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 }
-
-#if 0
-size_t
-atom_to_str(const struct atom_t * atom, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = predicate_to_str(atom, outbuf_size, outbuf); // FIXME add error checking
-
-  // There needs to be space to store at least "()\0".
-  if (*outbuf_size < 3) {
-    // FIXME complain
-  }
-
-  outbuf[(*outbuf_size)--, l++] = '(';
-
-  for (int i = 0; i < atom->arity; i++) {
-    size_t l_sub = term_to_str(&(atom->args[i]), outbuf_size, outbuf + l); // FIXME add error checking
-
-    l += l_sub;
-
-    if (i != atom->arity - 1) {
-      // There needs to be space to store at least ", x)\0".
-      if (*outbuf_size < 5) {
-        // FIXME complain
-      }
-
-      // FIXME batch these.
-      outbuf[(*outbuf_size)--, l++] = ',';
-      outbuf[(*outbuf_size)--, l++] = ' ';
-    }
-  }
-
-  // FIXME batch these.
-  outbuf[(*outbuf_size)--, l++] = ')';
-
-#if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%d}", hash_atom(*atom) + 127);
-  *outbuf_size -= strlen(&(outbuf[l]));
-  l += strlen(&(outbuf[l]));
-#endif
-
-  outbuf[(*outbuf_size)--, l++] = '\0';
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
@@ -262,86 +128,6 @@ Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 }
-
-#if 0
-size_t
-clause_to_str(const struct clause_t * clause, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = atom_to_str(&(clause->head), outbuf_size, outbuf); // FIXME add error checking
-
-  (*outbuf_size)++, l--; // chomp the trailing \0.
-
-  if (clause->body_size > 0) {
-    // There needs to be space to store at least " :- x().".
-    if (*outbuf_size < 8) {
-      // FIXME complain
-    }
-
-    // FIXME batch these.
-    outbuf[(*outbuf_size)--, l++] = ' ';
-    outbuf[(*outbuf_size)--, l++] = ':';
-    outbuf[(*outbuf_size)--, l++] = '-';
-    outbuf[(*outbuf_size)--, l++] = ' ';
-
-    for (int i = 0; i < clause->body_size; i++) {
-      size_t l_sub = atom_to_str(&(clause->body[i]), outbuf_size, outbuf + l); // FIXME add error checking
-
-      (*outbuf_size)++, l--; // chomp the trailing \0.
-
-      l += l_sub;
-
-      if (i != clause->body_size - 1) {
-        // There needs to be space to store at least ", x().\0".
-        if (*outbuf_size < 7) {
-          // FIXME complain
-        }
-
-        // FIXME batch these.
-        outbuf[(*outbuf_size)--, l++] = ',';
-        outbuf[(*outbuf_size)--, l++] = ' ';
-      }
-    }
-  }
-
-  // There needs to be space to store at least ".\0".
-  if (*outbuf_size < 2) {
-    // FIXME complain
-  }
-
-  // FIXME batch these.
-  outbuf[(*outbuf_size)--, l++] = '.';
-
-#if DEBUG
-  sprintf(&(outbuf[l]), "{hash=%d}", hash_clause(*clause) + 127);
-  *outbuf_size -= strlen(&(outbuf[l]));
-  l += strlen(&(outbuf[l]));
-#endif
-
-  outbuf[l] = '\0';
-
-  return l;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-clause_to_str(const struct clause_t * const clause, size_t * outbuf_size, char * outbuf)
-{
-  struct buffer_info b =
-    {
-      .buffer = outbuf,
-      .idx = 0,
-      .buffer_size = *outbuf_size
-    };
-
-  struct buffer_write_result * res = Bclause_to_str(clause, &b);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
@@ -403,47 +189,6 @@ Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 }
-
-#if 0
-size_t
-program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
-{
-  size_t offset = 0;
-  size_t pre_offset;
-
-  for (int i = 0; i < program->no_clauses; i++) {
-    pre_offset = clause_to_str(program->program[i], outbuf_size, outbuf + offset); // FIXME add error checking
-
-    offset += pre_offset;
-
-    if (i < program->no_clauses - 1) {
-      outbuf[(*outbuf_size)--, offset++] = '\n';
-    }
-  }
-
-  return offset;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-program_to_str(const struct program_t * const program, size_t * outbuf_size, char * outbuf)
-{
-  struct buffer_info b =
-    {
-      .buffer = outbuf,
-      .idx = 0,
-      .buffer_size = *outbuf_size
-    };
-
-  struct buffer_write_result * res = Bprogram_to_str(program, &b);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bprogram_to_str(const struct program_t * const program, struct buffer_info * dst)
@@ -702,20 +447,6 @@ free_program(struct program_t * program)
 }
 #pragma GCC diagnostic pop
 
-#if 0
-// FIXME could allocate memory at start to amortise.
-void
-debug_out_syntax(void * x, int (*x_to_str)(void *, size_t * outbuf_size, char * outbuf))
-{
-  size_t buf_size = BUF_SIZE;
-  char * outbuf = malloc(buf_size);
-  assert(NULL != outbuf);
-  x_to_str(x, &buf_size, outbuf);
-  DBG("%s", outbuf);
-  free(outbuf);
-}
-#endif
-
 void
 Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst))
 {
@@ -842,14 +573,6 @@ test_clause(void) {
   cl->body_size = 1;
   cl->body = at;
 
-#if 0
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = malloc(remaining_buf_size);
-  size_t l = clause_to_str(cl, &remaining_buf_size, buf);
-  printf("test clause (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-  free(buf);
-#endif
-
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = Bclause_to_str(cl, outbuf);
   assert(is_ok_buffer_write_result(res));
@@ -901,13 +624,6 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 
     if (!found) {
 #if DEBUG
-#if 0
-      size_t remaining_buf_size = BUF_SIZE;
-      char * buf = malloc(remaining_buf_size);
-      size_t l = term_to_str(ss->term, &remaining_buf_size, buf);
-      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-      free(buf);
-#endif
       struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
       struct buffer_write_result * res = Bterm_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
@@ -929,29 +645,6 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 
   return result;
 }
-
-#if 0
-size_t
-terms_to_str(const struct terms_t * const terms, size_t * outbuf_size, char * outbuf)
-{
-  const struct terms_t * cursor = terms;
-  size_t l = 0;
-  while (NULL != cursor) {
-    l += term_to_str(cursor->term, outbuf_size, outbuf + l); // FIXME add error checking
-
-    if (NULL != terms->next) {
-      outbuf[(*outbuf_size)--, l++] = ',';
-      outbuf[(*outbuf_size)--, l++] = ' ';
-    }
-
-    cursor = cursor->next;
-  }
-
-  outbuf[l] = '\0';
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst)

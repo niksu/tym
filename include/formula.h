@@ -58,11 +58,6 @@ struct fmla_t * copy_fmla(const struct fmla_t * const);
 
 const struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
 
-#if 0
-size_t fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf);
-size_t fmla_quant_str(struct fmla_quant_t * at, size_t * remaining, char * buf);
-size_t fmla_str(const struct fmla_t * at, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst);
 struct buffer_write_result * Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst);
 struct buffer_write_result * Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst);
@@ -83,9 +78,6 @@ struct valuation_t {
 };
 
 size_t valuation_len(const struct valuation_t * const v);
-#if 0
-size_t valuation_str(struct valuation_t * v, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bvaluation_str(struct valuation_t * v, struct buffer_info * dst);
 
 bool fmla_is_atom(const struct fmla_t * fmla);

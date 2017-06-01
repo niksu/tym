@@ -16,9 +16,6 @@
 
 #define MAX_VAR_WIDTH 10/*FIXME const*/
 
-#if 0
-size_t fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
 
 const struct fmla_t *
@@ -191,30 +188,6 @@ mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
   return result;
 }
 
-#if 0
-size_t
-fmla_atom_str(struct fmla_atom_t * at, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  char * dst = buf + l;
-  char * src = at->pred_name;
-  // FIXME inline expressions above into expression below?
-  size_t l_sub = my_strcpy(dst, src, remaining);
-  // FIXME check and react to errors.
-  l += l_sub;
-
-  for (int i = 0; i < at->arity; i++) {
-    buf[(*remaining)--, l++] = ' ';
-    l_sub = term_to_str(at->predargs[i], remaining, buf + l);
-    // FIXME check and react to errors.
-    l += l_sub;
-  }
-
-  buf[l] = '\0';
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
 {
@@ -247,33 +220,6 @@ Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 }
-
-#if 0
-size_t
-fmla_quant_str(struct fmla_quant_t * quant, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  const char * uni_type = "Universe"; // FIXME const
-  buf[(*remaining)--, l++] = '(';
-
-  buf[(*remaining)--, l++] = '(';
-  // FIXME check and react to errors.
-  l += my_strcpy(buf + l, quant->bv, remaining);
-  buf[(*remaining)--, l++] = ' ';
-  // FIXME check and react to errors.
-  l += my_strcpy(buf + l, uni_type, remaining);
-  buf[(*remaining)--, l++] = ')';
-
-  buf[(*remaining)--, l++] = ')';
-  buf[(*remaining)--, l++] = ' ';
-
-  // FIXME check and react to errors.
-  l += fmla_str(quant->body, remaining, buf + l);
-
-  buf[l] = '\0';
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
@@ -309,20 +255,6 @@ Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
 
-#if 0
-size_t
-fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  l += fmla_str(fmlaL, remaining, buf + l);
-  buf[(*remaining)--, l++] = ' ';
-  l += fmla_str(fmlaR, remaining, buf + l);
-
-  buf[l] = '\0';
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst)
 {
@@ -340,88 +272,6 @@ Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_i
 
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
-
-#if 0
-size_t
-fmla_str(const struct fmla_t * fmla, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-
-  const size_t fmla_sz = fmla_size(fmla);
-  if (fmla_sz > 1) {
-    buf[(*remaining)--, l++] = '(';
-  }
-
-  switch (fmla->kind) {
-  case FMLA_CONST:
-    if (fmla->param.const_value) {
-      sprintf(buf + l, "true");
-    } else {
-      sprintf(buf + l, "false");
-    }
-    *remaining -= strlen(buf + l);
-    l += strlen(buf + l);
-    break;
-  case FMLA_ATOM:
-    l += fmla_atom_str(fmla->param.atom, remaining, buf + l);
-    break;
-  case FMLA_AND:
-    sprintf(buf + l, "and ");
-    *remaining -= strlen(buf + l);
-    l += strlen(buf + l);
-    l += fmla_junction_str(fmla->param.args[0], fmla->param.args[1], remaining, buf + l);
-    break;
-  case FMLA_OR:
-    sprintf(buf + l, "or ");
-    *remaining -= strlen(buf + l);
-    l += strlen(buf + l);
-    l += fmla_junction_str(fmla->param.args[0], fmla->param.args[1], remaining, buf + l);
-    break;
-  case FMLA_NOT:
-    sprintf(buf + l, "not ");
-    *remaining -= strlen(buf + l);
-    l += strlen(buf + l);
-    l += fmla_str(fmla->param.args[0], remaining, buf + l);
-    break;
-  case FMLA_EX:
-    sprintf(buf + l, "exists ");
-    *remaining -= strlen(buf + l);
-    l += strlen(buf + l);
-    l += fmla_quant_str(fmla->param.quant, remaining, buf + l);
-    break;
-  default:
-    // FIXME fail
-    break;
-  }
-
-  if (fmla_sz > 1) {
-    buf[(*remaining)--, l++] = ')';
-  }
-
-  buf[l] = '\0';
-  return l;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-fmla_str(const struct fmla_t * fmla, size_t * outbuf_size, char * outbuf)
-{
-  struct buffer_info b =
-    {
-      .buffer = outbuf,
-      .idx = 0,
-      .buffer_size = *outbuf_size
-    };
-
-  struct buffer_write_result * res = Bfmla_str(fmla, &b);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
@@ -604,57 +454,6 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   free(var_args_T); // since mk_fmla_atom copies the formula.
   return result;
 }
-
-#if 0
-size_t
-valuation_str(struct valuation_t * v, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  struct valuation_t * v_cursor = v;
-
-  while (NULL != v_cursor) {
-    size_t l_sub;
-    l_sub = my_strcpy(buf + l, v_cursor->var, remaining);
-    // FIXME check and react to errors.
-    l += l_sub;
-    buf[(*remaining)--, l++] = '=';
-
-    l_sub = term_to_str(v_cursor->val, remaining, buf + l);
-    // FIXME check and react to errors.
-    l += l_sub;
-
-    v_cursor = v_cursor->next;
-
-    if (NULL != v_cursor) {
-      buf[(*remaining)--, l++] = ',';
-      buf[(*remaining)--, l++] = ' ';
-    }
-  }
-
-  buf[l] = '\0';
-  return l;
-}
-
-// FIXME this is simply a wrapper for the B-version of the function.
-size_t
-valuation_str(struct valuation_t * v, size_t * outbuf_size, char * outbuf)
-{
-  struct buffer_info b =
-    {
-      .buffer = outbuf,
-      .idx = 0,
-      .buffer_size = *outbuf_size
-    };
-
-  struct buffer_write_result * res = Bvaluation_str(v, &b);
-  assert(is_ok_buffer_write_result(res));
-  free(res);
-
-  size_t l = b.idx;
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bvaluation_str(struct valuation_t * v, struct buffer_info * dst)
@@ -901,12 +700,6 @@ test_formula(void)
   const struct fmla_t * test_or = mk_fmla_or(test_not, test_and);
   const struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
 
-#if 0
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = malloc(remaining_buf_size);
-  size_t l = fmla_str(test_quant, &remaining_buf_size, buf);
-  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = Bfmla_str(test_quant, outbuf);
   assert(is_ok_buffer_write_result(res));
@@ -930,19 +723,6 @@ test_formula(void)
   const struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
   const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);
 
-#if 0
-  remaining_buf_size = BUF_SIZE;
-  l = fmla_str(test_atom, &remaining_buf_size, buf);
-  printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-
-  remaining_buf_size = BUF_SIZE;
-  l = fmla_str(test_and2, &remaining_buf_size, buf);
-  printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-
-  remaining_buf_size = BUF_SIZE;
-  l = fmla_str(test_or, &remaining_buf_size, buf);
-  printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
   outbuf = mk_buffer(BUF_SIZE);
   res = Bfmla_str(test_atom, outbuf);
   assert(is_ok_buffer_write_result(res));
@@ -977,9 +757,6 @@ test_formula(void)
   free_fmla(test_and2);
   free_fmla(test_or);
   free_fmla(test_or2);
-#if 0
-  free(buf);
-#endif
 }
 
 struct terms_t *

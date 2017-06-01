@@ -120,21 +120,10 @@ main(int argc, char ** argv)
   }
 
   if (params.test_parsing) {
-#if 0
-    size_t remaining_buf_size = BUF_SIZE;
-    char * buf = malloc(remaining_buf_size); // FIXME check if succeeds
-    size_t used_buf_size;
-#endif
     struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
     if (NULL != params.source_file) {
-#if 0
-      used_buf_size = program_to_str(parsed_source_file_contents,
-          &remaining_buf_size, buf);
-      printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
-          used_buf_size, remaining_buf_size, buf);
-#endif
       res = Bprogram_to_str(parsed_source_file_contents, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
@@ -147,12 +136,6 @@ main(int argc, char ** argv)
     }
 
     if (NULL != params.query) {
-#if 0
-      remaining_buf_size = BUF_SIZE;
-      used_buf_size = program_to_str(parsed_query, &remaining_buf_size, buf);
-      printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
-          used_buf_size, remaining_buf_size, buf);
-#endif
       res = Bprogram_to_str(parsed_query, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
@@ -163,9 +146,6 @@ main(int argc, char ** argv)
       free(params.query);
     }
 
-#if 0
-    free(buf);
-#endif
     free_buffer(outbuf);
 
     return 0;
@@ -204,21 +184,11 @@ main(int argc, char ** argv)
 #endif
 
 #if DEBUG
-#if 0
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = malloc(remaining_buf_size);
-  *buf = '\0'; // FIXME initialise in a neater way?
-  size_t l = 0;
-#endif
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = NULL;
 #endif
   if (NULL != mdl) {
 #if DEBUG
-#if 0
-    model_str(mdl, &remaining_buf_size, buf);
-    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
     res = Bmodel_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
@@ -234,11 +204,6 @@ main(int argc, char ** argv)
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
 #if DEBUG
-#if 0
-    remaining_buf_size = BUF_SIZE;
-    l = model_str(mdl, &remaining_buf_size, buf);
-    printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
     res = Bmodel_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
@@ -258,9 +223,6 @@ main(int argc, char ** argv)
   free(cg);
   free(cK);
 #if DEBUG
-#if 0
-  free(buf);
-#endif
   free_buffer(outbuf);
 #endif
 

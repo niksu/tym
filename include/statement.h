@@ -38,9 +38,6 @@ struct stmt_t {
 };
 
 struct universe_t * mk_universe(struct terms_t *);
-#if 0
-size_t universe_str(struct universe_t *, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Buniverse_str(const struct universe_t * const, struct buffer_info * dst);
 void free_universe(struct universe_t *);
 
@@ -48,17 +45,11 @@ const struct stmt_t * mk_stmt_axiom(const struct fmla_t * axiom);
 const struct stmt_t * mk_stmt_pred(const char * const pred_name, struct terms_t * params, const struct fmla_t * body);
 struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, const char * const ty);
 const struct stmt_t * mk_stmt_const_def(char * const_name, struct universe_t * uni);
-#if 0
-size_t stmt_str(const struct stmt_t *, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bstmt_str(const struct stmt_t * const, struct buffer_info * dst);
 void free_stmt(const struct stmt_t *);
 
 DECLARE_LIST_TYPE(stmts_t, stmt, stmt_t)
 DECLARE_LIST_MK(stmt, struct stmt_t, struct stmts_t, const)
-#if 0
-size_t stmts_str(const struct stmts_t *, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bstmts_str(const struct stmts_t * const, struct buffer_info * dst);
 void free_stmts(const struct stmts_t *);
 
@@ -70,9 +61,6 @@ struct model_t {
 };
 
 struct model_t * mk_model(struct universe_t *);
-#if 0
-size_t model_str(struct model_t *, size_t * remaining, char * buf);
-#endif
 struct buffer_write_result * Bmodel_str(const struct model_t * const, struct buffer_info * dst);
 void free_model(const struct model_t *);
 void strengthen_model(struct model_t *, const struct stmt_t *);

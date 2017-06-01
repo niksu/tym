@@ -59,31 +59,6 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   return exists;
 }
 
-#if 0
-size_t
-term_database_str(struct term_database_t * tdb, size_t * outbuf_size, char * outbuf)
-{
-  assert(NULL != tdb);
-  assert(NULL != outbuf);
-
-  const struct terms_t * cursor = tdb->herbrand_universe;
-  size_t l = 0;
-
-  while (NULL != cursor && *outbuf_size > 0) {
-    size_t l_sub = term_to_str(cursor->term, outbuf_size, outbuf + l);
-    // FIXME check and react to errors.
-    l += l_sub;
-
-    outbuf[(*outbuf_size)--, l++] = '\n';
-    assert(*outbuf_size > 0);
-
-    cursor = cursor->next;
-  }
-
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst)
 {
@@ -247,59 +222,6 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_
   return success;
 }
 
-#if 0
-size_t
-atom_database_str(struct atom_database_t * adb, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = my_strcpy(outbuf, "Terms:\n", outbuf_size);
-  // FIXME check and react to errors.
-
-  size_t l_sub = term_database_str(adb->tdb, outbuf_size, outbuf + l);
-  // FIXME check and react to errors.
-  l += l_sub;
-  outbuf[(*outbuf_size)--, l++] = '\n';
-  l_sub = my_strcpy(&(outbuf[l]), "Predicates:\n", outbuf_size);
-  // FIXME check and react to errors.
-  l += l_sub;
-
-  // FIXME any time we detect that *outbuf_size > 0 then
-  //       switch to failure mode.
-
-  const struct predicates_t * cursor;
-
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
-    cursor = adb->atom_database[i];
-    while (NULL != cursor && *outbuf_size > 0) {
-      l_sub = predicate_str(cursor->predicate, outbuf_size, outbuf + l);
-      // FIXME check and react to errors.
-      l += l_sub;
-
-      outbuf[(*outbuf_size)--, l++] = '\n';
-
-      const struct clauses_t * clause_cursor = cursor->predicate->bodies;
-      while (NULL != clause_cursor) {
-        outbuf[(*outbuf_size)--, l++] = ' ';
-        outbuf[(*outbuf_size)--, l++] = ' ';
-        outbuf[(*outbuf_size)--, l++] = '*';
-        outbuf[(*outbuf_size)--, l++] = ' ';
-        l_sub = clause_to_str(clause_cursor->clause, outbuf_size, outbuf + l);
-        // FIXME check and react to errors.
-        l += l_sub;
-        outbuf[(*outbuf_size)--, l++] = '\n';
-
-        clause_cursor = clause_cursor->next;
-      }
-
-      cursor = cursor->next;
-    }
-  }
-
-  assert(*outbuf_size > 0);
-
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 {
@@ -360,30 +282,6 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
-
-#if 0
-size_t
-predicate_str(const struct predicate_t * pred, size_t * outbuf_size, char * outbuf)
-{
-  size_t l = 0;
-  size_t l_sub = my_strcpy(&(outbuf[l]), pred->predicate, outbuf_size);
-  // FIXME check and react to errors.
-  l += l_sub;
-
-  outbuf[(*outbuf_size)--, l++] = '/';
-
-  int l_sub_int = sprintf(&(outbuf[l]), "%u", pred->arity);
-  if (l_sub_int <= 0) {
-    // FIXME check and react to errors.
-  }
-  *outbuf_size -= strlen(&(outbuf[l]));
-  l += (size_t)l_sub_int;
-
-  assert(*outbuf_size > 0);
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst)

@@ -45,42 +45,6 @@ mk_universe(struct terms_t * terms)
   return result;
 }
 
-#if 0
-size_t
-universe_str(struct universe_t * uni, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-
-  for (int i = 0; i < uni->cardinality; i++) {
-    sprintf(&(buf[l]), "(declare-const %s %s)\n",
-        uni->element[i],
-        universe_ty);
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
-  }
-
-  sprintf(&(buf[l]), "(assert (distinct ");
-  *remaining -= strlen(&(buf[l]));
-  l += strlen(&(buf[l]));
-  for (int i = 0; i < uni->cardinality; i++) {
-    sprintf(&(buf[l]), "%s", uni->element[i]);
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
-
-    if (i < uni->cardinality - 1) {
-      buf[(*remaining)--, l++] = ' ';
-    }
-  }
-
-  buf[(*remaining)--, l++] = ')';
-  buf[(*remaining)--, l++] = ')';
-  buf[(*remaining)--, l++] = '\n';
-
-  buf[l] = '\0';
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Buniverse_str(const struct universe_t * const uni, struct buffer_info * dst)
 {
@@ -224,73 +188,6 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
 
   return mk_stmt_axiom(mk_fmla_ors(fmlas));
 }
-
-#if 0
-size_t
-stmt_str(const struct stmt_t * stmt, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  switch (stmt->kind) {
-  case STMT_AXIOM:
-    sprintf(&(buf[l]), "(assert ");
-    *remaining -= strlen(&(buf[l]));
-    l += strlen(&(buf[l]));
-
-    l += fmla_str(stmt->param.axiom, remaining, buf + l);
-
-    buf[(*remaining)--, l++] = ')';
-    break;
-
-  case STMT_CONST_DEF:
-    // Check arity, and use define-fun or declare-const as appropriate.
-
-    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
-      // We're dealing with a nullary constant.
-      sprintf(&(buf[l]), "(declare-const %s %s)",
-          stmt->param.const_def->const_name,
-          stmt->param.const_def->ty);
-      *remaining -= strlen(&(buf[l]));
-      l += strlen(&(buf[l]));
-    } else {
-      sprintf(&(buf[l]), "(define-fun %s (",
-          stmt->param.const_def->const_name);
-      *remaining -= strlen(&(buf[l]));
-      l += strlen(&(buf[l]));
-
-      const struct terms_t * params_cursor = stmt->param.const_def->params;
-      while (NULL != params_cursor) {
-        buf[(*remaining)--, l++] = '(';
-
-        l += term_to_str(params_cursor->term, remaining, buf + l);
-
-        sprintf(&(buf[l]), " %s)", universe_ty);
-        *remaining -= strlen(&(buf[l]));
-        l += strlen(&(buf[l]));
-
-        params_cursor = params_cursor->next;
-        if (NULL != params_cursor) {
-          buf[(*remaining)--, l++] = ' ';
-        }
-      }
-
-      sprintf(&(buf[l]), ") %s\n  ", stmt->param.const_def->ty);
-      *remaining -= strlen(&(buf[l]));
-      l += strlen(&(buf[l]));
-
-      l += fmla_str(stmt->param.const_def->body, remaining, buf + l);
-
-      buf[(*remaining)--, l++] = ')';
-    }
-    break;
-
-  default:
-    // FIXME complain
-    return 0;
-  }
-
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
@@ -452,21 +349,6 @@ free_stmt(const struct stmt_t * stmt)
 
 DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
-#if 0
-size_t
-stmts_str(const struct stmts_t * stmts, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-  const struct stmts_t * cursor = stmts;
-  while (NULL != cursor) {
-    l += stmt_str(cursor->stmt, remaining, buf + l);
-    buf[(*remaining)--, l++] = '\n';
-    cursor = cursor->next;
-  }
-  return l;
-}
-#endif
-
 struct buffer_write_result *
 Bstmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
 {
@@ -515,22 +397,6 @@ mk_model(struct universe_t * uni)
   result->stmts = NULL;
   return result;
 }
-
-#if 0
-size_t
-model_str(struct model_t * mdl, size_t * remaining, char * buf)
-{
-  size_t l = 0;
-
-  sprintf(&(buf[l]), "(declare-sort %s 0)\n", universe_ty);
-  *remaining -= strlen(&(buf[l]));
-  l += strlen(&(buf[l]));
-
-  l += stmts_str(mdl->stmts, remaining, buf + l);
-  buf[l] = '\0';
-  return l;
-}
-#endif
 
 struct buffer_write_result *
 Bmodel_str(const struct model_t * const mdl, struct buffer_info * dst)
@@ -611,13 +477,6 @@ test_statement(void)
   strengthen_model(mdl, s3AS);
   strengthen_model(mdl, s3BS);
 
-#if 0
-  size_t remaining_buf_size = BUF_SIZE;
-  char * buf = malloc(remaining_buf_size);
-  size_t l = model_str(mdl, &remaining_buf_size, buf);
-  printf("test model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
-#endif
-
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = Bmodel_str(mdl, outbuf);
   assert(is_ok_buffer_write_result(res));
@@ -630,9 +489,6 @@ test_statement(void)
 
   free_model(mdl); // NOTE this also frees "terms", the freeing of which also
                    //      frees "vX" and "vY".
-#if 0
-  free(buf);
-#endif
 }
 
 DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
