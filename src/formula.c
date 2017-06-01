@@ -520,13 +520,11 @@ free_fmla_atom(struct fmla_atom_t * at)
 void
 free_fmla_quant(struct fmla_quant_t * q)
 {
-  // FIXME these checks are overly prudent -- turn them into asserts.
-  if (NULL != q->bv) {
-    free((void *)q->bv);
-  }
-  if (NULL != q->body) {
-    free_fmla(q->body);
-  }
+  assert (NULL != q->bv);
+  free((void *)q->bv);
+
+  assert (NULL != q->body);
+  free_fmla(q->body);
 
   free(q);
 }
