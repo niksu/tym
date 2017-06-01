@@ -204,15 +204,26 @@ main(int argc, char ** argv)
 #endif
 
 #if DEBUG
+#if 0
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   *buf = '\0'; // FIXME initialise in a neater way?
   size_t l = 0;
 #endif
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = NULL;
+#endif
   if (NULL != mdl) {
 #if DEBUG
+#if 0
     model_str(mdl, &remaining_buf_size, buf);
     printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+    res = Bmodel_str(mdl, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
     const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
@@ -223,9 +234,16 @@ main(int argc, char ** argv)
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
 #if DEBUG
+#if 0
     remaining_buf_size = BUF_SIZE;
     l = model_str(mdl, &remaining_buf_size, buf);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+    res = Bmodel_str(mdl, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+    printf("model (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
   }
 
@@ -240,7 +258,10 @@ main(int argc, char ** argv)
   free(cg);
   free(cK);
 #if DEBUG
+#if 0
   free(buf);
+#endif
+  free_buffer(outbuf);
 #endif
 
   if (NULL != params.source_file) {

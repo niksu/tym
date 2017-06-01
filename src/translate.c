@@ -130,12 +130,21 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
 #if DEBUG
+#if 0
   size_t remaining_buf_size = BUF_SIZE;
   char * buf = malloc(remaining_buf_size);
   size_t l = fmla_str(q_fmla, &remaining_buf_size, buf);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
   l = fmla_str(translated_q, &remaining_buf_size, buf);
   printf("translated_q (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = Bfmla_str(q_fmla, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+  printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+  free_buffer(outbuf);
 #endif
 
   const struct stmt_t * stmt = mk_stmt_axiom(translated_q);
@@ -160,7 +169,8 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   assert(is_ok_buffer_write_result(res));
   free(res);
 #if DEBUG
-  printf("clause database (remaining=%zu)\n|%s|\n", remaining_buf_size, buf);
+  printf("clause database (remaining=%zu)\n|%s|\n",
+      outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
 
@@ -171,8 +181,15 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   remaining_buf_size = BUF_SIZE;
 #endif
 #if DEBUG
+#if 0
   size_t l = model_str(mdl, &remaining_buf_size, buf);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+  res = Bmodel_str(mdl, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+  printf("model (size=%zu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #else
 #if 0
   (void)model_str(mdl, &remaining_buf_size, buf);
@@ -224,7 +241,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       assert(is_ok_buffer_write_result(res));
       free(res);
 #if DEBUG
-      printf("bodyless: %s\n", buf);
+#if 0
+      printf("bodyless: %s\n", outbuf->buffer);
+#endif
+      printf("bodyless: %s\n", outbuf->buffer);
 #endif
 
       strengthen_model(mdl,
@@ -260,7 +280,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
+#if 0
         printf("from: %s\n", buf);
+#endif
+        printf("from: %s\n", outbuf->buffer);
 #endif
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t *));
@@ -273,7 +296,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
+#if 0
         printf("to: %s\n", buf);
+#endif
+        printf("to: %s\n", outbuf->buffer);
 #endif
 
 #if 0
@@ -282,14 +308,20 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #endif
         res = Bvaluation_str(*v, outbuf);
         assert(is_ok_buffer_write_result(res));
-        free(res);
 #if DEBUG
+#if 0
         if (0 == out_size) {
+#endif
+        if (0 == val_of_buffer_write_result(res)) {
           printf("  where: (no substitutions)\n");
         } else {
+#if 0
           printf("  where: %s\n", buf);
+#endif
+          printf("  where: %s\n", outbuf->buffer);
         }
 #endif
+        free(res);
 
         const struct fmla_t * valuation_fmla = translate_valuation(*v);
         const struct fmla_t * fmla = fmlas_cursor->fmla;
@@ -313,7 +345,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
+#if 0
         printf("  :|%s|\n", buf);
+#endif
+        printf("  :|%s|\n", outbuf->buffer);
 #endif
 
 
@@ -344,7 +379,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       assert(is_ok_buffer_write_result(res));
       free(res);
 #if DEBUG
+#if 0
       printf("pre-result: %s\n", buf);
+#endif
+      printf("pre-result: %s\n", outbuf->buffer);
 #endif
 
       struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
@@ -383,11 +421,11 @@ order_statements(const struct stmts_t * stmts)
   while (NULL != cursor || NULL != waiting) {
 
 #if DEBUG
+#if 0
     size_t remaining_buf_size = BUF_SIZE;
     char * buf = malloc(remaining_buf_size);
     size_t l;
 
-#if 0
     remaining_buf_size = BUF_SIZE;
     l = stmts_str(cursor, &remaining_buf_size, buf);
     printf("cursor (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
@@ -396,17 +434,31 @@ order_statements(const struct stmts_t * stmts)
     l = stmts_str(waiting, &remaining_buf_size, buf);
     printf("waiting (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
+  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_write_result * res = NULL;
 
 #if DEBUG
     printf("|declared| = %d\n", len_terms_cell(declared));
 #endif
+#if 0
     remaining_buf_size = BUF_SIZE;
     l = terms_to_str(declared, &remaining_buf_size, buf);
+#endif
+    res = Bterms_to_str(declared, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
 #if DEBUG
+#if 0
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
 #endif
+    printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+#endif
 
+#if 0
     free(buf);
+#endif
+    free_buffer(outbuf);
 #endif
 
     if (NULL == cursor && NULL != waiting) {
@@ -424,9 +476,16 @@ order_statements(const struct stmts_t * stmts)
 #endif
 
 #if DEBUG
+#if 0
     remaining_buf_size = BUF_SIZE;
     l = stmt_str(cursor->stmt, &remaining_buf_size, buf);
     printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n", l, remaining_buf_size, buf);
+#endif
+    res = Bstmt_str(cursor->stmt, outbuf);
+    assert(is_ok_buffer_write_result(res));
+    free(res);
+    printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
     struct term_t * t = new_const_in_stmt(cursor->stmt);

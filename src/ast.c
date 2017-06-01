@@ -909,7 +909,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
       free(buf);
 #endif
       struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-      struct buffer_write_result * res = Bterm_to_str(ss->term, dst);
+      struct buffer_write_result * res = Bterm_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
