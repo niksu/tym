@@ -215,7 +215,9 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_
 
     assert(NULL != adb->tdb);
     for (int i = 0; i < atom->arity; i++) {
-      // FIXME check return value
+      // NOTE we don't need to check return value here, since it simply
+      //      indicates whether ther term already existed or not in the term
+      //      database.
       (void)term_database_add(&(atom->args[i]), adb->tdb);
     }
   }
