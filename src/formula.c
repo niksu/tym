@@ -14,7 +14,7 @@
 #include "module_tests.h"
 #include "util.h"
 
-#define MAX_VAR_WIDTH 10/*FIXME const*/
+#define MAX_VAR_WIDTH 10/*FIXME make into a parameter, rather than having it be a const*/
 
 struct buffer_write_result * Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
 
