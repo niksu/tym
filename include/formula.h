@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static const char * const universe_ty = "Universe";
+
 struct fmla_atom_t {
   char * pred_name;
   uint8_t arity;

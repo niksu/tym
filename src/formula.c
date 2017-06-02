@@ -225,7 +225,6 @@ struct buffer_write_result *
 Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
-  const char * uni_type = "Universe"; // FIXME const
 
   if (have_space(dst, 2)) {
     unsafe_buffer_str(dst, "((");
@@ -239,7 +238,7 @@ Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
 
   safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-  res = buf_strcpy(dst, uni_type);
+  res = buf_strcpy(dst, universe_ty);
   assert(is_ok_buffer_write_result(res));
   free(res);
 

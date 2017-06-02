@@ -17,7 +17,6 @@ struct universe_t {
 };
 
 static const char * const bool_ty = "Bool";
-static const char * const universe_ty = "Universe";
 static const char * const distinct_pred = "distinct";
 
 struct stmt_const_t {
