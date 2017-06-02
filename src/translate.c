@@ -125,7 +125,10 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
 #endif
-  const struct clause_t * q_cl = query/* FIXME implicit arg8? */->program[0]; // FIXME hardcoding
+  // NOTE we only expect a query to contain at most one clause.
+  assert(1 == query->no_clauses);
+  const struct clause_t * q_cl = query->program[0];
+
   const struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
   const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
