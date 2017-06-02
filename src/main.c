@@ -248,25 +248,22 @@ read_file(char * filename)
 
   char * contents = NULL;
 
-  // FIXME check whether file exists.
-  FILE *file = fopen(filename, "r");
-  if (NULL == file) {
-    // FIXME complain
-  }
+  FILE * file = fopen(filename, "r");
+  assert (NULL != file);
 
-  fseek(file, 0L, SEEK_END); // FIXME check return value;
+  assert(fseek(file, 0L, SEEK_END));
   long pre_file_size = ftell(file);
-  if (pre_file_size < 0) {
-    // FIXME complain
-  };
+  assert (pre_file_size >= 0);
+
   size_t file_size = (size_t)pre_file_size;
   assert(file_size > 0);
-  rewind(file); // FIXME check return value;
+  rewind(file);
 
   contents = malloc(file_size + 1);
-  fread(contents, sizeof(char), file_size, file); // FIXME check return value;
+  size_t post_file_size = fread(contents, sizeof(char), file_size, file);
+  assert(post_file_size == file_size);
   contents[file_size] = '\0';
 
-  fclose(file); // FIXME check return value;
+  assert(0 == fclose(file));
   return contents;
 }
