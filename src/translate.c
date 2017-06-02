@@ -88,7 +88,9 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct f
   const struct fmla_t * result = NULL;
   const struct fmla_t * fmla_2 = NULL;
   const struct fmla_t * fmla_3 = NULL;
-  // FIXME free intermediate allocations.
+  // FIXME free intermediate allocations which are made when generating formulas
+  //       from subformulas -- e.g., after generating "result" free "fmla_2" and
+  //       "fmla_3".
 
   switch (fmla->kind) {
   case FMLA_CONST:
