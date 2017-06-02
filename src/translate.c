@@ -9,6 +9,9 @@
 
 #include "translate.h"
 
+const char * const eqK = "=";
+const char * const distinctK = "distinct";
+
 const struct fmla_t *
 translate_atom(const struct atom_t * at)
 {
@@ -335,8 +338,8 @@ order_statements(const struct stmts_t * stmts)
   const struct stmts_t * result = NULL;
 
   struct terms_t * declared = NULL;
-  declared = mk_term_cell(mk_term(CONST, "="/* FIXME const */), declared);
-  declared = mk_term_cell(mk_term(CONST, "distinct"/* FIXME const */), declared);
+  declared = mk_term_cell(mk_term(CONST, eqK), declared);
+  declared = mk_term_cell(mk_term(CONST, distinctK), declared);
 
   while (NULL != cursor || NULL != waiting) {
 
