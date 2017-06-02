@@ -18,23 +18,23 @@
 struct program_t * parse(const char * string);
 char * read_file(char * filename);
 
-char * source_file_contents = NULL;
+char * input_file_contents = NULL;
 
 struct param_t {
-  char * source_file;
+  char * input_file;
   char verbosity;
   char * query;
   bool test_parsing;
 };
 
 struct param_t params = {
-  .source_file = NULL,
+  .input_file = NULL,
   .verbosity = 0,
   .query = NULL,
   .test_parsing = false
 };
 
-struct program_t * parsed_source_file_contents = NULL;
+struct program_t * parsed_input_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
 int
@@ -48,7 +48,7 @@ main(int argc, char ** argv)
 #endif
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
-    {"input", required_argument, NULL, LONG_OPT_INPUT}, /*  FIXME have "input" and "source_file" be identical? (as parameter and variable names) */
+    {"input_file", required_argument, NULL, LONG_OPT_INPUT},
 #define LONG_OPT_VERBOSE 2
     {"verbose", no_argument, NULL, LONG_OPT_VERBOSE},
 #define LONG_OPT_QUERY 3
@@ -65,8 +65,8 @@ main(int argc, char ** argv)
     switch (option) {
     case LONG_OPT_INPUT:
     case 'i':
-      params.source_file = malloc(strlen(optarg) + 1);
-      strcpy(params.source_file, optarg);
+      params.input_file = malloc(strlen(optarg) + 1);
+      strcpy(params.input_file, optarg);
       break;
     case LONG_OPT_VERBOSE:
     case 'v':
@@ -88,20 +88,20 @@ main(int argc, char ** argv)
   }
 
   if (params.verbosity > 0) {
-    VERBOSE("input = %s\n", params.source_file);
+    VERBOSE("input_fine = %s\n", params.input_file);
     VERBOSE("verbosity = %d\n", params.verbosity);
     VERBOSE("test_parsing = %d\n", params.test_parsing);
     VERBOSE("query = %s\n", params.query);
   }
 
-  if (NULL != params.source_file) {
-    source_file_contents = read_file(params.source_file);
+  if (NULL != params.input_file) {
+    input_file_contents = read_file(params.input_file);
     if (params.test_parsing) {
-      printf("input contents |%s|\n", source_file_contents);
+      printf("input contents |%s|\n", input_file_contents);
     }
-    parsed_source_file_contents = parse(source_file_contents);
-    if (params.verbosity > 0 && NULL != source_file_contents) {
-      VERBOSE("input : %d clauses\n", parsed_source_file_contents->no_clauses);
+    parsed_input_file_contents = parse(input_file_contents);
+    if (params.verbosity > 0 && NULL != input_file_contents) {
+      VERBOSE("input : %d clauses\n", parsed_input_file_contents->no_clauses);
     }
   } else if (params.test_parsing) {
     printf("(no input file given)\n");
@@ -123,16 +123,16 @@ main(int argc, char ** argv)
     struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
-    if (NULL != params.source_file) {
-      res = Bprogram_to_str(parsed_source_file_contents, outbuf);
+    if (NULL != params.input_file) {
+      res = Bprogram_to_str(parsed_input_file_contents, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-      free_program(parsed_source_file_contents);
-      free(source_file_contents);
-      free(params.source_file);
+      free_program(parsed_input_file_contents);
+      free(input_file_contents);
+      free(params.input_file);
     }
 
     if (NULL != params.query) {
@@ -151,10 +151,10 @@ main(int argc, char ** argv)
     return 0;
   }
 
-  if (NULL == params.source_file) {
+  if (NULL == params.input_file) {
     ERR("No input file given.\n");
-  } else if (0 == parsed_source_file_contents->no_clauses) {
-    ERR("Input file (%s) is devoid of clauses.\n", params.source_file);
+  } else if (0 == parsed_input_file_contents->no_clauses) {
+    ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
   }
 
   char * vK = malloc(sizeof(char) * 2);
@@ -167,8 +167,8 @@ main(int argc, char ** argv)
   struct sym_gen_t * cg = mk_sym_gen(cK);
 
   struct model_t * mdl = NULL;
-  if (NULL != parsed_source_file_contents) {
-    mdl = translate_program(parsed_source_file_contents, vg);
+  if (NULL != parsed_input_file_contents) {
+    mdl = translate_program(parsed_input_file_contents, vg);
     statementise_universe(mdl);
   }
 
@@ -226,10 +226,10 @@ main(int argc, char ** argv)
   free_buffer(outbuf);
 #endif
 
-  if (NULL != params.source_file) {
-    free_program(parsed_source_file_contents);
-    free(source_file_contents);
-    free(params.source_file);
+  if (NULL != params.input_file) {
+    free_program(parsed_input_file_contents);
+    free(input_file_contents);
+    free(params.input_file);
   }
 
   if (NULL != params.query) {
