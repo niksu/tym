@@ -110,7 +110,7 @@ free_pred(struct predicate_t * pred)
 DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
 bool
-eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_code, bool * result)
+eq_pred(struct predicate_t p1, struct predicate_t p2, enum eq_pred_error * error_code, bool * result)
 {
   *error_code = NO_ERROR_eq_pred;
 
@@ -145,7 +145,7 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record)
+atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
 {
   bool success;
   if (NULL == adb) {
@@ -165,7 +165,7 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, a
       struct predicates_t * cursor = adb->atom_database[(int)h];
 
       do {
-        eq_pred_error_t eq_pred_error_code;
+        enum eq_pred_error eq_pred_error_code;
         success = (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &exists));
         if (success) {
           if (exists) {
@@ -190,7 +190,7 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, a
 }
 
 bool
-atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result)
+atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
 {
   bool success;
 
@@ -341,8 +341,8 @@ atom_database_to_predicates(struct atom_database_t * adb)
 bool
 clause_database_add(const struct clause_t * clause, struct atom_database_t * adb, void * cdl_add_error)
 {
-  adl_lookup_error_t adl_lookup_error;
-  adl_add_error_t adl_add_error;
+  enum adl_lookup_error adl_lookup_error;
+  enum adl_add_error adl_add_error;
   struct predicate_t * record = NULL;
   bool success = atom_database_member(&clause->head, adb, &adl_lookup_error, &record);
   if (!success) {

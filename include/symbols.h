@@ -41,9 +41,9 @@ struct predicate_t {
 struct predicate_t * mk_pred(const char * predicate, uint8_t arity);
 void free_pred(struct predicate_t * pred);
 
-typedef enum {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY} eq_pred_error_t;
+enum eq_pred_error {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY};
 
-bool eq_pred(struct predicate_t p1, struct predicate_t p2, eq_pred_error_t * error_code, bool * result);
+bool eq_pred(struct predicate_t p1, struct predicate_t p2, enum eq_pred_error * error_code, bool * result);
 
 DECLARE_MUTABLE_LIST_TYPE(predicates_t, predicate, predicate_t)
 DECLARE_MUTABLE_LIST_MK(pred, struct predicate_t, struct predicates_t)
@@ -57,13 +57,13 @@ struct atom_database_t {
 
 struct atom_database_t * mk_atom_database(void);
 
-typedef enum {ADL_NO_ERROR, DIFF_ARITY} adl_lookup_error_t;
+enum adl_lookup_error {ADL_NO_ERROR, DIFF_ARITY};
 
-bool atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, adl_lookup_error_t * error_code, struct predicate_t ** record);
+bool atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record);
 
-typedef enum {NO_ATOM_DATABASE} adl_add_error_t;
+enum adl_add_error {NO_ATOM_DATABASE};
 
-bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, adl_add_error_t * error_code, struct predicate_t ** result);
+bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result);
 
 struct buffer_write_result * Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst);
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
