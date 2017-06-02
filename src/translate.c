@@ -125,7 +125,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
 #endif
-  // NOTE we only expect a query to contain at most one clause.
+  // NOTE we expect a query to contain exactly one clause.
   assert(1 == query->no_clauses);
   const struct clause_t * q_cl = query->program[0];
 
