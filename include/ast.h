@@ -91,8 +91,8 @@ char hash_term(struct term_t);
 char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
 
-typedef enum {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND} eq_term_error_t;
-bool eq_term(const struct term_t * const t1, const struct term_t * const t2, eq_term_error_t * error_code, bool * result);
+enum eq_term_error {NO_ERROR, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND};
+bool eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result);
 
 struct term_t * copy_term(const struct term_t * const term);
 

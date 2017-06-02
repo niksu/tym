@@ -512,7 +512,7 @@ hash_clause(struct clause_t clause) {
 }
 
 bool
-eq_term(const struct term_t * const t1, const struct term_t * const t2, eq_term_error_t * error_code, bool * result)
+eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result)
 {
   bool successful;
 
@@ -610,7 +610,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 #endif
     const struct terms_t * cursor = ts;
     bool found = (NULL == cursor);
-    eq_term_error_t error_code;
+    enum eq_term_error error_code;
     while (NULL != cursor) {
       if (eq_term(cursor->term, ss->term, &error_code, &found)) {
         if (found) {
