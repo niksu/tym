@@ -379,7 +379,7 @@ order_statements(const struct stmts_t * stmts)
 
     struct term_t * t = new_const_in_stmt(cursor->stmt);
     struct terms_t * term_consts = consts_in_stmt(cursor->stmt);
-    if (terms_subsumed_by(declared, term_consts)) { // FIXME should swap params?
+    if (terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
 #if DEBUG
         printf("Term subsumption for %s\n", t->identifier);
