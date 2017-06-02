@@ -45,7 +45,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
           exists = result;
           break;
       } else {
-        // FIXME analyse and and act on error_code.
+        printf("Error when comparing terms for equality: %d", error_code);
+        assert(false);
       }
     } while (NULL != cursor->next);
 
