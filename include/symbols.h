@@ -57,11 +57,11 @@ struct atom_database_t {
 
 struct atom_database_t * mk_atom_database(void);
 
-enum adl_lookup_error {ADL_NO_ERROR, DIFF_ARITY};
+enum adl_lookup_error {ADL_NO_ERROR = 0, DIFF_ARITY};
 
 bool atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record);
 
-enum adl_add_error {NO_ATOM_DATABASE};
+enum adl_add_error {NO_ATOM_DATABASE = 0};
 
 bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result);
 
@@ -69,7 +69,9 @@ struct buffer_write_result * Batom_database_str(struct atom_database_t * adb, st
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
 struct buffer_write_result * Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst);
 
-bool clause_database_add(const struct clause_t * clause, struct atom_database_t * cdb, void *);
+enum cdl_add_error {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
+
+bool clause_database_add(const struct clause_t * clause, struct atom_database_t * cdb, enum cdl_add_error *);
 
 size_t num_predicate_bodies (struct predicate_t *);
 

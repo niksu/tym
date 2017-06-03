@@ -339,29 +339,35 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(const struct clause_t * clause, struct atom_database_t * adb, void * cdl_add_error)
+clause_database_add(const struct clause_t * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
 {
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
   struct predicate_t * record = NULL;
   bool success = atom_database_member(&clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
-    // FIXME elaborate this further
-    ERR("Looking-up atom failed: %s\n", clause->head.predicate);
-    cdl_add_error = 0; // FIXME set 'cdl_add_error'
+    assert(DIFF_ARITY == adl_lookup_error);
+    *cdl_add_error = CDL_ADL_DIFF_ARITY;
+    ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
+         *cdl_add_error, clause->head.predicate);
     return false;
   } else if (NULL == record) {
     struct predicate_t * result;
     success = atom_database_add(&clause->head, adb, &adl_add_error, &result);
     result->bodies = mk_clause_cell(clause, NULL);
     if (!success) {
-      // FIXME elaborate this further
-      ERR("Adding atom failed: %s\n", clause->head.predicate);
+      assert(NO_ATOM_DATABASE == adl_add_error);
+      *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
+      ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
+           *cdl_add_error, clause->head.predicate);
+      return false;
     }
   } else if (success && NULL != record) {
     assert(NULL != adb->tdb);
     for (int i = 0; i < clause->head.arity; i++) {
-      // FIXME check return value
+      // NOTE we don't need to check return value here, since it simply
+      //      indicates whether ther term already existed or not in the term
+      //      database.
       (void)term_database_add(&(clause->head.args[i]), adb->tdb);
     }
 
@@ -369,19 +375,24 @@ clause_database_add(const struct clause_t * clause, struct atom_database_t * adb
     record->bodies = mk_clause_cell(clause, remainder);
   }
 
-  // FIXME check adl_add_error
   if (success) {
     for (int i = 0; success && i < clause->body_size; i++) {
       success &= atom_database_member(&clause->body[i], adb, &adl_lookup_error, &record);
       if (!success) {
-        // FIXME elaborate this further
-        ERR("Looking-up atom failed: %s\n", clause->body[i].predicate);
+        assert(DIFF_ARITY == adl_lookup_error);
+        *cdl_add_error = CDL_ADL_DIFF_ARITY;
+        ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
+             *cdl_add_error, clause->body[i].predicate);
+        return false;
       } else if (NULL == record) {
         struct predicate_t * result;
         success &= atom_database_add(&clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
-          // FIXME elaborate this further
-          ERR("Adding atom failed: %s\n", clause->body[i].predicate);
+          assert(NO_ATOM_DATABASE == adl_add_error);
+          *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
+          ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
+               *cdl_add_error, clause->body[i].predicate);
+          return false;
         }
       }
     }
