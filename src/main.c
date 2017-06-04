@@ -124,7 +124,7 @@ main(int argc, char ** argv)
     struct buffer_write_result * res = NULL;
 
     if (NULL != params.input_file) {
-      res = Bprogram_to_str(parsed_input_file_contents, outbuf);
+      res = program_to_str(parsed_input_file_contents, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
@@ -136,7 +136,7 @@ main(int argc, char ** argv)
     }
 
     if (NULL != params.query) {
-      res = Bprogram_to_str(parsed_query, outbuf);
+      res = program_to_str(parsed_query, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
@@ -189,7 +189,7 @@ main(int argc, char ** argv)
 #endif
   if (NULL != mdl) {
 #if DEBUG
-    res = Bmodel_str(mdl, outbuf);
+    res = model_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
     printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
@@ -204,7 +204,7 @@ main(int argc, char ** argv)
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
 #if DEBUG
-    res = Bmodel_str(mdl, outbuf);
+    res = model_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n",

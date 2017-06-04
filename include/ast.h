@@ -50,12 +50,12 @@ struct program_t {
   const struct clause_t ** program;
 };
 
-struct buffer_write_result * Bterm_to_str(const struct term_t * const term, struct buffer_info * dst);
-struct buffer_write_result * Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst);
-struct buffer_write_result * Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst);
-struct buffer_write_result * Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst);
-struct buffer_write_result * Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst);
-struct buffer_write_result * Bprogram_to_str(const struct program_t * const program, struct buffer_info * dst);
+struct buffer_write_result * term_to_str(const struct term_t * const term, struct buffer_info * dst);
+struct buffer_write_result * terms_to_str(const struct terms_t * const terms, struct buffer_info * dst);
+struct buffer_write_result * predicate_to_str(const struct atom_t * atom, struct buffer_info * dst);
+struct buffer_write_result * atom_to_str(const struct atom_t * const atom, struct buffer_info * dst);
+struct buffer_write_result * clause_to_str(const struct clause_t * const clause, struct buffer_info * dst);
+struct buffer_write_result * program_to_str(const struct program_t * const program, struct buffer_info * dst);
 
 struct term_t * mk_const(const char * identifier);
 struct term_t * mk_var(const char * identifier);
@@ -78,10 +78,10 @@ void free_program(struct program_t * program);
 
 typedef struct buffer_write_result * (*x_to_str_t)(void *, struct buffer_info * dst);
 
-void Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst));
+void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst));
 
 #if DEBUG
-#define DBG_SYNTAX Bdebug_out_syntax
+#define DBG_SYNTAX debug_out_syntax
 #else
 #define DBG_SYNTAX(...)
 #endif // DEBUG

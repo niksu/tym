@@ -46,7 +46,7 @@ mk_universe(struct terms_t * terms)
 }
 
 struct buffer_write_result *
-Buniverse_str(const struct universe_t * const uni, struct buffer_info * dst)
+universe_str(const struct universe_t * const uni, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -190,7 +190,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
 }
 
 struct buffer_write_result *
-Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
+stmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -204,7 +204,7 @@ Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
 
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-    res = Bfmla_str(stmt->param.axiom, dst);
+    res = fmla_str(stmt->param.axiom, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -260,7 +260,7 @@ Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
           return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
         }
 
-        res = Bterm_to_str(params_cursor->term, dst);
+        res = term_to_str(params_cursor->term, dst);
         assert(is_ok_buffer_write_result(res));
         free(res);
 
@@ -301,7 +301,7 @@ Bstmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
         return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
       }
 
-      res = Bfmla_str(stmt->param.const_def->body, dst);
+      res = fmla_str(stmt->param.const_def->body, dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -350,7 +350,7 @@ free_stmt(const struct stmt_t * stmt)
 DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
 struct buffer_write_result *
-Bstmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
+stmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
   const struct stmts_t * cursor = stmts;
@@ -358,7 +358,7 @@ Bstmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
   struct buffer_write_result * res = NULL;
 
   while (NULL != cursor) {
-    res = Bstmt_str(cursor->stmt, dst);
+    res = stmt_str(cursor->stmt, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -399,7 +399,7 @@ mk_model(struct universe_t * uni)
 }
 
 struct buffer_write_result *
-Bmodel_str(const struct model_t * const mdl, struct buffer_info * dst)
+model_str(const struct model_t * const mdl, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -423,7 +423,7 @@ Bmodel_str(const struct model_t * const mdl, struct buffer_info * dst)
 
   safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
 
-  res = Bstmts_str(mdl->stmts, dst);
+  res = stmts_str(mdl->stmts, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -478,7 +478,7 @@ test_statement(void)
   strengthen_model(mdl, s3BS);
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = Bmodel_str(mdl, outbuf);
+  struct buffer_write_result * res = model_str(mdl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n",

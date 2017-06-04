@@ -16,7 +16,7 @@
 
 #define MAX_VAR_WIDTH 10/*FIXME make into a parameter, rather than having it be a const*/
 
-struct buffer_write_result * Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
+struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
 
 const struct fmla_t *
 mk_fmla_const(bool b)
@@ -189,7 +189,7 @@ mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
 }
 
 struct buffer_write_result *
-Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
+fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -206,7 +206,7 @@ Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
       return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
     }
 
-    res = Bterm_to_str(at->predargs[i], dst);
+    res = term_to_str(at->predargs[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -222,7 +222,7 @@ Bfmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
+fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -247,7 +247,7 @@ Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
   unsafe_buffer_str(dst, ") ");
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
-  res = Bfmla_str(quant->body, dst);
+  res = fmla_str(quant->body, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -255,17 +255,17 @@ Bfmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst)
+fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = Bfmla_str(fmlaL, dst);
+  struct buffer_write_result * res = fmla_str(fmlaL, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
   safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-  res = Bfmla_str(fmlaR, dst);
+  res = fmla_str(fmlaR, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -273,7 +273,7 @@ Bfmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_i
 }
 
 struct buffer_write_result *
-Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
+fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -299,7 +299,7 @@ Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     free(res);
     break;
   case FMLA_ATOM:
-    res = Bfmla_atom_str(fmla->param.atom, dst);
+    res = fmla_atom_str(fmla->param.atom, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
     break;
@@ -308,7 +308,7 @@ Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     assert(is_ok_buffer_write_result(res));
     free(res);
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = Bfmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
+    res = fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
     break;
@@ -317,7 +317,7 @@ Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     assert(is_ok_buffer_write_result(res));
     free(res);
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = Bfmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
+    res = fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
     break;
@@ -326,7 +326,7 @@ Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     assert(is_ok_buffer_write_result(res));
     free(res);
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = Bfmla_str(fmla->param.args[0], dst);
+    res = fmla_str(fmla->param.args[0], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
     break;
@@ -335,7 +335,7 @@ Bfmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     assert(is_ok_buffer_write_result(res));
     free(res);
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = Bfmla_quant_str(fmla->param.quant, dst);
+    res = fmla_quant_str(fmla->param.quant, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
     break;
@@ -455,7 +455,7 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
 }
 
 struct buffer_write_result *
-Bvaluation_str(struct valuation_t * v, struct buffer_info * dst)
+valuation_str(struct valuation_t * v, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -470,7 +470,7 @@ Bvaluation_str(struct valuation_t * v, struct buffer_info * dst)
 
     safe_buffer_replace_last(dst, '='); // replace the trailing \0.
 
-    res = Bterm_to_str(v_cursor->val, dst);
+    res = term_to_str(v_cursor->val, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -698,7 +698,7 @@ test_formula(void)
   const struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = Bfmla_str(test_quant, outbuf);
+  struct buffer_write_result * res = fmla_str(test_quant, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
@@ -721,7 +721,7 @@ test_formula(void)
   const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);
 
   outbuf = mk_buffer(BUF_SIZE);
-  res = Bfmla_str(test_atom, outbuf);
+  res = fmla_str(test_atom, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n",
@@ -731,7 +731,7 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   outbuf = mk_buffer(BUF_SIZE);
-  res = Bfmla_str(test_and2, outbuf);
+  res = fmla_str(test_and2, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n",
@@ -741,7 +741,7 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   outbuf = mk_buffer(BUF_SIZE);
-  res = Bfmla_str(test_or, outbuf);
+  res = fmla_str(test_or, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n",

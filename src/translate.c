@@ -139,7 +139,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 
 #if DEBUG
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = Bfmla_str(q_fmla, outbuf);
+  struct buffer_write_result * res = fmla_str(q_fmla, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n",
@@ -160,7 +160,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
     (void)clause_database_add(program->program[i], adb, NULL);
   }
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = Batom_database_str(adb, outbuf);
+  struct buffer_write_result * res = atom_database_str(adb, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
 #if DEBUG
@@ -173,13 +173,13 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   struct model_t * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
 
 #if DEBUG
-  res = Bmodel_str(mdl, outbuf);
+  res = model_str(mdl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #else
-  res = Bmodel_str(mdl, outbuf);
+  res = model_str(mdl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
 #endif
@@ -207,7 +207,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       const struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
           preds_cursor->predicate->arity, var_args);
 
-      res = Bfmla_str(atom, outbuf);
+      res = fmla_str(atom, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
 #if DEBUG
@@ -239,7 +239,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         // Abstract the atom's parameters.
         const struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
 
-        res = Bfmla_str(head_fmla, outbuf);
+        res = fmla_str(head_fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
@@ -248,14 +248,14 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
         struct valuation_t ** v = malloc(sizeof(struct valuation_t *));
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, v);
-        res = Bfmla_str(abs_head_fmla, outbuf);
+        res = fmla_str(abs_head_fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
         printf("to: %s\n", outbuf->buffer);
 #endif
 
-        res = Bvaluation_str(*v, outbuf);
+        res = valuation_str(*v, outbuf);
         assert(is_ok_buffer_write_result(res));
 #if DEBUG
         if (0 == val_of_buffer_write_result(res)) {
@@ -280,7 +280,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free_fmla(fmla);
         free_fmla(quantified_fmla);
 
-        res = Bfmla_str(fmlas_cursor->fmla, outbuf);
+        res = fmla_str(fmlas_cursor->fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
         free(res);
 #if DEBUG
@@ -306,7 +306,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       }
 
       const struct fmla_t * fmla = mk_fmla_ors((struct fmlas_t *)fmlas);
-      res = Bfmla_str(fmla, outbuf);
+      res = fmla_str(fmla, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
 #if DEBUG
@@ -352,7 +352,7 @@ order_statements(const struct stmts_t * stmts)
 #if DEBUG
     printf("|declared| = %d\n", len_terms_cell(declared));
 #endif
-    res = Bterms_to_str(declared, outbuf);
+    res = terms_to_str(declared, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
 #if DEBUG
@@ -378,7 +378,7 @@ order_statements(const struct stmts_t * stmts)
 #endif
 
 #if DEBUG
-    res = Bstmt_str(cursor->stmt, outbuf);
+    res = stmt_str(cursor->stmt, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
     printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",

@@ -30,7 +30,7 @@ struct term_database_t {
 
 struct term_database_t * mk_term_database(void);
 bool term_database_add(struct term_t * term, struct term_database_t * tdb);
-struct buffer_write_result * Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst);
+struct buffer_write_result * term_database_str(struct term_database_t * tdb, struct buffer_info * dst);
 
 struct predicate_t {
   const char * predicate;
@@ -65,9 +65,9 @@ enum adl_add_error {NO_ATOM_DATABASE = 0};
 
 bool atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result);
 
-struct buffer_write_result * Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst);
+struct buffer_write_result * atom_database_str(struct atom_database_t * adb, struct buffer_info * dst);
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
-struct buffer_write_result * Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst);
+struct buffer_write_result * predicate_str(const struct predicate_t * pred, struct buffer_info * dst);
 
 enum cdl_add_error {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
 

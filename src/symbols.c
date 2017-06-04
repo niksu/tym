@@ -61,7 +61,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
 }
 
 struct buffer_write_result *
-Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst)
+term_database_str(struct term_database_t * tdb, struct buffer_info * dst)
 {
   assert(NULL != tdb);
   assert(NULL != dst);
@@ -73,7 +73,7 @@ Bterm_database_str(struct term_database_t * tdb, struct buffer_info * dst)
   struct buffer_write_result * res = NULL;
 
   while (NULL != cursor) {
-    res = Bterm_to_str(cursor->term, dst);
+    res = term_to_str(cursor->term, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -226,7 +226,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
 }
 
 struct buffer_write_result *
-Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
+atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -236,7 +236,7 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 
   safe_buffer_replace_last(dst, '\n');
 
-  res = Bterm_database_str(adb->tdb, dst);
+  res = term_database_str(adb->tdb, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -253,7 +253,7 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
     while (NULL != cursor) {
-      res = Bpredicate_str(cursor->predicate, dst);
+      res = predicate_str(cursor->predicate, dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -270,7 +270,7 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
           return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
         }
 
-        res = Bclause_to_str(clause_cursor->clause, dst);
+        res = clause_to_str(clause_cursor->clause, dst);
         assert(is_ok_buffer_write_result(res));
         free(res);
 
@@ -287,7 +287,7 @@ Batom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bpredicate_str(const struct predicate_t * pred, struct buffer_info * dst)
+predicate_str(const struct predicate_t * pred, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 

@@ -16,7 +16,7 @@
 #include "util.h"
 
 struct buffer_write_result *
-Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
+term_to_str(const struct term_t * const term, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -44,7 +44,7 @@ Bterm_to_str(const struct term_t * const term, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
+predicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -72,11 +72,11 @@ Bpredicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
+atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = Bpredicate_to_str(atom, dst);
+  struct buffer_write_result * res = predicate_to_str(atom, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -90,7 +90,7 @@ Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 
   for (int i = 0; i < atom->arity; i++) {
-    res = Bterm_to_str(&(atom->args[i]), dst);
+    res = term_to_str(&(atom->args[i]), dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -130,11 +130,11 @@ Batom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
+clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = Batom_to_str(&(clause->head), dst);
+  struct buffer_write_result * res = atom_to_str(&(clause->head), dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -149,7 +149,7 @@ Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
     unsafe_buffer_str(dst, " :- ");
 
     for (int i = 0; i < clause->body_size; i++) {
-      res = Batom_to_str(&(clause->body[i]), dst);
+      res = atom_to_str(&(clause->body[i]), dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -191,14 +191,14 @@ Bclause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-Bprogram_to_str(const struct program_t * const program, struct buffer_info * dst)
+program_to_str(const struct program_t * const program, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = NULL;
 
   for (int i = 0; i < program->no_clauses; i++) {
-    res = Bclause_to_str(program->program[i], dst);
+    res = clause_to_str(program->program[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -352,7 +352,7 @@ free_atom(struct atom_t at)
   assert(NULL != at.predicate);
 
   DBG("Freeing atom: ");
-  DBG_SYNTAX((void *)&at, (x_to_str_t)Batom_to_str);
+  DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
   DBG("\n");
 
   free(at.predicate);
@@ -431,7 +431,7 @@ free_program(struct program_t * program)
 
   for (int i = 0; i < program->no_clauses; i++) {
     DBG("Freeing clause %d: ", i);
-    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)Bclause_to_str);
+    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)clause_to_str);
     DBG("\n");
 
     assert(NULL != (program->program[i]));
@@ -448,7 +448,7 @@ free_program(struct program_t * program)
 #pragma GCC diagnostic pop
 
 void
-Bdebug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst))
+debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst))
 {
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
 
@@ -574,7 +574,7 @@ test_clause(void) {
   cl->body = at;
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = Bclause_to_str(cl, outbuf);
+  struct buffer_write_result * res = clause_to_str(cl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
@@ -625,7 +625,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
     if (!found) {
 #if DEBUG
       struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-      struct buffer_write_result * res = Bterm_to_str(ss->term, outbuf);
+      struct buffer_write_result * res = term_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
@@ -647,7 +647,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 }
 
 struct buffer_write_result *
-Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
+terms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -656,7 +656,7 @@ Bterms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
   struct buffer_write_result * res = NULL;
 
   while (NULL != cursor) {
-    res = Bterm_to_str(cursor->term, dst);
+    res = term_to_str(cursor->term, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
