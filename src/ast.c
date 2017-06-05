@@ -211,18 +211,18 @@ program_to_str(const struct program_t * const program, struct buffer_info * dst)
 }
 
 struct term_t *
-mk_const(const char * identifier)
+mk_const(const char * cp_identifier)
 {
-  char * ident_copy = malloc(sizeof(char) * (strlen(identifier) + 1));
-  strcpy(ident_copy, identifier);
+  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
+  strcpy(ident_copy, cp_identifier);
   return mk_term(CONST, ident_copy);
 }
 
 struct term_t *
-mk_var(const char * identifier)
+mk_var(const char * cp_identifier)
 {
-  char * ident_copy = malloc(sizeof(char) * (strlen(identifier) + 1));
-  strcpy(ident_copy, identifier);
+  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
+  strcpy(ident_copy, cp_identifier);
   return mk_term(VAR, ident_copy);
 }
 
@@ -244,7 +244,7 @@ DEFINE_LIST_MK(term, term, struct term_t, struct terms_t, /*no const*/)
 DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, const struct terms_t * args) {
+mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
   assert(NULL != predicate);
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
@@ -256,8 +256,8 @@ mk_atom(char * predicate, uint8_t arity, const struct terms_t * args) {
   if (at->arity > 0) {
     at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = *(args->term);
-      args = args->next;
+      at->args[i] = *(cps_args->term);
+      cps_args = cps_args->next;
     }
   } else {
     at->args = NULL;
@@ -271,7 +271,7 @@ DEFINE_LIST_MK(atom, atom, struct atom_t, struct atoms_t, /*no const*/)
 DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) {
+mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body) {
   assert(NULL != head);
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
@@ -283,8 +283,8 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) 
   if (cl->body_size > 0) {
     cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = *(body->atom);
-      body = body->next;
+      cl->body[i] = *(cps_body->atom);
+      cps_body = cps_body->next;
     }
   } else {
     cl->body = NULL;
@@ -298,7 +298,7 @@ DEFINE_LIST_MK(clause, clause, struct clause_t, struct clauses_t, /*no const*/)
 DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
-mk_program(uint8_t no_clauses, const struct clauses_t * program)
+mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
 {
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
@@ -308,8 +308,8 @@ mk_program(uint8_t no_clauses, const struct clauses_t * program)
   if (no_clauses > 0) {
     p->program = malloc(sizeof(struct clause_t *) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
-      p->program[i] = program->clause;
-      program = program->next;
+      p->program[i] = cps_program->clause;
+      cps_program = cps_program->next;
     }
   } else {
     p->program = NULL;
@@ -588,11 +588,11 @@ test_clause(void) {
 }
 
 struct term_t *
-copy_term(const struct term_t * const term)
+copy_term(const struct term_t * const cp_term)
 {
-  char * ident_copy = malloc(sizeof(char) * (strlen(term->identifier) + 1));
-  strcpy(ident_copy, term->identifier);
-  return mk_term(term->kind, ident_copy);
+  char * ident_copy = malloc(sizeof(char) * (strlen(cp_term->identifier) + 1));
+  strcpy(ident_copy, cp_term->identifier);
+  return mk_term(cp_term->kind, ident_copy);
 }
 
 // FIXME naive implementation

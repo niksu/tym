@@ -57,12 +57,12 @@ struct buffer_write_result * atom_to_str(const struct atom_t * const atom, struc
 struct buffer_write_result * clause_to_str(const struct clause_t * const clause, struct buffer_info * dst);
 struct buffer_write_result * program_to_str(const struct program_t * const program, struct buffer_info * dst);
 
-struct term_t * mk_const(const char * identifier);
-struct term_t * mk_var(const char * identifier);
+struct term_t * mk_const(const char * cp_identifier);
+struct term_t * mk_var(const char * cp_identifier);
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * args);
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body);
-struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * program);
+struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args);
+struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body);
+struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * cps_program);
 
 DECLARE_U8_LIST_LEN(terms)
 DECLARE_U8_LIST_LEN(atoms)
@@ -94,7 +94,7 @@ char hash_clause(struct clause_t);
 enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND};
 bool eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result);
 
-struct term_t * copy_term(const struct term_t * const term);
+struct term_t * copy_term(const struct term_t * const cp_term);
 
 bool terms_subsumed_by(const struct terms_t * const, const struct terms_t *);
 
