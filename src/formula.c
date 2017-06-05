@@ -360,12 +360,11 @@ fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
 DEFINE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t, /*no const*/)
 
 struct sym_gen_t *
-mk_sym_gen(const char * prefix)
+mk_sym_gen(const char * cp_prefix)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
-  char * prefix_copy = malloc(sizeof(char) * (strlen(prefix) + 1));
-  strcpy(prefix_copy, prefix);
-  // FIXME use naming convention to indicate which parameters are copied, and which aren't.
+  char * prefix_copy = malloc(sizeof(char) * (strlen(cp_prefix) + 1));
+  strcpy(prefix_copy, cp_prefix);
   result->prefix = prefix_copy;
   result->index = 0;
   return result;
