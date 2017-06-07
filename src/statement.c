@@ -458,10 +458,8 @@ test_statement(void)
   struct model_t * mdl = mk_model(mk_universe(terms));
 
   const struct stmt_t * s1S = mk_stmt_axiom(mk_fmla_atom_varargs(to_heap("="), 2, mk_const("a"), mk_const("a")));
-  char * vX = malloc(sizeof(char) * 2);
-  strcpy(vX, "X");
-  char * vY = malloc(sizeof(char) * 2);
-  strcpy(vY, "Y");
+  char * vX = to_heap("X");
+  char * vY = to_heap("Y");
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
   const struct stmt_t * s2S = mk_stmt_pred(to_heap("some_predicate"), terms,
