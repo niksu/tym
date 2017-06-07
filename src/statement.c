@@ -478,9 +478,9 @@ test_statement(void)
   free(res);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+  free_buffer(outbuf);
 
   free_model(mdl); // NOTE this also frees "terms", the freeing of which also
                    //      frees "vX" and "vY".

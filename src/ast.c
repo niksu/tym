@@ -579,10 +579,10 @@ test_clause(void) {
   free(res);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
+  free_buffer(outbuf);
   free_clause(*cl);
   free(cl);
 }

@@ -707,10 +707,10 @@ test_formula(void)
   free(res);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
+  free_buffer(outbuf);
   free(args[0]);
   free(args[1]);
   free(args);
@@ -734,9 +734,9 @@ test_formula(void)
   free(res);
   printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+  free_buffer(outbuf);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = fmla_str(test_and2, outbuf);
@@ -744,9 +744,9 @@ test_formula(void)
   free(res);
   printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+  free_buffer(outbuf);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = fmla_str(test_or, outbuf);
@@ -754,9 +754,9 @@ test_formula(void)
   free(res);
   printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+  free_buffer(outbuf);
 
   free_fmla(test_atom);
   free_fmla(test_and2);
