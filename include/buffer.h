@@ -40,6 +40,6 @@ MAYBE_ERROR__ERRVAL_OF_DEC(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKERRVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
 
-char * to_heap(char * s);
+char * to_heap(const char * const s);
 
 #endif /* __TYM_BUFFER_H__ */

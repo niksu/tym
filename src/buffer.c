@@ -93,7 +93,7 @@ MAYBE_ERROR__MKVAL_DEF(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKERRVAL_DEF(buffer_write_result, size_t, enum buffer_errors)
 
 char *
-to_heap(char * s)
+to_heap(const char * const s)
 {
   char * result = malloc(sizeof(char) * (strlen(s) + 1));
   strcpy(result, s);
