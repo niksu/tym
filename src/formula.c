@@ -139,6 +139,7 @@ mk_fmla_ands(const struct fmlas_t * cpi_fmlas)
 {
   const struct fmla_t * result;
   const struct fmlas_t * cursor = cpi_fmlas;
+  const struct fmla_t * pre_result;
   if (NULL == cursor) {
     result = mk_fmla_const(true);
   } else {
@@ -148,7 +149,9 @@ mk_fmla_ands(const struct fmlas_t * cpi_fmlas)
       result = mk_fmla_and(cpi_fmlas->fmla, cpi_fmlas->next->fmla);
       cursor = cpi_fmlas->next->next;
       while (NULL != cursor) {
-        result = mk_fmla_and(result, cursor->fmla);
+        pre_result = result;
+        result = mk_fmla_and(pre_result, cursor->fmla);
+        free_fmla(pre_result);
         cursor = cursor->next;
       }
     }
@@ -161,6 +164,7 @@ mk_fmla_ors(const struct fmlas_t * cpi_fmlas)
 {
   const struct fmla_t * result;
   const struct fmlas_t * cursor = cpi_fmlas;
+  const struct fmla_t * pre_result;
   if (NULL == cursor) {
     result = mk_fmla_const(false);
   } else {
@@ -170,7 +174,9 @@ mk_fmla_ors(const struct fmlas_t * cpi_fmlas)
       result = mk_fmla_or(cpi_fmlas->fmla, cpi_fmlas->next->fmla);
       cursor = cpi_fmlas->next->next;
       while (NULL != cursor) {
-        result = mk_fmla_or(result, cursor->fmla);
+        pre_result = result;
+        result = mk_fmla_or(pre_result, cursor->fmla);
+        free_fmla(pre_result);
         cursor = cursor->next;
       }
     }
@@ -717,6 +723,10 @@ test_formula(void)
   const struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom, test_atom);
   const struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
   const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)test_fmlas);
+#pragma GCC diagnostic pop
 
   outbuf = mk_buffer(BUF_SIZE);
   res = fmla_str(test_atom, outbuf);
