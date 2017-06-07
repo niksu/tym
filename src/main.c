@@ -157,14 +157,10 @@ main(int argc, char ** argv)
     ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
   }
 
-  char * vK = malloc(sizeof(char) * 2);
-  strcpy(vK, "V");
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
-  *vg = mk_sym_gen(vK);
+  *vg = mk_sym_gen("V");
 
-  char * cK = malloc(sizeof(char) * 2);
-  strcpy(cK, "c");
-  struct sym_gen_t * cg = mk_sym_gen(cK);
+  struct sym_gen_t * cg = mk_sym_gen("c");
 
   struct model_t * mdl = NULL;
   if (NULL != parsed_input_file_contents) {
@@ -219,9 +215,7 @@ main(int argc, char ** argv)
   }
   free_sym_gen(*vg);
   free(vg);
-  free(vK);
-  free(cg);
-  free(cK);
+  free_sym_gen(cg);
 #if DEBUG
   free_buffer(outbuf);
 #endif
