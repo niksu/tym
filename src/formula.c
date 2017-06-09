@@ -505,6 +505,7 @@ free_fmla_atom(struct fmla_atom_t * at)
   free(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
+    free_term(*at->predargs[i]);
     free(at->predargs[i]);
   }
 
