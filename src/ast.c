@@ -390,8 +390,7 @@ free_atoms(struct atoms_t * atoms)
 void
 free_clause(struct clause_t clause)
 {
-  // No need to free clause->head since that's freed when we free this clause's
-  // memory.
+  free_atom(clause.head);
 
   assert((0 == clause.body_size && NULL == clause.body) ||
          (clause.body_size > 0 && NULL != clause.body));
