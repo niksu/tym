@@ -465,10 +465,8 @@ test_statement(void)
     mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
   terms = mk_term_cell(mk_term(VAR, to_heap("X")), NULL);
   terms = mk_term_cell(mk_term(VAR, to_heap("Y")), terms);
-  struct term_t * varX = mk_var("X");
-  struct term_t * varY = mk_var("Y");
   const struct fmla_t * fmla =
-    mk_fmla_atom_varargs("=", 2, varX, varY);
+    mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms,
       mk_fmla_not(fmla));
   free_fmla(fmla);
