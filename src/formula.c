@@ -579,7 +579,9 @@ free_fmlas(const struct fmlas_t * fmlas)
 {
   assert(NULL != fmlas->fmla);
   free_fmla(fmlas->fmla);
-  free_fmlas(fmlas->next);
+  if (NULL != fmlas->next) {
+    free_fmlas(fmlas->next);
+  }
 
   free((void *)fmlas);
 }
