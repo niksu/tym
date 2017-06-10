@@ -459,6 +459,7 @@ test_statement(void)
   terms = mk_term_cell(bT, terms);
 
   struct model_t * mdl = mk_model(mk_universe(terms));
+  free_terms(terms);
 
   const struct stmt_t * s1S =
     mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
