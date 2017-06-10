@@ -183,7 +183,10 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
-  return mk_stmt_axiom(mk_fmla_ors(fmlas));
+  const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
+  free_fmlas(fmlas);
+
+  return result;
 }
 
 struct buffer_write_result *
@@ -463,8 +466,11 @@ test_statement(void)
   char * vY = to_heap("Y");
   terms = mk_term_cell(mk_term(VAR, vX), NULL);
   terms = mk_term_cell(mk_term(VAR, vY), terms);
+  const struct fmla_t * fmla =
+    mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms,
-      mk_fmla_not(mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"))));
+      mk_fmla_not(fmla));
+  free_fmla(fmla);
   struct stmt_t * s3AS = mk_stmt_const("x", mdl->universe, universe_ty);
   const struct stmt_t * s3BS = mk_stmt_const_def("x", mdl->universe);
 
