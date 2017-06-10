@@ -553,20 +553,13 @@ test_clause(void) {
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   struct atom_t * at = malloc(sizeof(struct atom_t));
   struct term_t * t = malloc(sizeof(struct term_t));
-  char * okK = "ok";
-  char * t_ident = malloc(sizeof(char) * (strlen(okK) + 1));
-  strcpy(t_ident, okK);
-  *t = (struct term_t){.kind = CONST, .identifier = t_ident};
+  *t = (struct term_t){.kind = CONST, .identifier = to_heap("ok")};
 
-  char * worldK = "world";
-  at->predicate = malloc(sizeof(char) * (strlen(worldK) + 1));
-  strcpy(at->predicate, worldK);
+  at->predicate = to_heap("world");
   at->arity = 1;
   at->args = t;
 
-  char * helloK = "hello";
-  cl->head.predicate = malloc(sizeof(char) * (strlen(helloK) + 1));
-  strcpy(cl->head.predicate, helloK);
+  cl->head.predicate = to_heap("hello");
   cl->head.arity = 0;
   cl->head.args = NULL;
   cl->body_size = 1;
