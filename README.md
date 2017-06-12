@@ -1,5 +1,6 @@
 # TYM Datalog
-This is a simple implementation of Datalog.
+This is a simple implementation of Datalog that reduces evaluation to SMT
+solving.
 
 # Building
 `make`
