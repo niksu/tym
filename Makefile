@@ -34,7 +34,8 @@ parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	flex parser_src/lexer.l
 	mv lexer.{c,h} $(OUT_DIR)
 	mv parser.{c,h} $(OUT_DIR)
-	# We have to be more permissive with the C output of flex and bison :(
+	# We have to be more permissive with the C output of flex and bison, thus "-Werror"
+	# is excluded when compiling code they produced.
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/lexer.o $(OUT_DIR)/lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
