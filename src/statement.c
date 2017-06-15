@@ -174,17 +174,20 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  const struct fmlas_t * fmlas = NULL;
+  struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    const struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2,
-      mk_term(CONST, const_name),
-      mk_term(CONST, uni->element[i]));
+    struct term_t * arg1 = mk_term(CONST, const_name);
+    struct term_t * arg2 = mk_term(CONST, uni->element[i]);
+    struct fmla_t * fmla = mk_fmla_atom_varargs(to_heap("="), 2, arg1, arg2);
+//    free_term(*arg1);
+//    free(arg1);
+//    free_term(*arg2);
+//    free(arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
   const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
-  free_fmlas(fmlas);
 
   return result;
 }
@@ -461,22 +464,22 @@ test_statement(void)
   struct model_t * mdl = mk_model(mk_universe(terms));
   free_terms(terms);
 
-  const struct stmt_t * s1S =
-    mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
-  terms = mk_term_cell(mk_term(VAR, to_heap("X")), NULL);
-  terms = mk_term_cell(mk_term(VAR, to_heap("Y")), terms);
-  const struct fmla_t * fmla =
-    mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"));
-  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms,
-      mk_fmla_not(fmla));
-  free_fmla(fmla);
-  struct stmt_t * s3AS = mk_stmt_const("x", mdl->universe, universe_ty);
-  const struct stmt_t * s3BS = mk_stmt_const_def("x", mdl->universe);
+//  const struct stmt_t * s1S =
+//    mk_stmt_axiom(mk_fmla_atom_varargs(to_heap("="), 2, mk_const("a"), mk_const("a")));
+//  terms = mk_term_cell(mk_term(VAR, to_heap("X")), NULL);
+//  terms = mk_term_cell(mk_term(VAR, to_heap("Y")), terms);
+//  struct fmla_t * fmla =
+//    mk_fmla_atom_varargs(to_heap("="), 2, mk_var("X"), mk_var("Y"));
+//  const struct stmt_t * s2S = mk_stmt_pred(to_heap("some_predicate"), terms,
+//      mk_fmla_not(copy_fmla(fmla)));
+//  free_fmla(fmla);
+//  struct stmt_t * s3AS = mk_stmt_const(to_heap("x"), mdl->universe, universe_ty);
+//  const struct stmt_t * s3BS = mk_stmt_const_def(to_heap("x"), mdl->universe);
 
-  strengthen_model(mdl, s1S);
-  strengthen_model(mdl, s2S);
-  strengthen_model(mdl, s3AS);
-  strengthen_model(mdl, s3BS);
+//  strengthen_model(mdl, s1S);
+//  strengthen_model(mdl, s2S);
+//  strengthen_model(mdl, s3AS);
+//  strengthen_model(mdl, s3BS);
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = model_str(mdl, outbuf);

@@ -41,24 +41,23 @@ struct fmla_t {
   } param;
 };
 
-DECLARE_LIST_TYPE(fmlas_t, fmla, fmla_t)
-DECLARE_MUTABLE_LIST_TYPE(mutable_fmlas_t, fmla, fmla_t)
-DECLARE_LIST_MK(fmla, struct fmla_t, struct fmlas_t, /*no const*/)
+DECLARE_MUTABLE_LIST_TYPE(fmlas_t, fmla, fmla_t)
+DECLARE_MUTABLE_LIST_MK(fmla, struct fmla_t, struct fmlas_t)
 
-const struct fmla_t * mk_fmla_const(bool b);
-const struct fmla_t * mk_fmla_atom(const char * cp_pred_name, uint8_t arity, struct term_t ** cp_predargs);
-const struct fmla_t * mk_fmla_atom_varargs(const char * cp_pred_name, uint8_t arity, ...);
-const struct fmla_t * mk_fmla_quant(const char * cp_bv, const struct fmla_t * cp_body);
-const struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * cp_body);
-const struct fmla_t * mk_fmla_not(const struct fmla_t * cp_subfmla);
-const struct fmla_t * mk_fmla_and(const struct fmla_t * cp_subfmlaL, const struct fmla_t * cp_subfmlaR);
-const struct fmla_t * mk_fmla_or(const struct fmla_t * cp_subfmlaL, const struct fmla_t * cp_subfmlaR);
-const struct fmla_t * mk_fmla_ands(const struct fmlas_t * cpi_fmlas);
-const struct fmla_t * mk_fmla_ors(const struct fmlas_t * cpi_fmlas);
-const struct fmla_t * mk_fmla_imply(struct fmla_t * cp_antecedent, struct fmla_t * cp_consequent);
+struct fmla_t * mk_fmla_const(bool b);
+struct fmla_t * mk_fmla_atom(char * cp_pred_name, uint8_t arity, struct term_t ** cp_predargs);
+struct fmla_t * mk_fmla_atom_varargs(char * cp_pred_name, uint8_t arity, ...);
+struct fmla_t * mk_fmla_quant(const char * cp_bv, struct fmla_t * cp_body);
+struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * cp_body);
+struct fmla_t * mk_fmla_not(struct fmla_t * cp_subfmla);
+struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
+struct fmla_t * mk_fmla_or(struct fmla_t * cp_subfmlaL, struct fmla_t * cp_subfmlaR);
+struct fmla_t * mk_fmla_ands(struct fmlas_t * cpi_fmlas);
+struct fmla_t * mk_fmla_ors(struct fmlas_t * cpi_fmlas);
+struct fmla_t * mk_fmla_imply(struct fmla_t * cp_antecedent, struct fmla_t * cp_consequent);
 struct fmla_t * copy_fmla(const struct fmla_t * const);
 
-const struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
+struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
 
 struct buffer_write_result * fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst);
 struct buffer_write_result * fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst);

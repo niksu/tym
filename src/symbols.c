@@ -344,31 +344,31 @@ clause_database_add(const struct clause_t * clause, struct atom_database_t * adb
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
   struct predicate_t * record = NULL;
-  bool success = atom_database_member(&clause->head, adb, &adl_lookup_error, &record);
+  bool success = atom_database_member(clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
     assert(DIFF_ARITY == adl_lookup_error);
     *cdl_add_error = CDL_ADL_DIFF_ARITY;
     ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
-         *cdl_add_error, clause->head.predicate);
+         *cdl_add_error, clause->head->predicate);
     return false;
   } else if (NULL == record) {
     struct predicate_t * result;
-    success = atom_database_add(&clause->head, adb, &adl_add_error, &result);
+    success = atom_database_add(clause->head, adb, &adl_add_error, &result);
     result->bodies = mk_clause_cell(clause, NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
       *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
       ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
-           *cdl_add_error, clause->head.predicate);
+           *cdl_add_error, clause->head->predicate);
       return false;
     }
   } else if (success && NULL != record) {
     assert(NULL != adb->tdb);
-    for (int i = 0; i < clause->head.arity; i++) {
+    for (int i = 0; i < clause->head->arity; i++) {
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(&(clause->head.args[i]), adb->tdb);
+      (void)term_database_add(&(clause->head->args[i]), adb->tdb);
     }
 
     struct clauses_t * remainder = record->bodies;

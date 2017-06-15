@@ -37,7 +37,7 @@ DECLARE_LIST_TYPE(atoms_t, atom, atom_t)
 DECLARE_LIST_MK(atom, struct atom_t, struct atoms_t, /*no const*/)
 
 struct clause_t {
-  struct atom_t head;
+  struct atom_t * head;
   uint8_t body_size;
   struct atom_t * body;
 };

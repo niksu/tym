@@ -134,7 +134,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = atom_to_str(&(clause->head), dst);
+  struct buffer_write_result * res = atom_to_str(clause->head, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -277,7 +277,7 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_bo
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   assert(NULL != cl);
 
-  cl->head = *head;
+  cl->head = head;
   cl->body_size = body_size;
 
   if (cl->body_size > 0) {
@@ -358,12 +358,15 @@ free_atom(struct atom_t at)
   free(at.predicate);
   for (int i = 0; i < at.arity; i++) {
     free_term(at.args[i]);
+    free(&at.args[i]);
   }
+/*
   if (at.arity > 0) {
     // Since we allocated the space for all arguments, rather than for each argument,
     // we deallocate it as such.
     free(at.args);
   }
+*/
 
   // NOTE since we are passed an atom value rather than a pointer to an atom, we
   // don't deallocate the atom -- it's up to a caller to work out if it wants to
@@ -390,18 +393,21 @@ free_atoms(struct atoms_t * atoms)
 void
 free_clause(struct clause_t clause)
 {
-  free_atom(clause.head);
+  free_atom(*clause.head);
+  free(clause.head);
 
   assert((0 == clause.body_size && NULL == clause.body) ||
          (clause.body_size > 0 && NULL != clause.body));
   for (int i = 0; i < clause.body_size; i++) {
     free_atom(clause.body[i]);
+    free(&clause.body[i]);
   }
-
+/*
   if (clause.body_size > 0) {
     // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
     free(clause.body);
   }
+*/
 }
 
 #pragma GCC diagnostic push
@@ -501,7 +507,7 @@ hash_atom(struct atom_t atom)
 
 char
 hash_clause(struct clause_t clause) {
-  char result = hash_atom(clause.head);
+  char result = hash_atom(*clause.head);
 
   for (int i = 0; i < clause.body_size; i++) {
     result ^= ((i + hash_atom(clause.body[i])) % 256) - 128;
@@ -550,18 +556,21 @@ eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_
 void
 test_clause(void) {
   printf("***test_clause***\n");
-  struct clause_t * cl = malloc(sizeof(struct clause_t));
-  struct atom_t * at = malloc(sizeof(struct atom_t));
   struct term_t * t = malloc(sizeof(struct term_t));
   *t = (struct term_t){.kind = CONST, .identifier = to_heap("ok")};
 
+  struct atom_t * at = malloc(sizeof(struct atom_t));
   at->predicate = to_heap("world");
   at->arity = 1;
   at->args = t;
 
-  cl->head.predicate = to_heap("hello");
-  cl->head.arity = 0;
-  cl->head.args = NULL;
+  struct atom_t * hd = malloc(sizeof(struct atom_t));
+  hd->predicate = to_heap("hello");
+  hd->arity = 0;
+  hd->args = NULL;
+
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
+  cl->head = hd;
   cl->body_size = 1;
   cl->body = at;
 
@@ -573,8 +582,8 @@ test_clause(void) {
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-
   free_buffer(outbuf);
+
   free_clause(*cl);
   free(cl);
 }
