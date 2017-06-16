@@ -179,11 +179,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   for (int i = 0; i < uni->cardinality; i++) {
     struct term_t * arg1 = mk_term(CONST, const_name);
     struct term_t * arg2 = mk_term(CONST, uni->element[i]);
-    struct fmla_t * fmla = mk_fmla_atom_varargs(to_heap("="), 2, arg1, arg2);
-//    free_term(*arg1);
-//    free(arg1);
-//    free_term(*arg2);
-//    free(arg2);
+    struct fmla_t * fmla = mk_fmla_atom_varargs(to_heap("="/* FIXME const */), 2, arg1, arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
