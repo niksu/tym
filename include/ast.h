@@ -24,13 +24,13 @@ struct term_t {
   const char * identifier;
 };
 
-DECLARE_LIST_TYPE(terms_t, term, term_t)
-DECLARE_LIST_MK(term, struct term_t, struct terms_t, /*no const*/)
+DECLARE_MUTABLE_LIST_TYPE(terms_t, term, term_t)
+DECLARE_MUTABLE_LIST_MK(term, struct term_t, struct terms_t)
 
 struct atom_t {
   char * predicate;
   uint8_t arity;
-  struct term_t * args;
+  struct term_t ** args;
 };
 
 DECLARE_LIST_TYPE(atoms_t, atom, atom_t)
@@ -60,7 +60,7 @@ struct buffer_write_result * program_to_str(const struct program_t * const progr
 struct term_t * mk_const(const char * cp_identifier);
 struct term_t * mk_var(const char * cp_identifier);
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args);
+struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args);
 struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body);
 struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * cps_program);
 
@@ -68,7 +68,7 @@ DECLARE_U8_LIST_LEN(terms)
 DECLARE_U8_LIST_LEN(atoms)
 DECLARE_U8_LIST_LEN(clauses)
 
-void free_term(struct term_t term);
+void free_term(struct term_t * term);
 void free_terms(struct terms_t * terms);
 void free_atom(struct atom_t atom);
 void free_atoms(struct atoms_t * atoms);
@@ -87,7 +87,7 @@ void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *,
 #endif // DEBUG
 
 char hash_str(const char * str);
-char hash_term(struct term_t);
+char hash_term(struct term_t *);
 char hash_atom(struct atom_t);
 char hash_clause(struct clause_t);
 

@@ -24,7 +24,7 @@ bool
 term_database_add(struct term_t * term, struct term_database_t * tdb)
 {
   bool exists = false;
-  char h = hash_term(*term);
+  char h = hash_term(term);
 
   DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
 
@@ -218,7 +218,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(&(atom->args[i]), adb->tdb);
+      (void)term_database_add(atom->args[i], adb->tdb);
     }
   }
 
@@ -368,7 +368,7 @@ clause_database_add(const struct clause_t * clause, struct atom_database_t * adb
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(&(clause->head->args[i]), adb->tdb);
+      (void)term_database_add(clause->head->args[i], adb->tdb);
     }
 
     struct clauses_t * remainder = record->bodies;

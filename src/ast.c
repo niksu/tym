@@ -90,7 +90,7 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 
   for (int i = 0; i < atom->arity; i++) {
-    res = term_to_str(&(atom->args[i]), dst);
+    res = term_to_str(atom->args[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -239,12 +239,12 @@ mk_term(term_kind_t kind, const char * identifier)
   return t;
 }
 
-DEFINE_LIST_MK(term, term, struct term_t, struct terms_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(term, term, struct term_t, struct terms_t)
 
 DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
+mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args) {
   assert(NULL != predicate);
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
@@ -256,7 +256,7 @@ mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
   if (at->arity > 0) {
     at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = *(cps_args->term);
+      at->args[i] = cps_args->term;
       cps_args = cps_args->next;
     }
   } else {
@@ -321,11 +321,13 @@ mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_term(struct term_t term)
+free_term(struct term_t * term)
 {
-  assert(NULL != term.identifier);
+  assert(NULL != term->identifier);
 
-  free((void *)term.identifier);
+  free((void *)term->identifier);
+
+  free((void *)term);
 }
 #pragma GCC diagnostic pop
 
@@ -337,8 +339,7 @@ free_terms(struct terms_t * terms)
   assert(NULL != terms);
 
   assert(NULL != terms->term);
-  free_term(*(terms->term));
-  free((void *)terms->term);
+  free_term(terms->term);
   if (NULL != terms->next) {
     free_terms((void *)terms->next);
   }
@@ -358,19 +359,15 @@ free_atom(struct atom_t at)
   free(at.predicate);
   for (int i = 0; i < at.arity; i++) {
     free_term(at.args[i]);
-    free(&at.args[i]);
   }
-/*
+
   if (at.arity > 0) {
     // Since we allocated the space for all arguments, rather than for each argument,
     // we deallocate it as such.
     free(at.args);
   }
-*/
 
-  // NOTE since we are passed an atom value rather than a pointer to an atom, we
-  // don't deallocate the atom -- it's up to a caller to work out if it wants to
-  // do that.
+  free(&at);
 }
 
 #pragma GCC diagnostic push
@@ -481,12 +478,12 @@ hash_str(const char * str)
 }
 
 char
-hash_term(struct term_t term)
+hash_term(struct term_t * term)
 {
-  char result = hash_str(term.identifier);
+  char result = hash_str(term->identifier);
   char * cursor;
 
-  for (cursor = (char *)&term.kind; cursor < (char *)&term.kind + sizeof(term_kind_t); cursor ++) {
+  for (cursor = (char *)term->kind; cursor < (char *)term->kind + sizeof(term_kind_t); cursor ++) {
     result ^= *cursor;
   }
 
@@ -562,7 +559,8 @@ test_clause(void) {
   struct atom_t * at = malloc(sizeof(struct atom_t));
   at->predicate = to_heap("world");
   at->arity = 1;
-  at->args = t;
+  at->args = malloc(sizeof(struct term_t *));
+  at->args[0] = t;
 
   struct atom_t * hd = malloc(sizeof(struct atom_t));
   hd->predicate = to_heap("hello");

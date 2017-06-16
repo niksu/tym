@@ -476,8 +476,7 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   free(var_args);
   const struct fmla_t * result = mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
   for (int i = 0; i < atom->arity; i++) {
-    free_term(*var_args_T[i]);
-    free(var_args_T[i]);
+    free_term(var_args_T[i]);
   }
   free(var_args_T); // since mk_fmla_atom copies the formula.
   return result;
@@ -530,8 +529,7 @@ free_fmla_atom(struct fmla_atom_t * at)
   free(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
-    free_term(*at->predargs[i]);
-    free(at->predargs[i]);
+    free_term(at->predargs[i]);
   }
 
   if (NULL != at->predargs) {

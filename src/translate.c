@@ -18,7 +18,7 @@ translate_atom(const struct atom_t * at)
   assert(NULL != at);
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
-    args[i] = copy_term(&(at->args[i]));
+    args[i] = copy_term(at->args[i]);
   }
   return mk_fmla_atom(at->predicate, at->arity, args);
 }
@@ -236,7 +236,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
 
         for (int i = 0; i < head_atom->arity; i++) {
-          args[i] = copy_term(&(head_atom->args[i]));
+          args[i] = copy_term(head_atom->args[i]);
         }
 
         // Abstract the atom's parameters.
