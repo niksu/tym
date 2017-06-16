@@ -69,7 +69,7 @@ struct sym_gen_t {
   size_t index;
 };
 
-struct sym_gen_t * mk_sym_gen(const char * cp_prefix);
+struct sym_gen_t * mk_sym_gen(const char * prefix);
 struct sym_gen_t * copy_sym_gen(const struct sym_gen_t * const cp_orig);
 char * mk_new_var(struct sym_gen_t *);
 

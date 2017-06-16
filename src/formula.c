@@ -359,12 +359,10 @@ fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
 DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
 
 struct sym_gen_t *
-mk_sym_gen(const char * cp_prefix)
+mk_sym_gen(const char * prefix)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
-  char * prefix_copy = malloc(sizeof(char) * (strlen(cp_prefix) + 1));
-  strcpy(prefix_copy, cp_prefix);
-  result->prefix = prefix_copy;
+  result->prefix = prefix;
   result->index = 0;
   return result;
 }
