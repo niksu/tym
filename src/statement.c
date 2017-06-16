@@ -487,8 +487,7 @@ test_statement(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  free_model(mdl); // NOTE this also frees "terms", the freeing of which also
-                   //      frees "vX" and "vY".
+  free_model(mdl);
 }
 
 DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
