@@ -713,23 +713,22 @@ test_formula(void)
   struct fmla_t * test_not = mk_fmla_not(copy_fmla(test_atom));
   struct fmla_t * test_and = mk_fmla_and(copy_fmla(test_not), copy_fmla(test_atom));
   struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
-//  struct fmla_t * test_quant = mk_fmla_quant(to_heap("x"), copy_fmla(test_or));
+  struct fmla_t * test_quant = mk_fmla_quant(to_heap("x"), copy_fmla(test_or));
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res;
-//  struct buffer_write_result * res = fmla_str(test_quant, outbuf);
-//  assert(is_ok_buffer_write_result(res));
-//  free(res);
-//  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
-//      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-//  printf("strlen=%zu\n", strlen(outbuf->buffer));
-//  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+  struct buffer_write_result * res = fmla_str(test_quant, outbuf);
+  assert(is_ok_buffer_write_result(res));
+  free(res);
+  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+  printf("strlen=%zu\n", strlen(outbuf->buffer));
+  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free_buffer(outbuf);
   free_fmla(test_and);
   free_fmla(test_atom);
   free_fmla(test_not);
-//  free_fmla(test_quant);
+  free_fmla(test_quant);
 
   struct term_t * c1 = mk_const("ta1");
   struct term_t * c2 = mk_const("ta2");
