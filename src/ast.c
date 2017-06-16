@@ -149,7 +149,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
     unsafe_buffer_str(dst, " :- ");
 
     for (int i = 0; i < clause->body_size; i++) {
-      res = atom_to_str(&(clause->body[i]), dst);
+      res = atom_to_str(clause->body[i], dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -266,7 +266,7 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args) {
   return at;
 }
 
-DEFINE_LIST_MK(atom, atom, struct atom_t, struct atoms_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(atom, atom, struct atom_t, struct atoms_t)
 
 DEFINE_U8_LIST_LEN(atoms)
 
@@ -283,7 +283,7 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_bo
   if (cl->body_size > 0) {
     cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = *(cps_body->atom);
+      cl->body[i] = cps_body->atom;
       cps_body = cps_body->next;
     }
   } else {
@@ -348,26 +348,26 @@ free_terms(struct terms_t * terms)
 #pragma GCC diagnostic pop
 
 void
-free_atom(struct atom_t at)
+free_atom(struct atom_t * at)
 {
-  assert(NULL != at.predicate);
+  assert(NULL != at->predicate);
 
   DBG("Freeing atom: ");
   DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
   DBG("\n");
 
-  free(at.predicate);
-  for (int i = 0; i < at.arity; i++) {
-    free_term(at.args[i]);
+  free(at->predicate);
+  for (int i = 0; i < at->arity; i++) {
+    free_term(at->args[i]);
   }
 
-  if (at.arity > 0) {
+  if (at->arity > 0) {
     // Since we allocated the space for all arguments, rather than for each argument,
     // we deallocate it as such.
-    free(at.args);
+    free(at->args);
   }
 
-  free(&at);
+  free(at);
 }
 
 #pragma GCC diagnostic push
@@ -378,8 +378,7 @@ free_atoms(struct atoms_t * atoms)
   assert(NULL != atoms);
 
   assert(NULL != atoms->atom);
-  free_atom(*(atoms->atom));
-  free((void *)atoms->atom);
+  free_atom((struct atom_t *)atoms->atom);
   if (NULL != atoms->next) {
     free_atoms((void *)atoms->next);
   }
@@ -390,21 +389,17 @@ free_atoms(struct atoms_t * atoms)
 void
 free_clause(struct clause_t clause)
 {
-  free_atom(*clause.head);
-  free(clause.head);
+  free_atom(clause.head);
 
   assert((0 == clause.body_size && NULL == clause.body) ||
          (clause.body_size > 0 && NULL != clause.body));
   for (int i = 0; i < clause.body_size; i++) {
     free_atom(clause.body[i]);
-    free(&clause.body[i]);
   }
-/*
+
   if (clause.body_size > 0) {
-    // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
     free(clause.body);
   }
-*/
 }
 
 #pragma GCC diagnostic push
@@ -491,12 +486,12 @@ hash_term(struct term_t * term)
 }
 
 char
-hash_atom(struct atom_t atom)
+hash_atom(struct atom_t * atom)
 {
-  char result = hash_str(atom.predicate);
+  char result = hash_str(atom->predicate);
 
-  for (int i = 0; i < atom.arity; i++) {
-    result = (char)((result * hash_term(atom.args[i])) % 256) - 128;
+  for (int i = 0; i < atom->arity; i++) {
+    result = (char)((result * hash_term(atom->args[i])) % 256) - 128;
   }
 
   return result;
@@ -504,7 +499,7 @@ hash_atom(struct atom_t atom)
 
 char
 hash_clause(struct clause_t clause) {
-  char result = hash_atom(*clause.head);
+  char result = hash_atom(clause.head);
 
   for (int i = 0; i < clause.body_size; i++) {
     result ^= ((i + hash_atom(clause.body[i])) % 256) - 128;
@@ -559,7 +554,7 @@ test_clause(void) {
   struct atom_t * at = malloc(sizeof(struct atom_t));
   at->predicate = to_heap("world");
   at->arity = 1;
-  at->args = malloc(sizeof(struct term_t *));
+  at->args = malloc(sizeof(struct term_t *) * 1);
   at->args[0] = t;
 
   struct atom_t * hd = malloc(sizeof(struct atom_t));
@@ -570,7 +565,8 @@ test_clause(void) {
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   cl->head = hd;
   cl->body_size = 1;
-  cl->body = at;
+  cl->body = malloc(sizeof(struct atom_t *) * 1);
+  cl->body[0] = at;
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = clause_to_str(cl, outbuf);

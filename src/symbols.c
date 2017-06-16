@@ -377,21 +377,21 @@ clause_database_add(const struct clause_t * clause, struct atom_database_t * adb
 
   if (success) {
     for (int i = 0; success && i < clause->body_size; i++) {
-      success &= atom_database_member(&clause->body[i], adb, &adl_lookup_error, &record);
+      success &= atom_database_member(clause->body[i], adb, &adl_lookup_error, &record);
       if (!success) {
         assert(DIFF_ARITY == adl_lookup_error);
         *cdl_add_error = CDL_ADL_DIFF_ARITY;
         ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
-             *cdl_add_error, clause->body[i].predicate);
+             *cdl_add_error, clause->body[i]->predicate);
         return false;
       } else if (NULL == record) {
         struct predicate_t * result;
-        success &= atom_database_add(&clause->body[i], adb, &adl_add_error, &result);
+        success &= atom_database_add(clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
           *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
           ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
-               *cdl_add_error, clause->body[i].predicate);
+               *cdl_add_error, clause->body[i]->predicate);
           return false;
         }
       }

@@ -33,13 +33,13 @@ struct atom_t {
   struct term_t ** args;
 };
 
-DECLARE_LIST_TYPE(atoms_t, atom, atom_t)
-DECLARE_LIST_MK(atom, struct atom_t, struct atoms_t, /*no const*/)
+DECLARE_MUTABLE_LIST_TYPE(atoms_t, atom, atom_t)
+DECLARE_MUTABLE_LIST_MK(atom, struct atom_t, struct atoms_t)
 
 struct clause_t {
   struct atom_t * head;
   uint8_t body_size;
-  struct atom_t * body;
+  struct atom_t ** body;
 };
 
 DECLARE_LIST_TYPE(clauses_t, clause, clause_t)
@@ -70,7 +70,7 @@ DECLARE_U8_LIST_LEN(clauses)
 
 void free_term(struct term_t * term);
 void free_terms(struct terms_t * terms);
-void free_atom(struct atom_t atom);
+void free_atom(struct atom_t * atom);
 void free_atoms(struct atoms_t * atoms);
 void free_clause(struct clause_t clause);
 void free_clauses(struct clauses_t * clauses);
@@ -88,7 +88,7 @@ void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *,
 
 char hash_str(const char * str);
 char hash_term(struct term_t *);
-char hash_atom(struct atom_t);
+char hash_atom(struct atom_t *);
 char hash_clause(struct clause_t);
 
 enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER, DIFF_IDENTIFIER_SAME_KIND};

@@ -28,7 +28,7 @@ translate_body(const struct clause_t * cl)
 {
   struct fmlas_t * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
-    fmlas = mk_fmla_cell(translate_atom(cl->body + i), fmlas);
+    fmlas = mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
   }
   return mk_fmla_ands(fmlas);
 }
