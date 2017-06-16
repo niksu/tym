@@ -752,13 +752,9 @@ test_formula(void)
 //  free_term(*c4);
 //  free(c4);
   struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
-//  const struct fmlas_t * test_fmlas = mk_fmlas(1, test_atom);
+  struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
   struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
-//  const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);  
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wcast-qual"
-//  free((void *)test_fmlas);
-//#pragma GCC diagnostic pop
+  struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas2);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = fmla_str(test_atom, outbuf);
@@ -793,7 +789,7 @@ test_formula(void)
 //  free_fmla(test_atom);
   free_fmla(test_and2);
   free_fmla(test_or);
-//  free_fmla(test_or2);
+  free_fmla(test_or2);
 }
 
 struct terms_t *
@@ -914,5 +910,20 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     assert(false);
     break;
   }
+  return result;
+}
+
+struct fmlas_t *
+copy_fmlas(const struct fmlas_t * fmlas)
+{
+  struct fmlas_t * result = NULL;
+
+  if (NULL != fmlas) {
+    result = malloc(sizeof(struct fmlas_t));
+    assert(NULL != fmlas->fmla);
+    result->fmla = copy_fmla(fmlas->fmla);
+    result->next = copy_fmlas(fmlas->next);
+  }
+
   return result;
 }
