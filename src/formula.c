@@ -726,9 +726,6 @@ test_formula(void)
 //  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free_buffer(outbuf);
-//  free(args[0]);
-//  free(args[1]);
-//  free(args);
   free_fmla(test_and);
   free_fmla(test_atom);
   free_fmla(test_not);
@@ -743,14 +740,6 @@ test_formula(void)
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
   const struct fmla_t * test_atom3 = mk_fmla_atom_varargs(to_heap("testpred3"),
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
-//  free_term(*c1);
-//  free(c1);
-//  free_term(*c2);
-//  free(c2);
-//  free_term(*c3);
-//  free(c3);
-//  free_term(*c4);
-//  free(c4);
   struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
   struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
@@ -786,7 +775,6 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-//  free_fmla(test_atom);
   free_fmla(test_and2);
   free_fmla(test_or);
   free_fmla(test_or2);
