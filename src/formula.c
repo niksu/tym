@@ -795,16 +795,13 @@ filter_var_values(struct valuation_t * const v)
 }
 
 struct fmla_t *
-mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * cp_body)
+mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
 {
-  struct fmla_t * result = copy_fmla(cp_body);
+  struct fmla_t * result = body;
   const struct terms_t * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
     struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
-
-    free_fmla(result);
-
     result = pre_result;
 
     cursor = cursor->next;
