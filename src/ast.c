@@ -175,7 +175,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 
 #if DEBUG
   char local_buf[BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_clause(*clause) + 127);
+  sprintf(local_buf, "{hash=%d}", hash_clause(clause) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -293,7 +293,7 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_bo
   return cl;
 }
 
-DEFINE_LIST_MK(clause, clause, struct clause_t, struct clauses_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(clause, clause, struct clause_t, struct clauses_t)
 
 DEFINE_U8_LIST_LEN(clauses)
 
@@ -387,19 +387,21 @@ free_atoms(struct atoms_t * atoms)
 #pragma GCC diagnostic pop
 
 void
-free_clause(struct clause_t clause)
+free_clause(struct clause_t * clause)
 {
-  free_atom(clause.head);
+  free_atom(clause->head);
 
-  assert((0 == clause.body_size && NULL == clause.body) ||
-         (clause.body_size > 0 && NULL != clause.body));
-  for (int i = 0; i < clause.body_size; i++) {
-    free_atom(clause.body[i]);
+  assert((0 == clause->body_size && NULL == clause->body) ||
+         (clause->body_size > 0 && NULL != clause->body));
+  for (int i = 0; i < clause->body_size; i++) {
+    free_atom(clause->body[i]);
   }
 
-  if (clause.body_size > 0) {
-    free(clause.body);
+  if (clause->body_size > 0) {
+    free(clause->body);
   }
+
+  free(clause);
 }
 
 #pragma GCC diagnostic push
@@ -410,8 +412,7 @@ free_clauses(struct clauses_t * clauses)
   assert(NULL != clauses);
 
   assert(NULL != clauses->clause);
-  free_clause(*(clauses->clause));
-  free((void *)clauses->clause);
+  free_clause(clauses->clause);
   if (NULL != clauses->next) {
     free_clauses((void *)clauses->next);
   }
@@ -432,8 +433,7 @@ free_program(struct program_t * program)
     DBG("\n");
 
     assert(NULL != (program->program[i]));
-    free_clause(*(program->program[i])); // Free clause contents.
-    free((void *)program->program[i]); // Free the clause itsenf.
+    free_clause(program->program[i]);
   }
 
   if (program->no_clauses > 0) {
@@ -498,11 +498,11 @@ hash_atom(struct atom_t * atom)
 }
 
 char
-hash_clause(struct clause_t clause) {
-  char result = hash_atom(clause.head);
+hash_clause(struct clause_t * clause) {
+  char result = hash_atom(clause->head);
 
-  for (int i = 0; i < clause.body_size; i++) {
-    result ^= ((i + hash_atom(clause.body[i])) % 256) - 128;
+  for (int i = 0; i < clause->body_size; i++) {
+    result ^= ((i + hash_atom(clause->body[i])) % 256) - 128;
   }
 
   return result;
@@ -578,8 +578,7 @@ test_clause(void) {
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  free_clause(*cl);
-  free(cl);
+  free_clause(cl);
 }
 
 struct term_t *

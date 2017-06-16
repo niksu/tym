@@ -71,7 +71,7 @@ struct buffer_write_result * predicate_str(const struct predicate_t * pred, stru
 
 enum cdl_add_error {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
 
-bool clause_database_add(const struct clause_t * clause, struct atom_database_t * cdb, enum cdl_add_error *);
+bool clause_database_add(struct clause_t * clause, struct atom_database_t * cdb, enum cdl_add_error *);
 
 size_t num_predicate_bodies (struct predicate_t *);
 

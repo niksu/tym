@@ -339,7 +339,7 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(const struct clause_t * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
+clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
 {
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
