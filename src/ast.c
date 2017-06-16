@@ -244,7 +244,7 @@ DEFINE_MUTABLE_LIST_MK(term, term, struct term_t, struct terms_t)
 DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args) {
+mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   assert(NULL != predicate);
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
@@ -256,8 +256,8 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args) {
   if (at->arity > 0) {
     at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = cps_args->term;
-      cps_args = cps_args->next;
+      at->args[i] = args->term;
+      args = args->next;
     }
   } else {
     at->args = NULL;
@@ -271,7 +271,7 @@ DEFINE_MUTABLE_LIST_MK(atom, atom, struct atom_t, struct atoms_t)
 DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body) {
+mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) {
   assert(NULL != head);
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
@@ -283,8 +283,8 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_bo
   if (cl->body_size > 0) {
     cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = cps_body->atom;
-      cps_body = cps_body->next;
+      cl->body[i] = body->atom;
+      body = body->next;
     }
   } else {
     cl->body = NULL;
@@ -298,7 +298,7 @@ DEFINE_MUTABLE_LIST_MK(clause, clause, struct clause_t, struct clauses_t)
 DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
-mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
+mk_program(uint8_t no_clauses, const struct clauses_t * program)
 {
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
@@ -308,8 +308,8 @@ mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
   if (no_clauses > 0) {
     p->program = malloc(sizeof(struct clause_t *) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
-      p->program[i] = cps_program->clause;
-      cps_program = cps_program->next;
+      p->program[i] = program->clause;
+      program = program->next;
     }
   } else {
     p->program = NULL;

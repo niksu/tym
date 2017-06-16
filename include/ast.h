@@ -60,9 +60,9 @@ struct buffer_write_result * program_to_str(const struct program_t * const progr
 struct term_t * mk_const(const char * cp_identifier);
 struct term_t * mk_var(const char * cp_identifier);
 struct term_t * mk_term(term_kind_t kind, const char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * cps_args);
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body);
-struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * cps_program);
+struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
+struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body);
+struct program_t * mk_program(uint8_t no_clauses, const struct clauses_t * program);
 
 DECLARE_U8_LIST_LEN(terms)
 DECLARE_U8_LIST_LEN(atoms)
