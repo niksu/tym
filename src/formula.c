@@ -18,7 +18,7 @@
 
 struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
 
-const struct fmla_t *
+struct fmla_t *
 mk_fmla_const(bool b)
 {
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
@@ -30,40 +30,26 @@ mk_fmla_const(bool b)
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_atom(const char * cp_pred_name, uint8_t arity, struct term_t ** cp_predargs)
+struct fmla_t *
+mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
   assert(NULL != result_content);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   assert(NULL != result);
 
-  char * pred_name_copy = malloc(sizeof(char) * (strlen(cp_pred_name) + 1));
-  assert(NULL != pred_name_copy);
-  strcpy(pred_name_copy, cp_pred_name);
-
-  struct term_t ** predargs_copy = NULL;
-
-  if (arity > 0) {
-    predargs_copy = malloc(sizeof(struct term_t *) * arity);
-  }
-
-  for (int i = 0; i < arity; i++) {
-    predargs_copy[i] = copy_term(cp_predargs[i]);
-  }
-
   result->kind = FMLA_ATOM;
   result->param.atom = result_content;
 
-  result_content->pred_name = pred_name_copy;
+  result_content->pred_name = pred_name;
   result_content->arity = arity;
-  result_content->predargs = predargs_copy;
+  result_content->predargs = predargs;
 
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_atom_varargs(const char * cp_pred_name, uint8_t arity, ...)
+struct fmla_t *
+mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 {
   struct term_t ** args = malloc(sizeof(struct term_t *) * arity);
   va_list varargs;
@@ -73,123 +59,131 @@ mk_fmla_atom_varargs(const char * cp_pred_name, uint8_t arity, ...)
   }
   va_end(varargs);
 
-  const struct fmla_t * result = mk_fmla_atom(cp_pred_name, arity, args);
-  for (int i = 0; i < arity; i++) {
-    // NOTE we don't call free_term(*args[i]), since we shouldn't free
-    //      memory that's owned elsewhere.
-    free(args[i]);
-  }
-  free(args);
+  struct fmla_t * result = mk_fmla_atom(pred_name, arity, args);
 
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_quant(const char * cp_bv, const struct fmla_t * cp_body)
+struct fmla_t *
+mk_fmla_quant(const char * bv, struct fmla_t * body)
 {
-  assert(NULL != cp_bv);
-  assert(NULL != cp_body);
+  assert(NULL != bv);
+  assert(NULL != body);
   struct fmla_quant_t * result_content = malloc(sizeof(struct fmla_quant_t));
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
-  char * bv_copy = malloc(sizeof(char) * (strlen(cp_bv) + 1));
-  strcpy(bv_copy, cp_bv);
-  struct fmla_t * body_copy = copy_fmla(cp_body);
-  result_content->bv = bv_copy;
-  result_content->body = body_copy;
+  result_content->bv = bv;
+  result_content->body = body;
   *result = (struct fmla_t){.kind = FMLA_EX, .param.quant = result_content};
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_not(const struct fmla_t * cp_subfmla)
+struct fmla_t *
+mk_fmla_not(struct fmla_t * subfmla)
 {
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 1);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
-  result_content[0] = copy_fmla(cp_subfmla);
+  result_content[0] = subfmla;
   *result = (struct fmla_t){.kind = FMLA_NOT, .param.args = result_content};
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_and(const struct fmla_t * cp_subfmlaL, const struct fmla_t * cp_subfmlaR)
+struct fmla_t *
+mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 {
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_AND;
-  result_content[0] = copy_fmla(cp_subfmlaL);
-  result_content[1] = copy_fmla(cp_subfmlaR);
+  result_content[0] = subfmlaL;
+  result_content[1] = subfmlaR;
   result->param.args = result_content;
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_or(const struct fmla_t * cp_subfmlaL, const struct fmla_t * cp_subfmlaR)
+struct fmla_t *
+mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 {
   struct fmla_t ** result_content = malloc(sizeof(struct fmla_t *) * 2);
   struct fmla_t * result = malloc(sizeof(struct fmla_t));
   result->kind = FMLA_OR;
-  result_content[0] = copy_fmla(cp_subfmlaL);
-  result_content[1] = copy_fmla(cp_subfmlaR);
+  result_content[0] = subfmlaL;
+  result_content[1] = subfmlaR;
   result->param.args = result_content;
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_ands(const struct fmlas_t * cpi_fmlas)
+struct fmla_t *
+mk_fmla_ands(struct fmlas_t * fmlas)
 {
-  const struct fmla_t * result;
-  const struct fmlas_t * cursor = cpi_fmlas;
-  const struct fmla_t * pre_result;
-  if (NULL == cursor) {
+  struct fmla_t * result;
+  if (NULL == fmlas) {
     result = mk_fmla_const(true);
   } else {
-    if (NULL == cpi_fmlas->next) {
-      result = cpi_fmlas->fmla;
+    if (NULL == fmlas->next) {
+      result = fmlas->fmla;
+      free(fmlas);
     } else {
-      result = mk_fmla_and(cpi_fmlas->fmla, cpi_fmlas->next->fmla);
-      cursor = cpi_fmlas->next->next;
+      const struct fmlas_t * cursor = fmlas;
+      const struct fmlas_t * pre_cursor = cursor;
+      result = mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
+      cursor = fmlas->next->next;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+      free((void *)pre_cursor->next);
+      free((void *)pre_cursor);
+#pragma GCC diagnostic pop
       while (NULL != cursor) {
-        pre_result = result;
-        result = mk_fmla_and(pre_result, cursor->fmla);
-        free_fmla(pre_result);
+        result = mk_fmla_and(result, cursor->fmla);
+        pre_cursor = cursor;
         cursor = cursor->next;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+        free((void *)pre_cursor);
+#pragma GCC diagnostic pop
       }
     }
   }
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_ors(const struct fmlas_t * cpi_fmlas)
+struct fmla_t *
+mk_fmla_ors(struct fmlas_t * fmlas)
 {
-  const struct fmla_t * result;
-  const struct fmlas_t * cursor = cpi_fmlas;
-  const struct fmla_t * pre_result;
-  if (NULL == cursor) {
+  struct fmla_t * result;
+  if (NULL == fmlas) {
     result = mk_fmla_const(false);
   } else {
-    if (NULL == cpi_fmlas->next) {
-      result = cpi_fmlas->fmla;
+    if (NULL == fmlas->next) {
+      result = fmlas->fmla;
+      free(fmlas);
     } else {
-      result = mk_fmla_or(cpi_fmlas->fmla, cpi_fmlas->next->fmla);
-      cursor = cpi_fmlas->next->next;
+      const struct fmlas_t * cursor = fmlas;
+      const struct fmlas_t * pre_cursor = cursor;
+      result = mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
+      cursor = fmlas->next->next;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+      free((void *)pre_cursor->next);
+      free((void *)pre_cursor);
+#pragma GCC diagnostic pop
       while (NULL != cursor) {
-        pre_result = result;
-        result = mk_fmla_or(pre_result, cursor->fmla);
-        free_fmla(pre_result);
+        result = mk_fmla_and(result, cursor->fmla);
+        pre_cursor = cursor;
         cursor = cursor->next;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+        free((void *)pre_cursor);
+#pragma GCC diagnostic pop
       }
     }
   }
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_imply(struct fmla_t * cp_antecedent, struct fmla_t * cp_consequent)
+struct fmla_t *
+mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
 {
-  const struct fmla_t * subfmla = mk_fmla_not(cp_antecedent);
-  const struct fmla_t * result = mk_fmla_or(subfmla, cp_consequent);
-  free_fmla(subfmla);
+  struct fmla_t * subfmla = mk_fmla_not(antecedent);
+  struct fmla_t * result = mk_fmla_or(subfmla, consequent);
   return result;
 }
 
@@ -362,15 +356,13 @@ fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
   }
 }
 
-DEFINE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
 
 struct sym_gen_t *
-mk_sym_gen(const char * cp_prefix)
+mk_sym_gen(const char * prefix)
 {
   struct sym_gen_t * result = malloc(sizeof(struct sym_gen_t));
-  char * prefix_copy = malloc(sizeof(char) * (strlen(cp_prefix) + 1));
-  strcpy(prefix_copy, cp_prefix);
-  result->prefix = prefix_copy;
+  result->prefix = prefix;
   result->index = 0;
   return result;
 }
@@ -449,13 +441,8 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   }
 
   free(var_args);
-  const struct fmla_t * result = mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
-  for (int i = 0; i < atom->arity; i++) {
-    free_term(*var_args_T[i]);
-    free(var_args_T[i]);
-  }
-  free(var_args_T); // since mk_fmla_atom copies the formula.
-  return result;
+
+  return mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
 }
 
 struct buffer_write_result *
@@ -505,8 +492,7 @@ free_fmla_atom(struct fmla_atom_t * at)
   free(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
-    free_term(*at->predargs[i]);
-    free(at->predargs[i]);
+    free_term(at->predargs[i]);
   }
 
   if (NULL != at->predargs) {
@@ -617,12 +603,12 @@ free_valuation(struct valuation_t * v)
   free(v);
 }
 
-const struct fmlas_t *
+struct fmlas_t *
 mk_fmlas(uint8_t no_fmlas, ...)
 {
   va_list varargs;
   va_start(varargs, no_fmlas);
-  const struct fmlas_t * result = NULL;
+  struct fmlas_t * result = NULL;
   for (int i = 0; i < no_fmlas; i++) {
     struct fmla_t * cur_fmla = va_arg(varargs, struct fmla_t *);
     assert(NULL != cur_fmla);
@@ -636,6 +622,10 @@ struct fmla_t *
 copy_fmla(const struct fmla_t * const fmla)
 {
   struct fmla_t * result = NULL;
+
+  char * pred_name_copy = NULL;
+  struct term_t ** predargs_copy = NULL;
+
   switch (fmla->kind) {
   case FMLA_CONST:
 #pragma GCC diagnostic push
@@ -646,31 +636,50 @@ copy_fmla(const struct fmla_t * const fmla)
   case FMLA_ATOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct fmla_t *)mk_fmla_atom(fmla->param.atom->pred_name, fmla->param.atom->arity, fmla->param.atom->predargs);
+    pred_name_copy = malloc(sizeof(char) * (strlen(fmla->param.atom->pred_name) + 1));
+    assert(NULL != pred_name_copy);
+    strcpy(pred_name_copy, fmla->param.atom->pred_name);
+
+    predargs_copy = NULL;
+
+    if (fmla->param.atom->arity > 0) {
+      predargs_copy = malloc(sizeof(struct term_t *) * fmla->param.atom->arity);
+    }
+
+    for (int i = 0; i < fmla->param.atom->arity; i++) {
+      predargs_copy[i] = copy_term(fmla->param.atom->predargs[i]);
+    }
+
+    result = (struct fmla_t *)mk_fmla_atom(pred_name_copy,
+        fmla->param.atom->arity, predargs_copy);
 #pragma GCC diagnostic pop
     break;
   case FMLA_AND:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct fmla_t *)mk_fmla_and(fmla->param.args[0], fmla->param.args[1]);
+    result = (struct fmla_t *)mk_fmla_and(copy_fmla(fmla->param.args[0]),
+        copy_fmla(fmla->param.args[1]));
 #pragma GCC diagnostic pop
     break;
   case FMLA_OR:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct fmla_t *)mk_fmla_or(fmla->param.args[0], fmla->param.args[1]);
+    result = (struct fmla_t *)mk_fmla_or(copy_fmla(fmla->param.args[0]),
+        copy_fmla(fmla->param.args[1]));
 #pragma GCC diagnostic pop
     break;
   case FMLA_NOT:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct fmla_t *)mk_fmla_not(fmla->param.args[0]);
+    result = (struct fmla_t *)mk_fmla_not(copy_fmla(fmla->param.args[0]));
 #pragma GCC diagnostic pop
     break;
   case FMLA_EX:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct fmla_t *)mk_fmla_quant(fmla->param.quant->bv, fmla->param.quant->body);
+    // FIXME mk_fmla_quant currently copies arguments
+    result = (struct fmla_t *)mk_fmla_quant(fmla->param.quant->bv,
+        fmla->param.quant->body);
 #pragma GCC diagnostic pop
     break;
   default:
@@ -686,23 +695,23 @@ test_formula(void)
 {
   printf("***test_formula***\n");
   struct term_t ** args = malloc(sizeof(struct term_t *) * 2);
-  args[0] = mk_term(CONST, "arg0");
-  args[1] = mk_term(CONST, "arg1");
+  args[0] = mk_term(CONST, to_heap("arg0"));
+  args[1] = mk_term(CONST, to_heap("arg1"));
 
   for (int i = 0; i < 2; i++) {
     printf("  :%s\n", args[i]->identifier);
   }
 
-  const struct fmla_t * test_atom = mk_fmla_atom("atom", 2, args);
+  struct fmla_t * test_atom = mk_fmla_atom(to_heap("atom"), 2, args);
 
   for (int i = 0; i < 2; i++) {
     printf("  ;%s\n", test_atom->param.atom->predargs[i]->identifier);
   }
 
-  const struct fmla_t * test_not = mk_fmla_not(test_atom);
-  const struct fmla_t * test_and = mk_fmla_and(test_not, test_atom);
-  const struct fmla_t * test_or = mk_fmla_or(test_not, test_and);
-  const struct fmla_t * test_quant = mk_fmla_quant("x", test_or);
+  struct fmla_t * test_not = mk_fmla_not(copy_fmla(test_atom));
+  struct fmla_t * test_and = mk_fmla_and(copy_fmla(test_not), copy_fmla(test_atom));
+  struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
+  struct fmla_t * test_quant = mk_fmla_quant(to_heap("x"), copy_fmla(test_or));
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = fmla_str(test_quant, outbuf);
@@ -714,22 +723,24 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
   free_buffer(outbuf);
-  free(args[0]);
-  free(args[1]);
-  free(args);
-  free_fmla(test_quant);
   free_fmla(test_and);
   free_fmla(test_atom);
   free_fmla(test_not);
+  free_fmla(test_quant);
 
-  test_atom = mk_fmla_atom_varargs("testpred", 4, mk_const("ta1"), mk_const("ta2"), mk_const("ta3"), mk_const("ta4"));
-  const struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom, test_atom);
-  const struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
-  const struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-  free((void *)test_fmlas);
-#pragma GCC diagnostic pop
+  struct term_t * c1 = mk_const("ta1");
+  struct term_t * c2 = mk_const("ta2");
+  struct term_t * c3 = mk_const("ta3");
+  struct term_t * c4 = mk_const("ta4");
+  test_atom = mk_fmla_atom_varargs(to_heap("testpred1"), 4, c1, c2, c3, c4);
+  const struct fmla_t * test_atom2 = mk_fmla_atom_varargs(to_heap("testpred2"),
+      4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
+  const struct fmla_t * test_atom3 = mk_fmla_atom_varargs(to_heap("testpred3"),
+      4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
+  struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
+  struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
+  struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
+  struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas2);
 
   outbuf = mk_buffer(BUF_SIZE);
   res = fmla_str(test_atom, outbuf);
@@ -761,7 +772,6 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  free_fmla(test_atom);
   free_fmla(test_and2);
   free_fmla(test_or);
   free_fmla(test_or2);
@@ -782,17 +792,14 @@ filter_var_values(struct valuation_t * const v)
   return result;
 }
 
-const struct fmla_t *
-mk_fmla_quants(const struct terms_t * const vars, const struct fmla_t * cp_body)
+struct fmla_t *
+mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
 {
-  const struct fmla_t * result = copy_fmla(cp_body);
+  struct fmla_t * result = body;
   const struct terms_t * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
-    const struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
-
-    free_fmla(result);
-
+    struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
     result = pre_result;
 
     cursor = cursor->next;
@@ -813,11 +820,11 @@ valuation_len(const struct valuation_t * v)
 }
 
 struct terms_t *
-arguments_of_atom(struct fmla_atom_t * cpi_fmla)
+arguments_of_atom(struct fmla_atom_t * fmla)
 {
   struct terms_t * result = NULL;
-  for (int i = cpi_fmla->arity - 1; i >= 0; i--) {
-    result = mk_term_cell(copy_term(cpi_fmla->predargs[i]), result);
+  for (int i = fmla->arity - 1; i >= 0; i--) {
+    result = mk_term_cell(copy_term(fmla->predargs[i]), result);
   }
   return result;
 }
@@ -885,5 +892,20 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     assert(false);
     break;
   }
+  return result;
+}
+
+struct fmlas_t *
+copy_fmlas(const struct fmlas_t * fmlas)
+{
+  struct fmlas_t * result = NULL;
+
+  if (NULL != fmlas) {
+    result = malloc(sizeof(struct fmlas_t));
+    assert(NULL != fmlas->fmla);
+    result->fmla = copy_fmla(fmlas->fmla);
+    result->next = copy_fmlas(fmlas->next);
+  }
+
   return result;
 }

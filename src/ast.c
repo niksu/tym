@@ -90,7 +90,7 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 
   for (int i = 0; i < atom->arity; i++) {
-    res = term_to_str(&(atom->args[i]), dst);
+    res = term_to_str(atom->args[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -134,7 +134,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = atom_to_str(&(clause->head), dst);
+  struct buffer_write_result * res = atom_to_str(clause->head, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -149,7 +149,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
     unsafe_buffer_str(dst, " :- ");
 
     for (int i = 0; i < clause->body_size; i++) {
-      res = atom_to_str(&(clause->body[i]), dst);
+      res = atom_to_str(clause->body[i], dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -175,7 +175,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 
 #if DEBUG
   char local_buf[BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_clause(*clause) + 127);
+  sprintf(local_buf, "{hash=%d}", hash_clause(clause) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -239,12 +239,12 @@ mk_term(term_kind_t kind, const char * identifier)
   return t;
 }
 
-DEFINE_LIST_MK(term, term, struct term_t, struct terms_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(term, term, struct term_t, struct terms_t)
 
 DEFINE_U8_LIST_LEN(terms)
 
 struct atom_t *
-mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
+mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   assert(NULL != predicate);
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
@@ -256,8 +256,8 @@ mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
   if (at->arity > 0) {
     at->args = malloc(sizeof(struct term_t) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = *(cps_args->term);
-      cps_args = cps_args->next;
+      at->args[i] = args->term;
+      args = args->next;
     }
   } else {
     at->args = NULL;
@@ -266,25 +266,25 @@ mk_atom(char * predicate, uint8_t arity, const struct terms_t * cps_args) {
   return at;
 }
 
-DEFINE_LIST_MK(atom, atom, struct atom_t, struct atoms_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(atom, atom, struct atom_t, struct atoms_t)
 
 DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_body) {
+mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) {
   assert(NULL != head);
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   assert(NULL != cl);
 
-  cl->head = *head;
+  cl->head = head;
   cl->body_size = body_size;
 
   if (cl->body_size > 0) {
     cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
     for (int i = 0; i < cl->body_size; i++) {
-      cl->body[i] = *(cps_body->atom);
-      cps_body = cps_body->next;
+      cl->body[i] = body->atom;
+      body = body->next;
     }
   } else {
     cl->body = NULL;
@@ -293,12 +293,12 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * cps_bo
   return cl;
 }
 
-DEFINE_LIST_MK(clause, clause, struct clause_t, struct clauses_t, /*no const*/)
+DEFINE_MUTABLE_LIST_MK(clause, clause, struct clause_t, struct clauses_t)
 
 DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
-mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
+mk_program(uint8_t no_clauses, const struct clauses_t * program)
 {
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
@@ -308,8 +308,8 @@ mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
   if (no_clauses > 0) {
     p->program = malloc(sizeof(struct clause_t *) * no_clauses);
     for (int i = 0; i < p->no_clauses; i++) {
-      p->program[i] = cps_program->clause;
-      cps_program = cps_program->next;
+      p->program[i] = program->clause;
+      program = program->next;
     }
   } else {
     p->program = NULL;
@@ -321,11 +321,13 @@ mk_program(uint8_t no_clauses, const struct clauses_t * cps_program)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_term(struct term_t term)
+free_term(struct term_t * term)
 {
-  assert(NULL != term.identifier);
+  assert(NULL != term->identifier);
 
-  free((void *)term.identifier);
+  free((void *)term->identifier);
+
+  free((void *)term);
 }
 #pragma GCC diagnostic pop
 
@@ -337,8 +339,7 @@ free_terms(struct terms_t * terms)
   assert(NULL != terms);
 
   assert(NULL != terms->term);
-  free_term(*(terms->term));
-  free((void *)terms->term);
+  free_term(terms->term);
   if (NULL != terms->next) {
     free_terms((void *)terms->next);
   }
@@ -347,27 +348,26 @@ free_terms(struct terms_t * terms)
 #pragma GCC diagnostic pop
 
 void
-free_atom(struct atom_t at)
+free_atom(struct atom_t * at)
 {
-  assert(NULL != at.predicate);
+  assert(NULL != at->predicate);
 
   DBG("Freeing atom: ");
   DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
   DBG("\n");
 
-  free(at.predicate);
-  for (int i = 0; i < at.arity; i++) {
-    free_term(at.args[i]);
-  }
-  if (at.arity > 0) {
-    // Since we allocated the space for all arguments, rather than for each argument,
-    // we deallocate it as such.
-    free(at.args);
+  free(at->predicate);
+  for (int i = 0; i < at->arity; i++) {
+    free_term(at->args[i]);
   }
 
-  // NOTE since we are passed an atom value rather than a pointer to an atom, we
-  // don't deallocate the atom -- it's up to a caller to work out if it wants to
-  // do that.
+  if (at->arity > 0) {
+    // Since we allocated the space for all arguments, rather than for each argument,
+    // we deallocate it as such.
+    free(at->args);
+  }
+
+  free(at);
 }
 
 #pragma GCC diagnostic push
@@ -378,8 +378,7 @@ free_atoms(struct atoms_t * atoms)
   assert(NULL != atoms);
 
   assert(NULL != atoms->atom);
-  free_atom(*(atoms->atom));
-  free((void *)atoms->atom);
+  free_atom((struct atom_t *)atoms->atom);
   if (NULL != atoms->next) {
     free_atoms((void *)atoms->next);
   }
@@ -388,20 +387,21 @@ free_atoms(struct atoms_t * atoms)
 #pragma GCC diagnostic pop
 
 void
-free_clause(struct clause_t clause)
+free_clause(struct clause_t * clause)
 {
-  free_atom(clause.head);
+  free_atom(clause->head);
 
-  assert((0 == clause.body_size && NULL == clause.body) ||
-         (clause.body_size > 0 && NULL != clause.body));
-  for (int i = 0; i < clause.body_size; i++) {
-    free_atom(clause.body[i]);
+  assert((0 == clause->body_size && NULL == clause->body) ||
+         (clause->body_size > 0 && NULL != clause->body));
+  for (int i = 0; i < clause->body_size; i++) {
+    free_atom(clause->body[i]);
   }
 
-  if (clause.body_size > 0) {
-    // As with terms, we dellocate the whole body at one go, rather than one clause at a time.
-    free(clause.body);
+  if (clause->body_size > 0) {
+    free(clause->body);
   }
+
+  free(clause);
 }
 
 #pragma GCC diagnostic push
@@ -412,8 +412,7 @@ free_clauses(struct clauses_t * clauses)
   assert(NULL != clauses);
 
   assert(NULL != clauses->clause);
-  free_clause(*(clauses->clause));
-  free((void *)clauses->clause);
+  free_clause(clauses->clause);
   if (NULL != clauses->next) {
     free_clauses((void *)clauses->next);
   }
@@ -434,8 +433,7 @@ free_program(struct program_t * program)
     DBG("\n");
 
     assert(NULL != (program->program[i]));
-    free_clause(*(program->program[i])); // Free clause contents.
-    free((void *)program->program[i]); // Free the clause itsenf.
+    free_clause(program->program[i]);
   }
 
   if (program->no_clauses > 0) {
@@ -475,12 +473,12 @@ hash_str(const char * str)
 }
 
 char
-hash_term(struct term_t term)
+hash_term(struct term_t * term)
 {
-  char result = hash_str(term.identifier);
+  char result = hash_str(term->identifier);
   char * cursor;
 
-  for (cursor = (char *)&term.kind; cursor < (char *)&term.kind + sizeof(term_kind_t); cursor ++) {
+  for (cursor = (char *)term->kind; cursor < (char *)term->kind + sizeof(term_kind_t); cursor ++) {
     result ^= *cursor;
   }
 
@@ -488,23 +486,23 @@ hash_term(struct term_t term)
 }
 
 char
-hash_atom(struct atom_t atom)
+hash_atom(struct atom_t * atom)
 {
-  char result = hash_str(atom.predicate);
+  char result = hash_str(atom->predicate);
 
-  for (int i = 0; i < atom.arity; i++) {
-    result = (char)((result * hash_term(atom.args[i])) % 256) - 128;
+  for (int i = 0; i < atom->arity; i++) {
+    result = (char)((result * hash_term(atom->args[i])) % 256) - 128;
   }
 
   return result;
 }
 
 char
-hash_clause(struct clause_t clause) {
-  char result = hash_atom(clause.head);
+hash_clause(struct clause_t * clause) {
+  char result = hash_atom(clause->head);
 
-  for (int i = 0; i < clause.body_size; i++) {
-    result ^= ((i + hash_atom(clause.body[i])) % 256) - 128;
+  for (int i = 0; i < clause->body_size; i++) {
+    result ^= ((i + hash_atom(clause->body[i])) % 256) - 128;
   }
 
   return result;
@@ -550,20 +548,25 @@ eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_
 void
 test_clause(void) {
   printf("***test_clause***\n");
-  struct clause_t * cl = malloc(sizeof(struct clause_t));
-  struct atom_t * at = malloc(sizeof(struct atom_t));
   struct term_t * t = malloc(sizeof(struct term_t));
   *t = (struct term_t){.kind = CONST, .identifier = to_heap("ok")};
 
+  struct atom_t * at = malloc(sizeof(struct atom_t));
   at->predicate = to_heap("world");
   at->arity = 1;
-  at->args = t;
+  at->args = malloc(sizeof(struct term_t *) * 1);
+  at->args[0] = t;
 
-  cl->head.predicate = to_heap("hello");
-  cl->head.arity = 0;
-  cl->head.args = NULL;
+  struct atom_t * hd = malloc(sizeof(struct atom_t));
+  hd->predicate = to_heap("hello");
+  hd->arity = 0;
+  hd->args = NULL;
+
+  struct clause_t * cl = malloc(sizeof(struct clause_t));
+  cl->head = hd;
   cl->body_size = 1;
-  cl->body = at;
+  cl->body = malloc(sizeof(struct atom_t *) * 1);
+  cl->body[0] = at;
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = clause_to_str(cl, outbuf);
@@ -573,10 +576,9 @@ test_clause(void) {
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-
   free_buffer(outbuf);
-  free_clause(*cl);
-  free(cl);
+
+  free_clause(cl);
 }
 
 struct term_t *

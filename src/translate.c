@@ -12,23 +12,23 @@
 const char * const eqK = "=";
 const char * const distinctK = "distinct";
 
-const struct fmla_t *
+struct fmla_t *
 translate_atom(const struct atom_t * at)
 {
   assert(NULL != at);
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
-    args[i] = copy_term(&(at->args[i]));
+    args[i] = copy_term(at->args[i]);
   }
   return mk_fmla_atom(at->predicate, at->arity, args);
 }
 
-const struct fmla_t *
+struct fmla_t *
 translate_body(const struct clause_t * cl)
 {
-  const struct fmlas_t * fmlas = NULL;
+  struct fmlas_t * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
-    fmlas = mk_fmla_cell(translate_atom(cl->body + i), fmlas);
+    fmlas = mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
   }
   return mk_fmla_ands(fmlas);
 }
@@ -50,10 +50,10 @@ translate_bodies(const struct clauses_t * cls)
   return fmlas;
 }
 
-const struct fmla_t *
+struct fmla_t *
 translate_valuation(struct valuation_t * const v)
 {
-  const struct fmlas_t * result = NULL;
+  struct fmlas_t * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
     result = mk_fmla_cell(mk_fmla_atom_varargs("=", 2, mk_term(VAR, cursor->var), cursor->val), result);
@@ -62,10 +62,10 @@ translate_valuation(struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-const struct fmla_t *
+struct fmla_t *
 translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at)
 {
-  const struct fmla_t * result = NULL;
+  struct fmla_t * result = NULL;
   struct term_t ** args = malloc(sizeof(struct term_t *) * at->arity);
   for (int i = 0; i < at->arity; i++) {
     if (VAR == at->predargs[i]->kind) {
@@ -82,12 +82,12 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const str
   return result;
 }
 
-const struct fmla_t *
+struct fmla_t *
 translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla)
 {
-  const struct fmla_t * result = NULL;
-  const struct fmla_t * fmla_2 = NULL;
-  const struct fmla_t * fmla_3 = NULL;
+  struct fmla_t * result = NULL;
+  struct fmla_t * fmla_2 = NULL;
+  struct fmla_t * fmla_3 = NULL;
   // FIXME free intermediate allocations which are made when generating formulas
   //       from subformulas -- e.g., after generating "result" free "fmla_2" and
   //       "fmla_3".
@@ -134,7 +134,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   assert(1 == query->no_clauses);
   const struct clause_t * q_cl = query->program[0];
 
-  const struct fmla_t * q_fmla = translate_atom(&(q_cl->head));
+  const struct fmla_t * q_fmla = translate_atom(q_cl->head);
   const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
 #if DEBUG
@@ -192,8 +192,8 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 #endif
 
-    struct mutable_fmlas_t * fmlas = (struct mutable_fmlas_t *)translate_bodies(preds_cursor->predicate->bodies);
-    struct mutable_fmlas_t * fmlas_cursor = fmlas;
+    struct fmlas_t * fmlas = (struct fmlas_t *)translate_bodies(preds_cursor->predicate->bodies);
+    struct fmlas_t * fmlas_cursor = fmlas;
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
@@ -204,8 +204,11 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         var_args[i] = mk_term(VAR, mk_new_var(*vg));
       }
 
-      const struct fmla_t * atom = mk_fmla_atom((const char *)preds_cursor->predicate->predicate,
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+      const struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
           preds_cursor->predicate->arity, var_args);
+#pragma GCC diagnostic pop
 
       res = fmla_str(atom, outbuf);
       assert(is_ok_buffer_write_result(res));
@@ -214,8 +217,11 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       printf("bodyless: %s\n", outbuf->buffer);
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
       strengthen_model(mdl,
-          mk_stmt_pred((const char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+          mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+#pragma GCC diagnostic pop
 
       free_fmla(atom);
     } else {
@@ -229,11 +235,11 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
         struct sym_gen_t * vg_copy = copy_sym_gen(*vg);
 
-        const struct atom_t * head_atom = &(body_cursor->clause->head);
+        const struct atom_t * head_atom = body_cursor->clause->head;
         struct term_t ** args = malloc(sizeof(struct term_t *) * head_atom->arity);
 
         for (int i = 0; i < head_atom->arity; i++) {
-          args[i] = copy_term(&(head_atom->args[i]));
+          args[i] = copy_term(head_atom->args[i]);
         }
 
         // Abstract the atom's parameters.
@@ -266,9 +272,9 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #endif
         free(res);
 
-        const struct fmla_t * valuation_fmla = translate_valuation(*v);
-        const struct fmla_t * fmla = fmlas_cursor->fmla;
-        const struct fmla_t * anded_fmla = mk_fmla_and(fmla, valuation_fmla);
+        struct fmla_t * valuation_fmla = translate_valuation(*v);
+        struct fmla_t * fmla = fmlas_cursor->fmla;
+        struct fmla_t * anded_fmla = mk_fmla_and(fmla, valuation_fmla);
         fmlas_cursor->fmla = copy_fmla(anded_fmla);
         free_fmla(fmla);
         free_fmla(anded_fmla);

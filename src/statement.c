@@ -125,16 +125,13 @@ mk_stmt_axiom(const struct fmla_t * axiom)
 }
 
 const struct stmt_t *
-mk_stmt_pred(const char * const cp_pred_name, struct terms_t * params, const struct fmla_t * body)
+mk_stmt_pred(char * pred_name, struct terms_t * params, const struct fmla_t * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
-  char * const_name_copy = malloc(sizeof(char) * (strlen(cp_pred_name) + 1));
-  strcpy(const_name_copy, cp_pred_name);
-  sub_result->const_name = const_name_copy;
 
   *sub_result = (struct stmt_const_t)
-      {.const_name = const_name_copy,
+      {.const_name = pred_name,
        .params = params,
        .body = body,
        .ty = bool_ty};
@@ -145,19 +142,17 @@ mk_stmt_pred(const char * const cp_pred_name, struct terms_t * params, const str
 }
 
 struct stmt_t *
-mk_stmt_const(char * cp_const_name, struct universe_t * uni, const char * const ty)
+mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 {
-  assert(NULL != cp_const_name);
+  assert(NULL != const_name);
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
 
-  char * const_name_copy = malloc(sizeof(char) * (strlen(cp_const_name) + 1));
-  strcpy(const_name_copy, cp_const_name);
   *sub_result = (struct stmt_const_t)
-    {.const_name = const_name_copy,
+    {.const_name = const_name,
      .params = NULL,
      .body = NULL,
      .ty = ty};
@@ -174,17 +169,22 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  const struct fmlas_t * fmlas = NULL;
+  struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
-    const struct fmla_t * fmla = mk_fmla_atom_varargs("=", 2,
-      mk_term(CONST, const_name),
-      mk_term(CONST, uni->element[i]));
+    if (i > 0) {
+      // Currently terms must have disjoint strings, since these are freed
+      // up independently (without checking if a shared string has already been
+      // freed, say).
+      const_name = to_heap(const_name);
+    }
+    struct term_t * arg1 = mk_term(CONST, const_name);
+    struct term_t * arg2 = mk_term(CONST, to_heap(uni->element[i]));
+    struct fmla_t * fmla = mk_fmla_atom_varargs(to_heap("="/* FIXME const */), 2, arg1, arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
   const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
-  free_fmlas(fmlas);
 
   return result;
 }
@@ -462,16 +462,15 @@ test_statement(void)
   free_terms(terms);
 
   const struct stmt_t * s1S =
-    mk_stmt_axiom(mk_fmla_atom_varargs("=", 2, mk_const("a"), mk_const("a")));
+    mk_stmt_axiom(mk_fmla_atom_varargs(to_heap("="), 2, mk_const("a"), mk_const("a")));
   terms = mk_term_cell(mk_term(VAR, to_heap("X")), NULL);
   terms = mk_term_cell(mk_term(VAR, to_heap("Y")), terms);
-  const struct fmla_t * fmla =
-    mk_fmla_atom_varargs("=", 2, mk_var("X"), mk_var("Y"));
-  const struct stmt_t * s2S = mk_stmt_pred("some_predicate", terms,
+  struct fmla_t * fmla =
+    mk_fmla_atom_varargs(to_heap("="), 2, mk_var("X"), mk_var("Y"));
+  const struct stmt_t * s2S = mk_stmt_pred(to_heap("some_predicate"), terms,
       mk_fmla_not(fmla));
-  free_fmla(fmla);
-  struct stmt_t * s3AS = mk_stmt_const("x", mdl->universe, universe_ty);
-  const struct stmt_t * s3BS = mk_stmt_const_def("x", mdl->universe);
+  struct stmt_t * s3AS = mk_stmt_const(to_heap("x"), mdl->universe, universe_ty);
+  const struct stmt_t * s3BS = mk_stmt_const_def(to_heap("x"), mdl->universe);
 
   strengthen_model(mdl, s1S);
   strengthen_model(mdl, s2S);
@@ -488,8 +487,7 @@ test_statement(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  free_model(mdl); // NOTE this also frees "terms", the freeing of which also
-                   //      frees "vX" and "vY".
+  free_model(mdl);
 }
 
 DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
