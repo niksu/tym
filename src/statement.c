@@ -125,16 +125,13 @@ mk_stmt_axiom(const struct fmla_t * axiom)
 }
 
 const struct stmt_t *
-mk_stmt_pred(const char * const cp_pred_name, struct terms_t * params, const struct fmla_t * body)
+mk_stmt_pred(char * pred_name, struct terms_t * params, const struct fmla_t * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
-  char * const_name_copy = malloc(sizeof(char) * (strlen(cp_pred_name) + 1));
-  strcpy(const_name_copy, cp_pred_name);
-  sub_result->const_name = const_name_copy;
 
   *sub_result = (struct stmt_const_t)
-      {.const_name = const_name_copy,
+      {.const_name = pred_name,
        .params = params,
        .body = body,
        .ty = bool_ty};
@@ -145,19 +142,17 @@ mk_stmt_pred(const char * const cp_pred_name, struct terms_t * params, const str
 }
 
 struct stmt_t *
-mk_stmt_const(char * cp_const_name, struct universe_t * uni, const char * const ty)
+mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
 {
-  assert(NULL != cp_const_name);
+  assert(NULL != const_name);
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
 
-  char * const_name_copy = malloc(sizeof(char) * (strlen(cp_const_name) + 1));
-  strcpy(const_name_copy, cp_const_name);
   *sub_result = (struct stmt_const_t)
-    {.const_name = const_name_copy,
+    {.const_name = const_name,
      .params = NULL,
      .body = NULL,
      .ty = ty};

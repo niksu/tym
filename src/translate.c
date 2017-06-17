@@ -217,8 +217,11 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
       printf("bodyless: %s\n", outbuf->buffer);
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
       strengthen_model(mdl,
-          mk_stmt_pred((const char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+          mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+#pragma GCC diagnostic pop
 
       free_fmla(atom);
     } else {
