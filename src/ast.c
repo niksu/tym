@@ -491,12 +491,7 @@ char
 hash_term(struct term_t * term)
 {
   char result = hash_str(term->identifier);
-  char * cursor;
-
-  for (cursor = (char *)term->kind; cursor < (char *)term->kind + sizeof(term_kind_t); cursor ++) {
-    result ^= *cursor;
-  }
-
+  result ^= term->kind;
   return result;
 }
 
