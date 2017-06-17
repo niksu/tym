@@ -253,11 +253,16 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
   at->predicate = predicate;
   at->arity = arity;
 
+  struct terms_t * pre_position = NULL;
+
   if (at->arity > 0) {
-    at->args = malloc(sizeof(struct term_t) * at->arity);
+    at->args = malloc(sizeof(struct term_t *) * at->arity);
+    assert(NULL != at->args);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = args->term;
+      pre_position = args;
       args = args->next;
+      free(pre_position);
     }
   } else {
     at->args = NULL;
@@ -271,7 +276,7 @@ DEFINE_MUTABLE_LIST_MK(atom, atom, struct atom_t, struct atoms_t)
 DEFINE_U8_LIST_LEN(atoms)
 
 struct clause_t *
-mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) {
+mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
   assert(NULL != head);
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
@@ -280,11 +285,16 @@ mk_clause(struct atom_t * head, uint8_t body_size, const struct atoms_t * body) 
   cl->head = head;
   cl->body_size = body_size;
 
+  struct atoms_t * pre_position = NULL;
+
   if (cl->body_size > 0) {
-    cl->body = malloc(sizeof(struct atom_t) * cl->body_size);
+    cl->body = malloc(sizeof(struct atom_t *) * body_size);
+    assert(NULL != cl->body);
     for (int i = 0; i < cl->body_size; i++) {
       cl->body[i] = body->atom;
+      pre_position = body;
       body = body->next;
+      free(pre_position);
     }
   } else {
     cl->body = NULL;
@@ -298,18 +308,23 @@ DEFINE_MUTABLE_LIST_MK(clause, clause, struct clause_t, struct clauses_t)
 DEFINE_U8_LIST_LEN(clauses)
 
 struct program_t *
-mk_program(uint8_t no_clauses, const struct clauses_t * program)
+mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
 
   p->no_clauses = no_clauses;
 
+  struct clauses_t * pre_position = NULL;
+
   if (no_clauses > 0) {
     p->program = malloc(sizeof(struct clause_t *) * no_clauses);
+    assert(NULL != p->program);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
+      pre_position = program;
       program = program->next;
+      free(pre_position);
     }
   } else {
     p->program = NULL;
