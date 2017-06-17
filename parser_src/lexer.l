@@ -48,7 +48,7 @@ STRING {QUOTE}[^{QUOTE}]*{QUOTE}
 {L_ROUND_BRACKET} {return TK_L_RB;}
 {R_ROUND_BRACKET} {return TK_R_RB;}
 {VAR} {yylval->string = strdup(yytext); return TK_VAR;}
-{CONST} {yylval->string = yytext; return TK_CONST;}
+{CONST} {yylval->string = strdup(yytext); return TK_CONST;}
 {STRING} {yylval->string = strdup(yytext); return TK_STRING;}
 {COMMA} {return TK_COMMA;}
 {IF} {return TK_IF;}
