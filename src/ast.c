@@ -378,9 +378,9 @@ free_atoms(struct atoms_t * atoms)
   assert(NULL != atoms);
 
   assert(NULL != atoms->atom);
-  free_atom((struct atom_t *)atoms->atom);
+  free_atom(atoms->atom);
   if (NULL != atoms->next) {
-    free_atoms((void *)atoms->next);
+    free_atoms(atoms->next);
   }
   free(atoms);
 }
