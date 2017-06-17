@@ -17,6 +17,7 @@ mk_buffer(const size_t buffer_size)
 {
   char * b = malloc(sizeof(char) * buffer_size);
   assert(NULL != b);
+  b[0] = '\0';
   struct buffer_info * buf = malloc(sizeof(struct buffer_info));
   *buf = (struct buffer_info){.buffer = b, .idx = 0, .buffer_size = buffer_size};
   return buf;
