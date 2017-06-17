@@ -15,7 +15,7 @@ The `-v` flag activates verbose output.
 
 # Tests
 `make test_modules`
-`make test_regression`
+`make test_regression` and `MEM_CHECK=1 make test_regression`
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
