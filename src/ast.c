@@ -203,7 +203,7 @@ program_to_str(const struct program_t * const program, struct buffer_info * dst)
     free(res);
 
     if (i < program->no_clauses - 1) {
-      unsafe_buffer_char(dst, '\n');
+      safe_buffer_replace_last(dst, '\n');
     }
   }
 
