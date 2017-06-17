@@ -252,6 +252,7 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
 
   at->predicate = predicate;
   at->arity = arity;
+  at->args = NULL;
 
   struct terms_t * pre_position = NULL;
 
@@ -264,8 +265,6 @@ mk_atom(char * predicate, uint8_t arity, struct terms_t * args) {
       args = args->next;
       free(pre_position);
     }
-  } else {
-    at->args = NULL;
   }
 
   return at;
