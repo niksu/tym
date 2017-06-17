@@ -549,16 +549,16 @@ void
 test_clause(void) {
   printf("***test_clause***\n");
   struct term_t * t = malloc(sizeof(struct term_t));
-  *t = (struct term_t){.kind = CONST, .identifier = to_heap("ok")};
+  *t = (struct term_t){.kind = CONST, .identifier = strdup("ok")};
 
   struct atom_t * at = malloc(sizeof(struct atom_t));
-  at->predicate = to_heap("world");
+  at->predicate = strdup("world");
   at->arity = 1;
   at->args = malloc(sizeof(struct term_t *) * 1);
   at->args[0] = t;
 
   struct atom_t * hd = malloc(sizeof(struct atom_t));
-  hd->predicate = to_heap("hello");
+  hd->predicate = strdup("hello");
   hd->arity = 0;
   hd->args = NULL;
 

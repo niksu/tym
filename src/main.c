@@ -158,9 +158,9 @@ main(int argc, char ** argv)
   }
 
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
-  *vg = mk_sym_gen(to_heap("V"));
+  *vg = mk_sym_gen(strdup("V"));
 
-  struct sym_gen_t * cg = mk_sym_gen(to_heap("c"));
+  struct sym_gen_t * cg = mk_sym_gen(strdup("c"));
 
   struct model_t * mdl = NULL;
   if (NULL != parsed_input_file_contents) {

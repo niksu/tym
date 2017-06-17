@@ -695,14 +695,14 @@ test_formula(void)
 {
   printf("***test_formula***\n");
   struct term_t ** args = malloc(sizeof(struct term_t *) * 2);
-  args[0] = mk_term(CONST, to_heap("arg0"));
-  args[1] = mk_term(CONST, to_heap("arg1"));
+  args[0] = mk_term(CONST, strdup("arg0"));
+  args[1] = mk_term(CONST, strdup("arg1"));
 
   for (int i = 0; i < 2; i++) {
     printf("  :%s\n", args[i]->identifier);
   }
 
-  struct fmla_t * test_atom = mk_fmla_atom(to_heap("atom"), 2, args);
+  struct fmla_t * test_atom = mk_fmla_atom(strdup("atom"), 2, args);
 
   for (int i = 0; i < 2; i++) {
     printf("  ;%s\n", test_atom->param.atom->predargs[i]->identifier);
@@ -711,7 +711,7 @@ test_formula(void)
   struct fmla_t * test_not = mk_fmla_not(copy_fmla(test_atom));
   struct fmla_t * test_and = mk_fmla_and(copy_fmla(test_not), copy_fmla(test_atom));
   struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
-  struct fmla_t * test_quant = mk_fmla_quant(to_heap("x"), copy_fmla(test_or));
+  struct fmla_t * test_quant = mk_fmla_quant(strdup("x"), copy_fmla(test_or));
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = fmla_str(test_quant, outbuf);
@@ -732,10 +732,10 @@ test_formula(void)
   struct term_t * c2 = mk_const("ta2");
   struct term_t * c3 = mk_const("ta3");
   struct term_t * c4 = mk_const("ta4");
-  test_atom = mk_fmla_atom_varargs(to_heap("testpred1"), 4, c1, c2, c3, c4);
-  const struct fmla_t * test_atom2 = mk_fmla_atom_varargs(to_heap("testpred2"),
+  test_atom = mk_fmla_atom_varargs(strdup("testpred1"), 4, c1, c2, c3, c4);
+  const struct fmla_t * test_atom2 = mk_fmla_atom_varargs(strdup("testpred2"),
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
-  const struct fmla_t * test_atom3 = mk_fmla_atom_varargs(to_heap("testpred3"),
+  const struct fmla_t * test_atom3 = mk_fmla_atom_varargs(strdup("testpred3"),
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
   struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
