@@ -8,7 +8,7 @@ d().
 e(h1).
 |
 (no query given)
-stringed file contents (size=100, remaining=1500)
+stringed file contents (size=101, remaining=1499)
 |a(X, Y) :- b(X), c(Y), d().
 a(X, bla) :- b(X), c(X), f(X).
 a(X, X).

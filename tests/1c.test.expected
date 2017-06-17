@@ -2,7 +2,7 @@ input contents |hellom1123_AS12_1() :- a(), b().
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=50, remaining=1550)
+stringed file contents (size=51, remaining=1549)
 |hellom1123_AS12_1() :- a(), b().
 c() :- a().
 a(b).|
