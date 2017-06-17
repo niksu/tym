@@ -245,7 +245,7 @@ read_file(char * filename)
   FILE * file = fopen(filename, "r");
   assert (NULL != file);
 
-  assert(fseek(file, 0L, SEEK_END));
+  assert(0 == fseek(file, 0L, SEEK_END));
   long pre_file_size = ftell(file);
   assert (pre_file_size >= 0);
 
