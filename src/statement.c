@@ -172,8 +172,14 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   struct fmlas_t * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
+    if (i > 0) {
+      // Currently terms must have disjoint strings, since these are freed
+      // up independently (without checking if a shared string has already been
+      // freed, say).
+      const_name = to_heap(const_name);
+    }
     struct term_t * arg1 = mk_term(CONST, const_name);
-    struct term_t * arg2 = mk_term(CONST, uni->element[i]);
+    struct term_t * arg2 = mk_term(CONST, to_heap(uni->element[i]));
     struct fmla_t * fmla = mk_fmla_atom_varargs(to_heap("="/* FIXME const */), 2, arg1, arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
@@ -464,12 +470,12 @@ test_statement(void)
   const struct stmt_t * s2S = mk_stmt_pred(to_heap("some_predicate"), terms,
       mk_fmla_not(fmla));
   struct stmt_t * s3AS = mk_stmt_const(to_heap("x"), mdl->universe, universe_ty);
-//  const struct stmt_t * s3BS = mk_stmt_const_def(to_heap("x"), mdl->universe);
+  const struct stmt_t * s3BS = mk_stmt_const_def(to_heap("x"), mdl->universe);
 
   strengthen_model(mdl, s1S);
   strengthen_model(mdl, s2S);
   strengthen_model(mdl, s3AS);
-//  strengthen_model(mdl, s3BS);
+  strengthen_model(mdl, s3BS);
 
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = model_str(mdl, outbuf);
