@@ -70,15 +70,15 @@ struct program_t * parse(const char * string);
 %%
 
 term : TK_CONST
-       { char * identifier = strdup($1);
+       { char * identifier = $1;
          struct term_t * t = mk_term(CONST, identifier);
          $$ = t; }
      | TK_VAR
-       { char * identifier = strdup($1);
+       { char * identifier = $1;
          struct term_t * t = mk_term(VAR, identifier);
          $$ = t; }
      | TK_STRING
-       { char * identifier = strdup($1);
+       { char * identifier = $1;
          struct term_t * t = mk_term(STR, identifier);
          $$ = t; }
 
@@ -92,7 +92,7 @@ terms : term TK_R_RB
         { $$ = NULL; }
 
 atom : TK_CONST TK_L_RB terms
-       { char * predicate = strdup($1);
+       { char * predicate = $1;
          struct terms_t * ts = $3;
          struct atom_t * atom = mk_atom(predicate, len_terms_cell(ts), ts);
          $$ = atom; }
