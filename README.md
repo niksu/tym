@@ -4,8 +4,6 @@ This is a simple implementation of Datalog.
 # Building
 `make`
 
-or for debug output: `CFLAGS=-DDEBUG make`
-
 # Running
 `./out/tym`
 
@@ -17,6 +15,7 @@ The `-v` flag activates verbose output.
 * `make test_modules` tests internal APIs (for forming and destroying expressions, etc)
 * `make test_regression` tests parser + printer + internal API
 * `MEM_CHECK=1 make test_regression` checks for memory-safety during regression tests.
+* for debug output build with `CFLAGS=-DDEBUG`
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
