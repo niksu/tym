@@ -51,17 +51,19 @@ mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
 struct fmla_t *
 mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 {
-  struct term_t ** args = malloc(sizeof(struct term_t *) * arity);
+  struct term_t ** args = NULL;
+
   va_list varargs;
   va_start(varargs, arity);
-  for (int i = 0; i < arity; i++) {
-    args[i] = va_arg(varargs, struct term_t *);
+  if (arity > 0) {
+    args = malloc(sizeof(struct term_t *) * arity);
+    for (int i = 0; i < arity; i++) {
+      args[i] = va_arg(varargs, struct term_t *);
+    }
   }
   va_end(varargs);
 
-  struct fmla_t * result = mk_fmla_atom(pred_name, arity, args);
-
-  return result;
+  return mk_fmla_atom(pred_name, arity, args);
 }
 
 struct fmla_t *
@@ -416,33 +418,37 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   struct fmla_atom_t * atom = fmla_as_atom(at);
   assert(NULL != atom);
 
-  char ** var_args = malloc(sizeof(char *) * atom->arity);
-  struct term_t ** var_args_T = malloc(sizeof(struct term_t *) * atom->arity);
-  *v = NULL;
+  struct term_t ** var_args_T = NULL;
 
-  struct valuation_t * v_cursor;
-  for (int i = 0; i < atom->arity; i++) {
-    if (0 == i) {
-      *v = malloc(sizeof(struct valuation_t));
-      v_cursor = *v;
-    } else {
-      assert(NULL != v_cursor);
-      v_cursor->next = malloc(sizeof(struct valuation_t));
-      v_cursor = v_cursor->next;
+  if (atom->arity > 0) {
+    var_args_T = malloc(sizeof(struct term_t *) * atom->arity);
+    char ** var_args = malloc(sizeof(char *) * atom->arity);
+    *v = NULL;
+
+    struct valuation_t * v_cursor;
+    for (int i = 0; i < atom->arity; i++) {
+      if (0 == i) {
+        *v = malloc(sizeof(struct valuation_t));
+        v_cursor = *v;
+      } else {
+        assert(NULL != v_cursor);
+        v_cursor->next = malloc(sizeof(struct valuation_t));
+        v_cursor = v_cursor->next;
+      }
+
+      v_cursor->val = copy_term(atom->predargs[i]);
+
+      v_cursor->var = mk_new_var(vg);
+      var_args[i] = v_cursor->var;
+      var_args_T[i] = mk_term(VAR, strdup(v_cursor->var));
+
+      v_cursor->next = NULL;
     }
 
-    v_cursor->val = copy_term(atom->predargs[i]);
-
-    v_cursor->var = mk_new_var(vg);
-    var_args[i] = v_cursor->var;
-    var_args_T[i] = mk_term(VAR, v_cursor->var);
-
-    v_cursor->next = NULL;
+    free(var_args);
   }
 
-  free(var_args);
-
-  return mk_fmla_atom(atom->pred_name, atom->arity, var_args_T);
+  return mk_fmla_atom(strdup(atom->pred_name), atom->arity, var_args_T);
 }
 
 struct buffer_write_result *
@@ -636,18 +642,16 @@ copy_fmla(const struct fmla_t * const fmla)
   case FMLA_ATOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    pred_name_copy = malloc(sizeof(char) * (strlen(fmla->param.atom->pred_name) + 1));
+    pred_name_copy = strdup(fmla->param.atom->pred_name);
     assert(NULL != pred_name_copy);
-    strcpy(pred_name_copy, fmla->param.atom->pred_name);
 
     predargs_copy = NULL;
 
     if (fmla->param.atom->arity > 0) {
       predargs_copy = malloc(sizeof(struct term_t *) * fmla->param.atom->arity);
-    }
-
-    for (int i = 0; i < fmla->param.atom->arity; i++) {
-      predargs_copy[i] = copy_term(fmla->param.atom->predargs[i]);
+      for (int i = 0; i < fmla->param.atom->arity; i++) {
+        predargs_copy[i] = copy_term(fmla->param.atom->predargs[i]);
+      }
     }
 
     result = (struct fmla_t *)mk_fmla_atom(pred_name_copy,
@@ -677,9 +681,8 @@ copy_fmla(const struct fmla_t * const fmla)
   case FMLA_EX:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    // FIXME mk_fmla_quant currently copies arguments
-    result = (struct fmla_t *)mk_fmla_quant(fmla->param.quant->bv,
-        fmla->param.quant->body);
+    result = (struct fmla_t *)mk_fmla_quant(strdup(fmla->param.quant->bv),
+        copy_fmla(fmla->param.quant->body));
 #pragma GCC diagnostic pop
     break;
   default:

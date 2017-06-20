@@ -533,19 +533,23 @@ consts_in_stmt(const struct stmt_t * stmt)
 void
 statementise_universe(struct model_t * mdl)
 {
+  assert(NULL != mdl);
+
   if (0 == mdl->universe->cardinality) {
     return;
   }
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    strengthen_model(mdl, mk_stmt_const(mdl->universe->element[i], mdl->universe, universe_ty));
+    strengthen_model(mdl,
+        mk_stmt_const(strdup(mdl->universe->element[i]), mdl->universe, universe_ty));
   }
 
+  assert(0 < mdl->universe->cardinality);
   struct term_t ** args = malloc(sizeof(struct term_t *) * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    args[i] = mk_term(CONST, mdl->universe->element[i]);
+    args[i] = mk_term(CONST, strdup(mdl->universe->element[i]));
   }
   const struct fmla_t * distinctness_fmla =
-    mk_fmla_atom(distinct_pred, mdl->universe->cardinality, args);
+    mk_fmla_atom(strdup(distinct_pred), mdl->universe->cardinality, args);
   strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }

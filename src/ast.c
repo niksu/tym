@@ -518,7 +518,8 @@ hash_clause(struct clause_t * clause) {
 }
 
 bool
-eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result)
+eq_term(const struct term_t * const t1, const struct term_t * const t2,
+    enum eq_term_error * error_code, bool * result)
 {
   bool successful;
 
@@ -538,17 +539,13 @@ eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_
     same_identifier = true;
   }
 
-  if (same_kind && !same_identifier) {
-    successful = false;
-    *error_code = DIFF_IDENTIFIER_SAME_KIND;
-  } else if (!same_kind && same_identifier) {
+  if  (!same_kind && same_identifier) {
     successful = false;
     *error_code = DIFF_KIND_SAME_IDENTIFIER;
   } else {
     successful = true;
     *error_code = NO_ERROR;
-    assert (same_kind == same_identifier);
-    *result = same_kind;
+    *result = same_identifier;
   }
 
   return successful;

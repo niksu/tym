@@ -221,7 +221,7 @@ main(int argc, char ** argv)
 #endif
 
   if (NULL != params.input_file) {
-    free_program(parsed_input_file_contents);
+    free_program(parsed_input_file_contents); // FIXME buggy?
     free(input_file_contents);
     free(params.input_file);
   }
