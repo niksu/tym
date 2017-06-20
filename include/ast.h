@@ -87,9 +87,9 @@ void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *,
 #endif // DEBUG
 
 char hash_str(const char * str);
-char hash_term(struct term_t *);
-char hash_atom(struct atom_t *);
-char hash_clause(struct clause_t *);
+char hash_term(const struct term_t *);
+char hash_atom(const struct atom_t *);
+char hash_clause(const struct clause_t *);
 
 enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER};
 bool eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result);

@@ -28,7 +28,7 @@ term_to_str(const struct term_t * const term, struct buffer_info * dst)
 
 #if DEBUG
   char local_buf[BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_term(*term) + 127);
+  sprintf(local_buf, "{hash=%d}", hash_term(term) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -114,7 +114,7 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
 
 #if DEBUG
   char local_buf[BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_atom(*atom) + 127);
+  sprintf(local_buf, "{hash=%d}", hash_atom(atom) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -487,7 +487,7 @@ hash_str(const char * str)
 }
 
 char
-hash_term(struct term_t * term)
+hash_term(const struct term_t * term)
 {
   char result = hash_str(term->identifier);
   result ^= term->kind;
@@ -495,7 +495,7 @@ hash_term(struct term_t * term)
 }
 
 char
-hash_atom(struct atom_t * atom)
+hash_atom(const struct atom_t * atom)
 {
   char result = hash_str(atom->predicate);
 
@@ -507,7 +507,7 @@ hash_atom(struct atom_t * atom)
 }
 
 char
-hash_clause(struct clause_t * clause) {
+hash_clause(const struct clause_t * clause) {
   char result = hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
