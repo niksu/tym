@@ -86,9 +86,8 @@ buf_strcpy(struct buffer_info * dst, const char * src)
   }
 }
 
-
-MAYBE_ERROR__IS_OK_DEF(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__VAL_OF_DEF(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__ERRVAL_OF_DEF(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKVAL_DEF(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKERRVAL_DEF(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__IS_OK_DEFN(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__VAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__ERRVAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__MKVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__MKERRVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)

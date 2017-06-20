@@ -34,10 +34,10 @@ struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * s
 enum buffer_errors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
 
 MAYBE_ERROR(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__IS_OK_DEC(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__VAL_OF_DEC(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__ERRVAL_OF_DEC(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKERRVAL_DEC(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__IS_OK_DECL(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__VAL_OF_DECL(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
 
 #endif /* __TYM_BUFFER_H__ */
