@@ -363,16 +363,16 @@ order_statements(const struct stmts_t * stmts)
 
   while (NULL != cursor || NULL != waiting) {
 
+#if DEBUG
     struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
-#if DEBUG
     printf("|declared| = %d\n", len_terms_cell(declared));
-#endif
+
     res = terms_to_str(declared, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
-#if DEBUG
+
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
@@ -397,8 +397,9 @@ order_statements(const struct stmts_t * stmts)
     free(res);
     printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-#endif
+
     free_buffer(outbuf);
+#endif
 
     struct term_t * t = new_const_in_stmt(cursor->stmt);
     struct terms_t * term_consts = consts_in_stmt(cursor->stmt); // FIXME buggy?
