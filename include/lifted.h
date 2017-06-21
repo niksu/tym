@@ -84,7 +84,6 @@
 #define ERROR_CHECK_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
   __ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
   { \
-printf("!%d\n", v->is_error); \
     if (v->is_error) { \
       F(ctxt); \
     }; \
