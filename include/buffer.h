@@ -40,4 +40,7 @@ MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
 
+void buff_error_msg(void * x);
+ERROR_CHECK_DECL(buffer_write_result, size_t, enum buffer_errors, buff_error_msg)
+
 #endif /* __TYM_BUFFER_H__ */

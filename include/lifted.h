@@ -61,10 +61,10 @@
 #define MAYBE_ERROR__MKVAL_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   __MAYBE_ERROR__MKVAL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   { \
-    struct TYPE_NAME * value = malloc(sizeof(struct TYPE_NAME)); \
-    value->is_error = false; \
-    value->value.ok_value = v; \
-    return value; \
+    struct TYPE_NAME * result = malloc(sizeof(struct TYPE_NAME)); \
+    result->is_error = false; \
+    result->value.ok_value = v; \
+    return result; \
   }
 #define MAYBE_ERROR__MKERRVAL_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   __MAYBE_ERROR__MKERRVAL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
@@ -73,6 +73,21 @@
     value->is_error = true; \
     value->value.nok_value = v; \
     return value; \
+  }
+
+//Error handler, explains what's wrong (via function pointer applied to
+//situation-specific data) and terminates.
+#define __ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
+  void error_check_ ## TYPE_NAME (struct TYPE_NAME * v, void (*F)(void *), void * ctxt)
+#define ERROR_CHECK_DECL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
+  __ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F);
+#define ERROR_CHECK_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
+  __ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
+  { \
+printf("!%d\n", v->is_error); \
+    if (v->is_error) { \
+      F(ctxt); \
+    }; \
   }
 
 #endif /* __TYM_LIFTED_H__ */

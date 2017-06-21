@@ -333,7 +333,7 @@ fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
     break;
   case FMLA_EX:
     res = buf_strcpy(dst, "exists");
-    assert(is_ok_buffer_write_result(res));
+    error_check_buffer_write_result(res, buff_error_msg, dst);
     free(res);
     safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = fmla_quant_str(fmla->param.quant, dst);

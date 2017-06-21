@@ -91,3 +91,20 @@ MAYBE_ERROR__VAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__ERRVAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)
 MAYBE_ERROR__MKERRVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)
+
+//Error handler -- if something's wrong with the buffer then explain what's
+//wrong, and terminate.
+void
+buff_error_msg(void * x)
+{
+  struct buffer_info * buf = (struct buffer_info *)x;
+  if (buf->idx >= buf->buffer_size) {
+    buf->idx = buf->buffer_size - 1;
+  }
+  buf->buffer[buf->idx] = '\0';
+  fprintf(stderr, "Buffer error (idx=%zu, size=%zu, remaining=%zu)\n|%s|\n",
+      buf->idx, buf->buffer_size, buf->buffer_size - buf->idx, buf->buffer);
+  assert(false);
+}
+
+ERROR_CHECK_DEFN(buffer_write_result, size_t, enum buffer_errors, buff_error_msg)
