@@ -36,11 +36,10 @@ free_buffer(struct buffer_info * buf)
 bool
 have_space(struct buffer_info * buf, size_t n)
 {
-  if (n < buf->buffer_size - buf->idx) {
-    return true;
-  } else {
-    return false;
-  }
+  assert(buf->idx >= 0);
+  assert(buf->buffer_size > 0);
+  assert(buf->buffer_size > buf->idx);
+  return (n < buf->buffer_size - buf->idx);
 }
 
 inline void
