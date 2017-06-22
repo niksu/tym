@@ -18,6 +18,7 @@
 struct buffer_write_result *
 term_to_str(const struct term_t * const term, struct buffer_info * dst)
 {
+  assert(NULL != term);
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = buf_strcpy(dst, term->identifier);
@@ -46,6 +47,7 @@ term_to_str(const struct term_t * const term, struct buffer_info * dst)
 struct buffer_write_result *
 predicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
 {
+  assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = buf_strcpy(dst, atom->predicate);
@@ -74,6 +76,7 @@ predicate_to_str(const struct atom_t * atom, struct buffer_info * dst)
 struct buffer_write_result *
 atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
 {
+  assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = predicate_to_str(atom, dst);
@@ -132,6 +135,7 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
 struct buffer_write_result *
 clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
+  assert(NULL != clause);
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = atom_to_str(clause->head, dst);
@@ -193,6 +197,7 @@ clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 struct buffer_write_result *
 program_to_str(const struct program_t * const program, struct buffer_info * dst)
 {
+  assert(NULL != program);
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = NULL;
@@ -213,6 +218,7 @@ program_to_str(const struct program_t * const program, struct buffer_info * dst)
 struct term_t *
 mk_const(const char * cp_identifier)
 {
+  assert(NULL != cp_identifier);
   char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
   strcpy(ident_copy, cp_identifier);
   return mk_term(CONST, ident_copy);
@@ -221,6 +227,7 @@ mk_const(const char * cp_identifier)
 struct term_t *
 mk_var(const char * cp_identifier)
 {
+  assert(NULL != cp_identifier);
   char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
   strcpy(ident_copy, cp_identifier);
   return mk_term(VAR, ident_copy);
@@ -277,12 +284,14 @@ DEFINE_U8_LIST_LEN(atoms)
 struct clause_t *
 mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
   assert(NULL != head);
+  assert((NULL != body && body_size > 0) || (NULL == body && 0 == body_size));
 
   struct clause_t * cl = malloc(sizeof(struct clause_t));
   assert(NULL != cl);
 
   cl->head = head;
   cl->body_size = body_size;
+  cl->body = NULL;
 
   struct atoms_t * pre_position = NULL;
 
@@ -295,8 +304,6 @@ mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body) {
       body = body->next;
       free(pre_position);
     }
-  } else {
-    cl->body = NULL;
   }
 
   return cl;
@@ -309,6 +316,8 @@ DEFINE_U8_LIST_LEN(clauses)
 struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
+  assert(NULL != program);
+
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
 
@@ -337,6 +346,8 @@ mk_program(uint8_t no_clauses, struct clauses_t * program)
 void
 free_term(struct term_t * term)
 {
+  assert(NULL != term);
+
   assert(NULL != term->identifier);
 
   free((void *)term->identifier);
@@ -364,6 +375,7 @@ free_terms(struct terms_t * terms)
 void
 free_atom(struct atom_t * at)
 {
+  assert(NULL != at);
   assert(NULL != at->predicate);
 
   DBG("Freeing atom: ");
@@ -403,6 +415,8 @@ free_atoms(struct atoms_t * atoms)
 void
 free_clause(struct clause_t * clause)
 {
+  assert(NULL != clause);
+
   free_atom(clause->head);
 
   assert((0 == clause->body_size && NULL == clause->body) ||
@@ -475,6 +489,8 @@ debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, stru
 char
 hash_str(const char * str)
 {
+  assert(NULL != str);
+
   char result = 0;
   const char * cursor;
 
@@ -489,6 +505,7 @@ hash_str(const char * str)
 char
 hash_term(const struct term_t * term)
 {
+  assert(NULL != term);
   char result = hash_str(term->identifier);
   result ^= term->kind;
   return result;
@@ -497,6 +514,8 @@ hash_term(const struct term_t * term)
 char
 hash_atom(const struct atom_t * atom)
 {
+  assert(NULL != atom);
+
   char result = hash_str(atom->predicate);
 
   for (int i = 0; i < atom->arity; i++) {
@@ -508,6 +527,8 @@ hash_atom(const struct atom_t * atom)
 
 char
 hash_clause(const struct clause_t * clause) {
+  assert(NULL != clause);
+
   char result = hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
@@ -521,6 +542,9 @@ bool
 eq_term(const struct term_t * const t1, const struct term_t * const t2,
     enum eq_term_error * error_code, bool * result)
 {
+  assert(NULL != t1);
+  assert(NULL != t2);
+
   bool successful;
 
   bool same_kind = false;
@@ -590,6 +614,7 @@ test_clause(void) {
 struct term_t *
 copy_term(const struct term_t * const cp_term)
 {
+  assert(NULL != cp_term);
   char * ident_copy = malloc(sizeof(char) * (strlen(cp_term->identifier) + 1));
   strcpy(ident_copy, cp_term->identifier);
   return mk_term(cp_term->kind, ident_copy);
@@ -649,6 +674,8 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 struct buffer_write_result *
 terms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
 {
+  assert(NULL != terms);
+
   size_t initial_idx = dst->idx;
 
   const struct terms_t * cursor = terms;
