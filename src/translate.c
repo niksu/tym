@@ -232,7 +232,9 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
       strengthen_model(mdl,
-          mk_stmt_pred((char *)preds_cursor->predicate->predicate, arguments_of_atom(fmla_as_atom(atom)), mk_fmla_const(false)));
+          mk_stmt_pred((char *)preds_cursor->predicate->predicate,
+            arguments_of_atom(fmla_as_atom(atom)),
+            mk_fmla_const(false)));
 #pragma GCC diagnostic pop
 
       free_fmla(atom); // FIXME buggy?
@@ -333,7 +335,9 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
       struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
       strengthen_model(mdl,
-          mk_stmt_pred(strdup(head->pred_name), arguments_of_atom(head), fmla));
+          mk_stmt_pred(strdup(head->pred_name),
+            arguments_of_atom(head),
+            fmla));
       free_fmla(abs_head_fmla); // FIXME buggy?
     }
 
