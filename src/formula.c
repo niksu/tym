@@ -654,8 +654,7 @@ copy_fmla(const struct fmla_t * const fmla)
       }
     }
 
-    result = (struct fmla_t *)mk_fmla_atom(pred_name_copy,
-        fmla->param.atom->arity, predargs_copy);
+    result = mk_fmla_atom(pred_name_copy, fmla->param.atom->arity, predargs_copy);
 #pragma GCC diagnostic pop
     break;
   case FMLA_AND:
@@ -872,7 +871,9 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     result = acc;
     break;
   case FMLA_ATOM:
-    result = mk_term_cell(mk_term(CONST, fmla->param.atom->pred_name), acc);
+    // We don't add fmla->param.atom->pred_name to result since pred_name
+    // doesn't appear in the Herbrand Universe.
+    result = acc;
     for (int i = 0; i < fmla->param.atom->arity; i++) {
       struct term_t * t = fmla->param.atom->predargs[i];
       if (CONST == t->kind) {
