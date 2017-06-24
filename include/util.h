@@ -17,7 +17,7 @@
 
 #include "lifted.h"
 
-#define BUF_SIZE 1600
+#define BUF_SIZE 2600
 
 #define VERBOSE printf
 #define ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
