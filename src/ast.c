@@ -316,8 +316,6 @@ DEFINE_U8_LIST_LEN(clauses)
 struct program_t *
 mk_program(uint8_t no_clauses, struct clauses_t * program)
 {
-  assert(NULL != program);
-
   struct program_t * p = malloc(sizeof(struct program_t));
   assert(NULL != p);
 
