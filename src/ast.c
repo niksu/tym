@@ -551,6 +551,7 @@ eq_term(const struct term_t * const t1, const struct term_t * const t2,
   bool same_identifier = false;
 
   if (t1 == t2) {
+    *error_code = NO_ERROR;
     *result = true;
     return true;
   }
@@ -563,7 +564,7 @@ eq_term(const struct term_t * const t1, const struct term_t * const t2,
     same_identifier = true;
   }
 
-  if  (!same_kind && same_identifier) {
+  if (!same_kind && same_identifier) {
     successful = false;
     *error_code = DIFF_KIND_SAME_IDENTIFIER;
   } else {
@@ -620,10 +621,15 @@ copy_term(const struct term_t * const cp_term)
   return mk_term(cp_term->kind, ident_copy);
 }
 
+// In practice, simply checks that ss is a subset of ts.
 // FIXME naive implementation
 bool
 terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
 {
+  if (NULL == ts) {
+    return true;
+  }
+
   bool result = true;
 
 #if DEBUG
@@ -634,7 +640,7 @@ terms_subsumed_by(const struct terms_t * const ts, const struct terms_t * ss)
     printf(".");
 #endif
     const struct terms_t * cursor = ts;
-    bool found = (NULL == cursor);
+    bool found = false;
     enum eq_term_error error_code;
     while (NULL != cursor) {
       if (eq_term(cursor->term, ss->term, &error_code, &found)) {
@@ -688,8 +694,9 @@ terms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
     free(res);
 
     if (NULL != terms->next) {
-      if (have_space(dst, 2)) {
-        unsafe_buffer_str(dst, ", ");
+      safe_buffer_replace_last(dst, ',');
+      if (have_space(dst, 1)) {
+        unsafe_buffer_char(dst, ' ');
       } else {
         return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
       }
