@@ -158,6 +158,7 @@ main(int argc, char ** argv)
   }
 
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
+  *vg = NULL;
   *vg = mk_sym_gen(strdup("V"));
 
   struct sym_gen_t * cg = mk_sym_gen(strdup("c"));
