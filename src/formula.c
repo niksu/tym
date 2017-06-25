@@ -160,7 +160,7 @@ mk_fmla_ors(struct fmlas_t * fmlas)
     } else {
       const struct fmlas_t * cursor = fmlas;
       const struct fmlas_t * pre_cursor = cursor;
-      result = mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
+      result = mk_fmla_or(fmlas->fmla, fmlas->next->fmla);
       cursor = fmlas->next->next;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -168,7 +168,7 @@ mk_fmla_ors(struct fmlas_t * fmlas)
       free((void *)pre_cursor);
 #pragma GCC diagnostic pop
       while (NULL != cursor) {
-        result = mk_fmla_and(result, cursor->fmla);
+        result = mk_fmla_or(result, cursor->fmla);
         pre_cursor = cursor;
         cursor = cursor->next;
 #pragma GCC diagnostic push
@@ -533,7 +533,7 @@ free_fmla(const struct fmla_t * fmla)
 {
   switch (fmla->kind) {
   case FMLA_CONST:
-    // Nothing to free.
+    // Nothing internal to free. We simply free "fmla" at the end.
     break;
   case FMLA_ATOM:
     free_fmla_atom(fmla->param.atom);
