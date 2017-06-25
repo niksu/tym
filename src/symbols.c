@@ -228,6 +228,8 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
 struct buffer_write_result *
 atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 {
+  assert(NULL != adb);
+
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = buf_strcpy(dst, "Terms:");
