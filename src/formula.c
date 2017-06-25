@@ -600,7 +600,7 @@ free_valuation(struct valuation_t * v)
   free(v->var);
 
   assert(NULL != v->val);
-  free(v->val);
+  free_term(v->val);
 
   if (NULL != v->next) {
     free_valuation(v->next);
@@ -801,7 +801,8 @@ mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
   const struct terms_t * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
-    struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
+    struct fmla_t * pre_result =
+      mk_fmla_quant(strdup(cursor->term->identifier), result);
     result = pre_result;
 
     cursor = cursor->next;

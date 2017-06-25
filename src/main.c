@@ -197,7 +197,13 @@ main(int argc, char ** argv)
 // FIXME crude
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    free((void *)mdl->stmts);
+    const struct stmts_t * cursor = mdl->stmts;
+    const struct stmts_t * pre_cursor = NULL;
+    while (NULL != cursor) {
+      pre_cursor = cursor;
+      cursor = cursor->next;
+      free((void *)pre_cursor);
+    }
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
 #if DEBUG
@@ -222,7 +228,7 @@ main(int argc, char ** argv)
 #endif
 
   if (NULL != params.input_file) {
-    free_program(parsed_input_file_contents); // FIXME buggy?
+    free_program(parsed_input_file_contents);
     free(input_file_contents);
     free(params.input_file);
   }

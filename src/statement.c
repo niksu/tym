@@ -501,7 +501,7 @@ new_const_in_stmt(const struct stmt_t * stmt)
     result = NULL;
     break;
   case STMT_CONST_DEF:
-    result = mk_term(CONST, stmt->param.const_def->const_name);
+    result = mk_term(CONST, strdup(stmt->param.const_def->const_name));
     break;
   default:
     assert(false);

@@ -412,3 +412,19 @@ num_predicate_bodies (struct predicate_t * p)
   }
   return no_bodies;
 }
+
+//void
+//free_atom_database(struct atom_database_t * adb)
+//{
+//  //for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+//  //  free(adb->tdb->term_database[i]);
+//  //}
+//  //free(adb->tdb->term_database);
+//  free(adb->tdb);
+//
+//  //for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+//  //  free(adb->atom_database[i]);
+//  //}
+//  //free(adb->atom_database);
+//  free(adb);
+//}
