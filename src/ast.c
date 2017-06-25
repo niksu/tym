@@ -377,7 +377,7 @@ free_atom(struct atom_t * at)
   assert(NULL != at->predicate);
 
   DBG("Freeing atom: ");
-  DBG_SYNTAX((void *)&at, (x_to_str_t)atom_to_str);
+  DBG_SYNTAX((void *)at, (x_to_str_t)atom_to_str);
   DBG("\n");
 
   free(at->predicate);
