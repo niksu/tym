@@ -33,8 +33,7 @@ translate_body(const struct clause_t * cl)
   for (int i = 0; i < cl->body_size; i++) {
     fmlas = mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
   }
-  struct fmla_t * result = mk_fmla_ands(fmlas, true);
-  return result;
+  return mk_fmla_ands(fmlas, true);
 }
 
 struct fmlas_t *
@@ -296,8 +295,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free(res);
 
         struct fmla_t * valuation_fmla = translate_valuation(*val);
-        struct fmla_t * old_fmla = fmlas_cursor->fmla;
-        fmlas_cursor->fmla = mk_fmla_and(old_fmla, valuation_fmla);
+        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct terms_t * ts = filter_var_values(*val);
         const struct fmla_t * quantified_fmla =
           mk_fmla_quants(ts, fmlas_cursor->fmla);
