@@ -180,10 +180,9 @@ main(int argc, char ** argv)
   }
 #endif
 
-#if DEBUG
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = NULL;
-#endif
+
   if (NULL != mdl) {
 #if DEBUG
     res = model_str(mdl, outbuf);
@@ -206,13 +205,12 @@ main(int argc, char ** argv)
     }
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
-#if DEBUG
+
     res = model_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-#endif
   }
 
   DBG("Cleaning up before exiting\n");
@@ -223,9 +221,8 @@ main(int argc, char ** argv)
   free_sym_gen(*vg);
   free(vg);
   free_sym_gen(cg);
-#if DEBUG
+
   free_buffer(outbuf);
-#endif
 
   if (NULL != params.input_file) {
     free_program(parsed_input_file_contents);
