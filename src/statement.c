@@ -414,12 +414,10 @@ model_str(const struct model_t * const mdl, struct buffer_info * dst)
   safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
   if (have_space(dst, 3)) {
-    unsafe_buffer_str(dst, "0)");
+    unsafe_buffer_str(dst, "0)\n");
   } else {
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
-
-  safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
 
   res = stmts_str(mdl->stmts, dst);
   assert(is_ok_buffer_write_result(res));
