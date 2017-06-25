@@ -393,6 +393,7 @@ order_statements(const struct stmts_t * stmts)
 
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+    free_buffer(outbuf);
 #endif
 
     if (NULL == cursor && NULL != waiting) {
@@ -411,6 +412,7 @@ order_statements(const struct stmts_t * stmts)
 #endif
 
 #if DEBUG
+    outbuf = mk_buffer(BUF_SIZE);
     res = stmt_str(cursor->stmt, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
