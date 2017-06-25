@@ -17,6 +17,7 @@
 #define MAX_VAR_WIDTH 10/*FIXME make into a parameter, rather than having it be a const*/
 
 struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
+static struct fmlas_t * copy_fmlas(const struct fmlas_t *);
 
 struct fmla_t *
 mk_fmla_const(bool b)
@@ -900,7 +901,7 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
   return result;
 }
 
-struct fmlas_t *
+static struct fmlas_t *
 copy_fmlas(const struct fmlas_t * fmlas)
 {
   struct fmlas_t * result = NULL;
