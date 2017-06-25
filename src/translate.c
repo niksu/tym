@@ -23,7 +23,7 @@ translate_atom(const struct atom_t * at)
       args[i] = copy_term(at->args[i]);
     }
   }
-  return mk_fmla_atom(at->predicate, at->arity, args);
+  return mk_fmla_atom(strdup(at->predicate), at->arity, args);
 }
 
 struct fmla_t *
@@ -295,8 +295,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free(res);
 
         struct fmla_t * valuation_fmla = translate_valuation(*val);
-        fmlas_cursor->fmla = mk_fmla_and(copy_fmla(fmlas_cursor->fmla),
-            valuation_fmla);
+        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct terms_t * ts = filter_var_values(*val);
         const struct fmla_t * quantified_fmla =
           mk_fmla_quants(ts, fmlas_cursor->fmla);
