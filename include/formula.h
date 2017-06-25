@@ -52,7 +52,7 @@ struct fmla_t * mk_fmla_quants(const struct terms_t * const vars, struct fmla_t 
 struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
 struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
 struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas, bool destructive);
+struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas);
 struct fmla_t * mk_fmla_ors(struct fmlas_t * fmlas);
 struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
 struct fmla_t * copy_fmla(const struct fmla_t * const);

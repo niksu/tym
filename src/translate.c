@@ -33,7 +33,7 @@ translate_body(const struct clause_t * cl)
   for (int i = 0; i < cl->body_size; i++) {
     fmlas = mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
   }
-  return mk_fmla_ands(fmlas, true);
+  return mk_fmla_ands(fmlas);
 }
 
 struct fmlas_t *
@@ -62,7 +62,7 @@ translate_valuation(struct valuation_t * const v)
           copy_term(cursor->val)), result);
     cursor = cursor->next;
   }
-  return mk_fmla_ands(result, true);
+  return mk_fmla_ands(result);
 }
 
 struct fmla_t *
