@@ -54,6 +54,8 @@ safe_buffer_replace_last(struct buffer_info * buf, char c)
 {
   assert(NULL != buf);
   assert(buf->idx > 0);
+  // buf->idx points at the next address to write, and here we change a location
+  // we've written to, so we go negative.
   buf->buffer[buf->idx - 1] = c;
 }
 
