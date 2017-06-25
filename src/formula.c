@@ -619,7 +619,7 @@ mk_fmlas(uint8_t no_fmlas, ...)
   for (int i = 0; i < no_fmlas; i++) {
     struct fmla_t * cur_fmla = va_arg(varargs, struct fmla_t *);
     assert(NULL != cur_fmla);
-    result = mk_fmla_cell(cur_fmla, result);
+    result = mk_fmla_cell(copy_fmla(cur_fmla), result);
   }
   va_end(varargs);
   return result;
@@ -775,6 +775,9 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
+  free_fmla(test_atom);
+  free_fmla(test_atom2);
+  free_fmla(test_atom3);
   free_fmla(test_and2);
   free_fmla(test_or);
   free_fmla(test_or2);
