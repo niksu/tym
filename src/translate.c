@@ -41,14 +41,12 @@ translate_bodies(const struct clauses_t * cls)
 {
   const struct clauses_t * cursor = cls;
   struct fmlas_t * fmlas = NULL;
-  if (NULL != cursor) {
-// FIXME check if the translation involved any sharing (i.e., should the result
-//       type by a const?)
+  while (NULL != cursor) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    fmlas = (struct fmlas_t *)mk_fmla_cell(translate_body(cursor->clause),
-      translate_bodies(cursor->next));
+    fmlas = (struct fmlas_t *)mk_fmla_cell(translate_body(cursor->clause), fmlas);
 #pragma GCC diagnostic pop
+    cursor = cursor->next;
   }
   return fmlas;
 }
@@ -297,21 +295,16 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free(res);
 
         struct fmla_t * valuation_fmla = translate_valuation(*val);
-        struct fmla_t * fmla = fmlas_cursor->fmla;
-        struct fmla_t * anded_fmla = mk_fmla_and(fmla, valuation_fmla);
-        fmlas_cursor->fmla = copy_fmla(anded_fmla);
-//        free_fmla(anded_fmla); // FIXME inline above statements, remove copy, and no need to have anded_fmla
-//        free(anded_fmla->param.args);
-        free(anded_fmla->param.args);
-        free(anded_fmla);
+        fmlas_cursor->fmla = mk_fmla_and(copy_fmla(fmlas_cursor->fmla),
+            valuation_fmla);
         struct terms_t * ts = filter_var_values(*val);
-        fmla = fmlas_cursor->fmla;
-        const struct fmla_t * quantified_fmla = mk_fmla_quants(ts, fmla);
+        const struct fmla_t * quantified_fmla =
+          mk_fmla_quants(ts, fmlas_cursor->fmla);
         fmlas_cursor->fmla = copy_fmla(quantified_fmla);
         if (NULL != ts) {
           free_terms(ts);
         }
-        free_fmla(quantified_fmla); // FIXME inline above statements, remove copy, and no need to have quantified_fmla
+        free_fmla(quantified_fmla);
 
         res = fmla_str(fmlas_cursor->fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
