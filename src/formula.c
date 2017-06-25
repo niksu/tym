@@ -115,7 +115,7 @@ mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR)
 }
 
 struct fmla_t *
-mk_fmla_ands(struct fmlas_t * fmlas)
+mk_fmla_ands(struct fmlas_t * fmlas, bool destructive)
 {
   struct fmla_t * result;
   if (NULL == fmlas) {
@@ -123,7 +123,9 @@ mk_fmla_ands(struct fmlas_t * fmlas)
   } else {
     if (NULL == fmlas->next) {
       result = fmlas->fmla;
-      free(fmlas);
+      if (destructive) {
+        free(fmlas);
+      }
     } else {
       const struct fmlas_t * cursor = fmlas;
       const struct fmlas_t * pre_cursor = cursor;
@@ -131,8 +133,10 @@ mk_fmla_ands(struct fmlas_t * fmlas)
       cursor = fmlas->next->next;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      free((void *)pre_cursor->next);
-      free((void *)pre_cursor);
+      if (destructive) {
+        free((void *)pre_cursor->next);
+        free((void *)pre_cursor);
+      }
 #pragma GCC diagnostic pop
       while (NULL != cursor) {
         result = mk_fmla_and(result, cursor->fmla);
@@ -140,7 +144,9 @@ mk_fmla_ands(struct fmlas_t * fmlas)
         cursor = cursor->next;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-        free((void *)pre_cursor);
+        if (destructive) {
+          free((void *)pre_cursor);
+        }
 #pragma GCC diagnostic pop
       }
     }
@@ -742,7 +748,7 @@ test_formula(void)
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
   struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
-  struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
+  struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas, true);
   struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas2);
 
   outbuf = mk_buffer(BUF_SIZE);
