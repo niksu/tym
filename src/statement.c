@@ -181,14 +181,10 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     struct term_t * arg1 = mk_term(CONST, const_name);
     struct term_t * arg2 = mk_term(CONST, strdup(uni->element[i]));
     struct fmla_t * fmla = mk_fmla_atom_varargs(strdup("="/* FIXME const */), 2, arg1, arg2);
-    fmlas = mk_fmla_cell(copy_fmla(fmla), fmlas);
+    fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
-  const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
-  if (NULL != fmlas) {
-    free_fmlas(fmlas);
-  }
-  return result;
+  return mk_stmt_axiom(mk_fmla_ors(fmlas));
 }
 
 struct buffer_write_result *
