@@ -185,7 +185,9 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   }
 
   const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
-  free_fmlas(fmlas);
+  if (NULL != fmlas) {
+    free_fmlas(fmlas);
+  }
   return result;
 }
 
