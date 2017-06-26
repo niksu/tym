@@ -218,7 +218,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(atom->args[i], adb->tdb);
+      (void)term_database_add(copy_term(atom->args[i]), adb->tdb);
     }
   }
 
@@ -355,7 +355,8 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
     return false;
   } else if (NULL == record) {
     struct predicate_t * result;
-    success = atom_database_add(clause->head, adb, &adl_add_error, &result);
+    success = atom_database_add(copy_atom(clause->head), adb, &adl_add_error,
+        &result);
     result->bodies = mk_clause_cell(clause, NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
@@ -370,7 +371,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(clause->head->args[i], adb->tdb);
+      (void)term_database_add(copy_term(clause->head->args[i]), adb->tdb);
     }
 
     struct clauses_t * remainder = record->bodies;
@@ -388,7 +389,8 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
         return false;
       } else if (NULL == record) {
         struct predicate_t * result;
-        success &= atom_database_add(clause->body[i], adb, &adl_add_error, &result);
+        success &= atom_database_add(copy_atom(clause->body[i]), adb,
+            &adl_add_error, &result);
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
           *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
@@ -415,18 +417,74 @@ num_predicate_bodies (struct predicate_t * p)
   return no_bodies;
 }
 
-//void
-//free_atom_database(struct atom_database_t * adb)
-//{
-//  //for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
-//  //  free(adb->tdb->term_database[i]);
-//  //}
-//  //free(adb->tdb->term_database);
-//  free(adb->tdb);
-//
-//  //for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
-//  //  free(adb->atom_database[i]);
-//  //}
-//  //free(adb->atom_database);
-//  free(adb);
-//}
+void
+free_atom_database(struct atom_database_t * adb)
+{
+/*
+  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+    struct terms_t * cursor = adb->tdb->term_database[i];
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free(pre_cursor);
+    }
+  }
+  {
+    struct terms_t * cursor = adb->tdb->herbrand_universe;
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free(pre_cursor);
+    }
+  }
+  free(adb->tdb);
+
+  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+    struct predicates_t * cursor = adb->atom_database[i];
+    while (NULL != cursor) {
+      struct predicates_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      if (NULL != pre_cursor->predicate->bodies) {
+        free_clauses(pre_cursor->predicate->bodies);
+      }
+      free_pred(pre_cursor->predicate);
+      free(pre_cursor);
+    }
+  }
+*/
+
+  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+    struct terms_t * cursor = adb->tdb->term_database[i];
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free_term(pre_cursor->term);
+      free(pre_cursor);
+    }
+  }
+  {
+    struct terms_t * cursor = adb->tdb->herbrand_universe;
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free(pre_cursor);
+    }
+  }
+  free(adb->tdb);
+
+/* FIXME buggy
+  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+    struct predicates_t * cursor = adb->atom_database[i];
+    while (NULL != cursor) {
+      struct predicates_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      if (NULL != pre_cursor->predicate->bodies) {
+        free_clauses(pre_cursor->predicate->bodies);
+      }
+      free_pred(pre_cursor->predicate);
+      free(pre_cursor);
+    }
+  }
+*/
+  free(adb);
+}

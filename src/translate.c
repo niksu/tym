@@ -360,7 +360,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
   free_buffer(outbuf);
 
-  //free_atom_database(adb);
+  free_atom_database(adb);
 
   return mdl;
 }
