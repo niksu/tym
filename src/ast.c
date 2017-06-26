@@ -707,3 +707,26 @@ terms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
 
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
+
+struct atom_t *
+copy_atom(const struct atom_t * const cp_atom)
+{
+  assert(NULL != cp_atom);
+
+  struct atom_t * at = malloc(sizeof(struct atom_t));
+  assert(NULL != at);
+
+  at->predicate = strdup(cp_atom->predicate);
+  at->arity = cp_atom->arity;
+  at->args = NULL;
+
+  if (at->arity > 0) {
+    at->args = malloc(sizeof(struct term_t *) * at->arity);
+    assert(NULL != at->args);
+    for (int i = 0; i < at->arity; i++) {
+      at->args[i] = copy_term(cp_atom->args[i]);
+    }
+  }
+
+  return at;
+}
