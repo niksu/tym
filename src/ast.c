@@ -219,18 +219,14 @@ struct term_t *
 mk_const(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
-  strcpy(ident_copy, cp_identifier);
-  return mk_term(CONST, ident_copy);
+  return mk_term(CONST, strdup(cp_identifier));
 }
 
 struct term_t *
 mk_var(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
-  strcpy(ident_copy, cp_identifier);
-  return mk_term(VAR, ident_copy);
+  return mk_term(VAR, strdup(cp_identifier));
 }
 
 struct term_t *
