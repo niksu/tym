@@ -610,9 +610,7 @@ struct term_t *
 copy_term(const struct term_t * const cp_term)
 {
   assert(NULL != cp_term);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_term->identifier) + 1));
-  strcpy(ident_copy, cp_term->identifier);
-  return mk_term(cp_term->kind, ident_copy);
+  return mk_term(cp_term->kind, strdup(cp_term->identifier));
 }
 
 // In practice, simply checks that ss is a subset of ts.
