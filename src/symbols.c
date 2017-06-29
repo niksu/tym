@@ -205,6 +205,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
     } else {
+      // FIXME don't add the atom if it already exists in the chain.
       adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
     }
 
@@ -472,19 +473,19 @@ free_atom_database(struct atom_database_t * adb)
   }
   free(adb->tdb);
 
-/* FIXME buggy
+// FIXME buggy
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     struct predicates_t * cursor = adb->atom_database[i];
     while (NULL != cursor) {
       struct predicates_t * pre_cursor = cursor;
       cursor = cursor->next;
-      if (NULL != pre_cursor->predicate->bodies) {
-        free_clauses(pre_cursor->predicate->bodies);
-      }
-      free_pred(pre_cursor->predicate);
+      //if (NULL != pre_cursor->predicate->bodies) {
+      //  free_clauses(pre_cursor->predicate->bodies);
+      //}
+      //free_pred(pre_cursor->predicate);
       free(pre_cursor);
     }
   }
-*/
+
   free(adb);
 }
