@@ -376,7 +376,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
   } else if (NULL == record) {
     struct predicate_t * result;
     success = atom_database_add(clause->head, adb, &adl_add_error, &result);
-    result->bodies = mk_clause_cell(clause, NULL);
+    result->bodies = mk_clause_cell(copy_clause(clause), NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
       *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
@@ -458,16 +458,12 @@ free_atom_database(struct atom_database_t * adb)
   }
   free(adb->tdb);
 
-// FIXME buggy
   for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
     struct predicates_t * cursor = adb->atom_database[i];
     while (NULL != cursor) {
       struct predicates_t * pre_cursor = cursor;
       cursor = cursor->next;
-      //if (NULL != pre_cursor->predicate->bodies) {
-      //  free_clauses(pre_cursor->predicate->bodies);
-      //}
-      //free_pred(pre_cursor->predicate);
+      free_pred(pre_cursor->predicate);
       free(pre_cursor);
     }
   }
