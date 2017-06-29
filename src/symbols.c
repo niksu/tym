@@ -211,9 +211,9 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
       bool exists = false;
       struct predicates_t * cursor = adb->atom_database[(int)h];
       while (NULL != cursor) {
-        enum eq_pred_error * eq_pred_error_code = malloc(sizeof(enum eq_pred_error));
-        bool * eq_pred_result = malloc(sizeof(bool));
-        if (eq_pred(*pred, *cursor->predicate, eq_pred_error_code, eq_pred_result)) {
+        enum eq_pred_error eq_pred_error_code;
+        bool eq_pred_result;
+        if (eq_pred(*pred, *cursor->predicate, &eq_pred_error_code, &eq_pred_result)) {
           free_pred(pred);
           pred = cursor->predicate;
           exists = true;
