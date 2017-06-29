@@ -218,7 +218,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
           pred = cursor->predicate;
           exists = true;
         } else {
-          // FIXME report value of eq_pred_error
+          printf("Error when comparing terms for equality: %d", eq_pred_error_code);
           assert(false);
         }
         cursor = cursor->next;
