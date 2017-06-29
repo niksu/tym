@@ -375,8 +375,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
     return false;
   } else if (NULL == record) {
     struct predicate_t * result;
-    success = atom_database_add(copy_atom(clause->head), adb, &adl_add_error,
-        &result);
+    success = atom_database_add(clause->head, adb, &adl_add_error, &result);
     result->bodies = mk_clause_cell(clause, NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
@@ -409,8 +408,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
         return false;
       } else if (NULL == record) {
         struct predicate_t * result;
-        success &= atom_database_add(clause->body[i], adb,
-            &adl_add_error, &result);
+        success &= atom_database_add(clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
           *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
