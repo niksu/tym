@@ -33,8 +33,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   }
 
   if (NULL == tdb->term_database[(int)h]) {
-    tdb->term_database[(int)h] = mk_term_cell(term, NULL);
-    tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+    tdb->term_database[(int)h] = mk_term_cell(copy_term(term), NULL);
+    tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
     DBG("Added to Herbrand universe: %s\n", term->identifier);
   } else {
     struct terms_t * cursor = tdb->term_database[(int)h];
@@ -51,8 +51,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
     } while (NULL != cursor->next);
 
     if (!exists) {
-      cursor->next = mk_term_cell(term, NULL);
-      tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+      cursor->next = mk_term_cell(copy_term(term), NULL);
+      tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
       DBG("Added to Herbrand universe: %s\n", term->identifier);
     }
   }
@@ -235,7 +235,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(copy_term(atom->args[i]), adb->tdb);
+      (void)term_database_add(atom->args[i], adb->tdb);
     }
   }
 
@@ -388,7 +388,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
       // NOTE we don't need to check return value here, since it simply
       //      indicates whether ther term already existed or not in the term
       //      database.
-      (void)term_database_add(copy_term(clause->head->args[i]), adb->tdb);
+      (void)term_database_add(clause->head->args[i], adb->tdb);
     }
 
     struct clauses_t * remainder = record->bodies;
@@ -484,6 +484,7 @@ free_atom_database(struct atom_database_t * adb)
     while (NULL != cursor) {
       struct terms_t * pre_cursor = cursor;
       cursor = cursor->next;
+      free_term(pre_cursor->term);
       free(pre_cursor);
     }
   }
