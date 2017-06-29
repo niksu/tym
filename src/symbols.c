@@ -99,13 +99,18 @@ mk_pred(const char * predicate, uint8_t arity)
   return p;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_pred(struct predicate_t * pred)
 {
-  // NOTE we assume that the data in the pred's fields are shared,
-  //      so we don't free that memory.
+  free((void *)pred->predicate);
+  if (NULL != pred->bodies) {
+    free_clauses(pred->bodies);
+  }
   free(pred);
 }
+#pragma GCC diagnostic pop
 
 DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
@@ -160,7 +165,7 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, e
     } else {
       bool exists = false;
 
-      struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
+      struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
       struct predicates_t * cursor = adb->atom_database[(int)h];
 
@@ -180,8 +185,6 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, e
 
         cursor = cursor->next;
       } while (success && NULL != cursor);
-
-      free_pred(pred);
     }
   }
 
@@ -200,7 +203,7 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
   } else {
     char h = hash_str(atom->predicate);
 
-    struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
+    struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
@@ -392,7 +395,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
     }
 
     struct clauses_t * remainder = record->bodies;
-    record->bodies = mk_clause_cell(clause, remainder);
+    record->bodies = mk_clause_cell(copy_clause(clause), remainder);
   }
 
   if (success) {
@@ -406,7 +409,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
         return false;
       } else if (NULL == record) {
         struct predicate_t * result;
-        success &= atom_database_add(copy_atom(clause->body[i]), adb,
+        success &= atom_database_add(clause->body[i], adb,
             &adl_add_error, &result);
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
