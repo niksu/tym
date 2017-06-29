@@ -440,39 +440,6 @@ num_predicate_bodies (struct predicate_t * p)
 void
 free_atom_database(struct atom_database_t * adb)
 {
-/*
-  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
-    struct terms_t * cursor = adb->tdb->term_database[i];
-    while (NULL != cursor) {
-      struct terms_t * pre_cursor = cursor;
-      cursor = cursor->next;
-      free(pre_cursor);
-    }
-  }
-  {
-    struct terms_t * cursor = adb->tdb->herbrand_universe;
-    while (NULL != cursor) {
-      struct terms_t * pre_cursor = cursor;
-      cursor = cursor->next;
-      free(pre_cursor);
-    }
-  }
-  free(adb->tdb);
-
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
-    struct predicates_t * cursor = adb->atom_database[i];
-    while (NULL != cursor) {
-      struct predicates_t * pre_cursor = cursor;
-      cursor = cursor->next;
-      if (NULL != pre_cursor->predicate->bodies) {
-        free_clauses(pre_cursor->predicate->bodies);
-      }
-      free_pred(pre_cursor->predicate);
-      free(pre_cursor);
-    }
-  }
-*/
-
   for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
     struct terms_t * cursor = adb->tdb->term_database[i];
     while (NULL != cursor) {
