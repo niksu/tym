@@ -132,6 +132,25 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 }
 
+struct clause_t *
+copy_clause(const struct clause_t * const cp_clause)
+{
+  struct clause_t * result = malloc(sizeof(struct clause_t));
+  struct atom_t ** body = NULL;
+  if (cp_clause->body_size > 0) {
+    body = malloc(sizeof(struct atom_t *) * cp_clause->body_size);
+    for (int i = 0; i < cp_clause->body_size; i++) {
+      body[i] = copy_atom(cp_clause->body[i]);
+    }
+  }
+  *result = (struct clause_t){
+    .head = copy_atom(cp_clause->head),
+    .body_size = cp_clause->body_size,
+    .body = body
+  };
+  return result;
+}
+
 struct buffer_write_result *
 clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
