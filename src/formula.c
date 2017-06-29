@@ -17,6 +17,7 @@
 #define MAX_VAR_WIDTH 10/*FIXME make into a parameter, rather than having it be a const*/
 
 struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
+static struct fmlas_t * copy_fmlas(const struct fmlas_t *);
 
 struct fmla_t *
 mk_fmla_const(bool b)
@@ -160,7 +161,7 @@ mk_fmla_ors(struct fmlas_t * fmlas)
     } else {
       const struct fmlas_t * cursor = fmlas;
       const struct fmlas_t * pre_cursor = cursor;
-      result = mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
+      result = mk_fmla_or(fmlas->fmla, fmlas->next->fmla);
       cursor = fmlas->next->next;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -168,7 +169,7 @@ mk_fmla_ors(struct fmlas_t * fmlas)
       free((void *)pre_cursor);
 #pragma GCC diagnostic pop
       while (NULL != cursor) {
-        result = mk_fmla_and(result, cursor->fmla);
+        result = mk_fmla_or(result, cursor->fmla);
         pre_cursor = cursor;
         cursor = cursor->next;
 #pragma GCC diagnostic push
@@ -533,7 +534,7 @@ free_fmla(const struct fmla_t * fmla)
 {
   switch (fmla->kind) {
   case FMLA_CONST:
-    // Nothing to free.
+    // Nothing internal to free. We simply free "fmla" at the end.
     break;
   case FMLA_ATOM:
     free_fmla_atom(fmla->param.atom);
@@ -600,7 +601,7 @@ free_valuation(struct valuation_t * v)
   free(v->var);
 
   assert(NULL != v->val);
-  free(v->val);
+  free_term(v->val);
 
   if (NULL != v->next) {
     free_valuation(v->next);
@@ -618,7 +619,7 @@ mk_fmlas(uint8_t no_fmlas, ...)
   for (int i = 0; i < no_fmlas; i++) {
     struct fmla_t * cur_fmla = va_arg(varargs, struct fmla_t *);
     assert(NULL != cur_fmla);
-    result = mk_fmla_cell(cur_fmla, result);
+    result = mk_fmla_cell(copy_fmla(cur_fmla), result);
   }
   va_end(varargs);
   return result;
@@ -774,6 +775,9 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
+  free_fmla(test_atom);
+  free_fmla(test_atom2);
+  free_fmla(test_atom3);
   free_fmla(test_and2);
   free_fmla(test_or);
   free_fmla(test_or2);
@@ -801,7 +805,8 @@ mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
   const struct terms_t * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
-    struct fmla_t * pre_result = mk_fmla_quant(cursor->term->identifier, result);
+    struct fmla_t * pre_result =
+      mk_fmla_quant(strdup(cursor->term->identifier), result);
     result = pre_result;
 
     cursor = cursor->next;
@@ -899,7 +904,7 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
   return result;
 }
 
-struct fmlas_t *
+static struct fmlas_t *
 copy_fmlas(const struct fmlas_t * fmlas)
 {
   struct fmlas_t * result = NULL;

@@ -58,7 +58,6 @@ struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * conseq
 struct fmla_t * copy_fmla(const struct fmla_t * const);
 
 struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
-struct fmlas_t * copy_fmlas(const struct fmlas_t *);
 
 struct buffer_write_result * fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst);
 struct buffer_write_result * fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst);

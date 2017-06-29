@@ -180,10 +180,9 @@ main(int argc, char ** argv)
   }
 #endif
 
-#if DEBUG
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
   struct buffer_write_result * res = NULL;
-#endif
+
   if (NULL != mdl) {
 #if DEBUG
     res = model_str(mdl, outbuf);
@@ -197,16 +196,21 @@ main(int argc, char ** argv)
 // FIXME crude
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    free((void *)mdl->stmts);
+    const struct stmts_t * cursor = mdl->stmts;
+    const struct stmts_t * pre_cursor = NULL;
+    while (NULL != cursor) {
+      pre_cursor = cursor;
+      cursor = cursor->next;
+      free((void *)pre_cursor);
+    }
 #pragma GCC diagnostic pop
     mdl->stmts = reordered_stmts;
-#if DEBUG
+
     res = model_str(mdl, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-#endif
   }
 
   DBG("Cleaning up before exiting\n");
@@ -217,12 +221,11 @@ main(int argc, char ** argv)
   free_sym_gen(*vg);
   free(vg);
   free_sym_gen(cg);
-#if DEBUG
+
   free_buffer(outbuf);
-#endif
 
   if (NULL != params.input_file) {
-    free_program(parsed_input_file_contents); // FIXME buggy?
+    free_program(parsed_input_file_contents);
     free(input_file_contents);
     free(params.input_file);
   }

@@ -17,7 +17,7 @@ mk_buffer(const size_t buffer_size)
 {
   char * b = malloc(sizeof(char) * buffer_size);
   assert(NULL != b);
-  b[0] = '\0';
+  memset(b, '\0', buffer_size);
   struct buffer_info * buf = malloc(sizeof(struct buffer_info));
   *buf = (struct buffer_info){.buffer = b, .idx = 0, .buffer_size = buffer_size};
   return buf;
@@ -54,6 +54,8 @@ safe_buffer_replace_last(struct buffer_info * buf, char c)
 {
   assert(NULL != buf);
   assert(buf->idx > 0);
+  // buf->idx points at the next address to write, and here we change a location
+  // we've written to, so we go negative.
   buf->buffer[buf->idx - 1] = c;
 }
 

@@ -184,9 +184,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
-  const struct stmt_t * result = mk_stmt_axiom(mk_fmla_ors(fmlas));
-
-  return result;
+  return mk_stmt_axiom(mk_fmla_ors(fmlas));
 }
 
 struct buffer_write_result *
@@ -416,12 +414,10 @@ model_str(const struct model_t * const mdl, struct buffer_info * dst)
   safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
   if (have_space(dst, 3)) {
-    unsafe_buffer_str(dst, "0)");
+    unsafe_buffer_str(dst, "0)\n");
   } else {
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
-
-  safe_buffer_replace_last(dst, '\n'); // replace the trailing \0.
 
   res = stmts_str(mdl->stmts, dst);
   assert(is_ok_buffer_write_result(res));
@@ -501,7 +497,7 @@ new_const_in_stmt(const struct stmt_t * stmt)
     result = NULL;
     break;
   case STMT_CONST_DEF:
-    result = mk_term(CONST, stmt->param.const_def->const_name);
+    result = mk_term(CONST, strdup(stmt->param.const_def->const_name));
     break;
   default:
     assert(false);

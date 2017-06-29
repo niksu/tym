@@ -56,6 +56,7 @@ struct atom_database_t {
 };
 
 struct atom_database_t * mk_atom_database(void);
+void free_atom_database(struct atom_database_t *);
 
 enum adl_lookup_error {ADL_NO_ERROR = 0, DIFF_ARITY};
 

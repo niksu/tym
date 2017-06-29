@@ -33,8 +33,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
   }
 
   if (NULL == tdb->term_database[(int)h]) {
-    tdb->term_database[(int)h] = mk_term_cell(term, NULL);
-    tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+    tdb->term_database[(int)h] = mk_term_cell(copy_term(term), NULL);
+    tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
     DBG("Added to Herbrand universe: %s\n", term->identifier);
   } else {
     struct terms_t * cursor = tdb->term_database[(int)h];
@@ -51,8 +51,8 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
     } while (NULL != cursor->next);
 
     if (!exists) {
-      cursor->next = mk_term_cell(term, NULL);
-      tdb->herbrand_universe = mk_term_cell(term, tdb->herbrand_universe);
+      cursor->next = mk_term_cell(copy_term(term), NULL);
+      tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
       DBG("Added to Herbrand universe: %s\n", term->identifier);
     }
   }
@@ -99,13 +99,18 @@ mk_pred(const char * predicate, uint8_t arity)
   return p;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 free_pred(struct predicate_t * pred)
 {
-  // NOTE we assume that the data in the pred's fields are shared,
-  //      so we don't free that memory.
+  free((void *)pred->predicate);
+  if (NULL != pred->bodies) {
+    free_clauses(pred->bodies);
+  }
   free(pred);
 }
+#pragma GCC diagnostic pop
 
 DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
@@ -160,7 +165,7 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, e
     } else {
       bool exists = false;
 
-      struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
+      struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
       struct predicates_t * cursor = adb->atom_database[(int)h];
 
@@ -180,8 +185,6 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, e
 
         cursor = cursor->next;
       } while (success && NULL != cursor);
-
-      free_pred(pred);
     }
   }
 
@@ -200,12 +203,29 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
   } else {
     char h = hash_str(atom->predicate);
 
-    struct predicate_t * pred = mk_pred(atom->predicate, atom->arity);
+    struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
     } else {
-      adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
+      bool exists = false;
+      struct predicates_t * cursor = adb->atom_database[(int)h];
+      while (NULL != cursor) {
+        enum eq_pred_error * eq_pred_error_code = malloc(sizeof(enum eq_pred_error));
+        bool * eq_pred_result = malloc(sizeof(bool));
+        if (eq_pred(*pred, *cursor->predicate, eq_pred_error_code, eq_pred_result)) {
+          free_pred(pred);
+          pred = cursor->predicate;
+          exists = true;
+        } else {
+          // FIXME report value of eq_pred_error
+          assert(false);
+        }
+        cursor = cursor->next;
+      }
+      if (!exists) {
+        adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
+      }
     }
 
     *result = pred;
@@ -228,6 +248,8 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
 struct buffer_write_result *
 atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 {
+  assert(NULL != adb);
+
   size_t initial_idx = dst->idx;
 
   struct buffer_write_result * res = buf_strcpy(dst, "Terms:");
@@ -354,7 +376,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
   } else if (NULL == record) {
     struct predicate_t * result;
     success = atom_database_add(clause->head, adb, &adl_add_error, &result);
-    result->bodies = mk_clause_cell(clause, NULL);
+    result->bodies = mk_clause_cell(copy_clause(clause), NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
       *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
@@ -372,7 +394,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
     }
 
     struct clauses_t * remainder = record->bodies;
-    record->bodies = mk_clause_cell(clause, remainder);
+    record->bodies = mk_clause_cell(copy_clause(clause), remainder);
   }
 
   if (success) {
@@ -411,4 +433,40 @@ num_predicate_bodies (struct predicate_t * p)
     body_cursor = body_cursor->next;
   }
   return no_bodies;
+}
+
+void
+free_atom_database(struct atom_database_t * adb)
+{
+  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+    struct terms_t * cursor = adb->tdb->term_database[i];
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free_term(pre_cursor->term);
+      free(pre_cursor);
+    }
+  }
+  {
+    struct terms_t * cursor = adb->tdb->herbrand_universe;
+    while (NULL != cursor) {
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free_term(pre_cursor->term);
+      free(pre_cursor);
+    }
+  }
+  free(adb->tdb);
+
+  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+    struct predicates_t * cursor = adb->atom_database[i];
+    while (NULL != cursor) {
+      struct predicates_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free_pred(pre_cursor->predicate);
+      free(pre_cursor);
+    }
+  }
+
+  free(adb);
 }

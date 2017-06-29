@@ -95,6 +95,8 @@ enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER};
 bool eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result);
 
 struct term_t * copy_term(const struct term_t * const cp_term);
+struct atom_t * copy_atom(const struct atom_t * const cp_atom);
+struct clause_t * copy_clause(const struct clause_t * const cp_clause);
 
 bool terms_subsumed_by(const struct terms_t * const, const struct terms_t *);
 

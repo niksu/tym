@@ -23,7 +23,7 @@ translate_atom(const struct atom_t * at)
       args[i] = copy_term(at->args[i]);
     }
   }
-  return mk_fmla_atom(at->predicate, at->arity, args);
+  return mk_fmla_atom(strdup(at->predicate), at->arity, args);
 }
 
 struct fmla_t *
@@ -41,14 +41,12 @@ translate_bodies(const struct clauses_t * cls)
 {
   const struct clauses_t * cursor = cls;
   struct fmlas_t * fmlas = NULL;
-  if (NULL != cursor) {
-// FIXME check if the translation involved any sharing (i.e., should the result
-//       type by a const?)
+  while (NULL != cursor) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    fmlas = (struct fmlas_t *)mk_fmla_cell(translate_body(cursor->clause),
-      translate_bodies(cursor->next));
+    fmlas = (struct fmlas_t *)mk_fmla_cell(translate_body(cursor->clause), fmlas);
 #pragma GCC diagnostic pop
+    cursor = cursor->next;
   }
   return fmlas;
 }
@@ -218,7 +216,8 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct fmla_t * atom = mk_fmla_atom((char *)preds_cursor->predicate->predicate,
+      const struct fmla_t * atom =
+        mk_fmla_atom(strdup(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
 #pragma GCC diagnostic pop
 
@@ -232,15 +231,15 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
       strengthen_model(mdl,
-          mk_stmt_pred((char *)preds_cursor->predicate->predicate,
+          mk_stmt_pred(strdup(preds_cursor->predicate->predicate),
             arguments_of_atom(fmla_as_atom(atom)),
             mk_fmla_const(false)));
 #pragma GCC diagnostic pop
 
-      free_fmla(atom); // FIXME buggy?
+      free_fmla(atom);
     } else {
       const struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
-      const struct fmla_t * abs_head_fmla;
+      const struct fmla_t * abs_head_fmla = NULL;
 
       while (NULL != body_cursor) {
 #if DEBUG
@@ -261,7 +260,8 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         }
 
         // Abstract the atom's parameters.
-        const struct fmla_t * head_fmla = mk_fmla_atom(head_atom->predicate, head_atom->arity, args);
+        const struct fmla_t * head_fmla =
+          mk_fmla_atom(strdup(head_atom->predicate), head_atom->arity, args);
 
         res = fmla_str(head_fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
@@ -271,6 +271,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 #endif
 
         struct valuation_t ** val = malloc(sizeof(struct valuation_t *));
+        *val = NULL;
+        if (NULL != abs_head_fmla) {
+          free_fmla(abs_head_fmla);
+        }
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, val);
         res = fmla_str(abs_head_fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
@@ -291,15 +295,15 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         free(res);
 
         struct fmla_t * valuation_fmla = translate_valuation(*val);
-        struct fmla_t * fmla = fmlas_cursor->fmla;
-        struct fmla_t * anded_fmla = mk_fmla_and(fmla, valuation_fmla);
-        fmlas_cursor->fmla = copy_fmla(anded_fmla);
-        free_fmla(anded_fmla); // FIXME inline above statements, remove copy, and no need to have anded_fmla
+        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct terms_t * ts = filter_var_values(*val);
-        fmla = fmlas_cursor->fmla;
-        const struct fmla_t * quantified_fmla = mk_fmla_quants(ts, fmla);
+        const struct fmla_t * quantified_fmla =
+          mk_fmla_quants(ts, fmlas_cursor->fmla);
         fmlas_cursor->fmla = copy_fmla(quantified_fmla);
-        free_fmla(quantified_fmla); // FIXME inline above statements, remove copy, and no need to have quantified_fmla
+        if (NULL != ts) {
+          free_terms(ts);
+        }
+        free_fmla(quantified_fmla);
 
         res = fmla_str(fmlas_cursor->fmla, outbuf);
         assert(is_ok_buffer_write_result(res));
@@ -308,7 +312,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
         printf("  :|%s|\n", outbuf->buffer);
 #endif
 
-        free_fmla(head_fmla); // FIXME buggy?
+        free_fmla(head_fmla);
         if (NULL != *val) {
           // i.e., the predicate isn't nullary.
           free_valuation(*val);
@@ -338,10 +342,16 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
           mk_stmt_pred(strdup(head->pred_name),
             arguments_of_atom(head),
             fmla));
-      free_fmla(abs_head_fmla); // FIXME buggy?
+      free_fmla(abs_head_fmla);
     }
 
+
+    struct predicates_t * pre_preds_cursor = preds_cursor;
     preds_cursor = preds_cursor->next;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)pre_preds_cursor);
+#pragma GCC diagnostic pop
 
 #if DEBUG
     printf("\n");
@@ -349,6 +359,8 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
   }
 
   free_buffer(outbuf);
+
+  free_atom_database(adb);
 
   return mdl;
 }
@@ -365,6 +377,8 @@ order_statements(const struct stmts_t * stmts)
   declared = mk_term_cell(mk_term(CONST, strdup(eqK)), declared);
   declared = mk_term_cell(mk_term(CONST, strdup(distinctK)), declared);
 
+  bool cursor_is_waiting = false;
+
   while (NULL != cursor || NULL != waiting) {
 
 #if DEBUG
@@ -379,6 +393,7 @@ order_statements(const struct stmts_t * stmts)
 
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+    free_buffer(outbuf);
 #endif
 
     if (NULL == cursor && NULL != waiting) {
@@ -387,6 +402,7 @@ order_statements(const struct stmts_t * stmts)
 #endif
       cursor = waiting;
       waiting = NULL;
+      cursor_is_waiting = true;
       continue;
     }
 #if DEBUG
@@ -396,6 +412,7 @@ order_statements(const struct stmts_t * stmts)
 #endif
 
 #if DEBUG
+    outbuf = mk_buffer(BUF_SIZE);
     res = stmt_str(cursor->stmt, outbuf);
     assert(is_ok_buffer_write_result(res));
     free(res);
@@ -406,7 +423,7 @@ order_statements(const struct stmts_t * stmts)
 #endif
 
     struct term_t * t = new_const_in_stmt(cursor->stmt);
-    struct terms_t * term_consts = consts_in_stmt(cursor->stmt); // FIXME buggy?
+    struct terms_t * term_consts = consts_in_stmt(cursor->stmt);
     if (terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
 #if DEBUG
@@ -429,13 +446,34 @@ order_statements(const struct stmts_t * stmts)
       waiting = mk_stmt_cell(cursor->stmt, waiting);
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    struct terms_t * pre_term_consts = NULL;
+    while (NULL != term_consts) {
+      pre_term_consts = term_consts;
+      term_consts = term_consts->next;
+      free((void *)pre_term_consts);
+    }
+
+    const struct stmts_t * pre_cursor = cursor;
     cursor = cursor->next;
+    if (cursor_is_waiting) {
+      free((void *)pre_cursor);
+    }
+#pragma GCC diagnostic pop
   }
 
   const struct stmts_t * reversed = reverse_stmts(result);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-  free((void *)result);
+  const struct stmts_t * pre_cursor = NULL;
+  cursor = result;
+  while (NULL != cursor) {
+    pre_cursor = cursor;
+    cursor = cursor->next;
+    free((void *)pre_cursor);
+  }
 #pragma GCC diagnostic pop
+  free_terms(declared);
   return reversed;
 }

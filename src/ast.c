@@ -132,6 +132,25 @@ atom_to_str(const struct atom_t * const atom, struct buffer_info * dst)
   }
 }
 
+struct clause_t *
+copy_clause(const struct clause_t * const cp_clause)
+{
+  struct clause_t * result = malloc(sizeof(struct clause_t));
+  struct atom_t ** body = NULL;
+  if (cp_clause->body_size > 0) {
+    body = malloc(sizeof(struct atom_t *) * cp_clause->body_size);
+    for (int i = 0; i < cp_clause->body_size; i++) {
+      body[i] = copy_atom(cp_clause->body[i]);
+    }
+  }
+  *result = (struct clause_t){
+    .head = copy_atom(cp_clause->head),
+    .body_size = cp_clause->body_size,
+    .body = body
+  };
+  return result;
+}
+
 struct buffer_write_result *
 clause_to_str(const struct clause_t * const clause, struct buffer_info * dst)
 {
@@ -219,18 +238,14 @@ struct term_t *
 mk_const(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
-  strcpy(ident_copy, cp_identifier);
-  return mk_term(CONST, ident_copy);
+  return mk_term(CONST, strdup(cp_identifier));
 }
 
 struct term_t *
 mk_var(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_identifier) + 1));
-  strcpy(ident_copy, cp_identifier);
-  return mk_term(VAR, ident_copy);
+  return mk_term(VAR, strdup(cp_identifier));
 }
 
 struct term_t *
@@ -614,9 +629,7 @@ struct term_t *
 copy_term(const struct term_t * const cp_term)
 {
   assert(NULL != cp_term);
-  char * ident_copy = malloc(sizeof(char) * (strlen(cp_term->identifier) + 1));
-  strcpy(ident_copy, cp_term->identifier);
-  return mk_term(cp_term->kind, ident_copy);
+  return mk_term(cp_term->kind, strdup(cp_term->identifier));
 }
 
 // In practice, simply checks that ss is a subset of ts.
@@ -706,4 +719,27 @@ terms_to_str(const struct terms_t * const terms, struct buffer_info * dst)
   unsafe_buffer_char(dst, '\0');
 
   return mkval_buffer_write_result(dst->idx - initial_idx);
+}
+
+struct atom_t *
+copy_atom(const struct atom_t * const cp_atom)
+{
+  assert(NULL != cp_atom);
+
+  struct atom_t * at = malloc(sizeof(struct atom_t));
+  assert(NULL != at);
+
+  at->predicate = strdup(cp_atom->predicate);
+  at->arity = cp_atom->arity;
+  at->args = NULL;
+
+  if (at->arity > 0) {
+    at->args = malloc(sizeof(struct term_t *) * at->arity);
+    assert(NULL != at->args);
+    for (int i = 0; i < at->arity; i++) {
+      at->args[i] = copy_term(cp_atom->args[i]);
+    }
+  }
+
+  return at;
 }
