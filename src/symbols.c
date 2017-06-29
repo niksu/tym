@@ -205,8 +205,24 @@ atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
     } else {
-      // FIXME don't add the atom if it already exists in the chain.
-      adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
+      bool exists = false;
+      struct predicates_t * cursor = adb->atom_database[(int)h];
+      while (NULL != cursor) {
+        enum eq_pred_error * eq_pred_error_code = malloc(sizeof(enum eq_pred_error));
+        bool * eq_pred_result = malloc(sizeof(bool));
+        if (eq_pred(*pred, *cursor->predicate, eq_pred_error_code, eq_pred_result)) {
+          free_pred(pred);
+          pred = cursor->predicate;
+          exists = true;
+        } else {
+          // FIXME report value of eq_pred_error
+          assert(false);
+        }
+        cursor = cursor->next;
+      }
+      if (!exists) {
+        adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
+      }
     }
 
     *result = pred;
