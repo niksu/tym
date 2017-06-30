@@ -16,8 +16,8 @@ struct universe_t {
   char ** element;
 };
 
-static const char * const bool_ty = "Bool";
-static char * const distinct_pred = "distinct"; // FIXME repeated -- see distinctK
+extern const char * const bool_ty;
+extern char * const distinctK;
 
 struct stmt_const_t {
   const char * const_name;

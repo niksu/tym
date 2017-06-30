@@ -10,7 +10,6 @@
 #include "translate.h"
 
 const char * const eqK = "=";
-const char * const distinctK = "distinct";
 
 struct fmla_t *
 translate_atom(const struct atom_t * at)

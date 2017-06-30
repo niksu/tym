@@ -18,6 +18,9 @@
 #include "statement.h"
 #include "util.h"
 
+const char * const bool_ty = "Bool";
+char * const distinctK = "distinct";
+
 struct universe_t *
 mk_universe(struct terms_t * terms)
 {
@@ -546,6 +549,6 @@ statementise_universe(struct model_t * mdl)
     args[i] = mk_term(CONST, strdup(mdl->universe->element[i]));
   }
   const struct fmla_t * distinctness_fmla =
-    mk_fmla_atom(strdup(distinct_pred), mdl->universe->cardinality, args);
+    mk_fmla_atom(strdup(distinctK), mdl->universe->cardinality, args);
   strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }
