@@ -9,8 +9,6 @@
 
 #include "translate.h"
 
-const char * const eqK = "=";
-
 struct fmla_t *
 translate_atom(const struct atom_t * at)
 {
@@ -56,7 +54,7 @@ translate_valuation(struct valuation_t * const v)
   struct fmlas_t * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
-    result = mk_fmla_cell(mk_fmla_atom_varargs(strdup("="), 2,
+    result = mk_fmla_cell(mk_fmla_atom_varargs(strdup(eqK), 2,
           mk_term(VAR, strdup(cursor->var)),
           copy_term(cursor->val)), result);
     cursor = cursor->next;

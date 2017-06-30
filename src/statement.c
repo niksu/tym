@@ -20,6 +20,7 @@
 
 const char * const bool_ty = "Bool";
 char * const distinctK = "distinct";
+const char * const eqK = "=";
 
 struct universe_t *
 mk_universe(struct terms_t * terms)
@@ -183,7 +184,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     }
     struct term_t * arg1 = mk_term(CONST, const_name);
     struct term_t * arg2 = mk_term(CONST, strdup(uni->element[i]));
-    struct fmla_t * fmla = mk_fmla_atom_varargs(strdup("="/* FIXME const */), 2, arg1, arg2);
+    struct fmla_t * fmla = mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
 
@@ -461,11 +462,11 @@ test_statement(void)
   free_terms(terms);
 
   const struct stmt_t * s1S =
-    mk_stmt_axiom(mk_fmla_atom_varargs(strdup("="), 2, mk_const("a"), mk_const("a")));
+    mk_stmt_axiom(mk_fmla_atom_varargs(strdup(eqK), 2, mk_const("a"), mk_const("a")));
   terms = mk_term_cell(mk_term(VAR, strdup("X")), NULL);
   terms = mk_term_cell(mk_term(VAR, strdup("Y")), terms);
   struct fmla_t * fmla =
-    mk_fmla_atom_varargs(strdup("="), 2, mk_var("X"), mk_var("Y"));
+    mk_fmla_atom_varargs(strdup(eqK), 2, mk_var("X"), mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
       mk_fmla_not(fmla));
   struct stmt_t * s3AS = mk_stmt_const(strdup("x"), mdl->universe, universe_ty);

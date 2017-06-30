@@ -18,6 +18,7 @@ struct universe_t {
 
 extern const char * const bool_ty;
 extern char * const distinctK;
+extern const char * const eqK;
 
 struct stmt_const_t {
   const char * const_name;
