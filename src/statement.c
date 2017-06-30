@@ -19,7 +19,7 @@
 #include "util.h"
 
 const char * const bool_ty = "Bool";
-char * const distinctK = "distinct";
+const char * const distinctK = "distinct";
 const char * const eqK = "=";
 
 struct universe_t *
