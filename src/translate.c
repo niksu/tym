@@ -62,7 +62,7 @@ translate_valuation(struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-struct fmla_atom_t *
+void
 translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at)
 {
   struct term_t ** args = NULL;
@@ -83,35 +83,28 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fm
     free(at->predargs);
   }
   at->predargs = args;
-  return at;
 }
 
-struct fmla_t *
+void
 translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t * fmla)
 {
-  struct fmla_t * result = NULL;
-
   switch (fmla->kind) {
   case FMLA_CONST:
-    result = fmla;
+    // Nothing to do
     break;
   case FMLA_ATOM:
-    fmla->param.atom = translate_query_fmla_atom(mdl, cg, fmla->param.atom);
-    result = fmla;
+    translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
-    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    fmla->param.args[1] = translate_query_fmla(mdl, cg, fmla->param.args[1]);
-    result = fmla;
+    translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    translate_query_fmla(mdl, cg, fmla->param.args[1]);
     break;
   case FMLA_OR:
-    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    fmla->param.args[1] = translate_query_fmla(mdl, cg, fmla->param.args[1]);
-    result = fmla;
+    translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    translate_query_fmla(mdl, cg, fmla->param.args[1]);
     break;
   case FMLA_NOT:
-    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    result = fmla;
+    translate_query_fmla(mdl, cg, fmla->param.args[0]);
     break;
   case FMLA_EX:
     assert(false); // Existential quantifier cannot appear in queries.
@@ -120,8 +113,6 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t 
     assert(false); // No other formula constructor exists.
     break;
   }
-
-  return result;
 }
 
 void
@@ -134,7 +125,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   assert(1 == query->no_clauses);
   const struct clause_t * q_cl = query->program[0];
 
-  const struct fmla_t * q_fmla = translate_atom(q_cl->head);
+  struct fmla_t * q_fmla = translate_atom(q_cl->head);
 
 #if DEBUG
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
@@ -146,10 +137,9 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   free_buffer(outbuf);
 #endif
 
-  const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, copy_fmla(q_fmla));
-  free_fmla(q_fmla);
+  translate_query_fmla(mdl, cg, q_fmla);
 
-  const struct stmt_t * stmt = mk_stmt_axiom(translated_q);
+  const struct stmt_t * stmt = mk_stmt_axiom(q_fmla);
   strengthen_model(mdl, stmt);
 }
 

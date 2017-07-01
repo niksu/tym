@@ -25,9 +25,8 @@ struct fmlas_t * translate_bodies(const struct clauses_t * cls);
 
 struct fmla_t * translate_valuation(struct valuation_t * const v);
 
-struct fmla_atom_t * translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at);
-
-struct fmla_t * translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t * fmla);
+void translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at);
+void translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t * fmla);
 
 void translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg);
 
