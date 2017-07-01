@@ -14,7 +14,7 @@
 #include "module_tests.h"
 #include "util.h"
 
-#define MAX_VAR_WIDTH 10/*FIXME make into a parameter, rather than having it be a const*/
+uint8_t max_var_width = 10;
 
 struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
 static struct fmlas_t * copy_fmlas(const struct fmlas_t *);
@@ -385,9 +385,9 @@ char *
 mk_new_var(struct sym_gen_t * vg)
 {
   size_t i = strlen(vg->prefix);
-  char * result = malloc(i + 1 + MAX_VAR_WIDTH);
+  char * result = malloc(i + 1 + max_var_width);
   strcpy(result, vg->prefix);
-  snprintf(result + i, MAX_VAR_WIDTH, "%lu", vg->index);
+  snprintf(result + i, max_var_width, "%lu", vg->index);
   vg->index += 1;
   return result;
 }

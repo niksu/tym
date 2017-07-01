@@ -54,10 +54,13 @@ main(int argc, char ** argv)
 #define LONG_OPT_QUERY 3
     {"query", required_argument, NULL, LONG_OPT_QUERY},
 #define LONG_OPT_TESTPARSING 4
-    {"test_parsing", no_argument, NULL, LONG_OPT_TESTPARSING}
+    {"test_parsing", no_argument, NULL, LONG_OPT_TESTPARSING},
+#define LONG_OPT_MAX_VAR_WIDTH 5
+    {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH}
   };
 
   int option_index = 0;
+  long v;
 
   int option;
   while ((option = getopt_long(argc, argv, "i:vq:", long_options,
@@ -79,6 +82,11 @@ main(int argc, char ** argv)
       break;
     case LONG_OPT_TESTPARSING:
       params.test_parsing = true;
+      break;
+    case LONG_OPT_MAX_VAR_WIDTH:
+      v = strtol(optarg, NULL, 10);
+      assert(v <= UINT8_MAX);
+      max_var_width = (uint8_t)v;
       break;
     // FIXME add support for -h
     default:

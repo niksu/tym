@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern uint8_t max_var_width;
+
 static const char * const universe_ty = "Universe";
 
 struct fmla_atom_t {
