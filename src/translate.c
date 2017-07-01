@@ -73,7 +73,7 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fm
         char * placeholder = mk_new_var(cg);
         args[i] = mk_term(CONST, placeholder);
 
-        struct stmt_t * stmt = mk_stmt_const(placeholder, mdl->universe, universe_ty);
+        struct stmt_t * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, universe_ty);
         strengthen_model(mdl, stmt);
       } else {
         args[i] = copy_term(at->predargs[i]);
