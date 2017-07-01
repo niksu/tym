@@ -62,10 +62,9 @@ translate_valuation(struct valuation_t * const v)
   return mk_fmla_ands(result);
 }
 
-struct fmla_t *
-translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_atom_t * at)
+struct fmla_atom_t *
+translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at)
 {
-  struct fmla_t * result = NULL;
   struct term_t ** args = NULL;
   if (at->arity > 0) {
     args = malloc(sizeof(struct term_t *) * at->arity);
@@ -79,42 +78,40 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, const str
       } else {
         args[i] = copy_term(at->predargs[i]);
       }
+      free_term(at->predargs[i]);
     }
+    free(at->predargs);
   }
-  result = mk_fmla_atom(at->pred_name, at->arity, args);
-  return result;
+  at->predargs = args;
+  return at;
 }
 
 struct fmla_t *
-translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, const struct fmla_t * fmla)
+translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t * fmla)
 {
   struct fmla_t * result = NULL;
-  struct fmla_t * fmla_2 = NULL;
-  struct fmla_t * fmla_3 = NULL;
-  // FIXME free intermediate allocations which are made when generating formulas
-  //       from subformulas -- e.g., after generating "result" free "fmla_2" and
-  //       "fmla_3".
 
   switch (fmla->kind) {
   case FMLA_CONST:
-    result = copy_fmla(fmla);
+    result = fmla;
     break;
   case FMLA_ATOM:
-    result = translate_query_fmla_atom(mdl, cg, fmla->param.atom);
+    fmla->param.atom = translate_query_fmla_atom(mdl, cg, fmla->param.atom);
+    result = fmla;
     break;
   case FMLA_AND:
-    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    fmla_3 = translate_query_fmla(mdl, cg, fmla->param.args[1]);
-    result = mk_fmla_and(fmla_2, fmla_3);
+    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    fmla->param.args[1] = translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    result = fmla;
     break;
   case FMLA_OR:
-    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    fmla_3 = translate_query_fmla(mdl, cg, fmla->param.args[1]);
-    result = mk_fmla_or(fmla_2, fmla_3);
+    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    fmla->param.args[1] = translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    result = fmla;
     break;
   case FMLA_NOT:
-    fmla_2 = translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    result = mk_fmla_not(fmla_2);
+    fmla->param.args[0] = translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    result = fmla;
     break;
   case FMLA_EX:
     assert(false); // Existential quantifier cannot appear in queries.
@@ -138,7 +135,6 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   const struct clause_t * q_cl = query->program[0];
 
   const struct fmla_t * q_fmla = translate_atom(q_cl->head);
-  const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, q_fmla);
 
 #if DEBUG
   struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
@@ -149,6 +145,9 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   free_buffer(outbuf);
 #endif
+
+  const struct fmla_t * translated_q = translate_query_fmla(mdl, cg, copy_fmla(q_fmla));
+  free_fmla(q_fmla);
 
   const struct stmt_t * stmt = mk_stmt_axiom(translated_q);
   strengthen_model(mdl, stmt);

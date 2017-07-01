@@ -446,7 +446,8 @@ free_model(const struct model_t * mdl)
 void
 strengthen_model(struct model_t * mdl, const struct stmt_t * stmt)
 {
-  mdl->stmts = mk_stmt_cell(stmt, mdl->stmts);
+  const struct stmts_t * stmts = mdl->stmts;
+  mdl->stmts = mk_stmt_cell(stmt, stmts);
 }
 
 void
