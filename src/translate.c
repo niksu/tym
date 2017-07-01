@@ -137,6 +137,27 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
   free_buffer(outbuf);
 #endif
 
+  // Reject the query if it containts constants that don't appear in the program.
+  struct terms_t * cursor = consts_in_fmla(q_fmla, NULL);
+  while (NULL != cursor) {
+    if (CONST == cursor->term->kind) {
+      bool found = false;
+      for (int i = 0; i < mdl->universe->cardinality; i++) {
+        if (0 == strcmp(cursor->term->identifier, mdl->universe->element[i])) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        printf("The constant '%s' in the query doesn't appear in the program.\n",
+            cursor->term->identifier);
+        assert(false);
+      }
+      struct terms_t * pre_cursor = cursor;
+      cursor = cursor->next;
+      free(pre_cursor);
+    }
+  }
   translate_query_fmla(mdl, cg, q_fmla);
 
   const struct stmt_t * stmt = mk_stmt_axiom(q_fmla);
