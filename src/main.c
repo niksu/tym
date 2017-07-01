@@ -37,6 +37,12 @@ struct param_t params = {
 struct program_t * parsed_input_file_contents = NULL;
 struct program_t * parsed_query = NULL;
 
+DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+DEFINE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+#pragma GCC diagnostic pop
+
 int
 main(int argc, char ** argv)
 {
@@ -201,17 +207,7 @@ main(int argc, char ** argv)
 #endif
 
     const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
-// FIXME crude
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-    const struct stmts_t * cursor = mdl->stmts;
-    const struct stmts_t * pre_cursor = NULL;
-    while (NULL != cursor) {
-      pre_cursor = cursor;
-      cursor = cursor->next;
-      free((void *)pre_cursor);
-    }
-#pragma GCC diagnostic pop
+    shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 
     res = model_str(mdl, outbuf);

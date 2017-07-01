@@ -103,4 +103,19 @@
     return result; \
   }
 
+#define __DECLARE_LIST_SHALLOW_FREE(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  void shallow_free_ ## NAME (TYPE_OP_PRE TYPE_NAME * lst)
+#define DECLARE_LIST_SHALLOW_FREE(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  __DECLARE_LIST_SHALLOW_FREE(NAME, TYPE_OP_PRE, TYPE_NAME);
+#define DEFINE_LIST_SHALLOW_FREE(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  __DECLARE_LIST_SHALLOW_FREE(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  { \
+    TYPE_OP_PRE TYPE_NAME * pre_cursor = NULL; \
+    while (NULL != lst) { \
+      pre_cursor = lst; \
+      lst = lst->next; \
+      free((void *)pre_cursor); \
+    } \
+  }
+
 #endif /* __TYM_UTIL_H__ */
