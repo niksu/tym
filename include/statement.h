@@ -22,7 +22,7 @@ extern const char * const eqK;
 
 struct stmt_const_t {
   const char * const_name;
-  struct terms_t * params;
+  struct Terms * params;
   const struct fmla_t * body;
   const char * const ty;
 };
@@ -37,12 +37,12 @@ struct stmt_t {
   } param;
 };
 
-struct universe_t * mk_universe(struct terms_t *);
+struct universe_t * mk_universe(struct Terms *);
 struct buffer_write_result * universe_str(const struct universe_t * const, struct buffer_info * dst);
 void free_universe(struct universe_t *);
 
 const struct stmt_t * mk_stmt_axiom(const struct fmla_t * axiom);
-const struct stmt_t * mk_stmt_pred(char * pred_name, struct terms_t * params, const struct fmla_t * body);
+const struct stmt_t * mk_stmt_pred(char * pred_name, struct Terms * params, const struct fmla_t * body);
 struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, const char * const ty);
 const struct stmt_t * mk_stmt_const_def(char * const_name, struct universe_t * uni);
 struct buffer_write_result * stmt_str(const struct stmt_t * const, struct buffer_info * dst);
@@ -65,8 +65,8 @@ struct buffer_write_result * model_str(const struct model_t * const, struct buff
 void free_model(const struct model_t *);
 void strengthen_model(struct model_t *, const struct stmt_t *);
 
-struct term_t * new_const_in_stmt(const struct stmt_t * stmt);
-struct terms_t * consts_in_stmt(const struct stmt_t * stmt);
+struct Term * new_const_in_stmt(const struct stmt_t * stmt);
+struct Terms * consts_in_stmt(const struct stmt_t * stmt);
 
 void statementise_universe(struct model_t * mdl);
 

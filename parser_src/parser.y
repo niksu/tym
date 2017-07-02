@@ -94,7 +94,7 @@ terms : term TK_R_RB
 atom : TK_CONST TK_L_RB terms
        { char * predicate = $1;
          struct terms_t * ts = $3;
-         struct atom_t * atom = mk_atom(predicate, len_terms_cell(ts), ts);
+         struct atom_t * atom = mk_atom(predicate, len_Terms_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom
@@ -109,7 +109,7 @@ clause : atom TK_PERIOD
            $$ = cl; }
        | atom TK_IF atoms TK_PERIOD
          { struct atoms_t * ats = $3;
-           struct clause_t * cl = mk_clause($1, len_atoms_cell(ats), ats);
+           struct clause_t * cl = mk_clause($1, len_Atoms_cell(ats), ats);
            $$ = cl; }
 
 clauses : clause
@@ -121,7 +121,7 @@ clauses : clause
 
 program : clauses
            { struct clauses_t * cls = $1;
-             struct program_t * p = mk_program(len_clauses_cell(cls), cls);
+             struct program_t * p = mk_program(len_Clauses_cell(cls), cls);
              *program = p;
            }
         |

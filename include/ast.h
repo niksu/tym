@@ -17,64 +17,64 @@
 #include "buffer.h"
 #include "util.h"
 
-typedef enum {VAR=0, CONST=1, STR=2} term_kind_t;
+typedef enum {VAR=0, CONST=1, STR=2} TermKind;
 
-struct term_t {
-  term_kind_t kind;
+struct Term {
+  TermKind kind;
   const char * identifier;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(terms_t, term, term_t)
-DECLARE_MUTABLE_LIST_MK(term, struct term_t, struct terms_t)
+DECLARE_MUTABLE_LIST_TYPE(Terms, term, Term)
+DECLARE_MUTABLE_LIST_MK(term, struct Term, struct Terms)
 
-struct atom_t {
+struct Atom {
   char * predicate;
   uint8_t arity;
-  struct term_t ** args;
+  struct Term ** args;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(atoms_t, atom, atom_t)
-DECLARE_MUTABLE_LIST_MK(atom, struct atom_t, struct atoms_t)
+DECLARE_MUTABLE_LIST_TYPE(Atoms, atom, Atom)
+DECLARE_MUTABLE_LIST_MK(atom, struct Atom, struct Atoms)
 
-struct clause_t {
-  struct atom_t * head;
+struct Clause {
+  struct Atom * head;
   uint8_t body_size;
-  struct atom_t ** body;
+  struct Atom ** body;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(clauses_t, clause, clause_t)
-DECLARE_MUTABLE_LIST_MK(clause, struct clause_t, struct clauses_t)
+DECLARE_MUTABLE_LIST_TYPE(Clauses, clause, Clause)
+DECLARE_MUTABLE_LIST_MK(clause, struct Clause, struct Clauses)
 
-struct program_t {
+struct Program {
   uint8_t no_clauses;
-  struct clause_t ** program;
+  struct Clause ** program;
 };
 
-struct buffer_write_result * term_to_str(const struct term_t * const term, struct buffer_info * dst);
-struct buffer_write_result * terms_to_str(const struct terms_t * const terms, struct buffer_info * dst);
-struct buffer_write_result * predicate_to_str(const struct atom_t * atom, struct buffer_info * dst);
-struct buffer_write_result * atom_to_str(const struct atom_t * const atom, struct buffer_info * dst);
-struct buffer_write_result * clause_to_str(const struct clause_t * const clause, struct buffer_info * dst);
-struct buffer_write_result * program_to_str(const struct program_t * const program, struct buffer_info * dst);
+struct buffer_write_result * term_to_str(const struct Term * const term, struct buffer_info * dst);
+struct buffer_write_result * terms_to_str(const struct Terms * const terms, struct buffer_info * dst);
+struct buffer_write_result * predicate_to_str(const struct Atom * atom, struct buffer_info * dst);
+struct buffer_write_result * atom_to_str(const struct Atom * const atom, struct buffer_info * dst);
+struct buffer_write_result * clause_to_str(const struct Clause * const clause, struct buffer_info * dst);
+struct buffer_write_result * program_to_str(const struct Program * const program, struct buffer_info * dst);
 
-struct term_t * mk_const(const char * cp_identifier);
-struct term_t * mk_var(const char * cp_identifier);
-struct term_t * mk_term(term_kind_t kind, const char * identifier);
-struct atom_t * mk_atom(char * predicate, uint8_t arity, struct terms_t * args);
-struct clause_t * mk_clause(struct atom_t * head, uint8_t body_size, struct atoms_t * body);
-struct program_t * mk_program(uint8_t no_clauses, struct clauses_t * program);
+struct Term * mk_const(const char * cp_identifier);
+struct Term * mk_var(const char * cp_identifier);
+struct Term * mk_term(TermKind kind, const char * identifier);
+struct Atom * mk_atom(char * predicate, uint8_t arity, struct Terms * args);
+struct Clause * mk_clause(struct Atom * head, uint8_t body_size, struct Atoms * body);
+struct Program * mk_program(uint8_t no_clauses, struct Clauses * program);
 
-DECLARE_U8_LIST_LEN(terms)
-DECLARE_U8_LIST_LEN(atoms)
-DECLARE_U8_LIST_LEN(clauses)
+DECLARE_U8_LIST_LEN(Terms)
+DECLARE_U8_LIST_LEN(Atoms)
+DECLARE_U8_LIST_LEN(Clauses)
 
-void free_term(struct term_t * term);
-void free_terms(struct terms_t * terms);
-void free_atom(struct atom_t * atom);
-void free_atoms(struct atoms_t * atoms);
-void free_clause(struct clause_t * clause);
-void free_clauses(struct clauses_t * clauses);
-void free_program(struct program_t * program);
+void free_term(struct Term * term);
+void free_terms(struct Terms * terms);
+void free_atom(struct Atom * atom);
+void free_atoms(struct Atoms * atoms);
+void free_clause(struct Clause * clause);
+void free_clauses(struct Clauses * clauses);
+void free_program(struct Program * program);
 
 typedef struct buffer_write_result * (*x_to_str_t)(void *, struct buffer_info * dst);
 
@@ -87,17 +87,17 @@ void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *,
 #endif // DEBUG
 
 char hash_str(const char * str);
-char hash_term(const struct term_t *);
-char hash_atom(const struct atom_t *);
-char hash_clause(const struct clause_t *);
+char hash_term(const struct Term *);
+char hash_atom(const struct Atom *);
+char hash_clause(const struct Clause *);
 
 enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER};
-bool eq_term(const struct term_t * const t1, const struct term_t * const t2, enum eq_term_error * error_code, bool * result);
+bool eq_term(const struct Term * const t1, const struct Term * const t2, enum eq_term_error * error_code, bool * result);
 
-struct term_t * copy_term(const struct term_t * const cp_term);
-struct atom_t * copy_atom(const struct atom_t * const cp_atom);
-struct clause_t * copy_clause(const struct clause_t * const cp_clause);
+struct Term * copy_term(const struct Term * const cp_term);
+struct Atom * copy_atom(const struct Atom * const cp_atom);
+struct Clause * copy_clause(const struct Clause * const cp_clause);
 
-bool terms_subsumed_by(const struct terms_t * const, const struct terms_t *);
+bool terms_subsumed_by(const struct Terms * const, const struct Terms *);
 
 #endif // __TYM_AST_H__

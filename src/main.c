@@ -15,7 +15,7 @@
 #include "libtym.h"
 #include "module_tests.h"
 
-struct program_t * parse(const char * string);
+struct Program * parse(const char * string);
 char * read_file(char * filename);
 
 char * input_file_contents = NULL;
@@ -34,8 +34,8 @@ struct param_t params = {
   .test_parsing = false
 };
 
-struct program_t * parsed_input_file_contents = NULL;
-struct program_t * parsed_query = NULL;
+struct Program * parsed_input_file_contents = NULL;
+struct Program * parsed_query = NULL;
 
 DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
 #pragma GCC diagnostic push

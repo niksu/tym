@@ -23,13 +23,13 @@ const char * const distinctK = "distinct";
 const char * const eqK = "=";
 
 struct universe_t *
-mk_universe(struct terms_t * terms)
+mk_universe(struct Terms * terms)
 {
   struct universe_t * result = malloc(sizeof(struct universe_t));
   result->cardinality = 0;
   result->element = NULL;
 
-  const struct terms_t * cursor = terms;
+  const struct Terms * cursor = terms;
   while (NULL != cursor) {
     result->cardinality++;
     assert(CONST == cursor->term->kind);
@@ -129,7 +129,7 @@ mk_stmt_axiom(const struct fmla_t * axiom)
 }
 
 const struct stmt_t *
-mk_stmt_pred(char * pred_name, struct terms_t * params, const struct fmla_t * body)
+mk_stmt_pred(char * pred_name, struct Terms * params, const struct fmla_t * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
@@ -182,8 +182,8 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
       // freed, say).
       const_name = strdup(const_name);
     }
-    struct term_t * arg1 = mk_term(CONST, const_name);
-    struct term_t * arg2 = mk_term(CONST, strdup(uni->element[i]));
+    struct Term * arg1 = mk_term(CONST, const_name);
+    struct Term * arg2 = mk_term(CONST, strdup(uni->element[i]));
     struct fmla_t * fmla = mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
     fmlas = mk_fmla_cell(fmla, fmlas);
   }
@@ -254,7 +254,7 @@ stmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
         return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
       }
 
-      const struct terms_t * params_cursor = stmt->param.const_def->params;
+      const struct Terms * params_cursor = stmt->param.const_def->params;
       while (NULL != params_cursor) {
         if (have_space(dst, 1)) {
           unsafe_buffer_char(dst, '(');
@@ -454,9 +454,9 @@ void
 test_statement(void)
 {
   printf("***test_statement***\n");
-  struct term_t * aT = mk_term(CONST, strdup("a"));
-  struct term_t * bT = mk_term(CONST, strdup("b"));
-  struct terms_t * terms = mk_term_cell(aT, NULL);
+  struct Term * aT = mk_term(CONST, strdup("a"));
+  struct Term * bT = mk_term(CONST, strdup("b"));
+  struct Terms * terms = mk_term_cell(aT, NULL);
   terms = mk_term_cell(bT, terms);
 
   struct model_t * mdl = mk_model(mk_universe(terms));
@@ -493,10 +493,10 @@ test_statement(void)
 
 DEFINE_LIST_REV(stmts, mk_stmt_cell, const, struct stmts_t, const)
 
-struct term_t *
+struct Term *
 new_const_in_stmt(const struct stmt_t * stmt)
 {
-  struct term_t * result = NULL;
+  struct Term * result = NULL;
   switch (stmt->kind) {
   case STMT_AXIOM:
     result = NULL;
@@ -511,10 +511,10 @@ new_const_in_stmt(const struct stmt_t * stmt)
   return result;
 }
 
-struct terms_t *
+struct Terms *
 consts_in_stmt(const struct stmt_t * stmt)
 {
-  struct terms_t * result = NULL;
+  struct Terms * result = NULL;
   switch (stmt->kind) {
   case STMT_AXIOM:
     result = consts_in_fmla(stmt->param.axiom, NULL);
@@ -546,7 +546,7 @@ statementise_universe(struct model_t * mdl)
   }
 
   assert(0 < mdl->universe->cardinality);
-  struct term_t ** args = malloc(sizeof(struct term_t *) * mdl->universe->cardinality);
+  struct Term ** args = malloc(sizeof(struct Term *) * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = mk_term(CONST, strdup(mdl->universe->element[i]));
   }

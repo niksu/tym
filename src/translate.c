@@ -10,12 +10,12 @@
 #include "translate.h"
 
 struct fmla_t *
-translate_atom(const struct atom_t * at)
+translate_atom(const struct Atom * at)
 {
   assert(NULL != at);
-  struct term_t ** args = NULL;
+  struct Term ** args = NULL;
   if (at->arity > 0) {
-    args = malloc(sizeof(struct term_t *) * at->arity);
+    args = malloc(sizeof(struct Term *) * at->arity);
     for (int i = 0; i < at->arity; i++) {
       args[i] = copy_term(at->args[i]);
     }
@@ -24,7 +24,7 @@ translate_atom(const struct atom_t * at)
 }
 
 struct fmla_t *
-translate_body(const struct clause_t * cl)
+translate_body(const struct Clause * cl)
 {
   struct fmlas_t * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
@@ -34,9 +34,9 @@ translate_body(const struct clause_t * cl)
 }
 
 struct fmlas_t *
-translate_bodies(const struct clauses_t * cls)
+translate_bodies(const struct Clauses * cls)
 {
-  const struct clauses_t * cursor = cls;
+  const struct Clauses * cursor = cls;
   struct fmlas_t * fmlas = NULL;
   while (NULL != cursor) {
 #pragma GCC diagnostic push
@@ -65,9 +65,9 @@ translate_valuation(struct valuation_t * const v)
 void
 translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at)
 {
-  struct term_t ** args = NULL;
+  struct Term ** args = NULL;
   if (at->arity > 0) {
-    args = malloc(sizeof(struct term_t *) * at->arity);
+    args = malloc(sizeof(struct Term *) * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (VAR == at->predargs[i]->kind) {
         char * placeholder = mk_new_var(cg);
@@ -116,14 +116,14 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t 
 }
 
 void
-translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t * cg)
+translate_query(struct Program * query, struct model_t * mdl, struct sym_gen_t * cg)
 {
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
 #endif
   // NOTE we expect a query to contain exactly one clause.
   assert(1 == query->no_clauses);
-  const struct clause_t * q_cl = query->program[0];
+  const struct Clause * q_cl = query->program[0];
 
   struct fmla_t * q_fmla = translate_atom(q_cl->head);
 
@@ -138,7 +138,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 #endif
 
   // Reject the query if it containts constants that don't appear in the program.
-  struct terms_t * cursor = consts_in_fmla(q_fmla, NULL);
+  struct Terms * cursor = consts_in_fmla(q_fmla, NULL);
   while (NULL != cursor) {
     if (CONST == cursor->term->kind) {
       bool found = false;
@@ -153,7 +153,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
             cursor->term->identifier);
         assert(false);
       }
-      struct terms_t * pre_cursor = cursor;
+      struct Terms * pre_cursor = cursor;
       cursor = cursor->next;
       free(pre_cursor);
     }
@@ -165,7 +165,7 @@ translate_query(struct program_t * query, struct model_t * mdl, struct sym_gen_t
 }
 
 struct model_t *
-translate_program(struct program_t * program, struct sym_gen_t ** vg)
+translate_program(struct Program * program, struct sym_gen_t ** vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -211,10 +211,10 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
 
-      struct term_t ** var_args = NULL;
+      struct Term ** var_args = NULL;
 
       if (preds_cursor->predicate->arity > 0) {
-        var_args = malloc(sizeof(struct term_t *) * preds_cursor->predicate->arity);
+        var_args = malloc(sizeof(struct Term *) * preds_cursor->predicate->arity);
 
         for (int i = 0; i < preds_cursor->predicate->arity; i++) {
           var_args[i] = mk_term(VAR, mk_new_var(*vg));
@@ -245,7 +245,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
       free_fmla(atom);
     } else {
-      const struct clauses_t * body_cursor = preds_cursor->predicate->bodies;
+      const struct Clauses * body_cursor = preds_cursor->predicate->bodies;
       const struct fmla_t * abs_head_fmla = NULL;
 
       while (NULL != body_cursor) {
@@ -255,11 +255,11 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
         struct sym_gen_t * vg_copy = copy_sym_gen(*vg);
 
-        const struct atom_t * head_atom = body_cursor->clause->head;
-        struct term_t ** args = NULL;
+        const struct Atom * head_atom = body_cursor->clause->head;
+        struct Term ** args = NULL;
 
         if (head_atom->arity > 0) {
-          args = malloc(sizeof(struct term_t *) * head_atom->arity);
+          args = malloc(sizeof(struct Term *) * head_atom->arity);
 
           for (int i = 0; i < head_atom->arity; i++) {
             args[i] = copy_term(head_atom->args[i]);
@@ -303,7 +303,7 @@ translate_program(struct program_t * program, struct sym_gen_t ** vg)
 
         struct fmla_t * valuation_fmla = translate_valuation(*val);
         fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
-        struct terms_t * ts = filter_var_values(*val);
+        struct Terms * ts = filter_var_values(*val);
         const struct fmla_t * quantified_fmla =
           mk_fmla_quants(ts, fmlas_cursor->fmla);
         fmlas_cursor->fmla = copy_fmla(quantified_fmla);
@@ -380,7 +380,7 @@ order_statements(const struct stmts_t * stmts)
   const struct stmts_t * waiting = NULL;
   const struct stmts_t * result = NULL;
 
-  struct terms_t * declared = NULL;
+  struct Terms * declared = NULL;
   declared = mk_term_cell(mk_term(CONST, strdup(eqK)), declared);
   declared = mk_term_cell(mk_term(CONST, strdup(distinctK)), declared);
 
@@ -392,7 +392,7 @@ order_statements(const struct stmts_t * stmts)
     struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
-    printf("|declared| = %d\n", len_terms_cell(declared));
+    printf("|declared| = %d\n", len_Terms_cell(declared));
 
     res = terms_to_str(declared, outbuf);
     assert(is_ok_buffer_write_result(res));
@@ -429,8 +429,8 @@ order_statements(const struct stmts_t * stmts)
     free_buffer(outbuf);
 #endif
 
-    struct term_t * t = new_const_in_stmt(cursor->stmt);
-    struct terms_t * term_consts = consts_in_stmt(cursor->stmt);
+    struct Term * t = new_const_in_stmt(cursor->stmt);
+    struct Terms * term_consts = consts_in_stmt(cursor->stmt);
     if (terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
 #if DEBUG
@@ -455,7 +455,7 @@ order_statements(const struct stmts_t * stmts)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    struct terms_t * pre_term_consts = NULL;
+    struct Terms * pre_term_consts = NULL;
     while (NULL != term_consts) {
       pre_term_consts = term_consts;
       term_consts = term_consts->next;

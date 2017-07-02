@@ -32,7 +32,7 @@ mk_fmla_const(bool b)
 }
 
 struct fmla_t *
-mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
+mk_fmla_atom(char * pred_name, uint8_t arity, struct Term ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
   assert(NULL != result_content);
@@ -52,14 +52,14 @@ mk_fmla_atom(char * pred_name, uint8_t arity, struct term_t ** predargs)
 struct fmla_t *
 mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 {
-  struct term_t ** args = NULL;
+  struct Term ** args = NULL;
 
   va_list varargs;
   va_start(varargs, arity);
   if (arity > 0) {
-    args = malloc(sizeof(struct term_t *) * arity);
+    args = malloc(sizeof(struct Term *) * arity);
     for (int i = 0; i < arity; i++) {
-      args[i] = va_arg(varargs, struct term_t *);
+      args[i] = va_arg(varargs, struct Term *);
     }
   }
   va_end(varargs);
@@ -419,10 +419,10 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   struct fmla_atom_t * atom = fmla_as_atom(at);
   assert(NULL != atom);
 
-  struct term_t ** var_args_T = NULL;
+  struct Term ** var_args_T = NULL;
 
   if (atom->arity > 0) {
-    var_args_T = malloc(sizeof(struct term_t *) * atom->arity);
+    var_args_T = malloc(sizeof(struct Term *) * atom->arity);
     char ** var_args = malloc(sizeof(char *) * atom->arity);
     *v = NULL;
 
@@ -631,7 +631,7 @@ copy_fmla(const struct fmla_t * const fmla)
   struct fmla_t * result = NULL;
 
   char * pred_name_copy = NULL;
-  struct term_t ** predargs_copy = NULL;
+  struct Term ** predargs_copy = NULL;
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -649,7 +649,7 @@ copy_fmla(const struct fmla_t * const fmla)
     predargs_copy = NULL;
 
     if (fmla->param.atom->arity > 0) {
-      predargs_copy = malloc(sizeof(struct term_t *) * fmla->param.atom->arity);
+      predargs_copy = malloc(sizeof(struct Term *) * fmla->param.atom->arity);
       for (int i = 0; i < fmla->param.atom->arity; i++) {
         predargs_copy[i] = copy_term(fmla->param.atom->predargs[i]);
       }
@@ -697,7 +697,7 @@ void
 test_formula(void)
 {
   printf("***test_formula***\n");
-  struct term_t ** args = malloc(sizeof(struct term_t *) * 2);
+  struct Term ** args = malloc(sizeof(struct Term *) * 2);
   args[0] = mk_term(CONST, strdup("arg0"));
   args[1] = mk_term(CONST, strdup("arg1"));
 
@@ -731,10 +731,10 @@ test_formula(void)
   free_fmla(test_not);
   free_fmla(test_quant);
 
-  struct term_t * c1 = mk_const("ta1");
-  struct term_t * c2 = mk_const("ta2");
-  struct term_t * c3 = mk_const("ta3");
-  struct term_t * c4 = mk_const("ta4");
+  struct Term * c1 = mk_const("ta1");
+  struct Term * c2 = mk_const("ta2");
+  struct Term * c3 = mk_const("ta3");
+  struct Term * c4 = mk_const("ta4");
   test_atom = mk_fmla_atom_varargs(strdup("testpred1"), 4, c1, c2, c3, c4);
   const struct fmla_t * test_atom2 = mk_fmla_atom_varargs(strdup("testpred2"),
       4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
@@ -783,14 +783,14 @@ test_formula(void)
   free_fmla(test_or2);
 }
 
-struct terms_t *
+struct Terms *
 filter_var_values(struct valuation_t * const v)
 {
-  struct terms_t * result = NULL;
+  struct Terms * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
     if (VAR == cursor->val->kind) {
-      struct term_t * t_copy = copy_term(cursor->val);
+      struct Term * t_copy = copy_term(cursor->val);
       result = mk_term_cell(t_copy, result);
     }
     cursor = cursor->next;
@@ -799,10 +799,10 @@ filter_var_values(struct valuation_t * const v)
 }
 
 struct fmla_t *
-mk_fmla_quants(const struct terms_t * const vars, struct fmla_t * body)
+mk_fmla_quants(const struct Terms * const vars, struct fmla_t * body)
 {
   struct fmla_t * result = body;
-  const struct terms_t * cursor = vars;
+  const struct Terms * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
     struct fmla_t * pre_result =
@@ -826,10 +826,10 @@ valuation_len(const struct valuation_t * v)
   return l;
 }
 
-struct terms_t *
+struct Terms *
 arguments_of_atom(struct fmla_atom_t * fmla)
 {
-  struct terms_t * result = NULL;
+  struct Terms * result = NULL;
   for (int i = fmla->arity - 1; i >= 0; i--) {
     result = mk_term_cell(copy_term(fmla->predargs[i]), result);
   }
@@ -867,10 +867,10 @@ fmla_size(const struct fmla_t * const fmla)
   return result;
 }
 
-struct terms_t *
-consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
+struct Terms *
+consts_in_fmla(const struct fmla_t * fmla, struct Terms * acc)
 {
-  struct terms_t * result = acc;
+  struct Terms * result = acc;
   switch (fmla->kind) {
   case FMLA_CONST:
     result = acc;
@@ -880,7 +880,7 @@ consts_in_fmla(const struct fmla_t * fmla, struct terms_t * acc)
     // doesn't appear in the Herbrand Universe.
     result = acc;
     for (int i = 0; i < fmla->param.atom->arity; i++) {
-      struct term_t * t = fmla->param.atom->predargs[i];
+      struct Term * t = fmla->param.atom->predargs[i];
       if (CONST == t->kind) {
         result = mk_term_cell(t, result);
       }

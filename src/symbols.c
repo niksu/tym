@@ -21,7 +21,7 @@ mk_term_database(void)
 }
 
 bool
-term_database_add(struct term_t * term, struct term_database_t * tdb)
+term_database_add(struct Term * term, struct term_database_t * tdb)
 {
   bool exists = false;
   char h = hash_term(term);
@@ -37,7 +37,7 @@ term_database_add(struct term_t * term, struct term_database_t * tdb)
     tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
     DBG("Added to Herbrand universe: %s\n", term->identifier);
   } else {
-    struct terms_t * cursor = tdb->term_database[(int)h];
+    struct Terms * cursor = tdb->term_database[(int)h];
     do {
       bool result;
       enum eq_term_error error_code;
@@ -68,7 +68,7 @@ term_database_str(struct term_database_t * tdb, struct buffer_info * dst)
 
   size_t initial_idx = dst->idx;
 
-  const struct terms_t * cursor = tdb->herbrand_universe;
+  const struct Terms * cursor = tdb->herbrand_universe;
 
   struct buffer_write_result * res = NULL;
 
@@ -150,7 +150,7 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
+atom_database_member(const struct Atom * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
 {
   bool success;
   if (NULL == adb) {
@@ -193,7 +193,7 @@ atom_database_member(const struct atom_t * atom, struct atom_database_t * adb, e
 }
 
 bool
-atom_database_add(const struct atom_t * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
+atom_database_add(const struct Atom * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
 {
   bool success;
 
@@ -281,7 +281,7 @@ atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 
       safe_buffer_replace_last(dst, '\n');
 
-      const struct clauses_t * clause_cursor = cursor->predicate->bodies;
+      const struct Clauses * clause_cursor = cursor->predicate->bodies;
 
       while (NULL != clause_cursor) {
 
@@ -361,7 +361,7 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
+clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
 {
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
@@ -393,7 +393,7 @@ clause_database_add(struct clause_t * clause, struct atom_database_t * adb, enum
       (void)term_database_add(clause->head->args[i], adb->tdb);
     }
 
-    struct clauses_t * remainder = record->bodies;
+    struct Clauses * remainder = record->bodies;
     record->bodies = mk_clause_cell(copy_clause(clause), remainder);
   }
 
@@ -427,7 +427,7 @@ size_t
 num_predicate_bodies (struct predicate_t * p)
 {
   size_t no_bodies = 0;
-  const struct clauses_t * body_cursor = p->bodies;
+  const struct Clauses * body_cursor = p->bodies;
   while (NULL != body_cursor) {
     no_bodies++;
     body_cursor = body_cursor->next;
@@ -439,18 +439,18 @@ void
 free_atom_database(struct atom_database_t * adb)
 {
   for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
-    struct terms_t * cursor = adb->tdb->term_database[i];
+    struct Terms * cursor = adb->tdb->term_database[i];
     while (NULL != cursor) {
-      struct terms_t * pre_cursor = cursor;
+      struct Terms * pre_cursor = cursor;
       cursor = cursor->next;
       free_term(pre_cursor->term);
       free(pre_cursor);
     }
   }
   {
-    struct terms_t * cursor = adb->tdb->herbrand_universe;
+    struct Terms * cursor = adb->tdb->herbrand_universe;
     while (NULL != cursor) {
-      struct terms_t * pre_cursor = cursor;
+      struct Terms * pre_cursor = cursor;
       cursor = cursor->next;
       free_term(pre_cursor->term);
       free(pre_cursor);

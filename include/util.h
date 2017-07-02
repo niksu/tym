@@ -44,11 +44,11 @@
   };
 
 #define DECLARE_U8_LIST_LEN(TYPE_NAME) \
-  uint8_t len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME ## _t * next);
+  uint8_t len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME * next);
 
 #define DEFINE_U8_LIST_LEN(TYPE_NAME) \
   uint8_t \
-  len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME ## _t * next) \
+  len_ ## TYPE_NAME ## _cell(const struct TYPE_NAME * next) \
   { \
     uint8_t result = 0; \
     while (NULL != next) { \
