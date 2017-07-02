@@ -17,87 +17,87 @@
 #include "buffer.h"
 #include "util.h"
 
-typedef enum {VAR=0, CONST=1, STR=2} TermKind;
+typedef enum {VAR=0, CONST=1, STR=2} TymTermKind;
 
-struct Term {
-  TermKind kind;
+struct TymTerm {
+  TymTermKind kind;
   const char * identifier;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(Terms, term, Term)
-DECLARE_MUTABLE_LIST_MK(term, struct Term, struct Terms)
+TYM_DECLARE_MUTABLE_LIST_TYPE(TymTerms, term, TymTerm)
+TYM_DECLARE_MUTABLE_LIST_MK(term, struct TymTerm, struct TymTerms)
 
-struct Atom {
+struct TymAtom {
   char * predicate;
   uint8_t arity;
-  struct Term ** args;
+  struct TymTerm ** args;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(Atoms, atom, Atom)
-DECLARE_MUTABLE_LIST_MK(atom, struct Atom, struct Atoms)
+TYM_DECLARE_MUTABLE_LIST_TYPE(TymAtoms, atom, TymAtom)
+TYM_DECLARE_MUTABLE_LIST_MK(atom, struct TymAtom, struct TymAtoms)
 
-struct Clause {
-  struct Atom * head;
+struct TymClause {
+  struct TymAtom * head;
   uint8_t body_size;
-  struct Atom ** body;
+  struct TymAtom ** body;
 };
 
-DECLARE_MUTABLE_LIST_TYPE(Clauses, clause, Clause)
-DECLARE_MUTABLE_LIST_MK(clause, struct Clause, struct Clauses)
+TYM_DECLARE_MUTABLE_LIST_TYPE(TymClauses, clause, TymClause)
+TYM_DECLARE_MUTABLE_LIST_MK(clause, struct TymClause, struct TymClauses)
 
-struct Program {
+struct TymProgram {
   uint8_t no_clauses;
-  struct Clause ** program;
+  struct TymClause ** program;
 };
 
-struct buffer_write_result * term_to_str(const struct Term * const term, struct buffer_info * dst);
-struct buffer_write_result * terms_to_str(const struct Terms * const terms, struct buffer_info * dst);
-struct buffer_write_result * predicate_to_str(const struct Atom * atom, struct buffer_info * dst);
-struct buffer_write_result * atom_to_str(const struct Atom * const atom, struct buffer_info * dst);
-struct buffer_write_result * clause_to_str(const struct Clause * const clause, struct buffer_info * dst);
-struct buffer_write_result * program_to_str(const struct Program * const program, struct buffer_info * dst);
+struct buffer_write_result * tym_term_to_str(const struct TymTerm * const term, struct buffer_info * dst);
+struct buffer_write_result * tym_terms_to_str(const struct TymTerms * const terms, struct buffer_info * dst);
+struct buffer_write_result * tym_predicate_to_str(const struct TymAtom * atom, struct buffer_info * dst);
+struct buffer_write_result * tym_atom_to_str(const struct TymAtom * const atom, struct buffer_info * dst);
+struct buffer_write_result * tym_clause_to_str(const struct TymClause * const clause, struct buffer_info * dst);
+struct buffer_write_result * tym_program_to_str(const struct TymProgram * const program, struct buffer_info * dst);
 
-struct Term * mk_const(const char * cp_identifier);
-struct Term * mk_var(const char * cp_identifier);
-struct Term * mk_term(TermKind kind, const char * identifier);
-struct Atom * mk_atom(char * predicate, uint8_t arity, struct Terms * args);
-struct Clause * mk_clause(struct Atom * head, uint8_t body_size, struct Atoms * body);
-struct Program * mk_program(uint8_t no_clauses, struct Clauses * program);
+struct TymTerm * tym_mk_const(const char * cp_identifier);
+struct TymTerm * tym_mk_var(const char * cp_identifier);
+struct TymTerm * tym_mk_term(TymTermKind kind, const char * identifier);
+struct TymAtom * tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args);
+struct TymClause * tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body);
+struct TymProgram * tym_mk_program(uint8_t no_clauses, struct TymClauses * program);
 
-DECLARE_U8_LIST_LEN(Terms)
-DECLARE_U8_LIST_LEN(Atoms)
-DECLARE_U8_LIST_LEN(Clauses)
+TYM_DECLARE_U8_LIST_LEN(TymTerms)
+TYM_DECLARE_U8_LIST_LEN(TymAtoms)
+TYM_DECLARE_U8_LIST_LEN(TymClauses)
 
-void free_term(struct Term * term);
-void free_terms(struct Terms * terms);
-void free_atom(struct Atom * atom);
-void free_atoms(struct Atoms * atoms);
-void free_clause(struct Clause * clause);
-void free_clauses(struct Clauses * clauses);
-void free_program(struct Program * program);
+void tym_free_term(struct TymTerm * term);
+void tym_free_terms(struct TymTerms * terms);
+void tym_free_atom(struct TymAtom * atom);
+void tym_free_atoms(struct TymAtoms * atoms);
+void tym_free_clause(struct TymClause * clause);
+void tym_free_clauses(struct TymClauses * clauses);
+void tym_free_program(struct TymProgram * program);
 
-typedef struct buffer_write_result * (*x_to_str_t)(void *, struct buffer_info * dst);
+typedef struct buffer_write_result * (*tym_x_to_str_t)(void *, struct buffer_info * dst);
 
-void debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst));
+void tym_debug_out_syntax(void * x, struct buffer_write_result * (*tym_x_to_str)(void *, struct buffer_info * dst));
 
-#if DEBUG
-#define DBG_SYNTAX debug_out_syntax
+#if TYM_DEBUG
+#define TYM_DBG_SYNTAX tym_debug_out_syntax
 #else
-#define DBG_SYNTAX(...)
-#endif // DEBUG
+#define TYM_DBG_SYNTAX(...)
+#endif // TYM_DEBUG
 
-char hash_str(const char * str);
-char hash_term(const struct Term *);
-char hash_atom(const struct Atom *);
-char hash_clause(const struct Clause *);
+char tym_hash_str(const char * str);
+char tym_hash_term(const struct TymTerm *);
+char tym_hash_atom(const struct TymAtom *);
+char tym_hash_clause(const struct TymClause *);
 
-enum eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER};
-bool eq_term(const struct Term * const t1, const struct Term * const t2, enum eq_term_error * error_code, bool * result);
+enum tym_eq_term_error {NO_ERROR = 0, DIFF_KIND_SAME_IDENTIFIER};
+bool tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2, enum tym_eq_term_error * error_code, bool * result);
 
-struct Term * copy_term(const struct Term * const cp_term);
-struct Atom * copy_atom(const struct Atom * const cp_atom);
-struct Clause * copy_clause(const struct Clause * const cp_clause);
+struct TymTerm * tym_copy_term(const struct TymTerm * const cp_term);
+struct TymAtom * tym_copy_atom(const struct TymAtom * const cp_atom);
+struct TymClause * tym_copy_clause(const struct TymClause * const cp_clause);
 
-bool terms_subsumed_by(const struct Terms * const, const struct Terms *);
+bool tym_terms_subsumed_by(const struct TymTerms * const, const struct TymTerms *);
 
 #endif // __TYM_AST_H__

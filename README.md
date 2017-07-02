@@ -1,5 +1,4 @@
 # TYM Datalog
-This is a simple implementation of Datalog.
 
 # Building
 `make`
@@ -15,7 +14,7 @@ The `-v` flag activates verbose output.
 * `make test_modules` tests internal APIs (for forming and destroying expressions, etc)
 * `make test_regression` tests parser + printer + internal API
 * `MEM_CHECK=1 make test_regression` checks for memory-safety during regression tests.
-* for debug output build with `CFLAGS=-DDEBUG`
+* for debug output build with `CFLAGS=-DTYM_DEBUG`
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).

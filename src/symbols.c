@@ -21,27 +21,27 @@ mk_term_database(void)
 }
 
 bool
-term_database_add(struct Term * term, struct term_database_t * tdb)
+term_database_add(struct TymTerm * term, struct term_database_t * tdb)
 {
   bool exists = false;
-  char h = hash_term(term);
+  char h = tym_hash_term(term);
 
-  DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
+  TYM_DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
 
   if (CONST != term->kind) {
     return false;
   }
 
   if (NULL == tdb->term_database[(int)h]) {
-    tdb->term_database[(int)h] = mk_term_cell(copy_term(term), NULL);
-    tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
-    DBG("Added to Herbrand universe: %s\n", term->identifier);
+    tdb->term_database[(int)h] = tym_mk_term_cell(tym_copy_term(term), NULL);
+    tdb->herbrand_universe = tym_mk_term_cell(tym_copy_term(term), tdb->herbrand_universe);
+    TYM_DBG("Added to Herbrand universe: %s\n", term->identifier);
   } else {
-    struct Terms * cursor = tdb->term_database[(int)h];
+    struct TymTerms * cursor = tdb->term_database[(int)h];
     do {
       bool result;
-      enum eq_term_error error_code;
-      if (eq_term(term, cursor->term, &error_code, &result)) {
+      enum tym_eq_term_error error_code;
+      if (tym_eq_term(term, cursor->term, &error_code, &result)) {
           exists = result;
           break;
       } else {
@@ -51,9 +51,9 @@ term_database_add(struct Term * term, struct term_database_t * tdb)
     } while (NULL != cursor->next);
 
     if (!exists) {
-      cursor->next = mk_term_cell(copy_term(term), NULL);
-      tdb->herbrand_universe = mk_term_cell(copy_term(term), tdb->herbrand_universe);
-      DBG("Added to Herbrand universe: %s\n", term->identifier);
+      cursor->next = tym_mk_term_cell(tym_copy_term(term), NULL);
+      tdb->herbrand_universe = tym_mk_term_cell(tym_copy_term(term), tdb->herbrand_universe);
+      TYM_DBG("Added to Herbrand universe: %s\n", term->identifier);
     }
   }
 
@@ -68,12 +68,12 @@ term_database_str(struct term_database_t * tdb, struct buffer_info * dst)
 
   size_t initial_idx = dst->idx;
 
-  const struct Terms * cursor = tdb->herbrand_universe;
+  const struct TymTerms * cursor = tdb->herbrand_universe;
 
   struct buffer_write_result * res = NULL;
 
   while (NULL != cursor) {
-    res = term_to_str(cursor->term, dst);
+    res = tym_term_to_str(cursor->term, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -106,13 +106,13 @@ free_pred(struct predicate_t * pred)
 {
   free((void *)pred->predicate);
   if (NULL != pred->bodies) {
-    free_clauses(pred->bodies);
+    tym_free_clauses(pred->bodies);
   }
   free(pred);
 }
 #pragma GCC diagnostic pop
 
-DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
+TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
 
 bool
 eq_pred(struct predicate_t p1, struct predicate_t p2, enum eq_pred_error * error_code, bool * result)
@@ -150,14 +150,14 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(const struct Atom * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
+atom_database_member(const struct TymAtom * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
 {
   bool success;
   if (NULL == adb) {
     success = true;
     *record = NULL;
   } else {
-    char h = hash_str(atom->predicate);
+    char h = tym_hash_str(atom->predicate);
 
     if (NULL == adb->atom_database[(int)h]) {
       success = true;
@@ -193,7 +193,7 @@ atom_database_member(const struct Atom * atom, struct atom_database_t * adb, enu
 }
 
 bool
-atom_database_add(const struct Atom * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
+atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
 {
   bool success;
 
@@ -201,12 +201,12 @@ atom_database_add(const struct Atom * atom, struct atom_database_t * adb, enum a
     *error_code = NO_ATOM_DATABASE;
     success = false;
   } else {
-    char h = hash_str(atom->predicate);
+    char h = tym_hash_str(atom->predicate);
 
     struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
-      adb->atom_database[(int)h] = mk_pred_cell(pred, NULL);
+      adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
     } else {
       bool exists = false;
       struct predicates_t * cursor = adb->atom_database[(int)h];
@@ -224,14 +224,14 @@ atom_database_add(const struct Atom * atom, struct atom_database_t * adb, enum a
         cursor = cursor->next;
       }
       if (!exists) {
-        adb->atom_database[(int)h] = mk_pred_cell(pred, adb->atom_database[(int)h]);
+        adb->atom_database[(int)h] = tym_mk_pred_cell(pred, adb->atom_database[(int)h]);
       }
     }
 
     *result = pred;
     success = true;
 
-    DBG("Added atom: %s{hash=%u}\n", atom->predicate, h);
+    TYM_DBG("Added atom: %s{hash=%u}\n", atom->predicate, h);
 
     assert(NULL != adb->tdb);
     for (int i = 0; i < atom->arity; i++) {
@@ -281,7 +281,7 @@ atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 
       safe_buffer_replace_last(dst, '\n');
 
-      const struct Clauses * clause_cursor = cursor->predicate->bodies;
+      const struct TymClauses * clause_cursor = cursor->predicate->bodies;
 
       while (NULL != clause_cursor) {
 
@@ -292,7 +292,7 @@ atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
           return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
         }
 
-        res = clause_to_str(clause_cursor->clause, dst);
+        res = tym_clause_to_str(clause_cursor->clause, dst);
         assert(is_ok_buffer_write_result(res));
         free(res);
 
@@ -319,7 +319,7 @@ predicate_str(const struct predicate_t * pred, struct buffer_info * dst)
 
   safe_buffer_replace_last(dst, '/');
 
-  char buf[BUF_SIZE];
+  char buf[TYM_BUF_SIZE];
   int check = sprintf(buf, "%u", pred->arity);
   assert(check > 0);
 
@@ -361,7 +361,7 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
+clause_database_add(struct TymClause * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
 {
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
@@ -370,17 +370,17 @@ clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum c
   if (!success) {
     assert(DIFF_ARITY == adl_lookup_error);
     *cdl_add_error = CDL_ADL_DIFF_ARITY;
-    ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
+    TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
          *cdl_add_error, clause->head->predicate);
     return false;
   } else if (NULL == record) {
     struct predicate_t * result;
     success = atom_database_add(clause->head, adb, &adl_add_error, &result);
-    result->bodies = mk_clause_cell(copy_clause(clause), NULL);
+    result->bodies = tym_mk_clause_cell(tym_copy_clause(clause), NULL);
     if (!success) {
       assert(NO_ATOM_DATABASE == adl_add_error);
       *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
-      ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
+      TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
            *cdl_add_error, clause->head->predicate);
       return false;
     }
@@ -393,8 +393,8 @@ clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum c
       (void)term_database_add(clause->head->args[i], adb->tdb);
     }
 
-    struct Clauses * remainder = record->bodies;
-    record->bodies = mk_clause_cell(copy_clause(clause), remainder);
+    struct TymClauses * remainder = record->bodies;
+    record->bodies = tym_mk_clause_cell(tym_copy_clause(clause), remainder);
   }
 
   if (success) {
@@ -403,7 +403,7 @@ clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum c
       if (!success) {
         assert(DIFF_ARITY == adl_lookup_error);
         *cdl_add_error = CDL_ADL_DIFF_ARITY;
-        ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
+        TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
              *cdl_add_error, clause->body[i]->predicate);
         return false;
       } else if (NULL == record) {
@@ -412,7 +412,7 @@ clause_database_add(struct Clause * clause, struct atom_database_t * adb, enum c
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
           *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
-          ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
+          TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
                *cdl_add_error, clause->body[i]->predicate);
           return false;
         }
@@ -427,7 +427,7 @@ size_t
 num_predicate_bodies (struct predicate_t * p)
 {
   size_t no_bodies = 0;
-  const struct Clauses * body_cursor = p->bodies;
+  const struct TymClauses * body_cursor = p->bodies;
   while (NULL != body_cursor) {
     no_bodies++;
     body_cursor = body_cursor->next;
@@ -439,20 +439,20 @@ void
 free_atom_database(struct atom_database_t * adb)
 {
   for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
-    struct Terms * cursor = adb->tdb->term_database[i];
+    struct TymTerms * cursor = adb->tdb->term_database[i];
     while (NULL != cursor) {
-      struct Terms * pre_cursor = cursor;
+      struct TymTerms * pre_cursor = cursor;
       cursor = cursor->next;
-      free_term(pre_cursor->term);
+      tym_free_term(pre_cursor->term);
       free(pre_cursor);
     }
   }
   {
-    struct Terms * cursor = adb->tdb->herbrand_universe;
+    struct TymTerms * cursor = adb->tdb->herbrand_universe;
     while (NULL != cursor) {
-      struct Terms * pre_cursor = cursor;
+      struct TymTerms * pre_cursor = cursor;
       cursor = cursor->next;
-      free_term(pre_cursor->term);
+      tym_free_term(pre_cursor->term);
       free(pre_cursor);
     }
   }

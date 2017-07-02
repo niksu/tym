@@ -16,7 +16,7 @@
 #include "util.h"
 
 struct buffer_write_result *
-term_to_str(const struct Term * const term, struct buffer_info * dst)
+tym_term_to_str(const struct TymTerm * const term, struct buffer_info * dst)
 {
   assert(NULL != term);
   size_t initial_idx = dst->idx;
@@ -27,8 +27,8 @@ term_to_str(const struct Term * const term, struct buffer_info * dst)
 
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
-#if DEBUG
-  char local_buf[BUF_SIZE];
+#if TYM_DEBUG
+  char local_buf[TYM_BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_term(term) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
@@ -45,7 +45,7 @@ term_to_str(const struct Term * const term, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-predicate_to_str(const struct Atom * atom, struct buffer_info * dst)
+tym_predicate_to_str(const struct TymAtom * atom, struct buffer_info * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
@@ -56,8 +56,8 @@ predicate_to_str(const struct Atom * atom, struct buffer_info * dst)
 
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
-#if DEBUG
-  char local_buf[BUF_SIZE];
+#if TYM_DEBUG
+  char local_buf[TYM_BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_str(atom->predicate) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
@@ -74,12 +74,12 @@ predicate_to_str(const struct Atom * atom, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-atom_to_str(const struct Atom * const atom, struct buffer_info * dst)
+tym_atom_to_str(const struct TymAtom * const atom, struct buffer_info * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = predicate_to_str(atom, dst);
+  struct buffer_write_result * res = tym_predicate_to_str(atom, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -93,7 +93,7 @@ atom_to_str(const struct Atom * const atom, struct buffer_info * dst)
   }
 
   for (int i = 0; i < atom->arity; i++) {
-    res = term_to_str(atom->args[i], dst);
+    res = tym_term_to_str(atom->args[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -115,8 +115,8 @@ atom_to_str(const struct Atom * const atom, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 
-#if DEBUG
-  char local_buf[BUF_SIZE];
+#if TYM_DEBUG
+  char local_buf[TYM_BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_atom(atom) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
@@ -132,19 +132,19 @@ atom_to_str(const struct Atom * const atom, struct buffer_info * dst)
   }
 }
 
-struct Clause *
-copy_clause(const struct Clause * const cp_clause)
+struct TymClause *
+tym_copy_clause(const struct TymClause * const cp_clause)
 {
-  struct Clause * result = malloc(sizeof(struct Clause));
-  struct Atom ** body = NULL;
+  struct TymClause * result = malloc(sizeof(struct TymClause));
+  struct TymAtom ** body = NULL;
   if (cp_clause->body_size > 0) {
-    body = malloc(sizeof(struct Atom *) * cp_clause->body_size);
+    body = malloc(sizeof(struct TymAtom *) * cp_clause->body_size);
     for (int i = 0; i < cp_clause->body_size; i++) {
-      body[i] = copy_atom(cp_clause->body[i]);
+      body[i] = tym_copy_atom(cp_clause->body[i]);
     }
   }
-  *result = (struct Clause){
-    .head = copy_atom(cp_clause->head),
+  *result = (struct TymClause){
+    .head = tym_copy_atom(cp_clause->head),
     .body_size = cp_clause->body_size,
     .body = body
   };
@@ -152,12 +152,12 @@ copy_clause(const struct Clause * const cp_clause)
 }
 
 struct buffer_write_result *
-clause_to_str(const struct Clause * const clause, struct buffer_info * dst)
+tym_clause_to_str(const struct TymClause * const clause, struct buffer_info * dst)
 {
   assert(NULL != clause);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = atom_to_str(clause->head, dst);
+  struct buffer_write_result * res = tym_atom_to_str(clause->head, dst);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
@@ -172,7 +172,7 @@ clause_to_str(const struct Clause * const clause, struct buffer_info * dst)
     unsafe_buffer_str(dst, " :- ");
 
     for (int i = 0; i < clause->body_size; i++) {
-      res = atom_to_str(clause->body[i], dst);
+      res = tym_atom_to_str(clause->body[i], dst);
       assert(is_ok_buffer_write_result(res));
       free(res);
 
@@ -196,8 +196,8 @@ clause_to_str(const struct Clause * const clause, struct buffer_info * dst)
     return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
   }
 
-#if DEBUG
-  char local_buf[BUF_SIZE];
+#if TYM_DEBUG
+  char local_buf[TYM_BUF_SIZE];
   sprintf(local_buf, "{hash=%d}", hash_clause(clause) + 127);
   res = buf_strcpy(dst, local_buf);
   assert(is_ok_buffer_write_result(res));
@@ -214,7 +214,7 @@ clause_to_str(const struct Clause * const clause, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-program_to_str(const struct Program * const program, struct buffer_info * dst)
+tym_program_to_str(const struct TymProgram * const program, struct buffer_info * dst)
 {
   assert(NULL != program);
   size_t initial_idx = dst->idx;
@@ -222,7 +222,7 @@ program_to_str(const struct Program * const program, struct buffer_info * dst)
   struct buffer_write_result * res = NULL;
 
   for (int i = 0; i < program->no_clauses; i++) {
-    res = clause_to_str(program->program[i], dst);
+    res = tym_clause_to_str(program->program[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -234,26 +234,26 @@ program_to_str(const struct Program * const program, struct buffer_info * dst)
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
 
-struct Term *
-mk_const(const char * cp_identifier)
+struct TymTerm *
+tym_mk_const(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  return mk_term(CONST, strdup(cp_identifier));
+  return tym_mk_term(CONST, strdup(cp_identifier));
 }
 
-struct Term *
-mk_var(const char * cp_identifier)
+struct TymTerm *
+tym_mk_var(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  return mk_term(VAR, strdup(cp_identifier));
+  return tym_mk_term(VAR, strdup(cp_identifier));
 }
 
-struct Term *
-mk_term(TermKind kind, const char * identifier)
+struct TymTerm *
+tym_mk_term(TymTermKind kind, const char * identifier)
 {
   assert(NULL != identifier);
 
-  struct Term * t = malloc(sizeof(struct Term));
+  struct TymTerm * t = malloc(sizeof(struct TymTerm));
   assert(NULL != t);
 
   t->kind = kind;
@@ -261,25 +261,25 @@ mk_term(TermKind kind, const char * identifier)
   return t;
 }
 
-DEFINE_MUTABLE_LIST_MK(term, term, struct Term, struct Terms)
+TYM_DEFINE_MUTABLE_LIST_MK(term, term, struct TymTerm, struct TymTerms)
 
-DEFINE_U8_LIST_LEN(Terms)
+TYM_DEFINE_U8_LIST_LEN(TymTerms)
 
-struct Atom *
-mk_atom(char * predicate, uint8_t arity, struct Terms * args) {
+struct TymAtom *
+tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args) {
   assert(NULL != predicate);
 
-  struct Atom * at = malloc(sizeof(struct Atom));
+  struct TymAtom * at = malloc(sizeof(struct TymAtom));
   assert(NULL != at);
 
   at->predicate = predicate;
   at->arity = arity;
   at->args = NULL;
 
-  struct Terms * pre_position = NULL;
+  struct TymTerms * pre_position = NULL;
 
   if (at->arity > 0) {
-    at->args = malloc(sizeof(struct Term *) * at->arity);
+    at->args = malloc(sizeof(struct TymTerm *) * at->arity);
     assert(NULL != at->args);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = args->term;
@@ -292,26 +292,26 @@ mk_atom(char * predicate, uint8_t arity, struct Terms * args) {
   return at;
 }
 
-DEFINE_MUTABLE_LIST_MK(atom, atom, struct Atom, struct Atoms)
+TYM_DEFINE_MUTABLE_LIST_MK(atom, atom, struct TymAtom, struct TymAtoms)
 
-DEFINE_U8_LIST_LEN(Atoms)
+TYM_DEFINE_U8_LIST_LEN(TymAtoms)
 
-struct Clause *
-mk_clause(struct Atom * head, uint8_t body_size, struct Atoms * body) {
+struct TymClause *
+tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body) {
   assert(NULL != head);
   assert((NULL != body && body_size > 0) || (NULL == body && 0 == body_size));
 
-  struct Clause * cl = malloc(sizeof(struct Clause));
+  struct TymClause * cl = malloc(sizeof(struct TymClause));
   assert(NULL != cl);
 
   cl->head = head;
   cl->body_size = body_size;
   cl->body = NULL;
 
-  struct Atoms * pre_position = NULL;
+  struct TymAtoms * pre_position = NULL;
 
   if (cl->body_size > 0) {
-    cl->body = malloc(sizeof(struct Atom *) * body_size);
+    cl->body = malloc(sizeof(struct TymAtom *) * body_size);
     assert(NULL != cl->body);
     for (int i = 0; i < cl->body_size; i++) {
       cl->body[i] = body->atom;
@@ -324,22 +324,22 @@ mk_clause(struct Atom * head, uint8_t body_size, struct Atoms * body) {
   return cl;
 }
 
-DEFINE_MUTABLE_LIST_MK(clause, clause, struct Clause, struct Clauses)
+TYM_DEFINE_MUTABLE_LIST_MK(clause, clause, struct TymClause, struct TymClauses)
 
-DEFINE_U8_LIST_LEN(Clauses)
+TYM_DEFINE_U8_LIST_LEN(TymClauses)
 
-struct Program *
-mk_program(uint8_t no_clauses, struct Clauses * program)
+struct TymProgram *
+tym_mk_program(uint8_t no_clauses, struct TymClauses * program)
 {
-  struct Program * p = malloc(sizeof(struct Program));
+  struct TymProgram * p = malloc(sizeof(struct TymProgram));
   assert(NULL != p);
 
   p->no_clauses = no_clauses;
 
-  struct Clauses * pre_position = NULL;
+  struct TymClauses * pre_position = NULL;
 
   if (no_clauses > 0) {
-    p->program = malloc(sizeof(struct Clause *) * no_clauses);
+    p->program = malloc(sizeof(struct TymClause *) * no_clauses);
     assert(NULL != p->program);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
@@ -357,7 +357,7 @@ mk_program(uint8_t no_clauses, struct Clauses * program)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_term(struct Term * term)
+tym_free_term(struct TymTerm * term)
 {
   assert(NULL != term);
 
@@ -372,32 +372,32 @@ free_term(struct Term * term)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_terms(struct Terms * terms)
+tym_free_terms(struct TymTerms * terms)
 {
   assert(NULL != terms);
 
   assert(NULL != terms->term);
-  free_term(terms->term);
+  tym_free_term(terms->term);
   if (NULL != terms->next) {
-    free_terms((void *)terms->next);
+    tym_free_terms((void *)terms->next);
   }
   free(terms);
 }
 #pragma GCC diagnostic pop
 
 void
-free_atom(struct Atom * at)
+tym_free_atom(struct TymAtom * at)
 {
   assert(NULL != at);
   assert(NULL != at->predicate);
 
-  DBG("Freeing atom: ");
-  DBG_SYNTAX((void *)at, (x_to_str_t)atom_to_str);
-  DBG("\n");
+  TYM_DBG("Freeing atom: ");
+  TYM_DBG_SYNTAX((void *)at, (tym_x_to_str_t)tym_atom_to_str);
+  TYM_DBG("\n");
 
   free(at->predicate);
   for (int i = 0; i < at->arity; i++) {
-    free_term(at->args[i]);
+    tym_free_term(at->args[i]);
   }
 
   if (at->arity > 0) {
@@ -412,30 +412,30 @@ free_atom(struct Atom * at)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_atoms(struct Atoms * atoms)
+tym_free_atoms(struct TymAtoms * atoms)
 {
   assert(NULL != atoms);
 
   assert(NULL != atoms->atom);
-  free_atom(atoms->atom);
+  tym_free_atom(atoms->atom);
   if (NULL != atoms->next) {
-    free_atoms(atoms->next);
+    tym_free_atoms(atoms->next);
   }
   free(atoms);
 }
 #pragma GCC diagnostic pop
 
 void
-free_clause(struct Clause * clause)
+tym_free_clause(struct TymClause * clause)
 {
   assert(NULL != clause);
 
-  free_atom(clause->head);
+  tym_free_atom(clause->head);
 
   assert((0 == clause->body_size && NULL == clause->body) ||
          (clause->body_size > 0 && NULL != clause->body));
   for (int i = 0; i < clause->body_size; i++) {
-    free_atom(clause->body[i]);
+    tym_free_atom(clause->body[i]);
   }
 
   if (clause->body_size > 0) {
@@ -448,14 +448,14 @@ free_clause(struct Clause * clause)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_clauses(struct Clauses * clauses)
+tym_free_clauses(struct TymClauses * clauses)
 {
   assert(NULL != clauses);
 
   assert(NULL != clauses->clause);
-  free_clause(clauses->clause);
+  tym_free_clause(clauses->clause);
   if (NULL != clauses->next) {
-    free_clauses((void *)clauses->next);
+    tym_free_clauses((void *)clauses->next);
   }
   free(clauses);
 }
@@ -464,17 +464,17 @@ free_clauses(struct Clauses * clauses)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_program(struct Program * program)
+tym_free_program(struct TymProgram * program)
 {
   assert(NULL != program);
 
   for (int i = 0; i < program->no_clauses; i++) {
-    DBG("Freeing clause %d: ", i);
-    DBG_SYNTAX((void *)program->program[i], (x_to_str_t)clause_to_str);
-    DBG("\n");
+    TYM_DBG("Freeing clause %d: ", i);
+    TYM_DBG_SYNTAX((void *)program->program[i], (tym_x_to_str_t)clause_to_str);
+    TYM_DBG("\n");
 
     assert(NULL != (program->program[i]));
-    free_clause(program->program[i]);
+    tym_free_clause(program->program[i]);
   }
 
   if (program->no_clauses > 0) {
@@ -486,21 +486,21 @@ free_program(struct Program * program)
 #pragma GCC diagnostic pop
 
 void
-debug_out_syntax(void * x, struct buffer_write_result * (*x_to_str)(void *, struct buffer_info * dst))
+tym_debug_out_syntax(void * x, struct buffer_write_result * (*tym_x_to_str)(void *, struct buffer_info * dst))
 {
-  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
 
-  struct buffer_write_result * res = x_to_str(x, outbuf);
+  struct buffer_write_result * res = tym_x_to_str(x, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
 
-  DBG("%s", outbuf->buffer);
+  TYM_DBG("%s", outbuf->buffer);
 
   free_buffer(outbuf);
 }
 
 char
-hash_str(const char * str)
+tym_hash_str(const char * str)
 {
   assert(NULL != str);
 
@@ -516,44 +516,44 @@ hash_str(const char * str)
 }
 
 char
-hash_term(const struct Term * term)
+tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
-  char result = hash_str(term->identifier);
+  char result = tym_hash_str(term->identifier);
   result ^= term->kind;
   return result;
 }
 
 char
-hash_atom(const struct Atom * atom)
+tym_hash_atom(const struct TymAtom * atom)
 {
   assert(NULL != atom);
 
-  char result = hash_str(atom->predicate);
+  char result = tym_hash_str(atom->predicate);
 
   for (int i = 0; i < atom->arity; i++) {
-    result = (char)((result * hash_term(atom->args[i])) % 256) - 128;
+    result = (char)((result * tym_hash_term(atom->args[i])) % 256) - 128;
   }
 
   return result;
 }
 
 char
-hash_clause(const struct Clause * clause) {
+tym_hash_clause(const struct TymClause * clause) {
   assert(NULL != clause);
 
-  char result = hash_atom(clause->head);
+  char result = tym_hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
-    result ^= ((i + hash_atom(clause->body[i])) % 256) - 128;
+    result ^= ((i + tym_hash_atom(clause->body[i])) % 256) - 128;
   }
 
   return result;
 }
 
 bool
-eq_term(const struct Term * const t1, const struct Term * const t2,
-    enum eq_term_error * error_code, bool * result)
+tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
+    enum tym_eq_term_error * error_code, bool * result)
 {
   assert(NULL != t1);
   assert(NULL != t2);
@@ -590,30 +590,30 @@ eq_term(const struct Term * const t1, const struct Term * const t2,
 }
 
 void
-test_clause(void) {
+tym_test_clause(void) {
   printf("***test_clause***\n");
-  struct Term * t = malloc(sizeof(struct Term));
-  *t = (struct Term){.kind = CONST, .identifier = strdup("ok")};
+  struct TymTerm * t = malloc(sizeof(struct TymTerm));
+  *t = (struct TymTerm){.kind = CONST, .identifier = strdup("ok")};
 
-  struct Atom * at = malloc(sizeof(struct Atom));
+  struct TymAtom * at = malloc(sizeof(struct TymAtom));
   at->predicate = strdup("world");
   at->arity = 1;
-  at->args = malloc(sizeof(struct Term *) * 1);
+  at->args = malloc(sizeof(struct TymTerm *) * 1);
   at->args[0] = t;
 
-  struct Atom * hd = malloc(sizeof(struct Atom));
+  struct TymAtom * hd = malloc(sizeof(struct TymAtom));
   hd->predicate = strdup("hello");
   hd->arity = 0;
   hd->args = NULL;
 
-  struct Clause * cl = malloc(sizeof(struct Clause));
+  struct TymClause * cl = malloc(sizeof(struct TymClause));
   cl->head = hd;
   cl->body_size = 1;
-  cl->body = malloc(sizeof(struct Atom *) * 1);
+  cl->body = malloc(sizeof(struct TymAtom *) * 1);
   cl->body[0] = at;
 
-  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
-  struct buffer_write_result * res = clause_to_str(cl, outbuf);
+  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct buffer_write_result * res = tym_clause_to_str(cl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
@@ -622,20 +622,20 @@ test_clause(void) {
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  free_clause(cl);
+  tym_free_clause(cl);
 }
 
-struct Term *
-copy_term(const struct Term * const cp_term)
+struct TymTerm *
+tym_copy_term(const struct TymTerm * const cp_term)
 {
   assert(NULL != cp_term);
-  return mk_term(cp_term->kind, strdup(cp_term->identifier));
+  return tym_mk_term(cp_term->kind, strdup(cp_term->identifier));
 }
 
 // In practice, simply checks that ss is a subset of ts.
 // FIXME naive implementation
 bool
-terms_subsumed_by(const struct Terms * const ts, const struct Terms * ss)
+tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * ss)
 {
   if (NULL == ts) {
     return true;
@@ -643,18 +643,18 @@ terms_subsumed_by(const struct Terms * const ts, const struct Terms * ss)
 
   bool result = true;
 
-#if DEBUG
+#if TYM_DEBUG
   printf("Subsumption check initially %d", result);
 #endif
   while (NULL != ss) {
-#if DEBUG
+#if TYM_DEBUG
     printf(".");
 #endif
-    const struct Terms * cursor = ts;
+    const struct TymTerms * cursor = ts;
     bool found = false;
-    enum eq_term_error error_code;
+    enum tym_eq_term_error error_code;
     while (NULL != cursor) {
-      if (eq_term(cursor->term, ss->term, &error_code, &found)) {
+      if (tym_eq_term(cursor->term, ss->term, &error_code, &found)) {
         if (found) {
           break;
         }
@@ -665,8 +665,8 @@ terms_subsumed_by(const struct Terms * const ts, const struct Terms * ss)
     }
 
     if (!found) {
-#if DEBUG
-      struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+#if TYM_DEBUG
+      struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
       struct buffer_write_result * res = term_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
@@ -681,7 +681,7 @@ terms_subsumed_by(const struct Terms * const ts, const struct Terms * ss)
     ss = ss->next;
   }
 
-#if DEBUG
+#if TYM_DEBUG
   printf(" ultimately %d\n", result);
 #endif
 
@@ -689,18 +689,18 @@ terms_subsumed_by(const struct Terms * const ts, const struct Terms * ss)
 }
 
 struct buffer_write_result *
-terms_to_str(const struct Terms * const terms, struct buffer_info * dst)
+tym_terms_to_str(const struct TymTerms * const terms, struct buffer_info * dst)
 {
   assert(NULL != terms);
 
   size_t initial_idx = dst->idx;
 
-  const struct Terms * cursor = terms;
+  const struct TymTerms * cursor = terms;
 
   struct buffer_write_result * res = NULL;
 
   while (NULL != cursor) {
-    res = term_to_str(cursor->term, dst);
+    res = tym_term_to_str(cursor->term, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -721,12 +721,12 @@ terms_to_str(const struct Terms * const terms, struct buffer_info * dst)
   return mkval_buffer_write_result(dst->idx - initial_idx);
 }
 
-struct Atom *
-copy_atom(const struct Atom * const cp_atom)
+struct TymAtom *
+tym_copy_atom(const struct TymAtom * const cp_atom)
 {
   assert(NULL != cp_atom);
 
-  struct Atom * at = malloc(sizeof(struct Atom));
+  struct TymAtom * at = malloc(sizeof(struct TymAtom));
   assert(NULL != at);
 
   at->predicate = strdup(cp_atom->predicate);
@@ -734,10 +734,10 @@ copy_atom(const struct Atom * const cp_atom)
   at->args = NULL;
 
   if (at->arity > 0) {
-    at->args = malloc(sizeof(struct Term *) * at->arity);
+    at->args = malloc(sizeof(struct TymTerm *) * at->arity);
     assert(NULL != at->args);
     for (int i = 0; i < at->arity; i++) {
-      at->args[i] = copy_term(cp_atom->args[i]);
+      at->args[i] = tym_copy_term(cp_atom->args[i]);
     }
   }
 

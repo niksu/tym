@@ -32,7 +32,7 @@ mk_fmla_const(bool b)
 }
 
 struct fmla_t *
-mk_fmla_atom(char * pred_name, uint8_t arity, struct Term ** predargs)
+mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
   struct fmla_atom_t * result_content = malloc(sizeof(struct fmla_atom_t));
   assert(NULL != result_content);
@@ -52,14 +52,14 @@ mk_fmla_atom(char * pred_name, uint8_t arity, struct Term ** predargs)
 struct fmla_t *
 mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 {
-  struct Term ** args = NULL;
+  struct TymTerm ** args = NULL;
 
   va_list varargs;
   va_start(varargs, arity);
   if (arity > 0) {
-    args = malloc(sizeof(struct Term *) * arity);
+    args = malloc(sizeof(struct TymTerm *) * arity);
     for (int i = 0; i < arity; i++) {
-      args[i] = va_arg(varargs, struct Term *);
+      args[i] = va_arg(varargs, struct TymTerm *);
     }
   }
   va_end(varargs);
@@ -208,7 +208,7 @@ fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
       return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
     }
 
-    res = term_to_str(at->predargs[i], dst);
+    res = tym_term_to_str(at->predargs[i], dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -359,7 +359,7 @@ fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
   }
 }
 
-DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
+TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct fmla_t, struct fmlas_t)
 
 struct sym_gen_t *
 mk_sym_gen(const char * prefix)
@@ -419,7 +419,7 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   struct fmla_atom_t * atom = fmla_as_atom(at);
   assert(NULL != atom);
 
-  struct Term ** var_args_T = NULL;
+  struct TymTerm ** var_args_T = NULL;
 
   if (atom->arity > 0) {
     var_args_T = malloc(sizeof(struct Term *) * atom->arity);
@@ -437,11 +437,11 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
         v_cursor = v_cursor->next;
       }
 
-      v_cursor->val = copy_term(atom->predargs[i]);
+      v_cursor->val = tym_copy_term(atom->predargs[i]);
 
       v_cursor->var = mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      var_args_T[i] = mk_term(VAR, strdup(v_cursor->var));
+      var_args_T[i] = tym_mk_term(VAR, strdup(v_cursor->var));
 
       v_cursor->next = NULL;
     }
@@ -468,7 +468,7 @@ valuation_str(struct valuation_t * v, struct buffer_info * dst)
 
     safe_buffer_replace_last(dst, '='); // replace the trailing \0.
 
-    res = term_to_str(v_cursor->val, dst);
+    res = tym_term_to_str(v_cursor->val, dst);
     assert(is_ok_buffer_write_result(res));
     free(res);
 
@@ -499,7 +499,7 @@ free_fmla_atom(struct fmla_atom_t * at)
   free(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
-    free_term(at->predargs[i]);
+    tym_free_term(at->predargs[i]);
   }
 
   if (NULL != at->predargs) {
@@ -601,7 +601,7 @@ free_valuation(struct valuation_t * v)
   free(v->var);
 
   assert(NULL != v->val);
-  free_term(v->val);
+  tym_free_term(v->val);
 
   if (NULL != v->next) {
     free_valuation(v->next);
@@ -619,7 +619,7 @@ mk_fmlas(uint8_t no_fmlas, ...)
   for (int i = 0; i < no_fmlas; i++) {
     struct fmla_t * cur_fmla = va_arg(varargs, struct fmla_t *);
     assert(NULL != cur_fmla);
-    result = mk_fmla_cell(copy_fmla(cur_fmla), result);
+    result = tym_mk_fmla_cell(copy_fmla(cur_fmla), result);
   }
   va_end(varargs);
   return result;
@@ -631,7 +631,7 @@ copy_fmla(const struct fmla_t * const fmla)
   struct fmla_t * result = NULL;
 
   char * pred_name_copy = NULL;
-  struct Term ** predargs_copy = NULL;
+  struct TymTerm ** predargs_copy = NULL;
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -651,7 +651,7 @@ copy_fmla(const struct fmla_t * const fmla)
     if (fmla->param.atom->arity > 0) {
       predargs_copy = malloc(sizeof(struct Term *) * fmla->param.atom->arity);
       for (int i = 0; i < fmla->param.atom->arity; i++) {
-        predargs_copy[i] = copy_term(fmla->param.atom->predargs[i]);
+        predargs_copy[i] = tym_copy_term(fmla->param.atom->predargs[i]);
       }
     }
 
@@ -694,12 +694,12 @@ copy_fmla(const struct fmla_t * const fmla)
 }
 
 void
-test_formula(void)
+tym_test_formula(void)
 {
   printf("***test_formula***\n");
-  struct Term ** args = malloc(sizeof(struct Term *) * 2);
-  args[0] = mk_term(CONST, strdup("arg0"));
-  args[1] = mk_term(CONST, strdup("arg1"));
+  struct TymTerm ** args = malloc(sizeof(struct Term *) * 2);
+  args[0] = tym_mk_term(CONST, strdup("arg0"));
+  args[1] = tym_mk_term(CONST, strdup("arg1"));
 
   for (int i = 0; i < 2; i++) {
     printf("  :%s\n", args[i]->identifier);
@@ -716,7 +716,7 @@ test_formula(void)
   struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
   struct fmla_t * test_quant = mk_fmla_quant(strdup("x"), copy_fmla(test_or));
 
-  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = fmla_str(test_quant, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -731,21 +731,21 @@ test_formula(void)
   free_fmla(test_not);
   free_fmla(test_quant);
 
-  struct Term * c1 = mk_const("ta1");
-  struct Term * c2 = mk_const("ta2");
-  struct Term * c3 = mk_const("ta3");
-  struct Term * c4 = mk_const("ta4");
+  struct TymTerm * c1 = tym_mk_const("ta1");
+  struct TymTerm * c2 = tym_mk_const("ta2");
+  struct TymTerm * c3 = tym_mk_const("ta3");
+  struct TymTerm * c4 = tym_mk_const("ta4");
   test_atom = mk_fmla_atom_varargs(strdup("testpred1"), 4, c1, c2, c3, c4);
   const struct fmla_t * test_atom2 = mk_fmla_atom_varargs(strdup("testpred2"),
-      4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
+      4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
   const struct fmla_t * test_atom3 = mk_fmla_atom_varargs(strdup("testpred3"),
-      4, copy_term(c1), copy_term(c2), copy_term(c3), copy_term(c4));
+      4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
   struct fmlas_t * test_fmlas = mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct fmlas_t * test_fmlas2 = copy_fmlas(test_fmlas);
   struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
   struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas2);
 
-  outbuf = mk_buffer(BUF_SIZE);
+  outbuf = mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_atom, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -755,7 +755,7 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  outbuf = mk_buffer(BUF_SIZE);
+  outbuf = mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_and2, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -765,7 +765,7 @@ test_formula(void)
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
   free_buffer(outbuf);
 
-  outbuf = mk_buffer(BUF_SIZE);
+  outbuf = mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_or, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -783,15 +783,15 @@ test_formula(void)
   free_fmla(test_or2);
 }
 
-struct Terms *
+struct TymTerms *
 filter_var_values(struct valuation_t * const v)
 {
-  struct Terms * result = NULL;
+  struct TymTerms * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
     if (VAR == cursor->val->kind) {
-      struct Term * t_copy = copy_term(cursor->val);
-      result = mk_term_cell(t_copy, result);
+      struct TymTerm * t_copy = tym_copy_term(cursor->val);
+      result = tym_mk_term_cell(t_copy, result);
     }
     cursor = cursor->next;
   }
@@ -799,10 +799,10 @@ filter_var_values(struct valuation_t * const v)
 }
 
 struct fmla_t *
-mk_fmla_quants(const struct Terms * const vars, struct fmla_t * body)
+mk_fmla_quants(const struct TymTerms * const vars, struct fmla_t * body)
 {
   struct fmla_t * result = body;
-  const struct Terms * cursor = vars;
+  const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(VAR == cursor->term->kind);
     struct fmla_t * pre_result =
@@ -826,12 +826,12 @@ valuation_len(const struct valuation_t * v)
   return l;
 }
 
-struct Terms *
+struct TymTerms *
 arguments_of_atom(struct fmla_atom_t * fmla)
 {
-  struct Terms * result = NULL;
+  struct TymTerms * result = NULL;
   for (int i = fmla->arity - 1; i >= 0; i--) {
-    result = mk_term_cell(copy_term(fmla->predargs[i]), result);
+    result = tym_mk_term_cell(tym_copy_term(fmla->predargs[i]), result);
   }
   return result;
 }
@@ -867,10 +867,10 @@ fmla_size(const struct fmla_t * const fmla)
   return result;
 }
 
-struct Terms *
-consts_in_fmla(const struct fmla_t * fmla, struct Terms * acc)
+struct TymTerms *
+consts_in_fmla(const struct fmla_t * fmla, struct TymTerms * acc)
 {
-  struct Terms * result = acc;
+  struct TymTerms * result = acc;
   switch (fmla->kind) {
   case FMLA_CONST:
     result = acc;
@@ -880,9 +880,9 @@ consts_in_fmla(const struct fmla_t * fmla, struct Terms * acc)
     // doesn't appear in the Herbrand Universe.
     result = acc;
     for (int i = 0; i < fmla->param.atom->arity; i++) {
-      struct Term * t = fmla->param.atom->predargs[i];
+      struct TymTerm * t = fmla->param.atom->predargs[i];
       if (CONST == t->kind) {
-        result = mk_term_cell(t, result);
+        result = tym_mk_term_cell(t, result);
       }
     }
     break;

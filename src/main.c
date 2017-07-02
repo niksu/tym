@@ -15,7 +15,7 @@
 #include "libtym.h"
 #include "module_tests.h"
 
-struct Program * parse(const char * string);
+struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
 
 char * input_file_contents = NULL;
@@ -34,22 +34,22 @@ struct param_t params = {
   .test_parsing = false
 };
 
-struct Program * parsed_input_file_contents = NULL;
-struct Program * parsed_query = NULL;
+struct TymProgram * parsed_input_file_contents = NULL;
+struct TymProgram * parsed_query = NULL;
 
-DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-DEFINE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
 #pragma GCC diagnostic pop
 
 int
 main(int argc, char ** argv)
 {
 #ifdef TESTING
-  test_clause();
-  test_formula();
-  test_statement();
+  tym_test_clause();
+  tym_test_formula();
+  tym_test_statement();
   exit(0);
 #endif
   static struct option long_options[] = {
@@ -96,16 +96,16 @@ main(int argc, char ** argv)
       break;
     // FIXME add support for -h
     default:
-      ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
+      TYM_ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
       return -1;
     }
   }
 
   if (params.verbosity > 0) {
-    VERBOSE("input_fine = %s\n", params.input_file);
-    VERBOSE("verbosity = %d\n", params.verbosity);
-    VERBOSE("test_parsing = %d\n", params.test_parsing);
-    VERBOSE("query = %s\n", params.query);
+    TYM_VERBOSE("input_fine = %s\n", params.input_file);
+    TYM_VERBOSE("verbosity = %d\n", params.verbosity);
+    TYM_VERBOSE("test_parsing = %d\n", params.test_parsing);
+    TYM_VERBOSE("query = %s\n", params.query);
   }
 
   if (NULL != params.input_file) {
@@ -115,7 +115,7 @@ main(int argc, char ** argv)
     }
     parsed_input_file_contents = parse(input_file_contents);
     if (params.verbosity > 0 && NULL != input_file_contents) {
-      VERBOSE("input : %d clauses\n", parsed_input_file_contents->no_clauses);
+      TYM_VERBOSE("input : %d clauses\n", parsed_input_file_contents->no_clauses);
     }
   } else if (params.test_parsing) {
     printf("(no input file given)\n");
@@ -127,36 +127,36 @@ main(int argc, char ** argv)
     }
     parsed_query = parse(params.query);
     if (params.verbosity > 0 && NULL != params.query) {
-      VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
+      TYM_VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
     }
   } else if (params.test_parsing) {
     printf("(no query given)\n");
   }
 
   if (params.test_parsing) {
-    struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+    struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
     if (NULL != params.input_file) {
-      res = program_to_str(parsed_input_file_contents, outbuf);
+      res = tym_program_to_str(parsed_input_file_contents, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-      free_program(parsed_input_file_contents);
+      tym_free_program(parsed_input_file_contents);
       free(input_file_contents);
       free(params.input_file);
     }
 
     if (NULL != params.query) {
-      res = program_to_str(parsed_query, outbuf);
+      res = tym_program_to_str(parsed_query, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-      free_program(parsed_query);
+      tym_free_program(parsed_query);
       free(params.query);
     }
 
@@ -166,9 +166,9 @@ main(int argc, char ** argv)
   }
 
   if (NULL == params.input_file) {
-    ERR("No input file given.\n");
+    TYM_ERR("No input file given.\n");
   } else if (0 == parsed_input_file_contents->no_clauses) {
-    ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
+    TYM_ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
   }
 
   struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
@@ -194,7 +194,7 @@ main(int argc, char ** argv)
   }
 #endif
 
-  struct buffer_info * outbuf = mk_buffer(BUF_SIZE);
+  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = NULL;
 
   if (NULL != mdl) {
@@ -207,7 +207,7 @@ main(int argc, char ** argv)
 #endif
 
     const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
-    shallow_free_stmts(mdl->stmts);
+    tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 
     res = model_str(mdl, outbuf);
@@ -217,7 +217,7 @@ main(int argc, char ** argv)
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   }
 
-  DBG("Cleaning up before exiting\n");
+  TYM_DBG("Cleaning up before exiting\n");
 
   if (NULL != mdl) {
     free_model(mdl);
@@ -229,13 +229,13 @@ main(int argc, char ** argv)
   free_buffer(outbuf);
 
   if (NULL != params.input_file) {
-    free_program(parsed_input_file_contents);
+    tym_free_program(parsed_input_file_contents);
     free(input_file_contents);
     free(params.input_file);
   }
 
   if (NULL != params.query) {
-    free_program(parsed_query);
+    tym_free_program(parsed_query);
     free(params.query);
   }
 
@@ -246,7 +246,7 @@ char *
 read_file(char * filename)
 {
   assert(NULL != filename);
-  DBG("Reading \"%s\"\n", filename);
+  TYM_DBG("Reading \"%s\"\n", filename);
 
   char * contents = NULL;
 

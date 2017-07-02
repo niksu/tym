@@ -71,22 +71,22 @@ struct program_t * parse(const char * string);
 
 term : TK_CONST
        { char * identifier = $1;
-         struct term_t * t = mk_term(CONST, identifier);
+         struct term_t * t = tym_mk_term(CONST, identifier);
          $$ = t; }
      | TK_VAR
        { char * identifier = $1;
-         struct term_t * t = mk_term(VAR, identifier);
+         struct term_t * t = tym_mk_term(VAR, identifier);
          $$ = t; }
      | TK_STRING
        { char * identifier = $1;
-         struct term_t * t = mk_term(STR, identifier);
+         struct term_t * t = tym_mk_term(STR, identifier);
          $$ = t; }
 
 terms : term TK_R_RB
-        { struct terms_t * ts = mk_term_cell($1, NULL);
+        { struct terms_t * ts = tym_mk_term_cell($1, NULL);
           $$ = ts; }
       | term TK_COMMA terms
-        { struct terms_t * ts = mk_term_cell($1, $3);
+        { struct terms_t * ts = tym_mk_term_cell($1, $3);
           $$ = ts; }
       | TK_R_RB
         { $$ = NULL; }
@@ -94,45 +94,45 @@ terms : term TK_R_RB
 atom : TK_CONST TK_L_RB terms
        { char * predicate = $1;
          struct terms_t * ts = $3;
-         struct atom_t * atom = mk_atom(predicate, len_Terms_cell(ts), ts);
+         struct atom_t * atom = tym_mk_atom(predicate, tym_len_TymTerms_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom
-        { struct atoms_t * ats = mk_atom_cell($1, NULL);
+        { struct atoms_t * ats = tym_mk_atom_cell($1, NULL);
           $$ = ats; }
       | atom TK_COMMA atoms
-        { struct atoms_t * ats = mk_atom_cell($1, $3);
+        { struct atoms_t * ats = tym_mk_atom_cell($1, $3);
           $$ = ats; }
 
 clause : atom TK_PERIOD
-         { struct clause_t * cl = mk_clause($1, 0, NULL);
+         { struct clause_t * cl = tym_mk_clause($1, 0, NULL);
            $$ = cl; }
        | atom TK_IF atoms TK_PERIOD
          { struct atoms_t * ats = $3;
-           struct clause_t * cl = mk_clause($1, len_Atoms_cell(ats), ats);
+           struct clause_t * cl = tym_mk_clause($1, tym_len_TymAtoms_cell(ats), ats);
            $$ = cl; }
 
 clauses : clause
-          { struct clauses_t * cls = mk_clause_cell($1, NULL);
+          { struct clauses_t * cls = tym_mk_clause_cell($1, NULL);
             $$ = cls; }
         | clause clauses
-          { struct clauses_t * cls = mk_clause_cell($1, $2);
+          { struct clauses_t * cls = tym_mk_clause_cell($1, $2);
             $$ = cls; }
 
 program : clauses
            { struct clauses_t * cls = $1;
-             struct program_t * p = mk_program(len_Clauses_cell(cls), cls);
+             struct program_t * p = tym_mk_program(tym_len_TymClauses_cell(cls), cls);
              *program = p;
            }
         |
-           { struct program_t * p = mk_program(0, NULL);
+           { struct program_t * p = tym_mk_program(0, NULL);
              *program = p;
            }
 
 %%
 
 int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message) {
-  ERR("parse error: %s\n", error_message);
+  TYM_ERR("parse error: %s\n", error_message);
   return 0;
 }
 
@@ -143,13 +143,13 @@ parse(const char * string)
   yyscan_t scanner;
   YY_BUFFER_STATE state;
   if (yylex_init(&scanner)) {
-    ERR("yylex_init encountered a problem.");
+    TYM_ERR("yylex_init encountered a problem.");
     return NULL;
   }
 
   state = yy_scan_string(string, scanner);
   if (yyparse(&parsed, scanner)) {
-    ERR("yyparse encountered a problem.");
+    TYM_ERR("yyparse encountered a problem.");
     return NULL;
   }
 
