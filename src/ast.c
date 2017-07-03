@@ -249,7 +249,7 @@ tym_mk_var(const char * cp_identifier)
 }
 
 struct TymTerm *
-tym_mk_term(TymTermKind kind, const char * identifier)
+tym_mk_term(enum TymTermKind kind, const char * identifier)
 {
   assert(NULL != identifier);
 

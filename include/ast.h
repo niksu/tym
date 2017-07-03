@@ -17,10 +17,10 @@
 #include "buffer.h"
 #include "util.h"
 
-typedef enum {VAR=0, CONST=1, STR=2} TymTermKind;
+enum TymTermKind {VAR=0, CONST=1, STR=2};
 
 struct TymTerm {
-  TymTermKind kind;
+  enum TymTermKind kind;
   const char * identifier;
 };
 
@@ -59,7 +59,7 @@ struct buffer_write_result * tym_program_to_str(const struct TymProgram * const 
 
 struct TymTerm * tym_mk_const(const char * cp_identifier);
 struct TymTerm * tym_mk_var(const char * cp_identifier);
-struct TymTerm * tym_mk_term(TymTermKind kind, const char * identifier);
+struct TymTerm * tym_mk_term(enum TymTermKind kind, const char * identifier);
 struct TymAtom * tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args);
 struct TymClause * tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body);
 struct TymProgram * tym_mk_program(uint8_t no_clauses, struct TymClauses * program);
