@@ -32,7 +32,7 @@ mk_universe(struct TymTerms * terms)
   const struct TymTerms * cursor = terms;
   while (NULL != cursor) {
     result->cardinality++;
-    assert(CONST == cursor->term->kind);
+    assert(TYM_CONST == cursor->term->kind);
     cursor = cursor->next;
   }
 
@@ -182,8 +182,8 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
       // freed, say).
       const_name = strdup(const_name);
     }
-    struct TymTerm * arg1 = tym_mk_term(CONST, const_name);
-    struct TymTerm * arg2 = tym_mk_term(CONST, strdup(uni->element[i]));
+    struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
+    struct TymTerm * arg2 = tym_mk_term(TYM_CONST, strdup(uni->element[i]));
     struct fmla_t * fmla = mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
@@ -454,8 +454,8 @@ void
 tym_test_statement(void)
 {
   printf("***test_statement***\n");
-  struct TymTerm * aT = tym_mk_term(CONST, strdup("a"));
-  struct TymTerm * bT = tym_mk_term(CONST, strdup("b"));
+  struct TymTerm * aT = tym_mk_term(TYM_CONST, strdup("a"));
+  struct TymTerm * bT = tym_mk_term(TYM_CONST, strdup("b"));
   struct TymTerms * terms = tym_mk_term_cell(aT, NULL);
   terms = tym_mk_term_cell(bT, terms);
 
@@ -464,8 +464,8 @@ tym_test_statement(void)
 
   const struct stmt_t * s1S =
     mk_stmt_axiom(mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
-  terms = tym_mk_term_cell(tym_mk_term(VAR, strdup("X")), NULL);
-  terms = tym_mk_term_cell(tym_mk_term(VAR, strdup("Y")), terms);
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("X")), NULL);
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("Y")), terms);
   struct fmla_t * fmla =
     mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
@@ -502,7 +502,7 @@ new_const_in_stmt(const struct stmt_t * stmt)
     result = NULL;
     break;
   case STMT_CONST_DEF:
-    result = tym_mk_term(CONST, strdup(stmt->param.const_def->const_name));
+    result = tym_mk_term(TYM_CONST, strdup(stmt->param.const_def->const_name));
     break;
   default:
     assert(false);
@@ -548,7 +548,7 @@ statementise_universe(struct model_t * mdl)
   assert(0 < mdl->universe->cardinality);
   struct TymTerm ** args = malloc(sizeof(struct Term *) * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    args[i] = tym_mk_term(CONST, strdup(mdl->universe->element[i]));
+    args[i] = tym_mk_term(TYM_CONST, strdup(mdl->universe->element[i]));
   }
   const struct fmla_t * distinctness_fmla =
     mk_fmla_atom(strdup(distinctK), mdl->universe->cardinality, args);

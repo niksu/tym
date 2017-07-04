@@ -441,7 +441,7 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
 
       v_cursor->var = mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      var_args_T[i] = tym_mk_term(VAR, strdup(v_cursor->var));
+      var_args_T[i] = tym_mk_term(TYM_VAR, strdup(v_cursor->var));
 
       v_cursor->next = NULL;
     }
@@ -698,8 +698,8 @@ tym_test_formula(void)
 {
   printf("***test_formula***\n");
   struct TymTerm ** args = malloc(sizeof(struct Term *) * 2);
-  args[0] = tym_mk_term(CONST, strdup("arg0"));
-  args[1] = tym_mk_term(CONST, strdup("arg1"));
+  args[0] = tym_mk_term(TYM_CONST, strdup("arg0"));
+  args[1] = tym_mk_term(TYM_CONST, strdup("arg1"));
 
   for (int i = 0; i < 2; i++) {
     printf("  :%s\n", args[i]->identifier);
@@ -789,7 +789,7 @@ filter_var_values(struct valuation_t * const v)
   struct TymTerms * result = NULL;
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
-    if (VAR == cursor->val->kind) {
+    if (TYM_VAR == cursor->val->kind) {
       struct TymTerm * t_copy = tym_copy_term(cursor->val);
       result = tym_mk_term_cell(t_copy, result);
     }
@@ -804,7 +804,7 @@ mk_fmla_quants(const struct TymTerms * const vars, struct fmla_t * body)
   struct fmla_t * result = body;
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
-    assert(VAR == cursor->term->kind);
+    assert(TYM_VAR == cursor->term->kind);
     struct fmla_t * pre_result =
       mk_fmla_quant(strdup(cursor->term->identifier), result);
     result = pre_result;
@@ -881,7 +881,7 @@ consts_in_fmla(const struct fmla_t * fmla, struct TymTerms * acc)
     result = acc;
     for (int i = 0; i < fmla->param.atom->arity; i++) {
       struct TymTerm * t = fmla->param.atom->predargs[i];
-      if (CONST == t->kind) {
+      if (TYM_CONST == t->kind) {
         result = tym_mk_term_cell(t, result);
       }
     }

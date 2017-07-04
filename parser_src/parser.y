@@ -71,15 +71,15 @@ struct program_t * parse(const char * string);
 
 term : TK_CONST
        { char * identifier = $1;
-         struct term_t * t = tym_mk_term(CONST, identifier);
+         struct term_t * t = tym_mk_term(TYM_CONST, identifier);
          $$ = t; }
      | TK_VAR
        { char * identifier = $1;
-         struct term_t * t = tym_mk_term(VAR, identifier);
+         struct term_t * t = tym_mk_term(TYM_VAR, identifier);
          $$ = t; }
      | TK_STRING
        { char * identifier = $1;
-         struct term_t * t = tym_mk_term(STR, identifier);
+         struct term_t * t = tym_mk_term(TYM_STR, identifier);
          $$ = t; }
 
 terms : term TK_R_RB

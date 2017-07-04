@@ -28,7 +28,7 @@ term_database_add(struct TymTerm * term, struct term_database_t * tdb)
 
   TYM_DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
 
-  if (CONST != term->kind) {
+  if (TYM_CONST != term->kind) {
     return false;
   }
 

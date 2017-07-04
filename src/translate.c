@@ -55,7 +55,7 @@ translate_valuation(struct valuation_t * const v)
   struct valuation_t * cursor = v;
   while (NULL != cursor) {
     result = tym_mk_fmla_cell(mk_fmla_atom_varargs(strdup(eqK), 2,
-          tym_mk_term(VAR, strdup(cursor->var)),
+          tym_mk_term(TYM_VAR, strdup(cursor->var)),
           tym_copy_term(cursor->val)), result);
     cursor = cursor->next;
   }
@@ -69,9 +69,9 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fm
   if (at->arity > 0) {
     args = malloc(sizeof(struct Term *) * at->arity);
     for (int i = 0; i < at->arity; i++) {
-      if (VAR == at->predargs[i]->kind) {
+      if (TYM_VAR == at->predargs[i]->kind) {
         char * placeholder = mk_new_var(cg);
-        args[i] = tym_mk_term(CONST, placeholder);
+        args[i] = tym_mk_term(TYM_CONST, placeholder);
 
         struct stmt_t * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, universe_ty);
         strengthen_model(mdl, stmt);
@@ -140,7 +140,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_
   // Reject the query if it containts constants that don't appear in the program.
   struct TymTerms * cursor = consts_in_fmla(q_fmla, NULL);
   while (NULL != cursor) {
-    if (CONST == cursor->term->kind) {
+    if (TYM_CONST == cursor->term->kind) {
       bool found = false;
       for (int i = 0; i < mdl->universe->cardinality; i++) {
         if (0 == strcmp(cursor->term->identifier, mdl->universe->element[i])) {
@@ -217,7 +217,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
         var_args = malloc(sizeof(struct Term *) * preds_cursor->predicate->arity);
 
         for (int i = 0; i < preds_cursor->predicate->arity; i++) {
-          var_args[i] = tym_mk_term(VAR, mk_new_var(*vg));
+          var_args[i] = tym_mk_term(TYM_VAR, mk_new_var(*vg));
         }
       }
 
@@ -381,8 +381,8 @@ order_statements(const struct stmts_t * stmts)
   const struct stmts_t * result = NULL;
 
   struct TymTerms * declared = NULL;
-  declared = tym_mk_term_cell(tym_mk_term(CONST, strdup(eqK)), declared);
-  declared = tym_mk_term_cell(tym_mk_term(CONST, strdup(distinctK)), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, strdup(eqK)), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, strdup(distinctK)), declared);
 
   bool cursor_is_waiting = false;
 

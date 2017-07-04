@@ -238,14 +238,14 @@ struct TymTerm *
 tym_mk_const(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  return tym_mk_term(CONST, strdup(cp_identifier));
+  return tym_mk_term(TYM_CONST, strdup(cp_identifier));
 }
 
 struct TymTerm *
 tym_mk_var(const char * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  return tym_mk_term(VAR, strdup(cp_identifier));
+  return tym_mk_term(TYM_VAR, strdup(cp_identifier));
 }
 
 struct TymTerm *
@@ -564,7 +564,7 @@ tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
   bool same_identifier = false;
 
   if (t1 == t2) {
-    *error_code = NO_ERROR;
+    *error_code = TYM_NO_ERROR;
     *result = true;
     return true;
   }
@@ -579,10 +579,10 @@ tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
 
   if (!same_kind && same_identifier) {
     successful = false;
-    *error_code = DIFF_KIND_SAME_IDENTIFIER;
+    *error_code = TYM_DIFF_KIND_SAME_IDENTIFIER;
   } else {
     successful = true;
-    *error_code = NO_ERROR;
+    *error_code = TYM_NO_ERROR;
     *result = same_identifier;
   }
 
@@ -593,7 +593,7 @@ void
 tym_test_clause(void) {
   printf("***test_clause***\n");
   struct TymTerm * t = malloc(sizeof(struct TymTerm));
-  *t = (struct TymTerm){.kind = CONST, .identifier = strdup("ok")};
+  *t = (struct TymTerm){.kind = TYM_CONST, .identifier = strdup("ok")};
 
   struct TymAtom * at = malloc(sizeof(struct TymAtom));
   at->predicate = strdup("world");
