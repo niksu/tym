@@ -40,7 +40,7 @@ term_database_add(struct TymTerm * term, struct term_database_t * tdb)
     struct TymTerms * cursor = tdb->term_database[(int)h];
     do {
       bool result;
-      enum tym_eq_term_error error_code;
+      enum TymEqTermError error_code;
       if (tym_eq_term(term, cursor->term, &error_code, &result)) {
           exists = result;
           break;

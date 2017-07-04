@@ -91,8 +91,8 @@ char tym_hash_term(const struct TymTerm *);
 char tym_hash_atom(const struct TymAtom *);
 char tym_hash_clause(const struct TymClause *);
 
-enum tym_eq_term_error {TYM_NO_ERROR = 0, TYM_DIFF_KIND_SAME_IDENTIFIER};
-bool tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2, enum tym_eq_term_error * error_code, bool * result);
+enum TymEqTermError {TYM_NO_ERROR = 0, TYM_DIFF_KIND_SAME_IDENTIFIER};
+bool tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2, enum TymEqTermError * error_code, bool * result);
 
 struct TymTerm * tym_copy_term(const struct TymTerm * const cp_term);
 struct TymAtom * tym_copy_atom(const struct TymAtom * const cp_atom);

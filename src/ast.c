@@ -553,7 +553,7 @@ tym_hash_clause(const struct TymClause * clause) {
 
 bool
 tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
-    enum tym_eq_term_error * error_code, bool * result)
+    enum TymEqTermError * error_code, bool * result)
 {
   assert(NULL != t1);
   assert(NULL != t2);
@@ -652,7 +652,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
 #endif
     const struct TymTerms * cursor = ts;
     bool found = false;
-    enum tym_eq_term_error error_code;
+    enum TymEqTermError error_code;
     while (NULL != cursor) {
       if (tym_eq_term(cursor->term, ss->term, &error_code, &found)) {
         if (found) {
