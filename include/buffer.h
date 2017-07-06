@@ -29,8 +29,6 @@ void unsafe_buffer_str(struct TymBufferInfo * buf, char * s);
 void unsafe_dec_idx(struct TymBufferInfo * buf, size_t n);
 void safe_buffer_replace_last(struct TymBufferInfo * buf, char c);
 
-struct buffer_write_result * buf_strcpy(struct TymBufferInfo * dst, const char * src);
-
 enum TymBufferErrors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
 
 MAYBE_ERROR(buffer_write_result, size_t, enum TymBufferErrors)
@@ -39,6 +37,8 @@ MAYBE_ERROR__VAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
 MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
 MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
 MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+
+struct buffer_write_result * buf_strcpy(struct TymBufferInfo * dst, const char * src);
 
 void buff_error_msg(void * x);
 ERROR_CHECK_DECL(buffer_write_result, size_t, enum TymBufferErrors, buff_error_msg)
