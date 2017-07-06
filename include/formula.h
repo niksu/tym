@@ -61,9 +61,9 @@ struct fmla_t * copy_fmla(const struct fmla_t * const);
 
 struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
 
-struct buffer_write_result * fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst);
-struct buffer_write_result * fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst);
-struct buffer_write_result * fmla_str(const struct fmla_t * fmla, struct buffer_info * dst);
+struct buffer_write_result * fmla_atom_str(struct fmla_atom_t * at, struct TymBufferInfo * dst);
+struct buffer_write_result * fmla_quant_str(struct fmla_quant_t * quant, struct TymBufferInfo * dst);
+struct buffer_write_result * fmla_str(const struct fmla_t * fmla, struct TymBufferInfo * dst);
 
 struct sym_gen_t {
   const char * prefix;
@@ -81,7 +81,7 @@ struct valuation_t {
 };
 
 size_t valuation_len(const struct valuation_t * const v);
-struct buffer_write_result * valuation_str(struct valuation_t * v, struct buffer_info * dst);
+struct buffer_write_result * valuation_str(struct valuation_t * v, struct TymBufferInfo * dst);
 
 bool fmla_is_atom(const struct fmla_t * fmla);
 struct fmla_atom_t * fmla_as_atom(const struct fmla_t * fmla);

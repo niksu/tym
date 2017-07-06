@@ -16,7 +16,7 @@
 
 uint8_t max_var_width = 10;
 
-struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst);
+struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct TymBufferInfo * dst);
 static struct fmlas_t * copy_fmlas(const struct fmlas_t *);
 
 struct fmla_t *
@@ -191,7 +191,7 @@ mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
 }
 
 struct buffer_write_result *
-fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
+fmla_atom_str(struct fmla_atom_t * at, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -224,7 +224,7 @@ fmla_atom_str(struct fmla_atom_t * at, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
+fmla_quant_str(struct fmla_quant_t * quant, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -257,7 +257,7 @@ fmla_quant_str(struct fmla_quant_t * quant, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_info * dst)
+fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -275,7 +275,7 @@ fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct buffer_in
 }
 
 struct buffer_write_result *
-fmla_str(const struct fmla_t * fmla, struct buffer_info * dst)
+fmla_str(const struct fmla_t * fmla, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -453,7 +453,7 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
 }
 
 struct buffer_write_result *
-valuation_str(struct valuation_t * v, struct buffer_info * dst)
+valuation_str(struct valuation_t * v, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -716,7 +716,7 @@ tym_test_formula(void)
   struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
   struct fmla_t * test_quant = mk_fmla_quant(strdup("x"), copy_fmla(test_or));
 
-  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = fmla_str(test_quant, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);

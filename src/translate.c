@@ -128,7 +128,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_
   struct fmla_t * q_fmla = translate_atom(q_cl->head);
 
 #if DEBUG
-  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = fmla_str(q_fmla, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -172,7 +172,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
   for (int i = 0; i < program->no_clauses; i++) {
     (void)clause_database_add(program->program[i], adb, NULL);
   }
-  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = atom_database_str(adb, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);
@@ -389,7 +389,7 @@ order_statements(const struct stmts_t * stmts)
   while (NULL != cursor || NULL != waiting) {
 
 #if DEBUG
-    struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+    struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
     printf("|declared| = %d\n", tym_len_TymTerms_cell(declared));

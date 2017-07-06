@@ -50,7 +50,7 @@ mk_universe(struct TymTerms * terms)
 }
 
 struct buffer_write_result *
-universe_str(const struct universe_t * const uni, struct buffer_info * dst)
+universe_str(const struct universe_t * const uni, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -192,7 +192,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
 }
 
 struct buffer_write_result *
-stmt_str(const struct stmt_t * const stmt, struct buffer_info * dst)
+stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -352,7 +352,7 @@ free_stmt(const struct stmt_t * stmt)
 TYM_DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
 struct buffer_write_result *
-stmts_str(const struct stmts_t * const stmts, struct buffer_info * dst)
+stmts_str(const struct stmts_t * const stmts, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
   const struct stmts_t * cursor = stmts;
@@ -401,7 +401,7 @@ mk_model(struct universe_t * uni)
 }
 
 struct buffer_write_result *
-model_str(const struct model_t * const mdl, struct buffer_info * dst)
+model_str(const struct model_t * const mdl, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -478,7 +478,7 @@ tym_test_statement(void)
   strengthen_model(mdl, s3AS);
   strengthen_model(mdl, s3BS);
 
-  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = model_str(mdl, outbuf);
   assert(is_ok_buffer_write_result(res));
   free(res);

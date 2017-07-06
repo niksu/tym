@@ -15,32 +15,32 @@
 
 #include "util.h"
 
-struct buffer_info {
+struct TymBufferInfo {
   char * const buffer;
   size_t idx;
   const size_t buffer_size;
 };
 
-struct buffer_info * mk_buffer(const size_t buffer_size);
-void free_buffer(struct buffer_info * buf);
-bool have_space(struct buffer_info * buf, size_t n);
-void unsafe_buffer_char(struct buffer_info * buf, char c);
-void unsafe_buffer_str(struct buffer_info * buf, char * s);
-void unsafe_dec_idx(struct buffer_info * buf, size_t n);
-void safe_buffer_replace_last(struct buffer_info * buf, char c);
+struct TymBufferInfo * mk_buffer(const size_t buffer_size);
+void free_buffer(struct TymBufferInfo * buf);
+bool have_space(struct TymBufferInfo * buf, size_t n);
+void unsafe_buffer_char(struct TymBufferInfo * buf, char c);
+void unsafe_buffer_str(struct TymBufferInfo * buf, char * s);
+void unsafe_dec_idx(struct TymBufferInfo * buf, size_t n);
+void safe_buffer_replace_last(struct TymBufferInfo * buf, char c);
 
-struct buffer_write_result * buf_strcpy(struct buffer_info * dst, const char * src);
+struct buffer_write_result * buf_strcpy(struct TymBufferInfo * dst, const char * src);
 
-enum buffer_errors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
+enum TymBufferErrors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
 
-MAYBE_ERROR(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__IS_OK_DECL(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__VAL_OF_DECL(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__IS_OK_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__VAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
 
 void buff_error_msg(void * x);
-ERROR_CHECK_DECL(buffer_write_result, size_t, enum buffer_errors, buff_error_msg)
+ERROR_CHECK_DECL(buffer_write_result, size_t, enum TymBufferErrors, buff_error_msg)
 
 #endif /* __TYM_BUFFER_H__ */

@@ -61,7 +61,7 @@ term_database_add(struct TymTerm * term, struct term_database_t * tdb)
 }
 
 struct buffer_write_result *
-term_database_str(struct term_database_t * tdb, struct buffer_info * dst)
+term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst)
 {
   assert(NULL != tdb);
   assert(NULL != dst);
@@ -246,7 +246,7 @@ atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enu
 }
 
 struct buffer_write_result *
-atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
+atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
 {
   assert(NULL != adb);
 
@@ -309,7 +309,7 @@ atom_database_str(struct atom_database_t * adb, struct buffer_info * dst)
 }
 
 struct buffer_write_result *
-predicate_str(const struct predicate_t * pred, struct buffer_info * dst)
+predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 

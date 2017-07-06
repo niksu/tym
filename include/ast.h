@@ -50,12 +50,12 @@ struct TymProgram {
   struct TymClause ** program;
 };
 
-struct buffer_write_result * tym_term_to_str(const struct TymTerm * const term, struct buffer_info * dst);
-struct buffer_write_result * tym_terms_to_str(const struct TymTerms * const terms, struct buffer_info * dst);
-struct buffer_write_result * tym_predicate_to_str(const struct TymAtom * atom, struct buffer_info * dst);
-struct buffer_write_result * tym_atom_to_str(const struct TymAtom * const atom, struct buffer_info * dst);
-struct buffer_write_result * tym_clause_to_str(const struct TymClause * const clause, struct buffer_info * dst);
-struct buffer_write_result * tym_program_to_str(const struct TymProgram * const program, struct buffer_info * dst);
+struct buffer_write_result * tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst);
+struct buffer_write_result * tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst);
+struct buffer_write_result * tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst);
+struct buffer_write_result * tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst);
+struct buffer_write_result * tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst);
+struct buffer_write_result * tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst);
 
 struct TymTerm * tym_mk_const(const char * cp_identifier);
 struct TymTerm * tym_mk_var(const char * cp_identifier);
@@ -76,9 +76,9 @@ void tym_free_clause(struct TymClause * clause);
 void tym_free_clauses(struct TymClauses * clauses);
 void tym_free_program(struct TymProgram * program);
 
-typedef struct buffer_write_result * (*tym_x_to_str_t)(void *, struct buffer_info * dst);
+typedef struct buffer_write_result * (*tym_x_to_str_t)(void *, struct TymBufferInfo * dst);
 
-void tym_debug_out_syntax(void * x, struct buffer_write_result * (*tym_x_to_str)(void *, struct buffer_info * dst));
+void tym_debug_out_syntax(void * x, struct buffer_write_result * (*tym_x_to_str)(void *, struct TymBufferInfo * dst));
 
 #if TYM_DEBUG
 #define TYM_DBG_SYNTAX tym_debug_out_syntax

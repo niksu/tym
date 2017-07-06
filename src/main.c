@@ -134,7 +134,7 @@ main(int argc, char ** argv)
   }
 
   if (params.test_parsing) {
-    struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+    struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
     struct buffer_write_result * res = NULL;
 
     if (NULL != params.input_file) {
@@ -194,7 +194,7 @@ main(int argc, char ** argv)
   }
 #endif
 
-  struct buffer_info * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
   struct buffer_write_result * res = NULL;
 
   if (NULL != mdl) {

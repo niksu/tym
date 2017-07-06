@@ -12,21 +12,21 @@
 
 #include "buffer.h"
 
-struct buffer_info *
+struct TymBufferInfo *
 mk_buffer(const size_t buffer_size)
 {
   char * b = malloc(sizeof(char) * buffer_size);
   assert(NULL != b);
   memset(b, '\0', buffer_size);
-  struct buffer_info * buf = malloc(sizeof(struct buffer_info));
-  *buf = (struct buffer_info){.buffer = b, .idx = 0, .buffer_size = buffer_size};
+  struct TymBufferInfo * buf = malloc(sizeof(struct TymBufferInfo));
+  *buf = (struct TymBufferInfo){.buffer = b, .idx = 0, .buffer_size = buffer_size};
   return buf;
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_buffer(struct buffer_info * buf)
+free_buffer(struct TymBufferInfo * buf)
 {
   free((void *)buf->buffer);
   free((void *)buf);
@@ -34,7 +34,7 @@ free_buffer(struct buffer_info * buf)
 #pragma GCC diagnostic pop
 
 bool
-have_space(struct buffer_info * buf, size_t n)
+have_space(struct TymBufferInfo * buf, size_t n)
 {
   assert(buf->idx >= 0);
   assert(buf->buffer_size > 0);
@@ -43,14 +43,14 @@ have_space(struct buffer_info * buf, size_t n)
 }
 
 inline void
-unsafe_buffer_char(struct buffer_info * buf, char c)
+unsafe_buffer_char(struct TymBufferInfo * buf, char c)
 {
   buf->buffer[buf->idx] = c;
   buf->idx += 1;
 }
 
 inline void
-safe_buffer_replace_last(struct buffer_info * buf, char c)
+safe_buffer_replace_last(struct TymBufferInfo * buf, char c)
 {
   assert(NULL != buf);
   assert(buf->idx > 0);
@@ -60,7 +60,7 @@ safe_buffer_replace_last(struct buffer_info * buf, char c)
 }
 
 inline void
-unsafe_buffer_str(struct buffer_info * buf, char * s)
+unsafe_buffer_str(struct TymBufferInfo * buf, char * s)
 {
   strcpy(buf->buffer + buf->idx, s);
   // NOTE the updated idx doesn't include the terminating null character, which
@@ -69,13 +69,13 @@ unsafe_buffer_str(struct buffer_info * buf, char * s)
 }
 
 inline void
-unsafe_dec_idx(struct buffer_info * buf, size_t n)
+unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
 {
   buf->idx -= n;
 }
 
 struct buffer_write_result *
-buf_strcpy(struct buffer_info * dst, const char * src)
+buf_strcpy(struct TymBufferInfo * dst, const char * src)
 {
   size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
   if (have_space(dst, l)) {
@@ -87,18 +87,18 @@ buf_strcpy(struct buffer_info * dst, const char * src)
   }
 }
 
-MAYBE_ERROR__IS_OK_DEFN(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__VAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__ERRVAL_OF_DEFN(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)
-MAYBE_ERROR__MKERRVAL_DEFN(buffer_write_result, size_t, enum buffer_errors)
+MAYBE_ERROR__IS_OK_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__VAL_OF_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__ERRVAL_OF_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__MKVAL_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
+MAYBE_ERROR__MKERRVAL_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
 
 //Error handler -- if something's wrong with the buffer then explain what's
 //wrong, and terminate.
 void
 buff_error_msg(void * x)
 {
-  struct buffer_info * buf = (struct buffer_info *)x;
+  struct TymBufferInfo * buf = (struct TymBufferInfo *)x;
   if (buf->idx >= buf->buffer_size) {
     buf->idx = buf->buffer_size - 1;
   }
@@ -108,4 +108,4 @@ buff_error_msg(void * x)
   assert(false);
 }
 
-ERROR_CHECK_DEFN(buffer_write_result, size_t, enum buffer_errors, buff_error_msg)
+ERROR_CHECK_DEFN(buffer_write_result, size_t, enum TymBufferErrors, buff_error_msg)
