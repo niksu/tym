@@ -15,17 +15,17 @@
 #include "module_tests.h"
 #include "util.h"
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 {
   assert(NULL != term);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = buf_strcpy(dst, term->identifier);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, term->identifier);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
@@ -36,25 +36,25 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = buf_strcpy(dst, atom->predicate);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, atom->predicate);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
@@ -65,54 +65,54 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = tym_predicate_to_str(atom, dst);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_predicate_to_str(atom, dst);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
   // There needs to be space to store at least "()\0".
-  if (have_space(dst, 3)) {
-    unsafe_buffer_char(dst, '(');
+  if (tym_have_space(dst, 3)) {
+    tym_unsafe_buffer_char(dst, '(');
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
   for (int i = 0; i < atom->arity; i++) {
     res = tym_term_to_str(atom->args[i], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
-    unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+    tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
     if (i != atom->arity - 1) {
       // There needs to be space to store at least ", x)\0".
-      if (!have_space(dst, 5)) {
-        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      if (!tym_have_space(dst, 5)) {
+        return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
       }
 
-      unsafe_buffer_str(dst, ", ");
+      tym_unsafe_buffer_str(dst, ", ");
     }
   }
 
-  if (have_space(dst, 2)) {
-    unsafe_buffer_char(dst, ')');
+  if (tym_have_space(dst, 2)) {
+    tym_unsafe_buffer_char(dst, ')');
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
 #if TYM_DEBUG
@@ -124,11 +124,11 @@ tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
@@ -151,49 +151,49 @@ tym_copy_clause(const struct TymClause * const cp_clause)
   return result;
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst)
 {
   assert(NULL != clause);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = tym_atom_to_str(clause->head, dst);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_atom_to_str(clause->head, dst);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
   if (clause->body_size > 0) {
     // There needs to be space to store at least " :- x().".
-    if (!have_space(dst, 8)) {
-      return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    if (!tym_have_space(dst, 8)) {
+      return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
     }
 
-    unsafe_buffer_str(dst, " :- ");
+    tym_unsafe_buffer_str(dst, " :- ");
 
     for (int i = 0; i < clause->body_size; i++) {
       res = tym_atom_to_str(clause->body[i], dst);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
-      unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+      tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
       if (i != clause->body_size - 1) {
         // There needs to be space to store at least ", x().\0".
-        if (!have_space(dst, 7)) {
-          return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+        if (!tym_have_space(dst, 7)) {
+          return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
         }
 
-        unsafe_buffer_str(dst, ", ");
+        tym_unsafe_buffer_str(dst, ", ");
       }
     }
   }
 
   // There needs to be space to store at least ".\0".
-  if (have_space(dst, 2)) {
-    unsafe_buffer_char(dst, '.');
+  if (tym_have_space(dst, 2)) {
+    tym_unsafe_buffer_char(dst, '.');
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
 #if TYM_DEBUG
@@ -205,33 +205,33 @@ tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * 
   unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst)
 {
   assert(NULL != program);
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = NULL;
+  struct TymBufferWriteResult * res = NULL;
 
   for (int i = 0; i < program->no_clauses; i++) {
     res = tym_clause_to_str(program->program[i], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
     if (i < program->no_clauses - 1) {
-      safe_buffer_replace_last(dst, '\n');
+      tym_safe_buffer_replace_last(dst, '\n');
     }
   }
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
 struct TymTerm *
@@ -486,17 +486,17 @@ tym_free_program(struct TymProgram * program)
 #pragma GCC diagnostic pop
 
 void
-tym_debug_out_syntax(void * x, struct buffer_write_result * (*tym_x_to_str)(void *, struct TymBufferInfo * dst))
+tym_debug_out_syntax(void * x, struct TymBufferWriteResult * (*tym_x_to_str)(void *, struct TymBufferInfo * dst))
 {
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
 
-  struct buffer_write_result * res = tym_x_to_str(x, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_x_to_str(x, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
   TYM_DBG("%s", outbuf->buffer);
 
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 }
 
 char
@@ -612,15 +612,15 @@ tym_test_clause(void) {
   cl->body = malloc(sizeof(struct TymAtom *) * 1);
   cl->body[0] = at;
 
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-  struct buffer_write_result * res = tym_clause_to_str(cl, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferWriteResult * res = tym_clause_to_str(cl, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
   tym_free_clause(cl);
 }
@@ -667,7 +667,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
     if (!found) {
 #if TYM_DEBUG
       struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-      struct buffer_write_result * res = term_to_str(ss->term, outbuf);
+      struct TymBufferWriteResult * res = term_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
@@ -688,7 +688,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
   return result;
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst)
 {
   assert(NULL != terms);
@@ -697,28 +697,28 @@ tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst
 
   const struct TymTerms * cursor = terms;
 
-  struct buffer_write_result * res = NULL;
+  struct TymBufferWriteResult * res = NULL;
 
   while (NULL != cursor) {
     res = tym_term_to_str(cursor->term, dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
     if (NULL != terms->next) {
-      safe_buffer_replace_last(dst, ',');
-      if (have_space(dst, 1)) {
-        unsafe_buffer_char(dst, ' ');
+      tym_safe_buffer_replace_last(dst, ',');
+      if (tym_have_space(dst, 1)) {
+        tym_unsafe_buffer_char(dst, ' ');
       } else {
-        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+        return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
       }
     }
 
     cursor = cursor->next;
   }
 
-  unsafe_buffer_char(dst, '\0');
+  tym_unsafe_buffer_char(dst, '\0');
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
 struct TymAtom *

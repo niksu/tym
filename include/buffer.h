@@ -21,26 +21,26 @@ struct TymBufferInfo {
   const size_t buffer_size;
 };
 
-struct TymBufferInfo * mk_buffer(const size_t buffer_size);
-void free_buffer(struct TymBufferInfo * buf);
-bool have_space(struct TymBufferInfo * buf, size_t n);
-void unsafe_buffer_char(struct TymBufferInfo * buf, char c);
-void unsafe_buffer_str(struct TymBufferInfo * buf, char * s);
-void unsafe_dec_idx(struct TymBufferInfo * buf, size_t n);
-void safe_buffer_replace_last(struct TymBufferInfo * buf, char c);
+struct TymBufferInfo * tym_mk_buffer(const size_t buffer_size);
+void tym_free_buffer(struct TymBufferInfo * buf);
+bool tym_have_space(struct TymBufferInfo * buf, size_t n);
+void tym_unsafe_buffer_char(struct TymBufferInfo * buf, char c);
+void tym_unsafe_buffer_str(struct TymBufferInfo * buf, char * s);
+void tym_unsafe_dec_idx(struct TymBufferInfo * buf, size_t n);
+void tym_safe_buffer_replace_last(struct TymBufferInfo * buf, char c);
 
 enum TymBufferErrors {NON_BUFF_ERROR, BUFF_ERR_OVERFLOW};
 
-MAYBE_ERROR(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__IS_OK_DECL(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__VAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__ERRVAL_OF_DECL(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__MKVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__MKERRVAL_DECL(buffer_write_result, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__IS_OK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__VAL_OF_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__ERRVAL_OF_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__MKVAL_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__MKERRVAL_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
 
-struct buffer_write_result * buf_strcpy(struct TymBufferInfo * dst, const char * src);
+struct TymBufferWriteResult * tym_buf_strcpy(struct TymBufferInfo * dst, const char * src);
 
-void buff_error_msg(void * x);
-ERROR_CHECK_DECL(buffer_write_result, size_t, enum TymBufferErrors, buff_error_msg)
+void tym_buff_error_msg(void * x);
+TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_error_msg)
 
 #endif /* __TYM_BUFFER_H__ */

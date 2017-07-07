@@ -16,7 +16,7 @@
 
 uint8_t max_var_width = 10;
 
-struct buffer_write_result * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct TymBufferInfo * dst);
+struct TymBufferWriteResult * fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct TymBufferInfo * dst);
 static struct fmlas_t * copy_fmlas(const struct fmlas_t *);
 
 struct fmla_t *
@@ -190,172 +190,172 @@ mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent)
   return result;
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 fmla_atom_str(struct fmla_atom_t * at, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = buf_strcpy(dst, at->pred_name);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, at->pred_name);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
   for (int i = 0; i < at->arity; i++) {
-    if (have_space(dst, 1)) {
-      unsafe_buffer_char(dst, ' ');
+    if (tym_have_space(dst, 1)) {
+      tym_unsafe_buffer_char(dst, ' ');
     } else {
-      return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
     }
 
     res = tym_term_to_str(at->predargs[i], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
-    unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+    tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
   }
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 fmla_quant_str(struct fmla_quant_t * quant, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  if (have_space(dst, 2)) {
-    unsafe_buffer_str(dst, "((");
+  if (tym_have_space(dst, 2)) {
+    tym_unsafe_buffer_str(dst, "((");
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
-  struct buffer_write_result * res = buf_strcpy(dst, quant->bv);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, quant->bv);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+  tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-  res = buf_strcpy(dst, universe_ty);
-  assert(is_ok_buffer_write_result(res));
+  res = tym_buf_strcpy(dst, universe_ty);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+  tym_safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
 
-  unsafe_buffer_str(dst, ") ");
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_buffer_str(dst, ") ");
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 
   res = fmla_str(quant->body, dst);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 fmla_junction_str(struct fmla_t * fmlaL, struct fmla_t * fmlaR, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = fmla_str(fmlaL, dst);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = fmla_str(fmlaL, dst);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+  tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
   res = fmla_str(fmlaR, dst);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 fmla_str(const struct fmla_t * fmla, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
   const size_t fmla_sz = fmla_size(fmla);
   if (fmla_sz > 1) {
-    if (have_space(dst, 1)) {
-      unsafe_buffer_char(dst, '(');
+    if (tym_have_space(dst, 1)) {
+      tym_unsafe_buffer_char(dst, '(');
     } else {
-      return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+      return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
     }
   }
 
-  struct buffer_write_result * res = NULL;
+  struct TymBufferWriteResult * res = NULL;
 
   switch (fmla->kind) {
   case FMLA_CONST:
     if (fmla->param.const_value) {
-      res = buf_strcpy(dst, "true");
+      res = tym_buf_strcpy(dst, "true");
     } else {
-      res = buf_strcpy(dst, "false");
+      res = tym_buf_strcpy(dst, "false");
     }
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   case FMLA_ATOM:
     res = fmla_atom_str(fmla->param.atom, dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   case FMLA_AND:
-    res = buf_strcpy(dst, "and");
-    assert(is_ok_buffer_write_result(res));
+    res = tym_buf_strcpy(dst, "and");
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   case FMLA_OR:
-    res = buf_strcpy(dst, "or");
-    assert(is_ok_buffer_write_result(res));
+    res = tym_buf_strcpy(dst, "or");
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   case FMLA_NOT:
-    res = buf_strcpy(dst, "not");
-    assert(is_ok_buffer_write_result(res));
+    res = tym_buf_strcpy(dst, "not");
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = fmla_str(fmla->param.args[0], dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   case FMLA_EX:
-    res = buf_strcpy(dst, "exists");
-    error_check_buffer_write_result(res, buff_error_msg, dst);
+    res = tym_buf_strcpy(dst, "exists");
+    error_check_TymBufferWriteResult(res, tym_buff_error_msg, dst);
     free(res);
-    safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = fmla_quant_str(fmla->param.quant, dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
   default:
-    return mkerrval_buffer_write_result(NON_BUFF_ERROR);
+    return tym_mkerrval_TymBufferWriteResult(NON_BUFF_ERROR);
   }
 
   if (fmla_sz > 1) {
-    safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
   } else {
-    unsafe_dec_idx(dst, 1);
+    tym_unsafe_dec_idx(dst, 1);
   }
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
@@ -452,44 +452,44 @@ mk_abstract_vars(const struct fmla_t * at, struct sym_gen_t * vg, struct valuati
   return mk_fmla_atom(strdup(atom->pred_name), atom->arity, var_args_T);
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 valuation_str(struct valuation_t * v, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
   struct valuation_t * v_cursor = v;
 
-  struct buffer_write_result * res = NULL;
+  struct TymBufferWriteResult * res = NULL;
 
   while (NULL != v_cursor) {
-    res = buf_strcpy(dst, v_cursor->var);
-    assert(is_ok_buffer_write_result(res));
+    res = tym_buf_strcpy(dst, v_cursor->var);
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
-    safe_buffer_replace_last(dst, '='); // replace the trailing \0.
+    tym_safe_buffer_replace_last(dst, '='); // replace the trailing \0.
 
     res = tym_term_to_str(v_cursor->val, dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
     v_cursor = v_cursor->next;
 
     if (NULL != v_cursor) {
-      safe_buffer_replace_last(dst, ','); // replace the trailing \0.
+      tym_safe_buffer_replace_last(dst, ','); // replace the trailing \0.
 
-      if (have_space(dst, 1)) {
-        unsafe_buffer_char(dst, ' ');
+      if (tym_have_space(dst, 1)) {
+        tym_unsafe_buffer_char(dst, ' ');
       } else {
-        return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+        return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
       }
     }
   }
 
-  if (have_space(dst, 1)) {
-    unsafe_buffer_char(dst, '\0');
-    return mkval_buffer_write_result(dst->idx - initial_idx);
+  if (tym_have_space(dst, 1)) {
+    tym_unsafe_buffer_char(dst, '\0');
+    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
@@ -716,16 +716,16 @@ tym_test_formula(void)
   struct fmla_t * test_or = mk_fmla_or(copy_fmla(test_not), copy_fmla(test_and));
   struct fmla_t * test_quant = mk_fmla_quant(strdup("x"), copy_fmla(test_or));
 
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-  struct buffer_write_result * res = fmla_str(test_quant, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferWriteResult * res = fmla_str(test_quant, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
 
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
   free_fmla(test_and);
   free_fmla(test_atom);
   free_fmla(test_not);
@@ -745,35 +745,35 @@ tym_test_formula(void)
   struct fmla_t * test_and2 = mk_fmla_ands(test_fmlas);
   struct fmla_t * test_or2 = mk_fmla_ors(test_fmlas2);
 
-  outbuf = mk_buffer(TYM_BUF_SIZE);
+  outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_atom, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
-  outbuf = mk_buffer(TYM_BUF_SIZE);
+  outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_and2, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
-  outbuf = mk_buffer(TYM_BUF_SIZE);
+  outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   res = fmla_str(test_or, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
   printf("strlen=%zu\n", strlen(outbuf->buffer));
   assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
   free_fmla(test_atom);
   free_fmla(test_atom2);

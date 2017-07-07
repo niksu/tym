@@ -172,9 +172,9 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
   for (int i = 0; i < program->no_clauses; i++) {
     (void)clause_database_add(program->program[i], adb, NULL);
   }
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-  struct buffer_write_result * res = atom_database_str(adb, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferWriteResult * res = atom_database_str(adb, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #if DEBUG
   printf("clause database (remaining=%zu)\n|%s|\n",
@@ -193,7 +193,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #else
   res = model_str(mdl, outbuf);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #endif
 
@@ -229,7 +229,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
 #pragma GCC diagnostic pop
 
       res = fmla_str(atom, outbuf);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if DEBUG
       printf("bodyless: %s\n", outbuf->buffer);
@@ -271,7 +271,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
           mk_fmla_atom(strdup(head_atom->predicate), head_atom->arity, args);
 
         res = fmla_str(head_fmla, outbuf);
-        assert(is_ok_buffer_write_result(res));
+        assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("from: %s\n", outbuf->buffer);
@@ -284,14 +284,14 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
         }
         abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, val);
         res = fmla_str(abs_head_fmla, outbuf);
-        assert(is_ok_buffer_write_result(res));
+        assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("to: %s\n", outbuf->buffer);
 #endif
 
         res = valuation_str(*val, outbuf);
-        assert(is_ok_buffer_write_result(res));
+        assert(tym_is_ok_TymBufferWriteResult(res));
 #if DEBUG
         if (0 == val_of_buffer_write_result(res)) {
           printf("  where: (no substitutions)\n");
@@ -313,7 +313,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
         free_fmla(quantified_fmla);
 
         res = fmla_str(fmlas_cursor->fmla, outbuf);
-        assert(is_ok_buffer_write_result(res));
+        assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("  :|%s|\n", outbuf->buffer);
@@ -338,7 +338,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
 
       const struct fmla_t * fmla = mk_fmla_ors((struct fmlas_t *)fmlas);
       res = fmla_str(fmla, outbuf);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if DEBUG
       printf("pre-result: %s\n", outbuf->buffer);
@@ -365,7 +365,7 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
 #endif
   }
 
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
   free_atom_database(adb);
 

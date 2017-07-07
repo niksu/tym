@@ -13,7 +13,7 @@
 #include "buffer.h"
 
 struct TymBufferInfo *
-mk_buffer(const size_t buffer_size)
+tym_mk_buffer(const size_t buffer_size)
 {
   char * b = malloc(sizeof(char) * buffer_size);
   assert(NULL != b);
@@ -26,7 +26,7 @@ mk_buffer(const size_t buffer_size)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_buffer(struct TymBufferInfo * buf)
+tym_free_buffer(struct TymBufferInfo * buf)
 {
   free((void *)buf->buffer);
   free((void *)buf);
@@ -34,7 +34,7 @@ free_buffer(struct TymBufferInfo * buf)
 #pragma GCC diagnostic pop
 
 bool
-have_space(struct TymBufferInfo * buf, size_t n)
+tym_have_space(struct TymBufferInfo * buf, size_t n)
 {
   assert(buf->idx >= 0);
   assert(buf->buffer_size > 0);
@@ -43,14 +43,14 @@ have_space(struct TymBufferInfo * buf, size_t n)
 }
 
 inline void
-unsafe_buffer_char(struct TymBufferInfo * buf, char c)
+tym_unsafe_buffer_char(struct TymBufferInfo * buf, char c)
 {
   buf->buffer[buf->idx] = c;
   buf->idx += 1;
 }
 
 inline void
-safe_buffer_replace_last(struct TymBufferInfo * buf, char c)
+tym_safe_buffer_replace_last(struct TymBufferInfo * buf, char c)
 {
   assert(NULL != buf);
   assert(buf->idx > 0);
@@ -60,7 +60,7 @@ safe_buffer_replace_last(struct TymBufferInfo * buf, char c)
 }
 
 inline void
-unsafe_buffer_str(struct TymBufferInfo * buf, char * s)
+tym_unsafe_buffer_str(struct TymBufferInfo * buf, char * s)
 {
   strcpy(buf->buffer + buf->idx, s);
   // NOTE the updated idx doesn't include the terminating null character, which
@@ -69,34 +69,34 @@ unsafe_buffer_str(struct TymBufferInfo * buf, char * s)
 }
 
 inline void
-unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
+tym_unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
 {
   buf->idx -= n;
 }
 
-struct buffer_write_result *
-buf_strcpy(struct TymBufferInfo * dst, const char * src)
+struct TymBufferWriteResult *
+tym_buf_strcpy(struct TymBufferInfo * dst, const char * src)
 {
   size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
-  if (have_space(dst, l)) {
+  if (tym_have_space(dst, l)) {
     strcpy(dst->buffer + dst->idx, src);
     dst->idx += l;
-    return mkval_buffer_write_result(l);
+    return tym_mkval_TymBufferWriteResult(l);
   } else {
-    return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+    return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 }
 
-MAYBE_ERROR__IS_OK_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__VAL_OF_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__ERRVAL_OF_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__MKVAL_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
-MAYBE_ERROR__MKERRVAL_DEFN(buffer_write_result, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__IS_OK_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__VAL_OF_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__ERRVAL_OF_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__MKVAL_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors)
+TYM_MAYBE_ERROR__MKERRVAL_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors)
 
 //Error handler -- if something's wrong with the buffer then explain what's
 //wrong, and terminate.
 void
-buff_error_msg(void * x)
+tym_buff_error_msg(void * x)
 {
   struct TymBufferInfo * buf = (struct TymBufferInfo *)x;
   if (buf->idx >= buf->buffer_size) {
@@ -108,4 +108,4 @@ buff_error_msg(void * x)
   assert(false);
 }
 
-ERROR_CHECK_DEFN(buffer_write_result, size_t, enum TymBufferErrors, buff_error_msg)
+TYM_ERROR_CHECK_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors, tym_buff_error_msg)

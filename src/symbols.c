@@ -60,7 +60,7 @@ term_database_add(struct TymTerm * term, struct term_database_t * tdb)
   return exists;
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst)
 {
   assert(NULL != tdb);
@@ -70,19 +70,19 @@ term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst)
 
   const struct TymTerms * cursor = tdb->herbrand_universe;
 
-  struct buffer_write_result * res = NULL;
+  struct TymBufferWriteResult * res = NULL;
 
   while (NULL != cursor) {
     res = tym_term_to_str(cursor->term, dst);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
-    safe_buffer_replace_last(dst, '\n');
+    tym_safe_buffer_replace_last(dst, '\n');
 
     cursor = cursor->next;
   }
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
 struct predicate_t *
@@ -245,30 +245,30 @@ atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enu
   return success;
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
 {
   assert(NULL != adb);
 
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = buf_strcpy(dst, "Terms:");
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, "Terms:");
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, '\n');
+  tym_safe_buffer_replace_last(dst, '\n');
 
   res = term_database_str(adb->tdb, dst);
-  assert(is_ok_buffer_write_result(res));
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, '\n');
+  tym_safe_buffer_replace_last(dst, '\n');
 
-  res = buf_strcpy(dst, "Predicates:");
-  assert(is_ok_buffer_write_result(res));
+  res = tym_buf_strcpy(dst, "Predicates:");
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, '\n');
+  tym_safe_buffer_replace_last(dst, '\n');
 
   const struct predicates_t * cursor;
 
@@ -276,27 +276,27 @@ atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
     cursor = adb->atom_database[i];
     while (NULL != cursor) {
       res = predicate_str(cursor->predicate, dst);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
-      safe_buffer_replace_last(dst, '\n');
+      tym_safe_buffer_replace_last(dst, '\n');
 
       const struct TymClauses * clause_cursor = cursor->predicate->bodies;
 
       while (NULL != clause_cursor) {
 
-        if (have_space(dst, 1)) {
-          unsafe_buffer_str(dst, "  *");
-          safe_buffer_replace_last(dst, ' ');
+        if (tym_have_space(dst, 1)) {
+          tym_unsafe_buffer_str(dst, "  *");
+          tym_safe_buffer_replace_last(dst, ' ');
         } else {
-          return mkerrval_buffer_write_result(BUFF_ERR_OVERFLOW);
+          return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
         }
 
         res = tym_clause_to_str(clause_cursor->clause, dst);
-        assert(is_ok_buffer_write_result(res));
+        assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 
-        safe_buffer_replace_last(dst, '\n');
+        tym_safe_buffer_replace_last(dst, '\n');
 
         clause_cursor = clause_cursor->next;
       }
@@ -305,29 +305,29 @@ atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
     }
   }
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct buffer_write_result *
+struct TymBufferWriteResult *
 predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct buffer_write_result * res = buf_strcpy(dst, pred->predicate);
-  assert(is_ok_buffer_write_result(res));
+  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, pred->predicate);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  safe_buffer_replace_last(dst, '/');
+  tym_safe_buffer_replace_last(dst, '/');
 
   char buf[TYM_BUF_SIZE];
   int check = sprintf(buf, "%u", pred->arity);
   assert(check > 0);
 
-  res = buf_strcpy(dst, buf);
-  assert(is_ok_buffer_write_result(res));
+  res = tym_buf_strcpy(dst, buf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return mkval_buffer_write_result(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
 struct predicates_t *

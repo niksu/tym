@@ -134,12 +134,12 @@ main(int argc, char ** argv)
   }
 
   if (params.test_parsing) {
-    struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-    struct buffer_write_result * res = NULL;
+    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+    struct TymBufferWriteResult * res = NULL;
 
     if (NULL != params.input_file) {
       res = tym_program_to_str(parsed_input_file_contents, outbuf);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
@@ -151,7 +151,7 @@ main(int argc, char ** argv)
 
     if (NULL != params.query) {
       res = tym_program_to_str(parsed_query, outbuf);
-      assert(is_ok_buffer_write_result(res));
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
@@ -160,7 +160,7 @@ main(int argc, char ** argv)
       free(params.query);
     }
 
-    free_buffer(outbuf);
+    tym_free_buffer(outbuf);
 
     return 0;
   }
@@ -194,13 +194,13 @@ main(int argc, char ** argv)
   }
 #endif
 
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-  struct buffer_write_result * res = NULL;
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TymBufferWriteResult * res = NULL;
 
   if (NULL != mdl) {
 #if DEBUG
     res = model_str(mdl, outbuf);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
@@ -211,7 +211,7 @@ main(int argc, char ** argv)
     mdl->stmts = reordered_stmts;
 
     res = model_str(mdl, outbuf);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
@@ -226,7 +226,7 @@ main(int argc, char ** argv)
   free(vg);
   free_sym_gen(cg);
 
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 
   if (NULL != params.input_file) {
     tym_free_program(parsed_input_file_contents);
