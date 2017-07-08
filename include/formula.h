@@ -16,89 +16,89 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern uint8_t max_var_width;
+extern uint8_t TymMaxVarWidth;
 
-static const char * const universe_ty = "Universe";
+static const char * const TYM_UNIVERSE_TY = "Universe";
 
-struct fmla_atom_t {
+struct TymFmlaAtom {
   char * pred_name;
   uint8_t arity;
   struct TymTerm ** predargs;
 };
 
-enum fmla_kind_t {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST};
+enum TymFmlaKind {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST};
 
-struct fmla_quant_t {
+struct TymFmlaQuant {
   const char * bv;
-  struct fmla_t * body;
+  struct TymFmla * body;
 };
 
-struct fmla_t {
-  enum fmla_kind_t kind;
+struct TymFmla {
+  enum TymFmlaKind kind;
   union {
     bool const_value;
-    struct fmla_atom_t * atom;
-    struct fmla_t ** args;
-    struct fmla_quant_t * quant;
+    struct TymFmlaAtom * atom;
+    struct TymFmla ** args;
+    struct TymFmlaQuant * quant;
   } param;
 };
 
-TYM_DECLARE_MUTABLE_LIST_TYPE(fmlas_t, fmla, fmla_t)
-TYM_DECLARE_MUTABLE_LIST_MK(fmla, struct fmla_t, struct fmlas_t)
+TYM_DECLARE_MUTABLE_LIST_TYPE(TymFmlas, fmla, TymFmla)
+TYM_DECLARE_MUTABLE_LIST_MK(fmla, struct TymFmla, struct TymFmlas)
 
-struct fmla_t * mk_fmla_const(bool b);
-struct fmla_t * mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs);
-struct fmla_t * mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
-struct fmla_t * mk_fmla_quant(const char * bv, struct fmla_t * body);
-struct fmla_t * mk_fmla_quants(const struct TymTerms * const vars, struct fmla_t * body);
-struct fmla_t * mk_fmla_not(struct fmla_t * subfmla);
-struct fmla_t * mk_fmla_and(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_or(struct fmla_t * subfmlaL, struct fmla_t * subfmlaR);
-struct fmla_t * mk_fmla_ands(struct fmlas_t * fmlas);
-struct fmla_t * mk_fmla_ors(struct fmlas_t * fmlas);
-struct fmla_t * mk_fmla_imply(struct fmla_t * antecedent, struct fmla_t * consequent);
-struct fmla_t * copy_fmla(const struct fmla_t * const);
+struct TymFmla * tym_mk_fmla_const(bool b);
+struct TymFmla * tym_mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs);
+struct TymFmla * tym_mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
+struct TymFmla * tym_mk_fmla_quant(const char * bv, struct TymFmla * body);
+struct TymFmla * tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body);
+struct TymFmla * tym_mk_fmla_not(struct TymFmla * subfmla);
+struct TymFmla * tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
+struct TymFmla * tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
+struct TymFmla * tym_mk_fmla_ands(struct TymFmlas * fmlas);
+struct TymFmla * tym_mk_fmla_ors(struct TymFmlas * fmlas);
+struct TymFmla * tym_mk_fmla_imply(struct TymFmla * antecedent, struct TymFmla * consequent);
+struct TymFmla * tym_copy_fmla(const struct TymFmla * const);
 
-struct fmlas_t * mk_fmlas(uint8_t no_fmlas, ...);
+struct TymFmlas * tym_mk_fmlas(uint8_t no_fmlas, ...);
 
-struct TymBufferWriteResult * fmla_atom_str(struct fmla_atom_t * at, struct TymBufferInfo * dst);
-struct TymBufferWriteResult * fmla_quant_str(struct fmla_quant_t * quant, struct TymBufferInfo * dst);
-struct TymBufferWriteResult * fmla_str(const struct fmla_t * fmla, struct TymBufferInfo * dst);
+struct TymBufferWriteResult * tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst);
+struct TymBufferWriteResult * tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst);
+struct TymBufferWriteResult * tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst);
 
-struct sym_gen_t {
+struct TymSymGen {
   const char * prefix;
   size_t index;
 };
 
-struct sym_gen_t * mk_sym_gen(const char * prefix);
-struct sym_gen_t * copy_sym_gen(const struct sym_gen_t * const cp_orig);
-char * mk_new_var(struct sym_gen_t *);
+struct TymSymGen * tym_mk_sym_gen(const char * prefix);
+struct TymSymGen * tym_copy_sym_gen(const struct TymSymGen * const cp_orig);
+char * tym_mk_new_var(struct TymSymGen *);
 
-struct valuation_t {
+struct TymValuation {
   char * var;
   struct TymTerm * val;
-  struct valuation_t * next;
+  struct TymValuation * next;
 };
 
-size_t valuation_len(const struct valuation_t * const v);
-struct TymBufferWriteResult * valuation_str(struct valuation_t * v, struct TymBufferInfo * dst);
+size_t tym_valuation_len(const struct TymValuation * const v);
+struct TymBufferWriteResult * tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst);
 
-bool fmla_is_atom(const struct fmla_t * fmla);
-struct fmla_atom_t * fmla_as_atom(const struct fmla_t * fmla);
-const struct fmla_t * mk_abstract_vars(const struct fmla_t *, struct sym_gen_t *, struct valuation_t **);
-struct TymTerms * arguments_of_atom(struct fmla_atom_t * fmla);
+bool tym_fmla_is_atom(const struct TymFmla * fmla);
+struct TymFmlaAtom * tym_fmla_as_atom(const struct TymFmla * fmla);
+const struct TymFmla * tym_mk_abstract_vars(const struct TymFmla *, struct TymSymGen *, struct TymValuation **);
+struct TymTerms * tym_arguments_of_atom(struct TymFmlaAtom * fmla);
 
-void free_fmla_atom(struct fmla_atom_t *);
-void free_fmla_quant(struct fmla_quant_t *);
-void free_fmla(const struct fmla_t *);
-void free_fmlas(const struct fmlas_t *);
-void free_sym_gen(struct sym_gen_t *);
-void free_valuation(struct valuation_t *);
+void tym_free_fmla_atom(struct TymFmlaAtom *);
+void tym_free_fmla_quant(struct TymFmlaQuant *);
+void tym_free_fmla(const struct TymFmla *);
+void tym_free_fmlas(const struct TymFmlas *);
+void tym_free_sym_gen(struct TymSymGen *);
+void tym_free_valuation(struct TymValuation *);
 
-struct TymTerms * filter_var_values(struct valuation_t * const v);
+struct TymTerms * tym_filter_var_values(struct TymValuation * const v);
 
-size_t fmla_size(const struct fmla_t * const);
+size_t tym_fmla_size(const struct TymFmla * const);
 
-struct TymTerms * consts_in_fmla(const struct fmla_t * fmla, struct TymTerms * acc);
+struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc);
 
 #endif /* __TYM_FORMULA_H__ */

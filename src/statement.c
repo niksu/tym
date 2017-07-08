@@ -69,7 +69,7 @@ universe_str(const struct universe_t * const uni, struct TymBufferInfo * dst)
 
     tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-    res = tym_buf_strcpy(dst, universe_ty);
+    res = tym_buf_strcpy(dst, TYM_UNIVERSE_TY);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -121,7 +121,7 @@ free_universe(struct universe_t * uni)
 }
 
 const struct stmt_t *
-mk_stmt_axiom(const struct fmla_t * axiom)
+mk_stmt_axiom(const struct TymFmla * axiom)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   *result = (struct stmt_t){.kind = STMT_AXIOM, .param.axiom = axiom};
@@ -129,7 +129,7 @@ mk_stmt_axiom(const struct fmla_t * axiom)
 }
 
 const struct stmt_t *
-mk_stmt_pred(char * pred_name, struct TymTerms * params, const struct fmla_t * body)
+mk_stmt_pred(char * pred_name, struct TymTerms * params, const struct TymFmla * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
@@ -173,7 +173,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  struct fmlas_t * fmlas = NULL;
+  struct TymFmlas * fmlas = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
     if (i > 0) {
@@ -184,11 +184,11 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
     struct TymTerm * arg2 = tym_mk_term(TYM_CONST, strdup(uni->element[i]));
-    struct fmla_t * fmla = mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
+    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
 
-  return mk_stmt_axiom(mk_fmla_ors(fmlas));
+  return mk_stmt_axiom(tym_mk_fmla_ors(fmlas));
 }
 
 struct TymBufferWriteResult *
@@ -206,7 +206,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
 
     tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-    res = fmla_str(stmt->param.axiom, dst);
+    res = tym_fmla_str(stmt->param.axiom, dst);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -216,7 +216,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
   case STMT_CONST_DEF:
     // Check arity, and use define-fun or declare-const as appropriate.
 
-    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == universe_ty) {
+    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == TYM_UNIVERSE_TY) {
       // We're dealing with a nullary constant.
       res = tym_buf_strcpy(dst, "(declare-const");
       assert(tym_is_ok_TymBufferWriteResult(res));
@@ -268,7 +268,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
 
         tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-        res = tym_buf_strcpy(dst, universe_ty);
+        res = tym_buf_strcpy(dst, TYM_UNIVERSE_TY);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 
@@ -303,7 +303,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
         return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
       }
 
-      res = fmla_str(stmt->param.const_def->body, dst);
+      res = tym_fmla_str(stmt->param.const_def->body, dst);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
@@ -329,7 +329,7 @@ free_stmt(const struct stmt_t * stmt)
 {
   switch (stmt->kind) {
   case STMT_AXIOM:
-    free_fmla(stmt->param.axiom);
+    tym_free_fmla(stmt->param.axiom);
     break;
   case STMT_CONST_DEF:
     free((void *)stmt->param.const_def->const_name);
@@ -337,7 +337,7 @@ free_stmt(const struct stmt_t * stmt)
       tym_free_terms(stmt->param.const_def->params);
     }
     if (NULL != stmt->param.const_def->body) {
-      free_fmla(stmt->param.const_def->body);
+      tym_free_fmla(stmt->param.const_def->body);
     }
     free(stmt->param.const_def);
     break;
@@ -411,7 +411,7 @@ model_str(const struct model_t * const mdl, struct TymBufferInfo * dst)
 
   tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-  res = tym_buf_strcpy(dst, universe_ty);
+  res = tym_buf_strcpy(dst, TYM_UNIVERSE_TY);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -463,14 +463,14 @@ tym_test_statement(void)
   tym_free_terms(terms);
 
   const struct stmt_t * s1S =
-    mk_stmt_axiom(mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
+    mk_stmt_axiom(tym_mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("X")), NULL);
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("Y")), terms);
-  struct fmla_t * fmla =
-    mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
+  struct TymFmla * fmla =
+    tym_mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
-      mk_fmla_not(fmla));
-  struct stmt_t * s3AS = mk_stmt_const(strdup("x"), mdl->universe, universe_ty);
+      tym_mk_fmla_not(fmla));
+  struct stmt_t * s3AS = mk_stmt_const(strdup("x"), mdl->universe, TYM_UNIVERSE_TY);
   const struct stmt_t * s3BS = mk_stmt_const_def(strdup("x"), mdl->universe);
 
   strengthen_model(mdl, s1S);
@@ -517,11 +517,11 @@ consts_in_stmt(const struct stmt_t * stmt)
   struct TymTerms * result = NULL;
   switch (stmt->kind) {
   case STMT_AXIOM:
-    result = consts_in_fmla(stmt->param.axiom, NULL);
+    result = tym_consts_in_fmla(stmt->param.axiom, NULL);
     break;
   case STMT_CONST_DEF:
     if (NULL != stmt->param.const_def->body) {
-      result = consts_in_fmla(stmt->param.const_def->body, NULL);
+      result = tym_consts_in_fmla(stmt->param.const_def->body, NULL);
     }
     break;
   default:
@@ -542,7 +542,7 @@ statementise_universe(struct model_t * mdl)
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     strengthen_model(mdl,
-        mk_stmt_const(strdup(mdl->universe->element[i]), mdl->universe, universe_ty));
+        mk_stmt_const(strdup(mdl->universe->element[i]), mdl->universe, TYM_UNIVERSE_TY));
   }
 
   assert(0 < mdl->universe->cardinality);
@@ -550,7 +550,7 @@ statementise_universe(struct model_t * mdl)
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = tym_mk_term(TYM_CONST, strdup(mdl->universe->element[i]));
   }
-  const struct fmla_t * distinctness_fmla =
-    mk_fmla_atom(strdup(distinctK), mdl->universe->cardinality, args);
+  const struct TymFmla * distinctness_fmla =
+    tym_mk_fmla_atom(strdup(distinctK), mdl->universe->cardinality, args);
   strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }

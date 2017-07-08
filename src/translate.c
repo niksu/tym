@@ -9,7 +9,7 @@
 
 #include "translate.h"
 
-struct fmla_t *
+struct TymFmla *
 translate_atom(const struct TymAtom * at)
 {
   assert(NULL != at);
@@ -20,60 +20,60 @@ translate_atom(const struct TymAtom * at)
       args[i] = tym_copy_term(at->args[i]);
     }
   }
-  return mk_fmla_atom(strdup(at->predicate), at->arity, args);
+  return tym_mk_fmla_atom(strdup(at->predicate), at->arity, args);
 }
 
-struct fmla_t *
+struct TymFmla *
 translate_body(const struct TymClause * cl)
 {
-  struct fmlas_t * fmlas = NULL;
+  struct TymFmlas * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
     fmlas = tym_mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
   }
-  return mk_fmla_ands(fmlas);
+  return tym_mk_fmla_ands(fmlas);
 }
 
-struct fmlas_t *
+struct TymFmlas *
 translate_bodies(const struct TymClauses * cls)
 {
   const struct TymClauses * cursor = cls;
-  struct fmlas_t * fmlas = NULL;
+  struct TymFmlas * fmlas = NULL;
   while (NULL != cursor) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    fmlas = (struct fmlas_t *)tym_mk_fmla_cell(translate_body(cursor->clause), fmlas);
+    fmlas = (struct TymFmlas *)tym_mk_fmla_cell(translate_body(cursor->clause), fmlas);
 #pragma GCC diagnostic pop
     cursor = cursor->next;
   }
   return fmlas;
 }
 
-struct fmla_t *
-translate_valuation(struct valuation_t * const v)
+struct TymFmla *
+translate_valuation(struct TymValuation * const v)
 {
-  struct fmlas_t * result = NULL;
-  struct valuation_t * cursor = v;
+  struct TymFmlas * result = NULL;
+  struct TymValuation * cursor = v;
   while (NULL != cursor) {
-    result = tym_mk_fmla_cell(mk_fmla_atom_varargs(strdup(eqK), 2,
+    result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(strdup(eqK), 2,
           tym_mk_term(TYM_VAR, strdup(cursor->var)),
           tym_copy_term(cursor->val)), result);
     cursor = cursor->next;
   }
-  return mk_fmla_ands(result);
+  return tym_mk_fmla_ands(result);
 }
 
 void
-translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_atom_t * at)
+translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
 {
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
     args = malloc(sizeof(struct Term *) * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (TYM_VAR == at->predargs[i]->kind) {
-        char * placeholder = mk_new_var(cg);
+        char * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        struct stmt_t * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, universe_ty);
+        struct stmt_t * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
         strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
@@ -86,7 +86,7 @@ translate_query_fmla_atom(struct model_t * mdl, struct sym_gen_t * cg, struct fm
 }
 
 void
-translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t * fmla)
+translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
 {
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -116,7 +116,7 @@ translate_query_fmla(struct model_t * mdl, struct sym_gen_t * cg, struct fmla_t 
 }
 
 void
-translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_t * cg)
+translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGen * cg)
 {
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
@@ -125,7 +125,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_
   assert(1 == query->no_clauses);
   const struct TymClause * q_cl = query->program[0];
 
-  struct fmla_t * q_fmla = translate_atom(q_cl->head);
+  struct TymFmla * q_fmla = translate_atom(q_cl->head);
 
 #if DEBUG
   struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
@@ -138,7 +138,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_
 #endif
 
   // Reject the query if it containts constants that don't appear in the program.
-  struct TymTerms * cursor = consts_in_fmla(q_fmla, NULL);
+  struct TymTerms * cursor = tym_consts_in_fmla(q_fmla, NULL);
   while (NULL != cursor) {
     if (TYM_CONST == cursor->term->kind) {
       bool found = false;
@@ -165,7 +165,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct sym_gen_
 }
 
 struct model_t *
-translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
+translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -205,8 +205,8 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 #endif
 
-    struct fmlas_t * fmlas = (struct fmlas_t *)translate_bodies(preds_cursor->predicate->bodies);
-    struct fmlas_t * fmlas_cursor = fmlas;
+    struct TymFmlas * fmlas = (struct TymFmlas *)translate_bodies(preds_cursor->predicate->bodies);
+    struct TymFmlas * fmlas_cursor = fmlas;
 
     if (NULL == preds_cursor->predicate->bodies) {
       // "No bodies" means that the atom never appears as the head of a clause.
@@ -217,18 +217,18 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
         var_args = malloc(sizeof(struct Term *) * preds_cursor->predicate->arity);
 
         for (int i = 0; i < preds_cursor->predicate->arity; i++) {
-          var_args[i] = tym_mk_term(TYM_VAR, mk_new_var(*vg));
+          var_args[i] = tym_mk_term(TYM_VAR, tym_mk_new_var(*vg));
         }
       }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct fmla_t * atom =
-        mk_fmla_atom(strdup(preds_cursor->predicate->predicate),
+      const struct TymFmla * atom =
+        tym_mk_fmla_atom(strdup(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
 #pragma GCC diagnostic pop
 
-      res = fmla_str(atom, outbuf);
+      res = tym_fmla_str(atom, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if DEBUG
@@ -239,21 +239,21 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
 #pragma GCC diagnostic ignored "-Wcast-qual"
       strengthen_model(mdl,
           mk_stmt_pred(strdup(preds_cursor->predicate->predicate),
-            arguments_of_atom(fmla_as_atom(atom)),
-            mk_fmla_const(false)));
+            tym_arguments_of_atom(tym_fmla_as_atom(atom)),
+            tym_mk_fmla_const(false)));
 #pragma GCC diagnostic pop
 
-      free_fmla(atom);
+      tym_free_fmla(atom);
     } else {
       const struct TymClauses * body_cursor = preds_cursor->predicate->bodies;
-      const struct fmla_t * abs_head_fmla = NULL;
+      const struct TymFmla * abs_head_fmla = NULL;
 
       while (NULL != body_cursor) {
 #if DEBUG
         printf(">");
 #endif
 
-        struct sym_gen_t * vg_copy = copy_sym_gen(*vg);
+        struct TymSymGen * vg_copy = tym_copy_sym_gen(*vg);
 
         const struct TymAtom * head_atom = body_cursor->clause->head;
         struct TymTerm ** args = NULL;
@@ -267,30 +267,30 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
         }
 
         // Abstract the atom's parameters.
-        const struct fmla_t * head_fmla =
-          mk_fmla_atom(strdup(head_atom->predicate), head_atom->arity, args);
+        const struct TymFmla * head_fmla =
+          tym_mk_fmla_atom(strdup(head_atom->predicate), head_atom->arity, args);
 
-        res = fmla_str(head_fmla, outbuf);
+        res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("from: %s\n", outbuf->buffer);
 #endif
 
-        struct valuation_t ** val = malloc(sizeof(struct valuation_t *));
+        struct TymValuation ** val = malloc(sizeof(struct TymValuation *));
         *val = NULL;
         if (NULL != abs_head_fmla) {
-          free_fmla(abs_head_fmla);
+          tym_free_fmla(abs_head_fmla);
         }
-        abs_head_fmla = mk_abstract_vars(head_fmla, vg_copy, val);
-        res = fmla_str(abs_head_fmla, outbuf);
+        abs_head_fmla = tym_mk_abstract_vars(head_fmla, vg_copy, val);
+        res = tym_fmla_str(abs_head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("to: %s\n", outbuf->buffer);
 #endif
 
-        res = valuation_str(*val, outbuf);
+        res = tym_valuation_str(*val, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
 #if DEBUG
         if (0 == val_of_buffer_write_result(res)) {
@@ -301,55 +301,55 @@ translate_program(struct TymProgram * program, struct sym_gen_t ** vg)
 #endif
         free(res);
 
-        struct fmla_t * valuation_fmla = translate_valuation(*val);
-        fmlas_cursor->fmla = mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
-        struct TymTerms * ts = filter_var_values(*val);
-        const struct fmla_t * quantified_fmla =
-          mk_fmla_quants(ts, fmlas_cursor->fmla);
-        fmlas_cursor->fmla = copy_fmla(quantified_fmla);
+        struct TymFmla * valuation_fmla = translate_valuation(*val);
+        fmlas_cursor->fmla = tym_mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
+        struct TymTerms * ts = tym_filter_var_values(*val);
+        const struct TymFmla * quantified_fmla =
+          tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
+        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla);
         if (NULL != ts) {
           tym_free_terms(ts);
         }
-        free_fmla(quantified_fmla);
+        tym_free_fmla(quantified_fmla);
 
-        res = fmla_str(fmlas_cursor->fmla, outbuf);
+        res = tym_fmla_str(fmlas_cursor->fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if DEBUG
         printf("  :|%s|\n", outbuf->buffer);
 #endif
 
-        free_fmla(head_fmla);
+        tym_free_fmla(head_fmla);
         if (NULL != *val) {
           // i.e., the predicate isn't nullary.
-          free_valuation(*val);
+          tym_free_valuation(*val);
         }
         free(val);
 
         body_cursor = body_cursor->next;
         fmlas_cursor = fmlas_cursor->next;
         if (NULL == body_cursor) {
-          struct sym_gen_t * tmp = *vg;
+          struct TymSymGen * tmp = *vg;
           *vg = vg_copy;
           vg_copy = tmp;
         }
-        free_sym_gen(vg_copy);
+        tym_free_sym_gen(vg_copy);
       }
 
-      const struct fmla_t * fmla = mk_fmla_ors((struct fmlas_t *)fmlas);
-      res = fmla_str(fmla, outbuf);
+      const struct TymFmla * fmla = tym_mk_fmla_ors((struct TymFmlas *)fmlas);
+      res = tym_fmla_str(fmla, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if DEBUG
       printf("pre-result: %s\n", outbuf->buffer);
 #endif
 
-      struct fmla_atom_t * head = fmla_as_atom(abs_head_fmla);
+      struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
       strengthen_model(mdl,
           mk_stmt_pred(strdup(head->pred_name),
-            arguments_of_atom(head),
+            tym_arguments_of_atom(head),
             fmla));
-      free_fmla(abs_head_fmla);
+      tym_free_fmla(abs_head_fmla);
     }
 
 

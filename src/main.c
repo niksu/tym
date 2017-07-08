@@ -92,7 +92,7 @@ main(int argc, char ** argv)
     case LONG_OPT_MAX_VAR_WIDTH:
       v = strtol(optarg, NULL, 10);
       assert(v <= UINT8_MAX);
-      max_var_width = (uint8_t)v;
+      TymMaxVarWidth = (uint8_t)v;
       break;
     // FIXME add support for -h
     default:
@@ -171,11 +171,11 @@ main(int argc, char ** argv)
     TYM_ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
   }
 
-  struct sym_gen_t ** vg = malloc(sizeof(struct sym_gen_t *));
+  struct TymSymGen ** vg = malloc(sizeof(struct TymSymGen *));
   *vg = NULL;
-  *vg = mk_sym_gen(strdup("V"));
+  *vg = tym_mk_sym_gen(strdup("V"));
 
-  struct sym_gen_t * cg = mk_sym_gen(strdup("c"));
+  struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
 
   struct model_t * mdl = NULL;
   if (NULL != parsed_input_file_contents) {
@@ -222,9 +222,9 @@ main(int argc, char ** argv)
   if (NULL != mdl) {
     free_model(mdl);
   }
-  free_sym_gen(*vg);
+  tym_free_sym_gen(*vg);
   free(vg);
-  free_sym_gen(cg);
+  tym_free_sym_gen(cg);
 
   tym_free_buffer(outbuf);
 
