@@ -36,7 +36,6 @@ tym_free_buffer(struct TymBufferInfo * buf)
 bool
 tym_have_space(struct TymBufferInfo * buf, size_t n)
 {
-  assert(buf->idx >= 0);
   assert(buf->buffer_size > 0);
   assert(buf->buffer_size > buf->idx);
   return (n < buf->buffer_size - buf->idx);
