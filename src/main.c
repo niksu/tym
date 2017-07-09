@@ -18,24 +18,24 @@
 struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
 
-char * input_file_contents = NULL;
+char * InputFileContents = NULL;
 
-struct param_t {
+struct Params {
   char * input_file;
   char verbosity;
   char * query;
   bool test_parsing;
 };
 
-struct param_t params = {
+struct Params Params = {
   .input_file = NULL,
   .verbosity = 0,
   .query = NULL,
   .test_parsing = false
 };
 
-struct TymProgram * parsed_input_file_contents = NULL;
-struct TymProgram * parsed_query = NULL;
+struct TymProgram * ParsedInputFileContents = NULL;
+struct TymProgram * ParsedQuery = NULL;
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
 #pragma GCC diagnostic push
@@ -74,20 +74,20 @@ main(int argc, char ** argv)
     switch (option) {
     case LONG_OPT_INPUT:
     case 'i':
-      params.input_file = malloc(strlen(optarg) + 1);
-      strcpy(params.input_file, optarg);
+      Params.input_file = malloc(strlen(optarg) + 1);
+      strcpy(Params.input_file, optarg);
       break;
     case LONG_OPT_VERBOSE:
     case 'v':
-      params.verbosity = 1;
+      Params.verbosity = 1;
       break;
     case LONG_OPT_QUERY:
     case 'q':
-      params.query = malloc(strlen(optarg) + 1);
-      strcpy(params.query, optarg);
+      Params.query = malloc(strlen(optarg) + 1);
+      strcpy(Params.query, optarg);
       break;
     case LONG_OPT_TESTPARSING:
-      params.test_parsing = true;
+      Params.test_parsing = true;
       break;
     case LONG_OPT_MAX_VAR_WIDTH:
       v = strtol(optarg, NULL, 10);
@@ -101,63 +101,63 @@ main(int argc, char ** argv)
     }
   }
 
-  if (params.verbosity > 0) {
-    TYM_VERBOSE("input_fine = %s\n", params.input_file);
-    TYM_VERBOSE("verbosity = %d\n", params.verbosity);
-    TYM_VERBOSE("test_parsing = %d\n", params.test_parsing);
-    TYM_VERBOSE("query = %s\n", params.query);
+  if (Params.verbosity > 0) {
+    TYM_VERBOSE("input_fine = %s\n", Params.input_file);
+    TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
+    TYM_VERBOSE("test_parsing = %d\n", Params.test_parsing);
+    TYM_VERBOSE("query = %s\n", Params.query);
   }
 
-  if (NULL != params.input_file) {
-    input_file_contents = read_file(params.input_file);
-    if (params.test_parsing) {
-      printf("input contents |%s|\n", input_file_contents);
+  if (NULL != Params.input_file) {
+    InputFileContents = read_file(Params.input_file);
+    if (Params.test_parsing) {
+      printf("input contents |%s|\n", InputFileContents);
     }
-    parsed_input_file_contents = parse(input_file_contents);
-    if (params.verbosity > 0 && NULL != input_file_contents) {
-      TYM_VERBOSE("input : %d clauses\n", parsed_input_file_contents->no_clauses);
+    ParsedInputFileContents = parse(InputFileContents);
+    if (Params.verbosity > 0 && NULL != InputFileContents) {
+      TYM_VERBOSE("input : %d clauses\n", ParsedInputFileContents->no_clauses);
     }
-  } else if (params.test_parsing) {
+  } else if (Params.test_parsing) {
     printf("(no input file given)\n");
   }
 
-  if (NULL != params.query) {
-    if (params.test_parsing && 0 == params.verbosity) {
-      printf("query contents |%s|\n", params.query);
+  if (NULL != Params.query) {
+    if (Params.test_parsing && 0 == Params.verbosity) {
+      printf("query contents |%s|\n", Params.query);
     }
-    parsed_query = parse(params.query);
-    if (params.verbosity > 0 && NULL != params.query) {
-      TYM_VERBOSE("query : %d clauses\n", parsed_query->no_clauses);
+    ParsedQuery = parse(Params.query);
+    if (Params.verbosity > 0 && NULL != Params.query) {
+      TYM_VERBOSE("query : %d clauses\n", ParsedQuery->no_clauses);
     }
-  } else if (params.test_parsing) {
+  } else if (Params.test_parsing) {
     printf("(no query given)\n");
   }
 
-  if (params.test_parsing) {
+  if (Params.test_parsing) {
     struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
     struct TymBufferWriteResult * res = NULL;
 
-    if (NULL != params.input_file) {
-      res = tym_program_to_str(parsed_input_file_contents, outbuf);
+    if (NULL != Params.input_file) {
+      res = tym_program_to_str(ParsedInputFileContents, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-      tym_free_program(parsed_input_file_contents);
-      free(input_file_contents);
-      free(params.input_file);
+      tym_free_program(ParsedInputFileContents);
+      free(InputFileContents);
+      free(Params.input_file);
     }
 
-    if (NULL != params.query) {
-      res = tym_program_to_str(parsed_query, outbuf);
+    if (NULL != Params.query) {
+      res = tym_program_to_str(ParsedQuery, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-      tym_free_program(parsed_query);
-      free(params.query);
+      tym_free_program(ParsedQuery);
+      free(Params.query);
     }
 
     tym_free_buffer(outbuf);
@@ -165,10 +165,10 @@ main(int argc, char ** argv)
     return 0;
   }
 
-  if (NULL == params.input_file) {
+  if (NULL == Params.input_file) {
     TYM_ERR("No input file given.\n");
-  } else if (0 == parsed_input_file_contents->no_clauses) {
-    TYM_ERR("Input file (%s) is devoid of clauses.\n", params.input_file);
+  } else if (0 == ParsedInputFileContents->no_clauses) {
+    TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
   }
 
   struct TymSymGen ** vg = malloc(sizeof(struct TymSymGen *));
@@ -178,15 +178,15 @@ main(int argc, char ** argv)
   struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
 
   struct model_t * mdl = NULL;
-  if (NULL != parsed_input_file_contents) {
-    mdl = translate_program(parsed_input_file_contents, vg);
+  if (NULL != ParsedInputFileContents) {
+    mdl = translate_program(ParsedInputFileContents, vg);
     statementise_universe(mdl);
   }
 
-  if (NULL != parsed_query &&
+  if (NULL != ParsedQuery &&
       // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
       NULL != mdl) {
-    translate_query(parsed_query, mdl, cg);
+    translate_query(ParsedQuery, mdl, cg);
   }
 #if DEBUG
   else {
@@ -228,15 +228,15 @@ main(int argc, char ** argv)
 
   tym_free_buffer(outbuf);
 
-  if (NULL != params.input_file) {
-    tym_free_program(parsed_input_file_contents);
-    free(input_file_contents);
-    free(params.input_file);
+  if (NULL != Params.input_file) {
+    tym_free_program(ParsedInputFileContents);
+    free(InputFileContents);
+    free(Params.input_file);
   }
 
-  if (NULL != params.query) {
-    tym_free_program(parsed_query);
-    free(params.query);
+  if (NULL != Params.query) {
+    tym_free_program(ParsedQuery);
+    free(Params.query);
   }
 
   return 0;
