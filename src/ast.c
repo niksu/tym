@@ -520,7 +520,7 @@ tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
   char result = tym_hash_str(term->identifier);
-  result ^= term->kind;
+  result ^= (char)term->kind;
   return result;
 }
 
@@ -532,7 +532,7 @@ tym_hash_atom(const struct TymAtom * atom)
   char result = tym_hash_str(atom->predicate);
 
   for (int i = 0; i < atom->arity; i++) {
-    result = (char)((result * tym_hash_term(atom->args[i])) % 256) - 128;
+    result = (char)(((result * tym_hash_term(atom->args[i])) % 256) - 128);
   }
 
   return result;
@@ -545,7 +545,7 @@ tym_hash_clause(const struct TymClause * clause) {
   char result = tym_hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
-    result ^= ((i + tym_hash_atom(clause->body[i])) % 256) - 128;
+    result ^= (char)(((i + tym_hash_atom(clause->body[i])) % 256) - 128);
   }
 
   return result;
