@@ -33,8 +33,9 @@
     const struct ELEMENTS_TY * FIELD_NAME; \
     const struct TYPE_NAME * next; \
   };
-// FIXME or should that line have a const, i.e.,
-//       const struct TYPE_NAME * const next; \
+/* FIXME or should that line have a const, i.e.,
+         const struct TYPE_NAME * const next; \
+*/
 
 // FIXME can factor some code with DECLARE_LIST_TYPE?
 #define TYM_DECLARE_MUTABLE_LIST_TYPE(TYPE_NAME, FIELD_NAME, ELEMENTS_TY) \
