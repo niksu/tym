@@ -78,14 +78,14 @@
 //Error handler, explains what's wrong (via function pointer applied to
 //situation-specific data) and terminates.
 #define __TYM_ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
-  void error_check_ ## TYPE_NAME (struct TYPE_NAME * v, void (*F)(void *), void * ctxt)
+  void error_check_ ## TYPE_NAME (struct TYPE_NAME * v, void (*F ## param)(void *), void * ctxt)
 #define TYM_ERROR_CHECK_DECL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
   __TYM_ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F);
 #define TYM_ERROR_CHECK_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
   __TYM_ERROR_CHECK(TYPE_NAME, RESULT_TYPE, ERROR_TYPE, F) \
   { \
     if (v->is_error) { \
-      F(ctxt); \
+      F ## param (ctxt); \
     }; \
   }
 
