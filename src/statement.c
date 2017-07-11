@@ -18,9 +18,9 @@
 #include "statement.h"
 #include "util.h"
 
-const char * const bool_ty = "Bool";
-const char * const distinctK = "distinct";
-const char * const eqK = "=";
+char * bool_ty = "Bool";
+char * distinctK = "distinct";
+char * eqK = "=";
 
 struct universe_t *
 mk_universe(struct TymTerms * terms)
@@ -129,7 +129,7 @@ mk_stmt_axiom(const struct TymFmla * axiom)
 }
 
 const struct stmt_t *
-mk_stmt_pred(char * pred_name, struct TymTerms * params, const struct TymFmla * body)
+mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct stmt_t * result = malloc(sizeof(struct stmt_t));
   struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
@@ -146,7 +146,7 @@ mk_stmt_pred(char * pred_name, struct TymTerms * params, const struct TymFmla * 
 }
 
 struct stmt_t *
-mk_stmt_const(char * const_name, struct universe_t * uni, const char * const ty)
+mk_stmt_const(char * const_name, struct universe_t * uni, char * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);

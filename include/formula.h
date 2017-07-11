@@ -17,8 +17,7 @@
 #include <string.h>
 
 extern uint8_t TymMaxVarWidth;
-
-static const char * const TYM_UNIVERSE_TY = "Universe";
+extern char * TYM_UNIVERSE_TY;
 
 struct TymFmlaAtom {
   char * pred_name;

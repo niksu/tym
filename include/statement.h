@@ -16,15 +16,15 @@ struct universe_t {
   char ** element;
 };
 
-extern const char * const bool_ty;
-extern const char * const distinctK;
-extern const char * const eqK;
+extern char * bool_ty;
+extern char * distinctK;
+extern char * eqK;
 
 struct stmt_const_t {
-  const char * const_name;
+  char * const_name;
   struct TymTerms * params;
-  const struct TymFmla * body;
-  const char * const ty;
+  struct TymFmla * body;
+  char * ty;
 };
 
 enum stmt_kind_t {STMT_AXIOM, STMT_CONST_DEF};
@@ -42,8 +42,8 @@ struct TymBufferWriteResult * universe_str(const struct universe_t * const, stru
 void free_universe(struct universe_t *);
 
 const struct stmt_t * mk_stmt_axiom(const struct TymFmla * axiom);
-const struct stmt_t * mk_stmt_pred(char * pred_name, struct TymTerms * params, const struct TymFmla * body);
-struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, const char * const ty);
+const struct stmt_t * mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body);
+struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, char * ty);
 const struct stmt_t * mk_stmt_const_def(char * const_name, struct universe_t * uni);
 struct TymBufferWriteResult * stmt_str(const struct stmt_t * const, struct TymBufferInfo * dst);
 void free_stmt(const struct stmt_t *);

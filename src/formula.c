@@ -15,6 +15,7 @@
 #include "util.h"
 
 uint8_t TymMaxVarWidth = 10;
+char * TYM_UNIVERSE_TY = "Universe";
 
 struct TymBufferWriteResult * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
@@ -845,7 +846,7 @@ tym_fmla_size(const struct TymFmla * const fmla)
     result = 1;
     break;
   case FMLA_ATOM:
-    result = 1 + fmla->param.atom->arity;
+    result = 1u + fmla->param.atom->arity;
     break;
   case FMLA_AND:
     result = 1 + tym_fmla_size(fmla->param.args[0]) + tym_fmla_size(fmla->param.args[1]);

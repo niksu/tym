@@ -336,7 +336,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         tym_free_sym_gen(vg_copy);
       }
 
-      const struct TymFmla * fmla = tym_mk_fmla_ors((struct TymFmlas *)fmlas);
+      struct TymFmla * fmla = tym_mk_fmla_ors((struct TymFmlas *)fmlas);
       res = tym_fmla_str(fmla, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);

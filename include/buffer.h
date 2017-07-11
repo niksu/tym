@@ -16,9 +16,9 @@
 #include "util.h"
 
 struct TymBufferInfo {
-  char * const buffer;
+  char * buffer;
   size_t idx;
-  const size_t buffer_size;
+  size_t buffer_size;
 };
 
 struct TymBufferInfo * tym_mk_buffer(const size_t buffer_size);
