@@ -14,7 +14,8 @@ The `-v` flag activates verbose output.
 * `make test_modules` tests internal APIs (for forming and destroying expressions, etc)
 * `make test_regression` tests parser + printer + internal API
 * `MEM_CHECK=1 make test_regression` checks for memory-safety during regression tests.
-* for debug output build with `CFLAGS=-DTYM_DEBUG`
+* for debug output, build with `CFLAGS=-DTYM_DEBUG`.
+* `CC=gcc-7 make` to compile with a specific compiler.
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
