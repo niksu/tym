@@ -30,7 +30,7 @@ struct term_database_t {
 
 struct term_database_t * mk_term_database(void);
 bool term_database_add(struct TymTerm * term, struct term_database_t * tdb);
-struct TymBufferWriteResult * term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst);
 
 struct predicate_t {
   const char * predicate;
@@ -66,9 +66,9 @@ enum adl_add_error {NO_ATOM_DATABASE = 0};
 
 bool atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result);
 
-struct TymBufferWriteResult * atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst);
 struct predicates_t * atom_database_to_predicates(struct atom_database_t * adb);
-struct TymBufferWriteResult * predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst);
 
 enum cdl_add_error {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
 

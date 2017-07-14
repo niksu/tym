@@ -49,12 +49,12 @@ mk_universe(struct TymTerms * terms)
   return result;
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 universe_str(const struct universe_t * const uni, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   for (int i = 0; i < uni->cardinality; i++) {
     res = tym_buf_strcpy(dst, "(declare-const");
@@ -191,12 +191,12 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
   return mk_stmt_axiom(tym_mk_fmla_ors(fmlas));
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   switch (stmt->kind) {
   case STMT_AXIOM:
@@ -351,13 +351,13 @@ free_stmt(const struct stmt_t * stmt)
 
 TYM_DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 stmts_str(const struct stmts_t * const stmts, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
   const struct stmts_t * cursor = stmts;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   while (NULL != cursor) {
     res = stmt_str(cursor->stmt, dst);
@@ -400,12 +400,12 @@ mk_model(struct universe_t * uni)
   return result;
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 model_str(const struct model_t * const mdl, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, "(declare-sort");
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, "(declare-sort");
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -479,7 +479,7 @@ tym_test_statement(void)
   strengthen_model(mdl, s3BS);
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TymBufferWriteResult * res = model_str(mdl, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n",

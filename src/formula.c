@@ -17,7 +17,7 @@
 uint8_t TymMaxVarWidth = 10;
 char * TYM_UNIVERSE_TY = "Universe";
 
-struct TymBufferWriteResult * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 
 struct TymFmla *
@@ -191,12 +191,12 @@ tym_mk_fmla_imply(struct TymFmla * antecedent, struct TymFmla * consequent)
   return result;
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, at->pred_name);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, at->pred_name);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -224,7 +224,7 @@ tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
   }
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
@@ -235,7 +235,7 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
-  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, quant->bv);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, quant->bv);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -257,12 +257,12 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_fmla_str(fmlaL, dst);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(fmlaL, dst);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -275,7 +275,7 @@ tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct Tym
   return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
@@ -289,7 +289,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     }
   }
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -453,14 +453,14 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
   return tym_mk_fmla_atom(strdup(atom->pred_name), atom->arity, var_args_T);
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
   struct TymValuation * v_cursor = v;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   while (NULL != v_cursor) {
     res = tym_buf_strcpy(dst, v_cursor->var);
@@ -718,7 +718,7 @@ tym_test_formula(void)
   struct TymFmla * test_quant = tym_mk_fmla_quant(strdup("x"), tym_copy_fmla(test_or));
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TymBufferWriteResult * res = tym_fmla_str(test_quant, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(test_quant, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",

@@ -60,9 +60,9 @@ struct TymFmla * tym_copy_fmla(const struct TymFmla * const);
 
 struct TymFmlas * tym_mk_fmlas(uint8_t no_fmlas, ...);
 
-struct TymBufferWriteResult * tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst);
-struct TymBufferWriteResult * tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst);
-struct TymBufferWriteResult * tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst);
 
 struct TymSymGen {
   const char * prefix;
@@ -80,7 +80,7 @@ struct TymValuation {
 };
 
 size_t tym_valuation_len(const struct TymValuation * const v);
-struct TymBufferWriteResult * tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst);
 
 bool tym_fmla_is_atom(const struct TymFmla * fmla);
 struct TymFmlaAtom * tym_fmla_as_atom(const struct TymFmla * fmla);

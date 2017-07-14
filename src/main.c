@@ -135,7 +135,7 @@ main(int argc, char ** argv)
 
   if (Params.test_parsing) {
     struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    struct TymBufferWriteResult * res = NULL;
+    struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
     if (NULL != Params.input_file) {
       res = tym_program_to_str(ParsedInputFileContents, outbuf);
@@ -195,7 +195,7 @@ main(int argc, char ** argv)
 #endif
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   if (NULL != mdl) {
 #if DEBUG

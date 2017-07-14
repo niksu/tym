@@ -15,14 +15,14 @@
 #include "module_tests.h"
 #include "util.h"
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 {
   assert(NULL != term);
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, term->identifier);
-  assert(tym_is_ok_TymBufferWriteResult(res));
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, term->identifier);
+  assert(TYM_MAYBE_ERROR__IS_OK_FNAME(TymBufferWriteResult)(res));
   free(res);
 
   tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
@@ -44,13 +44,13 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
   }
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_buf_strcpy(dst, atom->predicate);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, atom->predicate);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -73,13 +73,13 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
   }
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 {
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_predicate_to_str(atom, dst);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_predicate_to_str(atom, dst);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -151,13 +151,13 @@ tym_copy_clause(const struct TymClause * const cp_clause)
   return result;
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst)
 {
   assert(NULL != clause);
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = tym_atom_to_str(clause->head, dst);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_atom_to_str(clause->head, dst);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -213,13 +213,13 @@ tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * 
   }
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst)
 {
   assert(NULL != program);
   size_t initial_idx = dst->idx;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   for (int i = 0; i < program->no_clauses; i++) {
     res = tym_clause_to_str(program->program[i], dst);
@@ -486,11 +486,11 @@ tym_free_program(struct TymProgram * program)
 #pragma GCC diagnostic pop
 
 void
-tym_debug_out_syntax(void * x, struct TymBufferWriteResult * (*tym_x_to_str)(void *, struct TymBufferInfo * dst))
+tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_to_str)(void *, struct TymBufferInfo * dst))
 {
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
 
-  struct TymBufferWriteResult * res = tym_x_to_str(x, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_x_to_str(x, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -613,7 +613,7 @@ tym_test_clause(void) {
   cl->body[0] = at;
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TymBufferWriteResult * res = tym_clause_to_str(cl, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_clause_to_str(cl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
@@ -667,7 +667,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
     if (!found) {
 #if TYM_DEBUG
       struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-      struct TymBufferWriteResult * res = term_to_str(ss->term, outbuf);
+      struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = term_to_str(ss->term, outbuf);
       assert(is_ok_buffer_write_result(res));
       free(res);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
@@ -688,7 +688,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
   return result;
 }
 
-struct TymBufferWriteResult *
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst)
 {
   assert(NULL != terms);
@@ -697,7 +697,7 @@ tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst
 
   const struct TymTerms * cursor = terms;
 
-  struct TymBufferWriteResult * res = NULL;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   while (NULL != cursor) {
     res = tym_term_to_str(cursor->term, dst);

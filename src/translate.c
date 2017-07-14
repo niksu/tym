@@ -173,7 +173,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
     (void)clause_database_add(program->program[i], adb, NULL);
   }
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TymBufferWriteResult * res = atom_database_str(adb, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = atom_database_str(adb, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #if DEBUG
