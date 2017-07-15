@@ -69,7 +69,7 @@
   { \
     assert(NULL != el); \
   \
-    LIST_TYPE * lsts = malloc(sizeof(LIST_TYPE)); \
+    LIST_TYPE * lsts = malloc(sizeof *lsts); \
     assert(NULL != lsts); \
   \
     *lsts = (LIST_TYPE){el, lst}; \

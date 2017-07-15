@@ -73,7 +73,7 @@
 #define TYM_MAYBE_ERROR__MKVAL_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   __TYM_MAYBE_ERROR__MKVAL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   { \
-    struct TYM_LIFTED_TYPE_NAME(TYPE_NAME) * result = malloc(sizeof(struct TYM_LIFTED_TYPE_NAME(TYPE_NAME))); \
+    struct TYM_LIFTED_TYPE_NAME(TYPE_NAME) * result = malloc(sizeof *result); \
     result->is_error = false; \
     result->value.ok_value = v; \
     return result; \
@@ -81,7 +81,7 @@
 #define TYM_MAYBE_ERROR__MKERRVAL_DEFN(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   __TYM_MAYBE_ERROR__MKERRVAL(TYPE_NAME, RESULT_TYPE, ERROR_TYPE) \
   { \
-    struct TYM_LIFTED_TYPE_NAME(TYPE_NAME) * value = malloc(sizeof(struct TYM_LIFTED_TYPE_NAME(TYPE_NAME))); \
+    struct TYM_LIFTED_TYPE_NAME(TYPE_NAME) * value = malloc(sizeof *value); \
     value->is_error = true; \
     value->value.nok_value = v; \
     return value; \
