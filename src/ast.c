@@ -135,10 +135,10 @@ tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 struct TymClause *
 tym_copy_clause(const struct TymClause * const cp_clause)
 {
-  struct TymClause * result = malloc(sizeof(struct TymClause));
+  struct TymClause * result = malloc(sizeof *result);
   struct TymAtom ** body = NULL;
   if (cp_clause->body_size > 0) {
-    body = malloc(sizeof(struct TymAtom *) * cp_clause->body_size);
+    body = malloc(sizeof *body * cp_clause->body_size);
     for (int i = 0; i < cp_clause->body_size; i++) {
       body[i] = tym_copy_atom(cp_clause->body[i]);
     }
@@ -253,7 +253,7 @@ tym_mk_term(enum TymTermKind kind, const char * identifier)
 {
   assert(NULL != identifier);
 
-  struct TymTerm * t = malloc(sizeof(struct TymTerm));
+  struct TymTerm * t = malloc(sizeof *t);
   assert(NULL != t);
 
   t->kind = kind;
@@ -269,7 +269,7 @@ struct TymAtom *
 tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args) {
   assert(NULL != predicate);
 
-  struct TymAtom * at = malloc(sizeof(struct TymAtom));
+  struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
   at->predicate = predicate;
@@ -279,7 +279,7 @@ tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args) {
   struct TymTerms * pre_position = NULL;
 
   if (at->arity > 0) {
-    at->args = malloc(sizeof(struct TymTerm *) * at->arity);
+    at->args = malloc(sizeof *at->args * at->arity);
     assert(NULL != at->args);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = args->term;
@@ -301,7 +301,7 @@ tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body) 
   assert(NULL != head);
   assert((NULL != body && body_size > 0) || (NULL == body && 0 == body_size));
 
-  struct TymClause * cl = malloc(sizeof(struct TymClause));
+  struct TymClause * cl = malloc(sizeof *cl);
   assert(NULL != cl);
 
   cl->head = head;
@@ -311,7 +311,7 @@ tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body) 
   struct TymAtoms * pre_position = NULL;
 
   if (cl->body_size > 0) {
-    cl->body = malloc(sizeof(struct TymAtom *) * body_size);
+    cl->body = malloc(sizeof *cl->body * body_size);
     assert(NULL != cl->body);
     for (int i = 0; i < cl->body_size; i++) {
       cl->body[i] = body->atom;
@@ -331,7 +331,7 @@ TYM_DEFINE_U8_LIST_LEN(TymClauses)
 struct TymProgram *
 tym_mk_program(uint8_t no_clauses, struct TymClauses * program)
 {
-  struct TymProgram * p = malloc(sizeof(struct TymProgram));
+  struct TymProgram * p = malloc(sizeof *p);
   assert(NULL != p);
 
   p->no_clauses = no_clauses;
@@ -339,7 +339,7 @@ tym_mk_program(uint8_t no_clauses, struct TymClauses * program)
   struct TymClauses * pre_position = NULL;
 
   if (no_clauses > 0) {
-    p->program = malloc(sizeof(struct TymClause *) * no_clauses);
+    p->program = malloc(sizeof *p->program * no_clauses);
     assert(NULL != p->program);
     for (int i = 0; i < p->no_clauses; i++) {
       p->program[i] = program->clause;
@@ -592,24 +592,24 @@ tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
 void
 tym_test_clause(void) {
   printf("***test_clause***\n");
-  struct TymTerm * t = malloc(sizeof(struct TymTerm));
+  struct TymTerm * t = malloc(sizeof *t);
   *t = (struct TymTerm){.kind = TYM_CONST, .identifier = strdup("ok")};
 
-  struct TymAtom * at = malloc(sizeof(struct TymAtom));
+  struct TymAtom * at = malloc(sizeof *at);
   at->predicate = strdup("world");
   at->arity = 1;
-  at->args = malloc(sizeof(struct TymTerm *) * 1);
+  at->args = malloc(sizeof *at->args * 1);
   at->args[0] = t;
 
-  struct TymAtom * hd = malloc(sizeof(struct TymAtom));
+  struct TymAtom * hd = malloc(sizeof *hd);
   hd->predicate = strdup("hello");
   hd->arity = 0;
   hd->args = NULL;
 
-  struct TymClause * cl = malloc(sizeof(struct TymClause));
+  struct TymClause * cl = malloc(sizeof *cl);
   cl->head = hd;
   cl->body_size = 1;
-  cl->body = malloc(sizeof(struct TymAtom *) * 1);
+  cl->body = malloc(sizeof *cl->body * 1);
   cl->body[0] = at;
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -726,7 +726,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
 {
   assert(NULL != cp_atom);
 
-  struct TymAtom * at = malloc(sizeof(struct TymAtom));
+  struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
   at->predicate = strdup(cp_atom->predicate);
@@ -734,7 +734,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
   at->args = NULL;
 
   if (at->arity > 0) {
-    at->args = malloc(sizeof(struct TymTerm *) * at->arity);
+    at->args = malloc(sizeof *at->args * at->arity);
     assert(NULL != at->args);
     for (int i = 0; i < at->arity; i++) {
       at->args[i] = tym_copy_term(cp_atom->args[i]);
