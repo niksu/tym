@@ -171,7 +171,7 @@ main(int argc, char ** argv)
     TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
   }
 
-  struct TymSymGen ** vg = malloc(sizeof(struct TymSymGen *));
+  struct TymSymGen ** vg = malloc(sizeof *vg);
   *vg = NULL;
   *vg = tym_mk_sym_gen(strdup("V"));
 
