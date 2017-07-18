@@ -18,7 +18,7 @@ tym_mk_buffer(const size_t buffer_size)
   char * b = malloc(sizeof(char) * buffer_size);
   assert(NULL != b);
   memset(b, '\0', buffer_size);
-  struct TymBufferInfo * buf = malloc(sizeof(struct TymBufferInfo));
+  struct TymBufferInfo * buf = malloc(sizeof *buf);
   *buf = (struct TymBufferInfo){.buffer = b, .idx = 0, .buffer_size = buffer_size};
   return buf;
 }
