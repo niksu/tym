@@ -15,7 +15,7 @@ translate_atom(const struct TymAtom * at)
   assert(NULL != at);
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
-    args = malloc(sizeof(struct TymTerm *) * at->arity);
+    args = malloc(sizeof *args * at->arity);
     for (int i = 0; i < at->arity; i++) {
       args[i] = tym_copy_term(at->args[i]);
     }
@@ -67,7 +67,7 @@ translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct Ty
 {
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
-    args = malloc(sizeof(struct Term *) * at->arity);
+    args = malloc(sizeof *args * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (TYM_VAR == at->predargs[i]->kind) {
         char * placeholder = tym_mk_new_var(cg);
@@ -214,7 +214,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       struct TymTerm ** var_args = NULL;
 
       if (preds_cursor->predicate->arity > 0) {
-        var_args = malloc(sizeof(struct Term *) * preds_cursor->predicate->arity);
+        var_args = malloc(sizeof *var_args * preds_cursor->predicate->arity);
 
         for (int i = 0; i < preds_cursor->predicate->arity; i++) {
           var_args[i] = tym_mk_term(TYM_VAR, tym_mk_new_var(*vg));
@@ -259,7 +259,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         struct TymTerm ** args = NULL;
 
         if (head_atom->arity > 0) {
-          args = malloc(sizeof(struct Term *) * head_atom->arity);
+          args = malloc(sizeof *args * head_atom->arity);
 
           for (int i = 0; i < head_atom->arity; i++) {
             args[i] = tym_copy_term(head_atom->args[i]);
@@ -277,7 +277,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         printf("from: %s\n", outbuf->buffer);
 #endif
 
-        struct TymValuation ** val = malloc(sizeof(struct TymValuation *));
+        struct TymValuation ** val = malloc(sizeof *val);
         *val = NULL;
         if (NULL != abs_head_fmla) {
           tym_free_fmla(abs_head_fmla);
