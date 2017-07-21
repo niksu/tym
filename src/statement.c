@@ -25,7 +25,7 @@ char * eqK = "=";
 struct universe_t *
 mk_universe(struct TymTerms * terms)
 {
-  struct universe_t * result = malloc(sizeof(struct universe_t));
+  struct universe_t * result = malloc(sizeof *result);
   result->cardinality = 0;
   result->element = NULL;
 
@@ -37,11 +37,11 @@ mk_universe(struct TymTerms * terms)
   }
 
   assert(result->cardinality > 0);
-  result->element = malloc(sizeof(char *) * result->cardinality);
+  result->element = malloc(sizeof *result->element * result->cardinality);
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-    result->element[i] = malloc(sizeof(char) * (strlen(cursor->term->identifier) + 1));
+    result->element[i] = malloc(sizeof *result->element[i] * (strlen(cursor->term->identifier) + 1));
     strcpy(result->element[i], cursor->term->identifier);
     cursor = cursor->next;
   }
@@ -123,7 +123,7 @@ free_universe(struct universe_t * uni)
 const struct stmt_t *
 mk_stmt_axiom(const struct TymFmla * axiom)
 {
-  struct stmt_t * result = malloc(sizeof(struct stmt_t));
+  struct stmt_t * result = malloc(sizeof *result);
   *result = (struct stmt_t){.kind = STMT_AXIOM, .param.axiom = axiom};
   return result;
 }
@@ -131,8 +131,8 @@ mk_stmt_axiom(const struct TymFmla * axiom)
 const struct stmt_t *
 mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
-  struct stmt_t * result = malloc(sizeof(struct stmt_t));
-  struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
+  struct stmt_t * result = malloc(sizeof *result);
+  struct stmt_const_t * sub_result = malloc(sizeof *sub_result);
 
   *sub_result = (struct stmt_const_t)
       {.const_name = pred_name,
@@ -152,8 +152,8 @@ mk_stmt_const(char * const_name, struct universe_t * uni, char * ty)
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  struct stmt_t * result = malloc(sizeof(struct stmt_t));
-  struct stmt_const_t * sub_result = malloc(sizeof(struct stmt_const_t));
+  struct stmt_t * result = malloc(sizeof *result);
+  struct stmt_const_t * sub_result = malloc(sizeof *sub_result);
 
   *sub_result = (struct stmt_const_t)
     {.const_name = const_name,
@@ -394,7 +394,7 @@ free_stmts(const struct stmts_t * stmts)
 struct model_t *
 mk_model(struct universe_t * uni)
 {
-  struct model_t * result = malloc(sizeof(struct model_t));
+  struct model_t * result = malloc(sizeof *result);
   result->universe = uni;
   result->stmts = NULL;
   return result;
@@ -546,7 +546,7 @@ statementise_universe(struct model_t * mdl)
   }
 
   assert(0 < mdl->universe->cardinality);
-  struct TymTerm ** args = malloc(sizeof(struct Term *) * mdl->universe->cardinality);
+  struct TymTerm ** args = malloc(sizeof *args * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = tym_mk_term(TYM_CONST, strdup(mdl->universe->element[i]));
   }
