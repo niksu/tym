@@ -23,7 +23,7 @@ static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 struct TymFmla *
 tym_mk_fmla_const(bool b)
 {
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmla * result = malloc(sizeof *result);
   assert(NULL != result);
 
   result->kind = FMLA_CONST;
@@ -35,9 +35,9 @@ tym_mk_fmla_const(bool b)
 struct TymFmla *
 tym_mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
-  struct TymFmlaAtom * result_content = malloc(sizeof(struct TymFmlaAtom));
+  struct TymFmlaAtom * result_content = malloc(sizeof *result_content);
   assert(NULL != result_content);
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmla * result = malloc(sizeof *result);
   assert(NULL != result);
 
   result->kind = FMLA_ATOM;
@@ -58,7 +58,7 @@ tym_mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
   va_list varargs;
   va_start(varargs, arity);
   if (arity > 0) {
-    args = malloc(sizeof(struct TymTerm *) * arity);
+    args = malloc(sizeof *args * arity);
     for (int i = 0; i < arity; i++) {
       args[i] = va_arg(varargs, struct TymTerm *);
     }
@@ -73,8 +73,8 @@ tym_mk_fmla_quant(const char * bv, struct TymFmla * body)
 {
   assert(NULL != bv);
   assert(NULL != body);
-  struct TymFmlaQuant * result_content = malloc(sizeof(struct TymFmlaQuant));
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmlaQuant * result_content = malloc(sizeof *result_content);
+  struct TymFmla * result = malloc(sizeof *result);
   result_content->bv = bv;
   result_content->body = body;
   *result = (struct TymFmla){.kind = FMLA_EX, .param.quant = result_content};
@@ -84,8 +84,8 @@ tym_mk_fmla_quant(const char * bv, struct TymFmla * body)
 struct TymFmla *
 tym_mk_fmla_not(struct TymFmla * subfmla)
 {
-  struct TymFmla ** result_content = malloc(sizeof(struct TymFmla *) * 1);
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 1);
+  struct TymFmla * result = malloc(sizeof *result);
   result_content[0] = subfmla;
   *result = (struct TymFmla){.kind = FMLA_NOT, .param.args = result_content};
   return result;
@@ -94,8 +94,8 @@ tym_mk_fmla_not(struct TymFmla * subfmla)
 struct TymFmla *
 tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
-  struct TymFmla ** result_content = malloc(sizeof(struct TymFmla *) * 2);
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 2);
+  struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_AND;
   result_content[0] = subfmlaL;
   result_content[1] = subfmlaR;
@@ -106,8 +106,8 @@ tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 struct TymFmla *
 tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
-  struct TymFmla ** result_content = malloc(sizeof(struct TymFmla *) * 2);
-  struct TymFmla * result = malloc(sizeof(struct TymFmla));
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 2);
+  struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_OR;
   result_content[0] = subfmlaL;
   result_content[1] = subfmlaR;
@@ -365,7 +365,7 @@ TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
 struct TymSymGen *
 tym_mk_sym_gen(const char * prefix)
 {
-  struct TymSymGen * result = malloc(sizeof(struct TymSymGen));
+  struct TymSymGen * result = malloc(sizeof *result);
   result->prefix = prefix;
   result->index = 0;
   return result;
@@ -374,8 +374,8 @@ tym_mk_sym_gen(const char * prefix)
 struct TymSymGen *
 tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 {
-  struct TymSymGen * result = malloc(sizeof(struct TymSymGen));
-  char * prefix_copy = malloc(sizeof(char) * (strlen(cp_orig->prefix) + 1));
+  struct TymSymGen * result = malloc(sizeof *result);
+  char * prefix_copy = malloc(sizeof *prefix_copy * (strlen(cp_orig->prefix) + 1));
   strcpy(prefix_copy, cp_orig->prefix);
   result->prefix = prefix_copy;
   result->index = cp_orig->index;
@@ -423,18 +423,18 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
   struct TymTerm ** var_args_T = NULL;
 
   if (atom->arity > 0) {
-    var_args_T = malloc(sizeof(struct Term *) * atom->arity);
-    char ** var_args = malloc(sizeof(char *) * atom->arity);
+    var_args_T = malloc(sizeof *var_args_T * atom->arity);
+    char ** var_args = malloc(sizeof *var_args * atom->arity);
     *v = NULL;
 
     struct TymValuation * v_cursor;
     for (int i = 0; i < atom->arity; i++) {
       if (0 == i) {
-        *v = malloc(sizeof(struct TymValuation));
+        *v = malloc(sizeof **v);
         v_cursor = *v;
       } else {
         assert(NULL != v_cursor);
-        v_cursor->next = malloc(sizeof(struct TymValuation));
+        v_cursor->next = malloc(sizeof *v_cursor->next);
         v_cursor = v_cursor->next;
       }
 
@@ -650,7 +650,7 @@ tym_copy_fmla(const struct TymFmla * const fmla)
     predargs_copy = NULL;
 
     if (fmla->param.atom->arity > 0) {
-      predargs_copy = malloc(sizeof(struct Term *) * fmla->param.atom->arity);
+      predargs_copy = malloc(sizeof *predargs_copy * fmla->param.atom->arity);
       for (int i = 0; i < fmla->param.atom->arity; i++) {
         predargs_copy[i] = tym_copy_term(fmla->param.atom->predargs[i]);
       }
@@ -698,7 +698,7 @@ void
 tym_test_formula(void)
 {
   printf("***test_formula***\n");
-  struct TymTerm ** args = malloc(sizeof(struct Term *) * 2);
+  struct TymTerm ** args = malloc(sizeof *args * 2);
   args[0] = tym_mk_term(TYM_CONST, strdup("arg0"));
   args[1] = tym_mk_term(TYM_CONST, strdup("arg1"));
 
@@ -911,7 +911,7 @@ tym_copy_fmlas(const struct TymFmlas * fmlas)
   struct TymFmlas * result = NULL;
 
   if (NULL != fmlas) {
-    result = malloc(sizeof(struct TymFmlas));
+    result = malloc(sizeof *result);
     assert(NULL != fmlas->fmla);
     result->fmla = tym_copy_fmla(fmlas->fmla);
     result->next = tym_copy_fmlas(fmlas->next);
