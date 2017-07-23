@@ -10,7 +10,7 @@
 #include "translate.h"
 
 struct TymFmla *
-translate_atom(const struct TymAtom * at)
+tym_translate_atom(const struct TymAtom * at)
 {
   assert(NULL != at);
   struct TymTerm ** args = NULL;
@@ -24,24 +24,24 @@ translate_atom(const struct TymAtom * at)
 }
 
 struct TymFmla *
-translate_body(const struct TymClause * cl)
+tym_translate_body(const struct TymClause * cl)
 {
   struct TymFmlas * fmlas = NULL;
   for (int i = 0; i < cl->body_size; i++) {
-    fmlas = tym_mk_fmla_cell(translate_atom(cl->body[i]), fmlas);
+    fmlas = tym_mk_fmla_cell(tym_translate_atom(cl->body[i]), fmlas);
   }
   return tym_mk_fmla_ands(fmlas);
 }
 
 struct TymFmlas *
-translate_bodies(const struct TymClauses * cls)
+tym_translate_bodies(const struct TymClauses * cls)
 {
   const struct TymClauses * cursor = cls;
   struct TymFmlas * fmlas = NULL;
   while (NULL != cursor) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    fmlas = (struct TymFmlas *)tym_mk_fmla_cell(translate_body(cursor->clause), fmlas);
+    fmlas = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), fmlas);
 #pragma GCC diagnostic pop
     cursor = cursor->next;
   }
@@ -49,7 +49,7 @@ translate_bodies(const struct TymClauses * cls)
 }
 
 struct TymFmla *
-translate_valuation(struct TymValuation * const v)
+tym_translate_valuation(struct TymValuation * const v)
 {
   struct TymFmlas * result = NULL;
   struct TymValuation * cursor = v;
@@ -63,7 +63,7 @@ translate_valuation(struct TymValuation * const v)
 }
 
 void
-translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
+tym_translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
 {
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
@@ -86,25 +86,25 @@ translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct Ty
 }
 
 void
-translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
+tym_translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
 {
   switch (fmla->kind) {
   case FMLA_CONST:
     // Nothing to do
     break;
   case FMLA_ATOM:
-    translate_query_fmla_atom(mdl, cg, fmla->param.atom);
+    tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
-    translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
     break;
   case FMLA_OR:
-    translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
     break;
   case FMLA_NOT:
-    translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
     break;
   case FMLA_EX:
     assert(false); // Existential quantifier cannot appear in queries.
@@ -116,7 +116,7 @@ translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct TymFmla
 }
 
 void
-translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGen * cg)
+tym_translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGen * cg)
 {
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
@@ -125,7 +125,7 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGe
   assert(1 == query->no_clauses);
   const struct TymClause * q_cl = query->program[0];
 
-  struct TymFmla * q_fmla = translate_atom(q_cl->head);
+  struct TymFmla * q_fmla = tym_translate_atom(q_cl->head);
 
 #if DEBUG
   struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
@@ -158,14 +158,14 @@ translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGe
       free(pre_cursor);
     }
   }
-  translate_query_fmla(mdl, cg, q_fmla);
+  tym_translate_query_fmla(mdl, cg, q_fmla);
 
   const struct stmt_t * stmt = mk_stmt_axiom(q_fmla);
   strengthen_model(mdl, stmt);
 }
 
 struct model_t *
-translate_program(struct TymProgram * program, struct TymSymGen ** vg)
+tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 {
   struct atom_database_t * adb = mk_atom_database();
 
@@ -205,7 +205,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
 #endif
 
-    struct TymFmlas * fmlas = (struct TymFmlas *)translate_bodies(preds_cursor->predicate->bodies);
+    struct TymFmlas * fmlas = (struct TymFmlas *)tym_translate_bodies(preds_cursor->predicate->bodies);
     struct TymFmlas * fmlas_cursor = fmlas;
 
     if (NULL == preds_cursor->predicate->bodies) {
@@ -301,7 +301,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #endif
         free(res);
 
-        struct TymFmla * valuation_fmla = translate_valuation(*val);
+        struct TymFmla * valuation_fmla = tym_translate_valuation(*val);
         fmlas_cursor->fmla = tym_mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
@@ -374,7 +374,7 @@ translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 // FIXME naive implementation
 const struct stmts_t *
-order_statements(const struct stmts_t * stmts)
+tym_order_statements(const struct stmts_t * stmts)
 {
   const struct stmts_t * cursor = stmts;
   const struct stmts_t * waiting = NULL;

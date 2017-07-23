@@ -179,14 +179,14 @@ main(int argc, char ** argv)
 
   struct model_t * mdl = NULL;
   if (NULL != ParsedInputFileContents) {
-    mdl = translate_program(ParsedInputFileContents, vg);
+    mdl = tym_translate_program(ParsedInputFileContents, vg);
     statementise_universe(mdl);
   }
 
   if (NULL != ParsedQuery &&
       // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
       NULL != mdl) {
-    translate_query(ParsedQuery, mdl, cg);
+    tym_translate_query(ParsedQuery, mdl, cg);
   }
 #if DEBUG
   else {
@@ -206,7 +206,7 @@ main(int argc, char ** argv)
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
-    const struct stmts_t * reordered_stmts = order_statements(mdl->stmts);
+    const struct stmts_t * reordered_stmts = tym_order_statements(mdl->stmts);
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 
