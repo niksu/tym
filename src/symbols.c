@@ -9,19 +9,19 @@
 
 #include "symbols.h"
 
-struct term_database_t *
+struct TymTermDatabase *
 mk_term_database(void)
 {
-  struct term_database_t * result = malloc(sizeof *result);
+  struct TymTermDatabase * result = malloc(sizeof *result);
   result ->herbrand_universe = NULL;
-  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_TERM_DATABASE_SIZE; i++) {
     result->term_database[i] = NULL;
   }
   return result;
 }
 
 bool
-term_database_add(struct TymTerm * term, struct term_database_t * tdb)
+term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
 {
   bool exists = false;
   char h = tym_hash_term(term);
@@ -61,7 +61,7 @@ term_database_add(struct TymTerm * term, struct term_database_t * tdb)
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst)
+term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
 {
   assert(NULL != tdb);
   assert(NULL != dst);
@@ -85,12 +85,12 @@ term_database_str(struct term_database_t * tdb, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct predicate_t *
+struct TymPredicate *
 mk_pred(const char * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 
-  struct predicate_t * p = malloc(sizeof *p);
+  struct TymPredicate * p = malloc(sizeof *p);
   assert(NULL != p);
 
   p->predicate = predicate;
@@ -102,7 +102,7 @@ mk_pred(const char * predicate, uint8_t arity)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_pred(struct predicate_t * pred)
+free_pred(struct TymPredicate * pred)
 {
   free((void *)pred->predicate);
   if (NULL != pred->bodies) {
@@ -112,10 +112,10 @@ free_pred(struct predicate_t * pred)
 }
 #pragma GCC diagnostic pop
 
-TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct predicate_t, struct predicates_t)
+TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct TymPredicate, struct predicates_t)
 
 bool
-eq_pred(struct predicate_t p1, struct predicate_t p2, enum eq_pred_error * error_code, bool * result)
+eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError * error_code, bool * result)
 {
   *error_code = NO_ERROR_eq_pred;
 
@@ -138,19 +138,19 @@ eq_pred(struct predicate_t p1, struct predicate_t p2, enum eq_pred_error * error
   }
 }
 
-struct atom_database_t *
+struct TymAtomDatabase *
 mk_atom_database(void)
 {
-  struct atom_database_t * result = malloc(sizeof *result);
+  struct TymAtomDatabase * result = malloc(sizeof *result);
   result->tdb = mk_term_database();
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     result->atom_database[i] = NULL;
   }
   return result;
 }
 
 bool
-atom_database_member(const struct TymAtom * atom, struct atom_database_t * adb, enum adl_lookup_error * error_code, struct predicate_t ** record)
+atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_lookup_error * error_code, struct TymPredicate ** record)
 {
   bool success;
   if (NULL == adb) {
@@ -165,12 +165,12 @@ atom_database_member(const struct TymAtom * atom, struct atom_database_t * adb, 
     } else {
       bool exists = false;
 
-      struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
+      struct TymPredicate * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
       struct predicates_t * cursor = adb->atom_database[(int)h];
 
       do {
-        enum eq_pred_error eq_pred_error_code;
+        enum TymEqPredError eq_pred_error_code;
         success = (eq_pred(*pred, *(cursor->predicate), &eq_pred_error_code, &exists));
         if (success) {
           if (exists) {
@@ -193,7 +193,7 @@ atom_database_member(const struct TymAtom * atom, struct atom_database_t * adb, 
 }
 
 bool
-atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enum adl_add_error * error_code, struct predicate_t ** result)
+atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_add_error * error_code, struct TymPredicate ** result)
 {
   bool success;
 
@@ -203,7 +203,7 @@ atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enu
   } else {
     char h = tym_hash_str(atom->predicate);
 
-    struct predicate_t * pred = mk_pred(strdup(atom->predicate), atom->arity);
+    struct TymPredicate * pred = mk_pred(strdup(atom->predicate), atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
@@ -211,7 +211,7 @@ atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enu
       bool exists = false;
       struct predicates_t * cursor = adb->atom_database[(int)h];
       while (NULL != cursor) {
-        enum eq_pred_error eq_pred_error_code;
+        enum TymEqPredError eq_pred_error_code;
         bool eq_pred_result;
         if (eq_pred(*pred, *cursor->predicate, &eq_pred_error_code, &eq_pred_result)) {
           free_pred(pred);
@@ -246,7 +246,7 @@ atom_database_add(const struct TymAtom * atom, struct atom_database_t * adb, enu
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
+atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
 {
   assert(NULL != adb);
 
@@ -272,7 +272,7 @@ atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
 
   const struct predicates_t * cursor;
 
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
     while (NULL != cursor) {
       res = predicate_str(cursor->predicate, dst);
@@ -309,7 +309,7 @@ atom_database_str(struct atom_database_t * adb, struct TymBufferInfo * dst)
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst)
+predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -331,13 +331,13 @@ predicate_str(const struct predicate_t * pred, struct TymBufferInfo * dst)
 }
 
 struct predicates_t *
-atom_database_to_predicates(struct atom_database_t * adb)
+atom_database_to_predicates(struct TymAtomDatabase * adb)
 {
   struct predicates_t * result = NULL;
   struct predicates_t * result_cursor = NULL;
   const struct predicates_t * cursor = NULL;
 
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
     while (NULL != cursor) {
       if (NULL == result) {
@@ -361,11 +361,11 @@ atom_database_to_predicates(struct atom_database_t * adb)
 }
 
 bool
-clause_database_add(struct TymClause * clause, struct atom_database_t * adb, enum cdl_add_error * cdl_add_error)
+clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb, enum cdl_add_error * cdl_add_error)
 {
   enum adl_lookup_error adl_lookup_error;
   enum adl_add_error adl_add_error;
-  struct predicate_t * record = NULL;
+  struct TymPredicate * record = NULL;
   bool success = atom_database_member(clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
     assert(DIFF_ARITY == adl_lookup_error);
@@ -374,7 +374,7 @@ clause_database_add(struct TymClause * clause, struct atom_database_t * adb, enu
          *cdl_add_error, clause->head->predicate);
     return false;
   } else if (NULL == record) {
-    struct predicate_t * result;
+    struct TymPredicate * result;
     success = atom_database_add(clause->head, adb, &adl_add_error, &result);
     result->bodies = tym_mk_clause_cell(tym_copy_clause(clause), NULL);
     if (!success) {
@@ -407,7 +407,7 @@ clause_database_add(struct TymClause * clause, struct atom_database_t * adb, enu
              *cdl_add_error, clause->body[i]->predicate);
         return false;
       } else if (NULL == record) {
-        struct predicate_t * result;
+        struct TymPredicate * result;
         success &= atom_database_add(clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
           assert(NO_ATOM_DATABASE == adl_add_error);
@@ -424,7 +424,7 @@ clause_database_add(struct TymClause * clause, struct atom_database_t * adb, enu
 }
 
 size_t
-num_predicate_bodies (struct predicate_t * p)
+num_predicate_bodies (struct TymPredicate * p)
 {
   size_t no_bodies = 0;
   const struct TymClauses * body_cursor = p->bodies;
@@ -436,9 +436,9 @@ num_predicate_bodies (struct predicate_t * p)
 }
 
 void
-free_atom_database(struct atom_database_t * adb)
+free_atom_database(struct TymAtomDatabase * adb)
 {
-  for (int i = 0; i < TERM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_TERM_DATABASE_SIZE; i++) {
     struct TymTerms * cursor = adb->tdb->term_database[i];
     while (NULL != cursor) {
       struct TymTerms * pre_cursor = cursor;
@@ -458,7 +458,7 @@ free_atom_database(struct atom_database_t * adb)
   }
   free(adb->tdb);
 
-  for (int i = 0; i < ATOM_DATABASE_SIZE; i++) {
+  for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     struct predicates_t * cursor = adb->atom_database[i];
     while (NULL != cursor) {
       struct predicates_t * pre_cursor = cursor;

@@ -167,7 +167,7 @@ tym_translate_query(struct TymProgram * query, struct model_t * mdl, struct TymS
 struct model_t *
 tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 {
-  struct atom_database_t * adb = mk_atom_database();
+  struct TymAtomDatabase * adb = mk_atom_database();
 
   for (int i = 0; i < program->no_clauses; i++) {
     (void)clause_database_add(program->program[i], adb, NULL);
