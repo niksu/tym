@@ -150,7 +150,7 @@ mk_atom_database(void)
 }
 
 bool
-atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_lookup_error * error_code, struct TymPredicate ** record)
+atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum TymAdlLookupError * error_code, struct TymPredicate ** record)
 {
   bool success;
   if (NULL == adb) {
@@ -193,7 +193,7 @@ atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, 
 }
 
 bool
-atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_add_error * error_code, struct TymPredicate ** result)
+atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum TymAdlAddError * error_code, struct TymPredicate ** result)
 {
   bool success;
 
@@ -361,10 +361,10 @@ atom_database_to_predicates(struct TymAtomDatabase * adb)
 }
 
 bool
-clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb, enum cdl_add_error * cdl_add_error)
+clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb, enum TymCdlAddError * cdl_add_error)
 {
-  enum adl_lookup_error adl_lookup_error;
-  enum adl_add_error adl_add_error;
+  enum TymAdlLookupError adl_lookup_error;
+  enum TymAdlAddError adl_add_error;
   struct TymPredicate * record = NULL;
   bool success = atom_database_member(clause->head, adb, &adl_lookup_error, &record);
   if (!success) {

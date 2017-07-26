@@ -58,21 +58,21 @@ struct TymAtomDatabase {
 struct TymAtomDatabase * mk_atom_database(void);
 void free_atom_database(struct TymAtomDatabase *);
 
-enum adl_lookup_error {ADL_NO_ERROR = 0, DIFF_ARITY};
+enum TymAdlLookupError {ADL_NO_ERROR = 0, DIFF_ARITY};
 
-bool atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_lookup_error * error_code, struct TymPredicate ** record);
+bool atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum TymAdlLookupError * error_code, struct TymPredicate ** record);
 
-enum adl_add_error {NO_ATOM_DATABASE = 0};
+enum TymAdlAddError {NO_ATOM_DATABASE = 0};
 
-bool atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum adl_add_error * error_code, struct TymPredicate ** result);
+bool atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum TymAdlAddError * error_code, struct TymPredicate ** result);
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst);
 struct predicates_t * atom_database_to_predicates(struct TymAtomDatabase * adb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst);
 
-enum cdl_add_error {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
+enum TymCdlAddError {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};
 
-bool clause_database_add(struct TymClause * clause, struct TymAtomDatabase * cdb, enum cdl_add_error *);
+bool clause_database_add(struct TymClause * clause, struct TymAtomDatabase * cdb, enum TymCdlAddError *);
 
 size_t num_predicate_bodies (struct TymPredicate *);
 
