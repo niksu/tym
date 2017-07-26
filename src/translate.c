@@ -167,13 +167,13 @@ tym_translate_query(struct TymProgram * query, struct model_t * mdl, struct TymS
 struct model_t *
 tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 {
-  struct TymAtomDatabase * adb = mk_atom_database();
+  struct TymAtomDatabase * adb = tym_mk_atom_database();
 
   for (int i = 0; i < program->no_clauses; i++) {
-    (void)clause_database_add(program->program[i], adb, NULL);
+    (void)tym_clause_database_add(program->program[i], adb, NULL);
   }
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = atom_database_str(adb, outbuf);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_atom_database_str(adb, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #if DEBUG
@@ -199,7 +199,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
-  struct predicates_t * preds_cursor = atom_database_to_predicates(adb);
+  struct predicates_t * preds_cursor = tym_atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
 #if DEBUG
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
@@ -367,7 +367,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
   tym_free_buffer(outbuf);
 
-  free_atom_database(adb);
+  tym_free_atom_database(adb);
 
   return mdl;
 }
