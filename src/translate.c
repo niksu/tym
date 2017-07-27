@@ -199,7 +199,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
-  struct predicates_t * preds_cursor = tym_atom_database_to_predicates(adb);
+  struct TymPredicates * preds_cursor = tym_atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
 #if DEBUG
     printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
@@ -353,7 +353,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
     }
 
 
-    struct predicates_t * pre_preds_cursor = preds_cursor;
+    struct TymPredicates * pre_preds_cursor = preds_cursor;
     preds_cursor = preds_cursor->next;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"

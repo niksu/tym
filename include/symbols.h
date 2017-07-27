@@ -45,14 +45,14 @@ enum TymEqPredError {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY};
 
 bool tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError * error_code, bool * result);
 
-TYM_DECLARE_MUTABLE_LIST_TYPE(predicates_t, predicate, TymPredicate)
-TYM_DECLARE_MUTABLE_LIST_MK(pred, struct TymPredicate, struct predicates_t)
+TYM_DECLARE_MUTABLE_LIST_TYPE(TymPredicates, predicate, TymPredicate)
+TYM_DECLARE_MUTABLE_LIST_MK(pred, struct TymPredicate, struct TymPredicates)
 
 #define TYM_ATOM_DATABASE_SIZE TYM_HASH_RANGE
 
 struct TymAtomDatabase {
   struct TymTermDatabase * tdb;
-  struct predicates_t * atom_database[TYM_ATOM_DATABASE_SIZE];
+  struct TymPredicates * atom_database[TYM_ATOM_DATABASE_SIZE];
 };
 
 struct TymAtomDatabase * tym_mk_atom_database(void);
@@ -67,7 +67,7 @@ enum TymAdlAddError {NO_ATOM_DATABASE = 0};
 bool tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb, enum TymAdlAddError * error_code, struct TymPredicate ** result);
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst);
-struct predicates_t * tym_atom_database_to_predicates(struct TymAtomDatabase * adb);
+struct TymPredicates * tym_atom_database_to_predicates(struct TymAtomDatabase * adb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst);
 
 enum TymCdlAddError {CDL_ADL_DIFF_ARITY = 0, CDL_ADL_NO_ATOM_DATABASE};

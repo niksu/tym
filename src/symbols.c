@@ -112,7 +112,7 @@ tym_free_pred(struct TymPredicate * pred)
 }
 #pragma GCC diagnostic pop
 
-TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct TymPredicate, struct predicates_t)
+TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct TymPredicate, struct TymPredicates)
 
 bool
 tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError * error_code, bool * result)
@@ -167,7 +167,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
 
       struct TymPredicate * pred = tym_mk_pred(strdup(atom->predicate), atom->arity);
 
-      struct predicates_t * cursor = adb->atom_database[(int)h];
+      struct TymPredicates * cursor = adb->atom_database[(int)h];
 
       do {
         enum TymEqPredError eq_pred_error_code;
@@ -209,7 +209,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
       adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
     } else {
       bool exists = false;
-      struct predicates_t * cursor = adb->atom_database[(int)h];
+      struct TymPredicates * cursor = adb->atom_database[(int)h];
       while (NULL != cursor) {
         enum TymEqPredError eq_pred_error_code;
         bool eq_pred_result;
@@ -270,7 +270,7 @@ tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
 
   tym_safe_buffer_replace_last(dst, '\n');
 
-  const struct predicates_t * cursor;
+  const struct TymPredicates * cursor;
 
   for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
@@ -330,12 +330,12 @@ tym_predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
 }
 
-struct predicates_t *
+struct TymPredicates *
 tym_atom_database_to_predicates(struct TymAtomDatabase * adb)
 {
-  struct predicates_t * result = NULL;
-  struct predicates_t * result_cursor = NULL;
-  const struct predicates_t * cursor = NULL;
+  struct TymPredicates * result = NULL;
+  struct TymPredicates * result_cursor = NULL;
+  const struct TymPredicates * cursor = NULL;
 
   for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
     cursor = adb->atom_database[i];
@@ -459,9 +459,9 @@ tym_free_atom_database(struct TymAtomDatabase * adb)
   free(adb->tdb);
 
   for (int i = 0; i < TYM_ATOM_DATABASE_SIZE; i++) {
-    struct predicates_t * cursor = adb->atom_database[i];
+    struct TymPredicates * cursor = adb->atom_database[i];
     while (NULL != cursor) {
-      struct predicates_t * pre_cursor = cursor;
+      struct TymPredicates * pre_cursor = cursor;
       cursor = cursor->next;
       tym_free_pred(pre_cursor->predicate);
       free(pre_cursor);
