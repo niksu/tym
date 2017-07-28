@@ -117,7 +117,7 @@ TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct TymPredicate, struct TymPredi
 bool
 tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError * error_code, bool * result)
 {
-  *error_code = NO_ERROR_eq_pred;
+  *error_code = TYM_NO_ERROR_EQ_PRED;
 
   if (&p1 == &p2) {
     *result = true;

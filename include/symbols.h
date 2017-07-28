@@ -41,7 +41,7 @@ struct TymPredicate {
 struct TymPredicate * tym_mk_pred(const char * predicate, uint8_t arity);
 void tym_free_pred(struct TymPredicate * pred);
 
-enum TymEqPredError {NO_ERROR_eq_pred, SAME_PREDICATE_DIFF_ARITY};
+enum TymEqPredError {TYM_NO_ERROR_EQ_PRED, SAME_PREDICATE_DIFF_ARITY};
 
 bool tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError * error_code, bool * result);
 
