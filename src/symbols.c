@@ -180,7 +180,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
           }
         } else {
           assert(SAME_PREDICATE_DIFF_ARITY == eq_pred_error_code);
-          *error_code = DIFF_ARITY;
+          *error_code = TYM_DIFF_ARITY;
         }
 
         cursor = cursor->next;
@@ -198,7 +198,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
   bool success;
 
   if (NULL == adb) {
-    *error_code = NO_ATOM_DATABASE;
+    *error_code = TYM_NO_ATOM_DATABASE;
     success = false;
   } else {
     char h = tym_hash_str(atom->predicate);
@@ -368,8 +368,8 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
   struct TymPredicate * record = NULL;
   bool success = tym_atom_database_member(clause->head, adb, &adl_lookup_error, &record);
   if (!success) {
-    assert(DIFF_ARITY == adl_lookup_error);
-    *cdl_add_error = CDL_ADL_DIFF_ARITY;
+    assert(TYM_DIFF_ARITY == adl_lookup_error);
+    *cdl_add_error = TYM_CDL_ADL_DIFF_ARITY;
     TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
          *cdl_add_error, clause->head->predicate);
     return false;
@@ -378,8 +378,8 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
     success = tym_atom_database_add(clause->head, adb, &adl_add_error, &result);
     result->bodies = tym_mk_clause_cell(tym_copy_clause(clause), NULL);
     if (!success) {
-      assert(NO_ATOM_DATABASE == adl_add_error);
-      *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
+      assert(TYM_NO_ATOM_DATABASE == adl_add_error);
+      *cdl_add_error = TYM_CDL_ADL_NO_ATOM_DATABASE;
       TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
            *cdl_add_error, clause->head->predicate);
       return false;
@@ -401,8 +401,8 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
     for (int i = 0; success && i < clause->body_size; i++) {
       success &= tym_atom_database_member(clause->body[i], adb, &adl_lookup_error, &record);
       if (!success) {
-        assert(DIFF_ARITY == adl_lookup_error);
-        *cdl_add_error = CDL_ADL_DIFF_ARITY;
+        assert(TYM_DIFF_ARITY == adl_lookup_error);
+        *cdl_add_error = TYM_CDL_ADL_DIFF_ARITY;
         TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
              *cdl_add_error, clause->body[i]->predicate);
         return false;
@@ -410,8 +410,8 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
         struct TymPredicate * result;
         success &= tym_atom_database_add(clause->body[i], adb, &adl_add_error, &result);
         if (!success) {
-          assert(NO_ATOM_DATABASE == adl_add_error);
-          *cdl_add_error = CDL_ADL_NO_ATOM_DATABASE;
+          assert(TYM_NO_ATOM_DATABASE == adl_add_error);
+          *cdl_add_error = TYM_CDL_ADL_NO_ATOM_DATABASE;
           TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
                *cdl_add_error, clause->body[i]->predicate);
           return false;
