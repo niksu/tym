@@ -18,14 +18,14 @@
 #include "statement.h"
 #include "util.h"
 
-char * bool_ty = "Bool";
-char * distinctK = "distinct";
-char * eqK = "=";
+char * tym_bool_ty = "Bool";
+char * tym_distinctK = "distinct";
+char * tym_eqK = "=";
 
-struct universe_t *
+struct TymUniverse *
 mk_universe(struct TymTerms * terms)
 {
-  struct universe_t * result = malloc(sizeof *result);
+  struct TymUniverse * result = malloc(sizeof *result);
   result->cardinality = 0;
   result->element = NULL;
 
@@ -50,7 +50,7 @@ mk_universe(struct TymTerms * terms)
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-universe_str(const struct universe_t * const uni, struct TymBufferInfo * dst)
+universe_str(const struct TymUniverse * const uni, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -109,7 +109,7 @@ universe_str(const struct universe_t * const uni, struct TymBufferInfo * dst)
 }
 
 void
-free_universe(struct universe_t * uni)
+free_universe(struct TymUniverse * uni)
 {
   if (uni->cardinality > 0) {
     for (int i = 0; i < uni->cardinality; i++) {
@@ -132,13 +132,13 @@ const struct stmt_t *
 mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct stmt_t * result = malloc(sizeof *result);
-  struct stmt_const_t * sub_result = malloc(sizeof *sub_result);
+  struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
 
-  *sub_result = (struct stmt_const_t)
+  *sub_result = (struct TymStmtConst)
       {.const_name = pred_name,
        .params = params,
        .body = body,
-       .ty = bool_ty};
+       .ty = tym_bool_ty};
 
   result->kind = STMT_CONST_DEF;
   result->param.const_def = sub_result;
@@ -146,16 +146,16 @@ mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
 }
 
 struct stmt_t *
-mk_stmt_const(char * const_name, struct universe_t * uni, char * ty)
+mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
   struct stmt_t * result = malloc(sizeof *result);
-  struct stmt_const_t * sub_result = malloc(sizeof *sub_result);
+  struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
 
-  *sub_result = (struct stmt_const_t)
+  *sub_result = (struct TymStmtConst)
     {.const_name = const_name,
      .params = NULL,
      .body = NULL,
@@ -167,7 +167,7 @@ mk_stmt_const(char * const_name, struct universe_t * uni, char * ty)
 }
 
 const struct stmt_t *
-mk_stmt_const_def(char * const_name, struct universe_t * uni)
+mk_stmt_const_def(char * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -184,7 +184,7 @@ mk_stmt_const_def(char * const_name, struct universe_t * uni)
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
     struct TymTerm * arg2 = tym_mk_term(TYM_CONST, strdup(uni->element[i]));
-    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(strdup(eqK), 2, arg1, arg2);
+    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
 
@@ -392,7 +392,7 @@ free_stmts(const struct stmts_t * stmts)
 #pragma GCC diagnostic pop
 
 struct model_t *
-mk_model(struct universe_t * uni)
+mk_model(struct TymUniverse * uni)
 {
   struct model_t * result = malloc(sizeof *result);
   result->universe = uni;
@@ -463,11 +463,11 @@ tym_test_statement(void)
   tym_free_terms(terms);
 
   const struct stmt_t * s1S =
-    mk_stmt_axiom(tym_mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
+    mk_stmt_axiom(tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("X")), NULL);
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("Y")), terms);
   struct TymFmla * fmla =
-    tym_mk_fmla_atom_varargs(strdup(eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
+    tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
   const struct stmt_t * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
       tym_mk_fmla_not(fmla));
   struct stmt_t * s3AS = mk_stmt_const(strdup("x"), mdl->universe, TYM_UNIVERSE_TY);
@@ -551,6 +551,6 @@ statementise_universe(struct model_t * mdl)
     args[i] = tym_mk_term(TYM_CONST, strdup(mdl->universe->element[i]));
   }
   const struct TymFmla * distinctness_fmla =
-    tym_mk_fmla_atom(strdup(distinctK), mdl->universe->cardinality, args);
+    tym_mk_fmla_atom(strdup(tym_distinctK), mdl->universe->cardinality, args);
   strengthen_model(mdl, mk_stmt_axiom(distinctness_fmla));
 }

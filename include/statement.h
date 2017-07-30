@@ -11,16 +11,16 @@
 #define __TYM_STATEMENT_H__
 
 // NOTE only interested in finite models
-struct universe_t {
+struct TymUniverse {
   uint8_t cardinality;
   char ** element;
 };
 
-extern char * bool_ty;
-extern char * distinctK;
-extern char * eqK;
+extern char * tym_bool_ty;
+extern char * tym_distinctK;
+extern char * tym_eqK;
 
-struct stmt_const_t {
+struct TymStmtConst {
   char * const_name;
   struct TymTerms * params;
   struct TymFmla * body;
@@ -33,18 +33,18 @@ struct stmt_t {
   enum stmt_kind_t kind;
   union {
     const struct TymFmla * axiom;
-    struct stmt_const_t * const_def;
+    struct TymStmtConst * const_def;
   } param;
 };
 
-struct universe_t * mk_universe(struct TymTerms *);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * universe_str(const struct universe_t * const, struct TymBufferInfo * dst);
-void free_universe(struct universe_t *);
+struct TymUniverse * mk_universe(struct TymTerms *);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * universe_str(const struct TymUniverse * const, struct TymBufferInfo * dst);
+void free_universe(struct TymUniverse *);
 
 const struct stmt_t * mk_stmt_axiom(const struct TymFmla * axiom);
 const struct stmt_t * mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body);
-struct stmt_t * mk_stmt_const(char * const_name, struct universe_t *, char * ty);
-const struct stmt_t * mk_stmt_const_def(char * const_name, struct universe_t * uni);
+struct stmt_t * mk_stmt_const(char * const_name, struct TymUniverse *, char * ty);
+const struct stmt_t * mk_stmt_const_def(char * const_name, struct TymUniverse * uni);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * stmt_str(const struct stmt_t * const, struct TymBufferInfo * dst);
 void free_stmt(const struct stmt_t *);
 
@@ -56,11 +56,11 @@ void free_stmts(const struct stmts_t *);
 TYM_DECLARE_LIST_REV(stmts, const, struct stmts_t, const)
 
 struct model_t {
-  struct universe_t * universe;
+  struct TymUniverse * universe;
   const struct stmts_t * stmts;
 };
 
-struct model_t * mk_model(struct universe_t *);
+struct model_t * mk_model(struct TymUniverse *);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * model_str(const struct model_t * const, struct TymBufferInfo * dst);
 void free_model(const struct model_t *);
 void strengthen_model(struct model_t *, const struct stmt_t *);
