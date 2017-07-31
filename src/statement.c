@@ -124,7 +124,7 @@ const struct stmt_t *
 mk_stmt_axiom(const struct TymFmla * axiom)
 {
   struct stmt_t * result = malloc(sizeof *result);
-  *result = (struct stmt_t){.kind = STMT_AXIOM, .param.axiom = axiom};
+  *result = (struct stmt_t){.kind = TYM_STMT_AXIOM, .param.axiom = axiom};
   return result;
 }
 
@@ -140,7 +140,7 @@ mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
        .body = body,
        .ty = tym_bool_ty};
 
-  result->kind = STMT_CONST_DEF;
+  result->kind = TYM_STMT_CONST_DEF;
   result->param.const_def = sub_result;
   return result;
 }
@@ -161,7 +161,7 @@ mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
      .body = NULL,
      .ty = ty};
 
-  result->kind = STMT_CONST_DEF;
+  result->kind = TYM_STMT_CONST_DEF;
   result->param.const_def = sub_result;
   return result;
 }
@@ -199,7 +199,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   switch (stmt->kind) {
-  case STMT_AXIOM:
+  case TYM_STMT_AXIOM:
     res = tym_buf_strcpy(dst, "(assert");
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
@@ -213,7 +213,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
     tym_safe_buffer_replace_last(dst, ')'); // replace the trailing \0.
     break;
 
-  case STMT_CONST_DEF:
+  case TYM_STMT_CONST_DEF:
     // Check arity, and use define-fun or declare-const as appropriate.
 
     if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == TYM_UNIVERSE_TY) {
@@ -328,10 +328,10 @@ void
 free_stmt(const struct stmt_t * stmt)
 {
   switch (stmt->kind) {
-  case STMT_AXIOM:
+  case TYM_STMT_AXIOM:
     tym_free_fmla(stmt->param.axiom);
     break;
-  case STMT_CONST_DEF:
+  case TYM_STMT_CONST_DEF:
     free((void *)stmt->param.const_def->const_name);
     if (NULL != stmt->param.const_def->params) {
       tym_free_terms(stmt->param.const_def->params);
@@ -498,10 +498,10 @@ new_const_in_stmt(const struct stmt_t * stmt)
 {
   struct TymTerm * result = NULL;
   switch (stmt->kind) {
-  case STMT_AXIOM:
+  case TYM_STMT_AXIOM:
     result = NULL;
     break;
-  case STMT_CONST_DEF:
+  case TYM_STMT_CONST_DEF:
     result = tym_mk_term(TYM_CONST, strdup(stmt->param.const_def->const_name));
     break;
   default:
@@ -516,10 +516,10 @@ consts_in_stmt(const struct stmt_t * stmt)
 {
   struct TymTerms * result = NULL;
   switch (stmt->kind) {
-  case STMT_AXIOM:
+  case TYM_STMT_AXIOM:
     result = tym_consts_in_fmla(stmt->param.axiom, NULL);
     break;
-  case STMT_CONST_DEF:
+  case TYM_STMT_CONST_DEF:
     if (NULL != stmt->param.const_def->body) {
       result = tym_consts_in_fmla(stmt->param.const_def->body, NULL);
     }

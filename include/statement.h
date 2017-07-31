@@ -27,10 +27,10 @@ struct TymStmtConst {
   char * ty;
 };
 
-enum stmt_kind_t {STMT_AXIOM, STMT_CONST_DEF};
+enum TymStmtKind {TYM_STMT_AXIOM, TYM_STMT_CONST_DEF};
 
 struct stmt_t {
-  enum stmt_kind_t kind;
+  enum TymStmtKind kind;
   union {
     const struct TymFmla * axiom;
     struct TymStmtConst * const_def;
