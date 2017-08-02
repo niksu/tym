@@ -37,10 +37,10 @@ struct Params Params = {
 struct TymProgram * ParsedInputFileContents = NULL;
 struct TymProgram * ParsedQuery = NULL;
 
-TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct stmts_t)
+TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
 int
@@ -177,7 +177,7 @@ main(int argc, char ** argv)
 
   struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
 
-  struct model_t * mdl = NULL;
+  struct TymModel * mdl = NULL;
   if (NULL != ParsedInputFileContents) {
     mdl = tym_translate_program(ParsedInputFileContents, vg);
     statementise_universe(mdl);
@@ -206,7 +206,7 @@ main(int argc, char ** argv)
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
 
-    const struct stmts_t * reordered_stmts = tym_order_statements(mdl->stmts);
+    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 

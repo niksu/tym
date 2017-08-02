@@ -63,7 +63,7 @@ tym_translate_valuation(struct TymValuation * const v)
 }
 
 void
-tym_translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
+tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
 {
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
@@ -73,7 +73,7 @@ tym_translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struc
         char * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        struct stmt_t * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
+        struct TymStmt * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
         strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
@@ -86,7 +86,7 @@ tym_translate_query_fmla_atom(struct model_t * mdl, struct TymSymGen * cg, struc
 }
 
 void
-tym_translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
+tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
 {
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -116,7 +116,7 @@ tym_translate_query_fmla(struct model_t * mdl, struct TymSymGen * cg, struct Tym
 }
 
 void
-tym_translate_query(struct TymProgram * query, struct model_t * mdl, struct TymSymGen * cg)
+tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg)
 {
 #if DEBUG
   printf("|query|=%d\n", query->no_clauses);
@@ -160,11 +160,11 @@ tym_translate_query(struct TymProgram * query, struct model_t * mdl, struct TymS
   }
   tym_translate_query_fmla(mdl, cg, q_fmla);
 
-  const struct stmt_t * stmt = mk_stmt_axiom(q_fmla);
+  const struct TymStmt * stmt = mk_stmt_axiom(q_fmla);
   strengthen_model(mdl, stmt);
 }
 
-struct model_t *
+struct TymModel *
 tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 {
   struct TymAtomDatabase * adb = tym_mk_atom_database();
@@ -183,7 +183,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
-  struct model_t * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
+  struct TymModel * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
 
 #if DEBUG
   res = model_str(mdl, outbuf);
@@ -373,12 +373,12 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 }
 
 // FIXME naive implementation
-const struct stmts_t *
-tym_order_statements(const struct stmts_t * stmts)
+const struct TymStmts *
+tym_order_statements(const struct TymStmts * stmts)
 {
-  const struct stmts_t * cursor = stmts;
-  const struct stmts_t * waiting = NULL;
-  const struct stmts_t * result = NULL;
+  const struct TymStmts * cursor = stmts;
+  const struct TymStmts * waiting = NULL;
+  const struct TymStmts * result = NULL;
 
   struct TymTerms * declared = NULL;
   declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, strdup(tym_eqK)), declared);
@@ -462,7 +462,7 @@ tym_order_statements(const struct stmts_t * stmts)
       free((void *)pre_term_consts);
     }
 
-    const struct stmts_t * pre_cursor = cursor;
+    const struct TymStmts * pre_cursor = cursor;
     cursor = cursor->next;
     if (cursor_is_waiting) {
       free((void *)pre_cursor);
@@ -470,10 +470,10 @@ tym_order_statements(const struct stmts_t * stmts)
 #pragma GCC diagnostic pop
   }
 
-  const struct stmts_t * reversed = tym_reverse_stmts(result);
+  const struct TymStmts * reversed = tym_reverse_stmts(result);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-  const struct stmts_t * pre_cursor = NULL;
+  const struct TymStmts * pre_cursor = NULL;
   cursor = result;
   while (NULL != cursor) {
     pre_cursor = cursor;

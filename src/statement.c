@@ -120,18 +120,18 @@ free_universe(struct TymUniverse * uni)
   free(uni);
 }
 
-const struct stmt_t *
+const struct TymStmt *
 mk_stmt_axiom(const struct TymFmla * axiom)
 {
-  struct stmt_t * result = malloc(sizeof *result);
-  *result = (struct stmt_t){.kind = TYM_STMT_AXIOM, .param.axiom = axiom};
+  struct TymStmt * result = malloc(sizeof *result);
+  *result = (struct TymStmt){.kind = TYM_STMT_AXIOM, .param.axiom = axiom};
   return result;
 }
 
-const struct stmt_t *
+const struct TymStmt *
 mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
-  struct stmt_t * result = malloc(sizeof *result);
+  struct TymStmt * result = malloc(sizeof *result);
   struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
 
   *sub_result = (struct TymStmtConst)
@@ -145,14 +145,14 @@ mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
   return result;
 }
 
-struct stmt_t *
+struct TymStmt *
 mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
   assert(uni->cardinality > 0);
 
-  struct stmt_t * result = malloc(sizeof *result);
+  struct TymStmt * result = malloc(sizeof *result);
   struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
 
   *sub_result = (struct TymStmtConst)
@@ -166,7 +166,7 @@ mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
   return result;
 }
 
-const struct stmt_t *
+const struct TymStmt *
 mk_stmt_const_def(char * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
@@ -192,7 +192,7 @@ mk_stmt_const_def(char * const_name, struct TymUniverse * uni)
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
+stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -325,7 +325,7 @@ stmt_str(const struct stmt_t * const stmt, struct TymBufferInfo * dst)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_stmt(const struct stmt_t * stmt)
+free_stmt(const struct TymStmt * stmt)
 {
   switch (stmt->kind) {
   case TYM_STMT_AXIOM:
@@ -349,13 +349,13 @@ free_stmt(const struct stmt_t * stmt)
 }
 #pragma GCC diagnostic pop
 
-TYM_DEFINE_LIST_MK(stmt, stmt, struct stmt_t, struct stmts_t, const)
+TYM_DEFINE_LIST_MK(stmt, stmt, struct TymStmt, struct TymStmts, const)
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-stmts_str(const struct stmts_t * const stmts, struct TymBufferInfo * dst)
+stmts_str(const struct TymStmts * const stmts, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
-  const struct stmts_t * cursor = stmts;
+  const struct TymStmts * cursor = stmts;
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
@@ -380,7 +380,7 @@ stmts_str(const struct stmts_t * const stmts, struct TymBufferInfo * dst)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_stmts(const struct stmts_t * stmts)
+free_stmts(const struct TymStmts * stmts)
 {
   assert(NULL != stmts->stmt);
   free_stmt(stmts->stmt);
@@ -391,17 +391,17 @@ free_stmts(const struct stmts_t * stmts)
 }
 #pragma GCC diagnostic pop
 
-struct model_t *
+struct TymModel *
 mk_model(struct TymUniverse * uni)
 {
-  struct model_t * result = malloc(sizeof *result);
+  struct TymModel * result = malloc(sizeof *result);
   result->universe = uni;
   result->stmts = NULL;
   return result;
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-model_str(const struct model_t * const mdl, struct TymBufferInfo * dst)
+model_str(const struct TymModel * const mdl, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
@@ -433,7 +433,7 @@ model_str(const struct model_t * const mdl, struct TymBufferInfo * dst)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void
-free_model(const struct model_t * mdl)
+free_model(const struct TymModel * mdl)
 {
   free_universe(mdl->universe);
   if (NULL != mdl->stmts) {
@@ -444,9 +444,9 @@ free_model(const struct model_t * mdl)
 #pragma GCC diagnostic pop
 
 void
-strengthen_model(struct model_t * mdl, const struct stmt_t * stmt)
+strengthen_model(struct TymModel * mdl, const struct TymStmt * stmt)
 {
-  const struct stmts_t * stmts = mdl->stmts;
+  const struct TymStmts * stmts = mdl->stmts;
   mdl->stmts = tym_mk_stmt_cell(stmt, stmts);
 }
 
@@ -459,19 +459,19 @@ tym_test_statement(void)
   struct TymTerms * terms = tym_mk_term_cell(aT, NULL);
   terms = tym_mk_term_cell(bT, terms);
 
-  struct model_t * mdl = mk_model(mk_universe(terms));
+  struct TymModel * mdl = mk_model(mk_universe(terms));
   tym_free_terms(terms);
 
-  const struct stmt_t * s1S =
+  const struct TymStmt * s1S =
     mk_stmt_axiom(tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("X")), NULL);
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("Y")), terms);
   struct TymFmla * fmla =
     tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
-  const struct stmt_t * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
+  const struct TymStmt * s2S = mk_stmt_pred(strdup("some_predicate"), terms,
       tym_mk_fmla_not(fmla));
-  struct stmt_t * s3AS = mk_stmt_const(strdup("x"), mdl->universe, TYM_UNIVERSE_TY);
-  const struct stmt_t * s3BS = mk_stmt_const_def(strdup("x"), mdl->universe);
+  struct TymStmt * s3AS = mk_stmt_const(strdup("x"), mdl->universe, TYM_UNIVERSE_TY);
+  const struct TymStmt * s3BS = mk_stmt_const_def(strdup("x"), mdl->universe);
 
   strengthen_model(mdl, s1S);
   strengthen_model(mdl, s2S);
@@ -491,10 +491,10 @@ tym_test_statement(void)
   free_model(mdl);
 }
 
-TYM_DEFINE_LIST_REV(stmts, tym_mk_stmt_cell, const, struct stmts_t, const)
+TYM_DEFINE_LIST_REV(stmts, tym_mk_stmt_cell, const, struct TymStmts, const)
 
 struct TymTerm *
-new_const_in_stmt(const struct stmt_t * stmt)
+new_const_in_stmt(const struct TymStmt * stmt)
 {
   struct TymTerm * result = NULL;
   switch (stmt->kind) {
@@ -512,7 +512,7 @@ new_const_in_stmt(const struct stmt_t * stmt)
 }
 
 struct TymTerms *
-consts_in_stmt(const struct stmt_t * stmt)
+consts_in_stmt(const struct TymStmt * stmt)
 {
   struct TymTerms * result = NULL;
   switch (stmt->kind) {
@@ -532,7 +532,7 @@ consts_in_stmt(const struct stmt_t * stmt)
 }
 
 void
-statementise_universe(struct model_t * mdl)
+statementise_universe(struct TymModel * mdl)
 {
   assert(NULL != mdl);
 
