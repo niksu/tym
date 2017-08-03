@@ -73,8 +73,8 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
         char * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        struct TymStmt * stmt = mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
-        strengthen_model(mdl, stmt);
+        struct TymStmt * stmt = tym_mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
+        tym_strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
       }
@@ -160,8 +160,8 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
   }
   tym_translate_query_fmla(mdl, cg, q_fmla);
 
-  const struct TymStmt * stmt = mk_stmt_axiom(q_fmla);
-  strengthen_model(mdl, stmt);
+  const struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
+  tym_strengthen_model(mdl, stmt);
 }
 
 struct TymModel *
@@ -183,7 +183,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
-  struct TymModel * mdl = mk_model(mk_universe(adb->tdb->herbrand_universe));
+  struct TymModel * mdl = tym_mk_model(tym_mk_universe(adb->tdb->herbrand_universe));
 
 #if DEBUG
   res = model_str(mdl, outbuf);
@@ -192,7 +192,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   printf("model (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #else
-  res = model_str(mdl, outbuf);
+  res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #endif
@@ -237,8 +237,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      strengthen_model(mdl,
-          mk_stmt_pred(strdup(preds_cursor->predicate->predicate),
+      tym_strengthen_model(mdl,
+          tym_mk_stmt_pred(strdup(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
             tym_mk_fmla_const(false)));
 #pragma GCC diagnostic pop
@@ -345,8 +345,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #endif
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      strengthen_model(mdl,
-          mk_stmt_pred(strdup(head->pred_name),
+      tym_strengthen_model(mdl,
+          tym_mk_stmt_pred(strdup(head->pred_name),
             tym_arguments_of_atom(head),
             fmla));
       tym_free_fmla(abs_head_fmla);
@@ -429,8 +429,8 @@ tym_order_statements(const struct TymStmts * stmts)
     free_buffer(outbuf);
 #endif
 
-    struct TymTerm * t = new_const_in_stmt(cursor->stmt);
-    struct TymTerms * term_consts = consts_in_stmt(cursor->stmt);
+    struct TymTerm * t = tym_new_const_in_stmt(cursor->stmt);
+    struct TymTerms * term_consts = tym_consts_in_stmt(cursor->stmt);
     if (tym_terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
 #if DEBUG

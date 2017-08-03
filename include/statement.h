@@ -37,21 +37,21 @@ struct TymStmt {
   } param;
 };
 
-struct TymUniverse * mk_universe(struct TymTerms *);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * universe_str(const struct TymUniverse * const, struct TymBufferInfo * dst);
-void free_universe(struct TymUniverse *);
+struct TymUniverse * tym_mk_universe(struct TymTerms *);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_universe_str(const struct TymUniverse * const, struct TymBufferInfo * dst);
+void tym_free_universe(struct TymUniverse *);
 
-const struct TymStmt * mk_stmt_axiom(const struct TymFmla * axiom);
-const struct TymStmt * mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body);
-struct TymStmt * mk_stmt_const(char * const_name, struct TymUniverse *, char * ty);
-const struct TymStmt * mk_stmt_const_def(char * const_name, struct TymUniverse * uni);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * stmt_str(const struct TymStmt * const, struct TymBufferInfo * dst);
-void free_stmt(const struct TymStmt *);
+const struct TymStmt * tym_mk_stmt_axiom(const struct TymFmla * axiom);
+const struct TymStmt * tym_mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body);
+struct TymStmt * tym_mk_stmt_const(char * const_name, struct TymUniverse *, char * ty);
+const struct TymStmt * tym_mk_stmt_const_def(char * const_name, struct TymUniverse * uni);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_stmt_str(const struct TymStmt * const, struct TymBufferInfo * dst);
+void tym_free_stmt(const struct TymStmt *);
 
 TYM_DECLARE_LIST_TYPE(TymStmts, stmt, TymStmt)
 TYM_DECLARE_LIST_MK(stmt, struct TymStmt, struct TymStmts, const)
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * stmts_str(const struct TymStmts * const, struct TymBufferInfo * dst);
-void free_stmts(const struct TymStmts *);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_stmts_str(const struct TymStmts * const, struct TymBufferInfo * dst);
+void tym_free_stmts(const struct TymStmts *);
 
 TYM_DECLARE_LIST_REV(stmts, const, struct TymStmts, const)
 
@@ -60,14 +60,14 @@ struct TymModel {
   const struct TymStmts * stmts;
 };
 
-struct TymModel * mk_model(struct TymUniverse *);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * model_str(const struct TymModel * const, struct TymBufferInfo * dst);
-void free_model(const struct TymModel *);
-void strengthen_model(struct TymModel *, const struct TymStmt *);
+struct TymModel * tym_mk_model(struct TymUniverse *);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_model_str(const struct TymModel * const, struct TymBufferInfo * dst);
+void tym_free_model(const struct TymModel *);
+void tym_strengthen_model(struct TymModel *, const struct TymStmt *);
 
-struct TymTerm * new_const_in_stmt(const struct TymStmt * stmt);
-struct TymTerms * consts_in_stmt(const struct TymStmt * stmt);
+struct TymTerm * tym_new_const_in_stmt(const struct TymStmt * stmt);
+struct TymTerms * tym_consts_in_stmt(const struct TymStmt * stmt);
 
-void statementise_universe(struct TymModel * mdl);
+void tym_statementise_universe(struct TymModel * mdl);
 
 #endif /* __TYM_STATEMENT_H__ */

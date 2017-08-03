@@ -180,7 +180,7 @@ main(int argc, char ** argv)
   struct TymModel * mdl = NULL;
   if (NULL != ParsedInputFileContents) {
     mdl = tym_translate_program(ParsedInputFileContents, vg);
-    statementise_universe(mdl);
+    tym_statementise_universe(mdl);
   }
 
   if (NULL != ParsedQuery &&
@@ -199,7 +199,7 @@ main(int argc, char ** argv)
 
   if (NULL != mdl) {
 #if DEBUG
-    res = model_str(mdl, outbuf);
+    res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
@@ -210,7 +210,7 @@ main(int argc, char ** argv)
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 
-    res = model_str(mdl, outbuf);
+    res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("model (size=%zu, remaining=%zu)\n|%s|\n",
@@ -220,7 +220,7 @@ main(int argc, char ** argv)
   TYM_DBG("Cleaning up before exiting\n");
 
   if (NULL != mdl) {
-    free_model(mdl);
+    tym_free_model(mdl);
   }
   tym_free_sym_gen(*vg);
   free(vg);
