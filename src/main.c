@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libtym.h"
+#include "tym.h"
 #include "module_tests.h"
 
 struct TymProgram * parse(const char * string);
