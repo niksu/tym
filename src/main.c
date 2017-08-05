@@ -16,7 +16,7 @@
 #include "module_tests.h"
 
 struct TymProgram * parse(const char * string);
-char * read_file(char * filename);
+static char * read_file(char * filename);
 
 char * InputFileContents = NULL;
 
@@ -242,7 +242,7 @@ main(int argc, char ** argv)
   return 0;
 }
 
-char *
+static char *
 read_file(char * filename)
 {
   assert(NULL != filename);
