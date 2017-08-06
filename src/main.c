@@ -15,11 +15,6 @@
 #include "tym.h"
 #include "module_tests.h"
 
-struct TymProgram * parse(const char * string);
-static char * read_file(char * filename);
-
-char * InputFileContents = NULL;
-
 struct Params {
   char * input_file;
   char verbosity;
@@ -27,21 +22,35 @@ struct Params {
   bool test_parsing;
 };
 
-struct Params Params = {
-  .input_file = NULL,
-  .verbosity = 0,
-  .query = NULL,
-  .test_parsing = false
-};
-
-struct TymProgram * ParsedInputFileContents = NULL;
-struct TymProgram * ParsedQuery = NULL;
+struct TymProgram * parse(const char * string);
+static char * read_file(char * filename);
+struct TymProgram * tym_parse_input_file(struct Params Params);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
+
+struct TymProgram *
+tym_parse_input_file(struct Params Params)
+{
+  struct TymProgram * result = NULL;
+  if (NULL != Params.input_file) {
+    char * InputFileContents = read_file(Params.input_file);
+    if (Params.test_parsing) {
+      printf("input contents |%s|\n", InputFileContents);
+    }
+    result = parse(InputFileContents);
+    if (Params.verbosity > 0 && NULL != InputFileContents) {
+      TYM_VERBOSE("input : %d clauses\n", result->no_clauses);
+    }
+    free(InputFileContents);
+  } else if (Params.test_parsing) {
+    printf("(no input file given)\n");
+  }
+  return result;
+}
 
 int
 main(int argc, char ** argv)
@@ -52,6 +61,14 @@ main(int argc, char ** argv)
   tym_test_statement();
   exit(0);
 #endif
+
+  struct Params Params = {
+    .input_file = NULL,
+    .verbosity = 0,
+    .query = NULL,
+    .test_parsing = false
+  };
+
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input_file", required_argument, NULL, LONG_OPT_INPUT},
@@ -108,19 +125,9 @@ main(int argc, char ** argv)
     TYM_VERBOSE("query = %s\n", Params.query);
   }
 
-  if (NULL != Params.input_file) {
-    InputFileContents = read_file(Params.input_file);
-    if (Params.test_parsing) {
-      printf("input contents |%s|\n", InputFileContents);
-    }
-    ParsedInputFileContents = parse(InputFileContents);
-    if (Params.verbosity > 0 && NULL != InputFileContents) {
-      TYM_VERBOSE("input : %d clauses\n", ParsedInputFileContents->no_clauses);
-    }
-  } else if (Params.test_parsing) {
-    printf("(no input file given)\n");
-  }
+  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
 
+  struct TymProgram * ParsedQuery = NULL;
   if (NULL != Params.query) {
     if (Params.test_parsing && 0 == Params.verbosity) {
       printf("query contents |%s|\n", Params.query);
@@ -145,7 +152,6 @@ main(int argc, char ** argv)
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
       tym_free_program(ParsedInputFileContents);
-      free(InputFileContents);
       free(Params.input_file);
     }
 
@@ -230,7 +236,6 @@ main(int argc, char ** argv)
 
   if (NULL != Params.input_file) {
     tym_free_program(ParsedInputFileContents);
-    free(InputFileContents);
     free(Params.input_file);
   }
 
