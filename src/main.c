@@ -25,6 +25,7 @@ struct Params {
 struct TymProgram * parse(const char * string);
 static char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct Params Params);
+struct TymProgram * tym_parse_query(struct Params Params);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic push
@@ -48,6 +49,24 @@ tym_parse_input_file(struct Params Params)
     free(InputFileContents);
   } else if (Params.test_parsing) {
     printf("(no input file given)\n");
+  }
+  return result;
+}
+
+struct TymProgram *
+tym_parse_query(struct Params Params)
+{
+  struct TymProgram * result = NULL;
+  if (NULL != Params.query) {
+    if (Params.test_parsing && 0 == Params.verbosity) {
+      printf("query contents |%s|\n", Params.query);
+    }
+    result = parse(Params.query);
+    if (Params.verbosity > 0 && NULL != Params.query) {
+      TYM_VERBOSE("query : %d clauses\n", result->no_clauses);
+    }
+  } else if (Params.test_parsing) {
+    printf("(no query given)\n");
   }
   return result;
 }
@@ -127,18 +146,7 @@ main(int argc, char ** argv)
 
   struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
 
-  struct TymProgram * ParsedQuery = NULL;
-  if (NULL != Params.query) {
-    if (Params.test_parsing && 0 == Params.verbosity) {
-      printf("query contents |%s|\n", Params.query);
-    }
-    ParsedQuery = parse(Params.query);
-    if (Params.verbosity > 0 && NULL != Params.query) {
-      TYM_VERBOSE("query : %d clauses\n", ParsedQuery->no_clauses);
-    }
-  } else if (Params.test_parsing) {
-    printf("(no query given)\n");
-  }
+  struct TymProgram * ParsedQuery = tym_parse_query(Params);
 
   if (Params.test_parsing) {
     struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
