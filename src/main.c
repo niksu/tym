@@ -22,12 +22,14 @@ struct Params {
   bool test_parsing;
 };
 
+enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER, TYM_NO_INPUT, TYM_INVALID_INPUT};
+
 struct TymProgram * parse(const char * string);
 static char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct Params Params);
 struct TymProgram * tym_parse_query(struct Params Params);
 static void test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
-static void process_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+static enum TymReturnCodes process_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic push
@@ -106,14 +108,16 @@ test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents,
   tym_free_buffer(outbuf);
 }
 
-static void
+static enum TymReturnCodes
 process_program(struct Params Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
   if (NULL == Params.input_file) {
     TYM_ERR("No input file given.\n");
+    return TYM_INVALID_INPUT;
   } else if (0 == ParsedInputFileContents->no_clauses) {
     TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
+    return TYM_INVALID_INPUT;
   }
 
   struct TymSymGen ** vg = malloc(sizeof *vg);
@@ -182,6 +186,8 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
     tym_free_program(ParsedQuery);
     free(Params.query);
   }
+
+  return TYM_AOK;
 }
 
 int
@@ -246,7 +252,7 @@ main(int argc, char ** argv)
     // FIXME add support for -h
     default:
       TYM_ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
-      return -1;
+      return TYM_UNRECOGNISED_PARAMETER;
     }
   }
 
@@ -258,16 +264,21 @@ main(int argc, char ** argv)
   }
 
   struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
+  if (NULL == ParsedInputFileContents) {
+     return TYM_NO_INPUT;
+  }
 
   struct TymProgram * ParsedQuery = tym_parse_query(Params);
 
+  enum TymReturnCodes result = TYM_AOK;
   if (Params.test_parsing) {
+    // FIXME "result" should be updated with an indication of whether parsing succeeded.
     test_parsing(Params, ParsedInputFileContents, ParsedQuery);
   } else {
-    process_program(Params, ParsedInputFileContents, ParsedQuery);
+    result = process_program(Params, ParsedInputFileContents, ParsedQuery);
   }
 
-  return 0; // FIXME const
+  return result;
 }
 
 static char *
