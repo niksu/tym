@@ -26,6 +26,8 @@ struct TymProgram * parse(const char * string);
 static char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct Params Params);
 struct TymProgram * tym_parse_query(struct Params Params);
+static void test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+static void process_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic push
@@ -53,6 +55,7 @@ tym_parse_input_file(struct Params Params)
   return result;
 }
 
+// FIXME DRY principle wrt tym_parse_input_file()
 struct TymProgram *
 tym_parse_query(struct Params Params)
 {
@@ -69,6 +72,116 @@ tym_parse_query(struct Params Params)
     printf("(no query given)\n");
   }
   return result;
+}
+
+static void
+test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents,
+  struct TymProgram * ParsedQuery)
+{
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+
+  if (NULL != Params.input_file) {
+    res = tym_program_to_str(ParsedInputFileContents, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+
+    tym_free_program(ParsedInputFileContents);
+    free(Params.input_file);
+  }
+
+  if (NULL != Params.query) {
+    res = tym_program_to_str(ParsedQuery, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
+      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+
+    tym_free_program(ParsedQuery);
+    free(Params.query);
+  }
+
+  tym_free_buffer(outbuf);
+}
+
+static void
+process_program(struct Params Params, struct TymProgram * ParsedInputFileContents,
+  struct TymProgram * ParsedQuery)
+{
+  if (NULL == Params.input_file) {
+    TYM_ERR("No input file given.\n");
+  } else if (0 == ParsedInputFileContents->no_clauses) {
+    TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
+  }
+
+  struct TymSymGen ** vg = malloc(sizeof *vg);
+  *vg = NULL;
+  *vg = tym_mk_sym_gen(strdup("V"));
+
+  struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
+
+  struct TymModel * mdl = NULL;
+  if (NULL != ParsedInputFileContents) {
+    mdl = tym_translate_program(ParsedInputFileContents, vg);
+    tym_statementise_universe(mdl);
+  }
+
+  if (NULL != ParsedQuery &&
+      // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
+      NULL != mdl) {
+    tym_translate_query(ParsedQuery, mdl, cg);
+  }
+#if DEBUG
+  else {
+    printf("(No query is being printed, since none was given as a parameter)\n");
+  }
+#endif
+
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+
+  if (NULL != mdl) {
+#if DEBUG
+    res = tym_model_str(mdl, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+#endif
+
+    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
+    tym_shallow_free_stmts(mdl->stmts);
+    mdl->stmts = reordered_stmts;
+
+    res = tym_model_str(mdl, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("model (size=%zu, remaining=%zu)\n|%s|\n",
+        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+  }
+
+  TYM_DBG("Cleaning up before exiting\n");
+
+  if (NULL != mdl) {
+    tym_free_model(mdl);
+  }
+  tym_free_sym_gen(*vg);
+  free(vg);
+  tym_free_sym_gen(cg);
+
+  tym_free_buffer(outbuf);
+
+  if (NULL != Params.input_file) {
+    tym_free_program(ParsedInputFileContents);
+    free(Params.input_file);
+  }
+
+  if (NULL != Params.query) {
+    tym_free_program(ParsedQuery);
+    free(Params.query);
+  }
 }
 
 int
@@ -149,110 +262,12 @@ main(int argc, char ** argv)
   struct TymProgram * ParsedQuery = tym_parse_query(Params);
 
   if (Params.test_parsing) {
-    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
-
-    if (NULL != Params.input_file) {
-      res = tym_program_to_str(ParsedInputFileContents, outbuf);
-      assert(tym_is_ok_TymBufferWriteResult(res));
-      free(res);
-      printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
-        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-
-      tym_free_program(ParsedInputFileContents);
-      free(Params.input_file);
-    }
-
-    if (NULL != Params.query) {
-      res = tym_program_to_str(ParsedQuery, outbuf);
-      assert(tym_is_ok_TymBufferWriteResult(res));
-      free(res);
-      printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
-        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-
-      tym_free_program(ParsedQuery);
-      free(Params.query);
-    }
-
-    tym_free_buffer(outbuf);
-
-    return 0;
+    test_parsing(Params, ParsedInputFileContents, ParsedQuery);
+  } else {
+    process_program(Params, ParsedInputFileContents, ParsedQuery);
   }
 
-  if (NULL == Params.input_file) {
-    TYM_ERR("No input file given.\n");
-  } else if (0 == ParsedInputFileContents->no_clauses) {
-    TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
-  }
-
-  struct TymSymGen ** vg = malloc(sizeof *vg);
-  *vg = NULL;
-  *vg = tym_mk_sym_gen(strdup("V"));
-
-  struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
-
-  struct TymModel * mdl = NULL;
-  if (NULL != ParsedInputFileContents) {
-    mdl = tym_translate_program(ParsedInputFileContents, vg);
-    tym_statementise_universe(mdl);
-  }
-
-  if (NULL != ParsedQuery &&
-      // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
-      NULL != mdl) {
-    tym_translate_query(ParsedQuery, mdl, cg);
-  }
-#if DEBUG
-  else {
-    printf("(No query is being printed, since none was given as a parameter)\n");
-  }
-#endif
-
-  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
-
-  if (NULL != mdl) {
-#if DEBUG
-    res = tym_model_str(mdl, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
-        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-#endif
-
-    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
-    tym_shallow_free_stmts(mdl->stmts);
-    mdl->stmts = reordered_stmts;
-
-    res = tym_model_str(mdl, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    printf("model (size=%zu, remaining=%zu)\n|%s|\n",
-        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  }
-
-  TYM_DBG("Cleaning up before exiting\n");
-
-  if (NULL != mdl) {
-    tym_free_model(mdl);
-  }
-  tym_free_sym_gen(*vg);
-  free(vg);
-  tym_free_sym_gen(cg);
-
-  tym_free_buffer(outbuf);
-
-  if (NULL != Params.input_file) {
-    tym_free_program(ParsedInputFileContents);
-    free(Params.input_file);
-  }
-
-  if (NULL != Params.query) {
-    tym_free_program(ParsedQuery);
-    free(Params.query);
-  }
-
-  return 0;
+  return 0; // FIXME const
 }
 
 static char *
