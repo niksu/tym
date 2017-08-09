@@ -28,7 +28,7 @@ struct TymProgram * parse(const char * string);
 static char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct Params Params);
 struct TymProgram * tym_parse_query(struct Params Params);
-static void test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+static void print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 static enum TymReturnCodes process_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
@@ -77,7 +77,7 @@ tym_parse_query(struct Params Params)
 }
 
 static void
-test_parsing(struct Params Params, struct TymProgram * ParsedInputFileContents,
+print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -272,8 +272,7 @@ main(int argc, char ** argv)
 
   enum TymReturnCodes result = TYM_AOK;
   if (Params.test_parsing) {
-    // FIXME "result" should be updated with an indication of whether parsing succeeded.
-    test_parsing(Params, ParsedInputFileContents, ParsedQuery);
+    print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
   } else {
     result = process_program(Params, ParsedInputFileContents, ParsedQuery);
   }
