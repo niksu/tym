@@ -15,6 +15,7 @@
 #include "formula.h"
 #include "parser.h"
 #include "lexer.h"
+#include "support.h"
 #include "statement.h"
 #include "symbols.h"
 #include "translate.h"
