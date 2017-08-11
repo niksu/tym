@@ -39,7 +39,6 @@ tym_parse_input_file(struct Params Params)
   return result;
 }
 
-// FIXME DRY principle wrt tym_parse_input_file()
 struct TymProgram *
 tym_parse_query(struct Params Params)
 {
