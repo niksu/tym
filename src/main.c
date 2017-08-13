@@ -49,7 +49,7 @@ main(int argc, char ** argv)
   long v;
 
   int option;
-  while ((option = getopt_long(argc, argv, "i:vq:", long_options,
+  while ((option = getopt_long(argc, argv, "hi:q:v", long_options,
           &option_index)) != -1) {
     switch (option) {
     case LONG_OPT_INPUT:
@@ -74,7 +74,19 @@ main(int argc, char ** argv)
       assert(v <= UINT8_MAX);
       TymMaxVarWidth = (uint8_t)v;
       break;
-    // FIXME add support for -h
+    case 'h':
+      // FIXME include name + version + url
+      printf("usage: %s PARAMETERS \n \
+Mandatory parameters: \n \
+  -i,--input_file FILENAME \n \
+Optional parameters: \n \
+  -q,--query QUERY \n \
+  -v,--verbose \n \
+  --test_parsing \n \
+  --max_var_width N \n \
+  -h \n \
+", argv[0]);
+      return TYM_AOK;
     default:
       TYM_ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
       return TYM_UNRECOGNISED_PARAMETER;
