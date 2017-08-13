@@ -76,16 +76,15 @@ main(int argc, char ** argv)
       break;
     case 'h':
       // FIXME include name + version + url
-      printf("usage: %s PARAMETERS \n \
-Mandatory parameters: \n \
-  -i,--input_file FILENAME \n \
-Optional parameters: \n \
-  -q,--query QUERY \n \
-  -v,--verbose \n \
-  --test_parsing \n \
-  --max_var_width N \n \
-  -h \n \
-", argv[0]);
+      printf("usage: %s PARAMETERS \n "
+             "Mandatory parameters: \n "
+             "  -i,--input_file FILENAME \n "
+             "Optional parameters: \n "
+             "  -q,--query QUERY \n "
+             "  -v,--verbose \n "
+             "  --test_parsing \n "
+             "  --max_var_width N \n "
+             "  -h \n", argv[0]);
       return TYM_AOK;
     default:
       TYM_ERR("Terminating on unrecognized option\n"); // The offending option would have been reported by getopt by this point.
