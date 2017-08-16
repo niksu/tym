@@ -22,15 +22,15 @@ show_usage(const char * const argv_0)
 {
   // FIXME include name + version + url
   // FIXME include description of each parameter
-  printf("usage: %s PARAMETERS \n "
-         "Mandatory parameters: \n "
-         "  -i,--input_file FILENAME \n "
-         "Optional parameters: \n "
-         "  -q,--query QUERY \n "
-         "  -v,--verbose \n "
-         "  --test_parsing \n "
-         "  --max_var_width N \n "
-         "  -h \n", argv_0);
+  printf("usage: %s PARAMETERS \n"
+         " Mandatory parameters: \n"
+         "   -i, --input_file FILENAME \n"
+         " Optional parameters: \n"
+         "   -q, --query QUERY \n"
+         "   -v, --verbose \n"
+         "   --test_parsing \n"
+         "   --max_var_width N \n"
+         "   -h \n", argv_0);
 }
 
 int
