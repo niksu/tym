@@ -11,12 +11,14 @@
 #define __LIBTYM_H__
 
 #include "ast.h"
+#include "buffer.h"
 #include "formula.h"
 #include "parser.h"
 #include "lexer.h"
+#include "support.h"
 #include "statement.h"
 #include "symbols.h"
 #include "translate.h"
-#include "tym.h"
+#include "util.h"
 
 #endif /* __LIBTYM_H__ */

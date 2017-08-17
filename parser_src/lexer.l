@@ -12,7 +12,7 @@
 
 #include "ast.h"
 #include "parser.h"
-#include "tym.h"
+#include "util.h"
 %}
 
 %option outfile="lexer.c" header-file="lexer.h"
@@ -53,12 +53,12 @@ STRING {QUOTE}[^{QUOTE}]*{QUOTE}
 {COMMA} {return TK_COMMA;}
 {IF} {return TK_IF;}
 {PERIOD} {return TK_PERIOD;}
-. {ERR("Unrecognised token: %s\n", yytext);}
+. {TYM_ERR("Unrecognised token: %s\n", yytext);}
 
 %%
 
 /*
 int yyerror(const char *error_message) {
-  ERR("Tokenisation error: %s\n", error_message);
+  TYM_ERR("Tokenisation error: %s\n", error_message);
 }
 */

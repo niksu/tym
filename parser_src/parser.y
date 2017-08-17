@@ -13,7 +13,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
-#include "tym.h"
+#include "util.h"
 
 #define YYERROR_VERBOSE 1
 
@@ -26,25 +26,26 @@
 //#define MAX_NO_ATOM_ARGS 30
 //#define MAX_CLAUSE_BODY_SIZE 30
 
-int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message);
+int yyerror(struct TymProgram ** program, yyscan_t scanner, const char * error_message);
+struct TymProgram * parse(const char * string);
 
 %}
 
 %pure-parser
 
 %lex-param   { yyscan_t scanner }
-%parse-param { struct program_t ** program }
+%parse-param { struct TymProgram ** program }
 %parse-param { yyscan_t scanner }
 
 %union {
   char * string;
-  struct clause_t * clause;
-  struct atom_t * atom;
-  struct term_t * term;
-  struct terms_t * terms;
-  struct atoms_t * atoms;
-  struct clauses_t * clauses;
-  struct program_t * program;
+  struct TymClause * clause;
+  struct TymAtom * atom;
+  struct TymTerm * term;
+  struct TymTerms * terms;
+  struct TymAtoms * atoms;
+  struct TymClauses * clauses;
+  struct TymProgram * program;
 }
 
 %token TK_L_RB
@@ -69,86 +70,86 @@ int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_me
 %%
 
 term : TK_CONST
-       { char * identifier = strdup($1);
-         struct term_t * t = mk_term(CONST, identifier);
+       { char * identifier = $1;
+         struct TymTerm * t = tym_mk_term(TYM_CONST, identifier);
          $$ = t; }
      | TK_VAR
-       { char * identifier = strdup($1);
-         struct term_t * t = mk_term(VAR, identifier);
+       { char * identifier = $1;
+         struct TymTerm * t = tym_mk_term(TYM_VAR, identifier);
          $$ = t; }
      | TK_STRING
-       { char * identifier = strdup($1);
-         struct term_t * t = mk_term(STR, identifier);
+       { char * identifier = $1;
+         struct TymTerm * t = tym_mk_term(TYM_STR, identifier);
          $$ = t; }
 
 terms : term TK_R_RB
-        { struct terms_t * ts = mk_term_cell($1, NULL);
+        { struct TymTerms * ts = tym_mk_term_cell($1, NULL);
           $$ = ts; }
       | term TK_COMMA terms
-        { struct terms_t * ts = mk_term_cell($1, $3);
+        { struct TymTerms * ts = tym_mk_term_cell($1, $3);
           $$ = ts; }
       | TK_R_RB
         { $$ = NULL; }
 
 atom : TK_CONST TK_L_RB terms
-       { char * predicate = strdup($1);
-         struct terms_t * ts = $3;
-         struct atom_t * atom = mk_atom(predicate, len_term_cell(ts), ts);
+       { char * predicate = $1;
+         struct TymTerms * ts = $3;
+         struct TymAtom * atom = tym_mk_atom(predicate, tym_len_TymTerms_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom
-        { struct atoms_t * ats = mk_atom_cell($1, NULL);
+        { struct TymAtoms * ats = tym_mk_atom_cell($1, NULL);
           $$ = ats; }
       | atom TK_COMMA atoms
-        { struct atoms_t * ats = mk_atom_cell($1, $3);
+        { struct TymAtoms * ats = tym_mk_atom_cell($1, $3);
           $$ = ats; }
 
 clause : atom TK_PERIOD
-         { struct clause_t * cl = mk_clause($1, 0, NULL);
+         { struct TymClause * cl = tym_mk_clause($1, 0, NULL);
            $$ = cl; }
        | atom TK_IF atoms TK_PERIOD
-         { struct atoms_t * ats = $3;
-           struct clause_t * cl = mk_clause($1, len_atom_cell(ats), ats);
+         { struct TymAtoms * ats = $3;
+           struct TymClause * cl = tym_mk_clause($1, tym_len_TymAtoms_cell(ats), ats);
            $$ = cl; }
 
 clauses : clause
-          { struct clauses_t * cls = mk_clause_cell($1, NULL);
+          { struct TymClauses * cls = tym_mk_clause_cell($1, NULL);
             $$ = cls; }
         | clause clauses
-          { struct clauses_t * cls = mk_clause_cell($1, $2);
+          { struct TymClauses * cls = tym_mk_clause_cell($1, $2);
             $$ = cls; }
 
 program : clauses
-           { struct clauses_t * cls = $1;
-             struct program_t * p = mk_program(len_clause_cell(cls), cls);
+           { struct TymClauses * cls = $1;
+             struct TymProgram * p = tym_mk_program(tym_len_TymClauses_cell(cls), cls);
              *program = p;
            }
         |
-           { struct program_t * p = mk_program(0, NULL);
+           { struct TymProgram * p = tym_mk_program(0, NULL);
              *program = p;
            }
 
 %%
 
-int yyerror(struct program_t ** program, yyscan_t scanner, const char * error_message) {
-  ERR("parse error: %s\n", error_message);
+int yyerror(struct TymProgram ** program, yyscan_t scanner, const char * error_message) {
+  TYM_ERR("parse error: %s\n", error_message);
   return 0;
 }
 
-struct program_t *
+struct TymProgram *
 parse(const char * string)
 {
-  struct program_t * parsed = NULL;
+  struct TymProgram * parsed = NULL;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
   if (yylex_init(&scanner)) {
-    ERR("yylex_init encountered a problem.");
+    TYM_ERR("yylex_init encountered a problem.");
     return NULL;
   }
 
   state = yy_scan_string(string, scanner);
   if (yyparse(&parsed, scanner)) {
-    ERR("yyparse encountered a problem.");
+    TYM_ERR("yyparse encountered a problem.");
     return NULL;
   }
 

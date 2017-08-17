@@ -5,35 +5,53 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 CC?=gcc
-CFLAGS=-std=c99 -Wall -pedantic -g
+CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
+				-Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g \
+#				-fprofile-arcs -ftest-coverage -O0
 TGT=tym
 LIB=libtym.a
-OBJ=ast.o formula.o lexer.o parser.o statement.o symbols.o translate.o tym.o
-HEADERS=ast.h formula.h lexer.h parser.h statement.h symbols.h translate.h tym.h
-ADDITIONAL_CFLAGS?=
+OUT_DIR=out
+PARSER_OBJ=$(OUT_DIR)/lexer.o $(OUT_DIR)/parser.o
+OBJ_FILES=ast.o buffer.o formula.o statement.o support.o symbols.o translate.o
+OBJ=$(addprefix $(OUT_DIR)/, $(OBJ_FILES))
+OBJ_OF_TGT=$(OUT_DIR)/main.o
+HEADER_FILES=ast.h buffer.h formula.h lifted.h statement.h support.h symbols.h translate.h util.h
+HEADER_DIR=include
+HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
+STD=iso9899:1999
 
-$(TGT) : $(LIB) $(HEADERS)
-	$(CC) -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) -L. -ltym
+$(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
+	mkdir -p $(OUT_DIR)
+	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR)
 
 $(LIB) : $(OBJ) $(HEADERS)
-	ar crv $@ $(OBJ)
+	mkdir -p $(OUT_DIR)
+	ar crv $(OUT_DIR)/$@ $(OBJ)
 
-lexer.c : lexer.l
-	flex $<
+parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
+	mkdir -p $(OUT_DIR)
+	bison -d -o parser.c parser_src/parser.y
+	flex parser_src/lexer.l
+	mv lexer.{c,h} $(OUT_DIR)
+	mv parser.{c,h} $(OUT_DIR)
+	# We have to be more permissive with the C output of flex and bison, thus "-Werror"
+	# is excluded when compiling code they produced.
+	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/lexer.o $(OUT_DIR)/lexer.c
+	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
-lexer.h : lexer.l
-	flex $<
+out/%.o: src/%.c $(HEADERS) parser
+	mkdir -p $(OUT_DIR)
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) -o $@ $<
 
-parser.h : parser.y
-	bison -d -o parser.c $<
+.PHONY: clean test
 
-parser.c : parser.y
-	bison -d -o parser.c $<
+test_modules:
+	make clean
+	CFLAGS=-DTESTING make $(TGT)
+	./$(OUT_DIR)/$(TGT)
 
-%.o: %.c $(HEADERS)
-	$(CC) -c -o $@ $(CFLAGS) $(ADDITIONAL_CFLAGS) $<
-
-.PHONY: clean
+test_regression:
+	@TYMDIR=`pwd` ./scripts/run_tests.sh
 
 clean:
-	rm -f $(TGT) $(LIB) *.o lexer.{c,h} parser.{c,h}
+	rm -f $(OUT_DIR)/$(TGT) $(OUT_DIR)/$(LIB) $(OUT_DIR)/*.o $(OUT_DIR)/lexer.{c,h} $(OUT_DIR)/parser.{c,h}

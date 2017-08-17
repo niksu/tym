@@ -1,17 +1,18 @@
-lexer.c
-lexer.h
-parser.c
-parser.h
+out/lexer.c
+out/lexer.h
+out/parser.c
+out/parser.h
 
-ast.o
-formula.o
-lexer.o
-parser.o
-statement.o
-symbols.o
-translate.o
-tym.o
+out/ast.o
+out/formula.o
+out/lexer.o
+out/main.o
+out/parser.o
+out/statement.o
+out/symbols.o
+out/translate.o
 
-tym
+out/tym
+out/libtym.a
 
 .*.swp
