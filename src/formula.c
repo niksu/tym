@@ -15,7 +15,7 @@
 #include "util.h"
 
 uint8_t TymMaxVarWidth = 10;
-char * TYM_UNIVERSE_TY = "Universe";
+str_idx_t TYM_UNIVERSE_TY = "Universe";
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
@@ -33,7 +33,7 @@ tym_mk_fmla_const(bool b)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs)
+tym_mk_fmla_atom(str_idx_t pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
   struct TymFmlaAtom * result_content = malloc(sizeof *result_content);
   assert(NULL != result_content);
@@ -51,7 +51,7 @@ tym_mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
+tym_mk_fmla_atom_varargs(str_idx_t pred_name, uint8_t arity, ...)
 {
   struct TymTerm ** args = NULL;
 
@@ -69,7 +69,7 @@ tym_mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...)
 }
 
 struct TymFmla *
-tym_mk_fmla_quant(const char * bv, struct TymFmla * body)
+tym_mk_fmla_quant(str_idx_t bv, struct TymFmla * body)
 {
   assert(NULL != bv);
   assert(NULL != body);
@@ -363,7 +363,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
 
 struct TymSymGen *
-tym_mk_sym_gen(const char * prefix)
+tym_mk_sym_gen(str_idx_t prefix)
 {
   struct TymSymGen * result = malloc(sizeof *result);
   result->prefix = prefix;
@@ -382,7 +382,7 @@ tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
   return result;
 }
 
-char *
+str_idx_t
 tym_mk_new_var(struct TymSymGen * vg)
 {
   size_t i = strlen(vg->prefix);

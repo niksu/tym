@@ -16,11 +16,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "string_idx.h"
+
 extern uint8_t TymMaxVarWidth;
-extern char * TYM_UNIVERSE_TY;
+extern str_idx_t TYM_UNIVERSE_TY;
 
 struct TymFmlaAtom {
-  char * pred_name;
+  str_idx_t pred_name;
   uint8_t arity;
   struct TymTerm ** predargs;
 };
@@ -28,7 +30,7 @@ struct TymFmlaAtom {
 enum TymFmlaKind {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST};
 
 struct TymFmlaQuant {
-  const char * bv;
+  str_idx_t bv;
   struct TymFmla * body;
 };
 
@@ -46,9 +48,9 @@ TYM_DECLARE_MUTABLE_LIST_TYPE(TymFmlas, fmla, TymFmla)
 TYM_DECLARE_MUTABLE_LIST_MK(fmla, struct TymFmla, struct TymFmlas)
 
 struct TymFmla * tym_mk_fmla_const(bool b);
-struct TymFmla * tym_mk_fmla_atom(char * pred_name, uint8_t arity, struct TymTerm ** predargs);
-struct TymFmla * tym_mk_fmla_atom_varargs(char * pred_name, uint8_t arity, ...);
-struct TymFmla * tym_mk_fmla_quant(const char * bv, struct TymFmla * body);
+struct TymFmla * tym_mk_fmla_atom(str_idx_t pred_name, uint8_t arity, struct TymTerm ** predargs);
+struct TymFmla * tym_mk_fmla_atom_varargs(str_idx_t pred_name, uint8_t arity, ...);
+struct TymFmla * tym_mk_fmla_quant(str_idx_t bv, struct TymFmla * body);
 struct TymFmla * tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body);
 struct TymFmla * tym_mk_fmla_not(struct TymFmla * subfmla);
 struct TymFmla * tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
@@ -65,16 +67,16 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_quant_str(struct Ty
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst);
 
 struct TymSymGen {
-  const char * prefix;
+  str_idx_t prefix;
   size_t index;
 };
 
-struct TymSymGen * tym_mk_sym_gen(const char * prefix);
+struct TymSymGen * tym_mk_sym_gen(str_idx_t prefix);
 struct TymSymGen * tym_copy_sym_gen(const struct TymSymGen * const cp_orig);
-char * tym_mk_new_var(struct TymSymGen *);
+str_idx_t tym_mk_new_var(struct TymSymGen *);
 
 struct TymValuation {
-  char * var;
+  str_idx_t var;
   struct TymTerm * val;
   struct TymValuation * next;
 };

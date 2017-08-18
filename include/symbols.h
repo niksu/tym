@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "string_idx.h"
 #include "util.h"
 
 #define TYM_HASH_RANGE 256
@@ -33,12 +34,12 @@ bool tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst);
 
 struct TymPredicate {
-  const char * predicate;
+  str_idx_t predicate;
   struct TymClauses * bodies;
   uint8_t arity;
 };
 
-struct TymPredicate * tym_mk_pred(const char * predicate, uint8_t arity);
+struct TymPredicate * tym_mk_pred(str_idx_t predicate, uint8_t arity);
 void tym_free_pred(struct TymPredicate * pred);
 
 enum TymEqPredError {TYM_NO_ERROR_EQ_PRED, SAME_PREDICATE_DIFF_ARITY};
