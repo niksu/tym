@@ -16,7 +16,7 @@ decode_str (str_idx_t s)
 }
 
 str_idx_t
-decode_str (char * s)
+encode_str (char * s)
 {
   return s;
 }

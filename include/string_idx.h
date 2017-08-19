@@ -15,6 +15,6 @@ typedef char * str_idx_t;
 #endif
 
 char * decode_str (str_idx_t);
-str_idx_t decode_str (char *);
+str_idx_t encode_str (char *);
 
 #endif // __TYM_STRING_IDX_H__
