@@ -7,14 +7,16 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_STRING_IDX_H__
-#define __TYM_STRING_IDX_H__
+#include "string_idx.h"
 
-#if 1
-typedef char * str_idx_t;
-#endif
+char *
+decode_str (str_idx_t s)
+{
+  return s;
+}
 
-char * decode_str (str_idx_t);
-str_idx_t decode_str (char *);
-
-#endif // __TYM_STRING_IDX_H__
+str_idx_t
+decode_str (char * s)
+{
+  return s;
+}
