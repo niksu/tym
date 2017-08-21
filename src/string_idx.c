@@ -10,13 +10,13 @@
 #include "string_idx.h"
 
 char *
-decode_str (str_idx_t s)
+tym_decode_str (TymStrIdx s)
 {
   return s;
 }
 
-str_idx_t
-encode_str (char * s)
+TymStrIdx
+tym_encode_str (char * s)
 {
   return s;
 }

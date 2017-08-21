@@ -15,18 +15,18 @@
 // NOTE only interested in finite models
 struct TymUniverse {
   uint8_t cardinality;
-  str_idx_t * element;
+  TymStrIdx * element;
 };
 
-extern str_idx_t tym_bool_ty;
-extern str_idx_t tym_distinctK;
-extern str_idx_t tym_eqK;
+extern TymStrIdx tym_bool_ty;
+extern TymStrIdx tym_distinctK;
+extern TymStrIdx tym_eqK;
 
 struct TymStmtConst {
-  str_idx_t const_name;
+  TymStrIdx const_name;
   struct TymTerms * params;
   struct TymFmla * body;
-  str_idx_t ty;
+  TymStrIdx ty;
 };
 
 enum TymStmtKind {TYM_STMT_AXIOM, TYM_STMT_CONST_DEF};
@@ -44,9 +44,9 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_universe_str(const struc
 void tym_free_universe(struct TymUniverse *);
 
 const struct TymStmt * tym_mk_stmt_axiom(const struct TymFmla * axiom);
-const struct TymStmt * tym_mk_stmt_pred(str_idx_t pred_name, struct TymTerms * params, struct TymFmla * body);
-struct TymStmt * tym_mk_stmt_const(str_idx_t const_name, struct TymUniverse *, str_idx_t ty);
-const struct TymStmt * tym_mk_stmt_const_def(str_idx_t const_name, struct TymUniverse * uni);
+const struct TymStmt * tym_mk_stmt_pred(TymStrIdx pred_name, struct TymTerms * params, struct TymFmla * body);
+struct TymStmt * tym_mk_stmt_const(TymStrIdx const_name, struct TymUniverse *, TymStrIdx ty);
+const struct TymStmt * tym_mk_stmt_const_def(TymStrIdx const_name, struct TymUniverse * uni);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_stmt_str(const struct TymStmt * const, struct TymBufferInfo * dst);
 void tym_free_stmt(const struct TymStmt *);
 

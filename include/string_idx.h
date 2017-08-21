@@ -11,10 +11,10 @@
 #define __TYM_STRING_IDX_H__
 
 #if 1
-typedef char * str_idx_t;
+typedef char * TymStrIdx;
 #endif
 
-char * decode_str (str_idx_t);
-str_idx_t encode_str (char *);
+char * tym_decode_str (TymStrIdx);
+TymStrIdx tym_encode_str (char *);
 
 #endif // __TYM_STRING_IDX_H__

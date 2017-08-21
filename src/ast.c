@@ -235,21 +235,21 @@ tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo
 }
 
 struct TymTerm *
-tym_mk_const(str_idx_t cp_identifier)
+tym_mk_const(TymStrIdx cp_identifier)
 {
   assert(NULL != cp_identifier);
   return tym_mk_term(TYM_CONST, strdup(cp_identifier));
 }
 
 struct TymTerm *
-tym_mk_var(str_idx_t cp_identifier)
+tym_mk_var(TymStrIdx cp_identifier)
 {
   assert(NULL != cp_identifier);
   return tym_mk_term(TYM_VAR, strdup(cp_identifier));
 }
 
 struct TymTerm *
-tym_mk_term(enum TymTermKind kind, str_idx_t identifier)
+tym_mk_term(enum TymTermKind kind, TymStrIdx identifier)
 {
   assert(NULL != identifier);
 
@@ -266,7 +266,7 @@ TYM_DEFINE_MUTABLE_LIST_MK(term, term, struct TymTerm, struct TymTerms)
 TYM_DEFINE_U8_LIST_LEN(TymTerms)
 
 struct TymAtom *
-tym_mk_atom(str_idx_t predicate, uint8_t arity, struct TymTerms * args) {
+tym_mk_atom(TymStrIdx predicate, uint8_t arity, struct TymTerms * args) {
   assert(NULL != predicate);
 
   struct TymAtom * at = malloc(sizeof *at);
