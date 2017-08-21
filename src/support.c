@@ -5,13 +5,6 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-//#include <assert.h>
-//#include <getopt.h>
-//#include <stdbool.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-
 #include "support.h"
 
 #pragma GCC diagnostic push
