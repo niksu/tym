@@ -29,11 +29,11 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_term(term) + 127);
-  res = buf_strcpy(dst, local_buf);
-  assert(is_ok_buffer_write_result(res));
+  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127);
+  res = tym_buf_strcpy(dst, local_buf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (tym_have_space(dst, 1)) {
@@ -58,11 +58,11 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_str(atom->predicate) + 127);
-  res = buf_strcpy(dst, local_buf);
-  assert(is_ok_buffer_write_result(res));
+  sprintf(local_buf, "{hash=%d}", tym_hash_str(atom->predicate) + 127);
+  res = tym_buf_strcpy(dst, local_buf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (tym_have_space(dst, 1)) {
@@ -117,11 +117,11 @@ tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_atom(atom) + 127);
-  res = buf_strcpy(dst, local_buf);
-  assert(is_ok_buffer_write_result(res));
+  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127);
+  res = tym_buf_strcpy(dst, local_buf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (tym_have_space(dst, 1)) {
@@ -198,11 +198,11 @@ tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * 
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", hash_clause(clause) + 127);
-  res = buf_strcpy(dst, local_buf);
-  assert(is_ok_buffer_write_result(res));
+  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127);
+  res = tym_buf_strcpy(dst, local_buf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  unsafe_dec_idx(dst, 1); // chomp the trailing \0.
+  tym_unsafe_dec_idx(dst, 1); // chomp the trailing \0.
 #endif
 
   if (tym_have_space(dst, 1)) {
@@ -472,7 +472,7 @@ tym_free_program(struct TymProgram * program)
 
   for (int i = 0; i < program->no_clauses; i++) {
     TYM_DBG("Freeing clause %d: ", i);
-    TYM_DBG_SYNTAX((void *)program->program[i], (tym_x_to_str_t)clause_to_str);
+    TYM_DBG_SYNTAX((void *)program->program[i], (tym_x_to_str_t)tym_clause_to_str);
     TYM_DBG("\n");
 
     assert(NULL != (program->program[i]));
@@ -670,13 +670,13 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
 
     if (!found) {
 #if TYM_DEBUG
-      struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-      struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = term_to_str(ss->term, outbuf);
-      assert(is_ok_buffer_write_result(res));
+      struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+      struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_term_to_str(ss->term, outbuf);
+      assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
           outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-      free_buffer(outbuf);
+      tym_free_buffer(outbuf);
 #endif
       result = false;
       break;
