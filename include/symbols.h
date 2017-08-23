@@ -34,12 +34,12 @@ bool tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst);
 
 struct TymPredicate {
-  TymStrIdx predicate;
+  TymStrIdx * predicate;
   struct TymClauses * bodies;
   uint8_t arity;
 };
 
-struct TymPredicate * tym_mk_pred(TymStrIdx predicate, uint8_t arity);
+struct TymPredicate * tym_mk_pred(TymStrIdx * predicate, uint8_t arity);
 void tym_free_pred(struct TymPredicate * pred);
 
 enum TymEqPredError {TYM_NO_ERROR_EQ_PRED, SAME_PREDICATE_DIFF_ARITY};

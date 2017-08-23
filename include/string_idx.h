@@ -10,11 +10,15 @@
 #ifndef __TYM_STRING_IDX_H__
 #define __TYM_STRING_IDX_H__
 
+struct TymStrIdxStruct;
 #if 1
-typedef char * TymStrIdx;
+typedef char TymStrIdx;
+#else
+typedef struct TymStrIdxStruct TymStrIdx;
 #endif
 
-char * tym_decode_str (TymStrIdx);
-TymStrIdx tym_encode_str (char *);
+char * tym_decode_str (TymStrIdx *);
+TymStrIdx * tym_encode_str (char *);
+void tym_free_str (TymStrIdx *);
 
 #endif // __TYM_STRING_IDX_H__

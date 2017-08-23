@@ -41,8 +41,11 @@ tym_mk_universe(struct TymTerms * terms)
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-    result->element[i] = malloc(sizeof *result->element[i] * (strlen(cursor->term->identifier) + 1));
-    strcpy(result->element[i], cursor->term->identifier);
+// FIXME check
+//    result->element[i] = malloc(sizeof result->element[i] *
+//        (strlen(tym_decode_str((cursor->term->identifier)) + 1));
+//    strcpy(result->element[i], cursor->term->identifier);
+    result->element[i] = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
     cursor = cursor->next;
   }
 
@@ -63,7 +66,7 @@ tym_universe_str(const struct TymUniverse * const uni, struct TymBufferInfo * ds
 
     tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-    res = tym_buf_strcpy(dst, uni->element[i]);
+    res = tym_buf_strcpy(dst, tym_decode_str(uni->element[i]));
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -89,7 +92,7 @@ tym_universe_str(const struct TymUniverse * const uni, struct TymBufferInfo * ds
   tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
   for (int i = 0; i < uni->cardinality; i++) {
-    res = tym_buf_strcpy(dst, uni->element[i]);
+    res = tym_buf_strcpy(dst, tym_decode_str(uni->element[i]));
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -129,7 +132,7 @@ tym_mk_stmt_axiom(const struct TymFmla * axiom)
 }
 
 const struct TymStmt *
-tym_mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * body)
+tym_mk_stmt_pred(TymStrIdx * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct TymStmt * result = malloc(sizeof *result);
   struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
@@ -138,7 +141,7 @@ tym_mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * bo
       {.const_name = pred_name,
        .params = params,
        .body = body,
-       .ty = tym_bool_ty};
+       .ty = tym_encode_str(tym_bool_ty)/*FIXME hack*/};
 
   result->kind = TYM_STMT_CONST_DEF;
   result->param.const_def = sub_result;
@@ -146,7 +149,7 @@ tym_mk_stmt_pred(char * pred_name, struct TymTerms * params, struct TymFmla * bo
 }
 
 struct TymStmt *
-tym_mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
+tym_mk_stmt_const(TymStrIdx * const_name, struct TymUniverse * uni, TymStrIdx * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -167,7 +170,7 @@ tym_mk_stmt_const(char * const_name, struct TymUniverse * uni, char * ty)
 }
 
 const struct TymStmt *
-tym_mk_stmt_const_def(char * const_name, struct TymUniverse * uni)
+tym_mk_stmt_const_def(TymStrIdx * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -180,11 +183,14 @@ tym_mk_stmt_const_def(char * const_name, struct TymUniverse * uni)
       // Currently terms must have disjoint strings, since these are freed
       // up independently (without checking if a shared string has already been
       // freed, say).
-      const_name = strdup(const_name);
+      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(const_name))); // FIXME hack
+      const_name = copied;
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
-    struct TymTerm * arg2 = tym_mk_term(TYM_CONST, strdup(uni->element[i]));
-    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, arg1, arg2);
+    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(uni->element[i]))); // FIXME hack
+    struct TymTerm * arg2 = tym_mk_term(TYM_CONST, copied);
+    copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
+    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(copied, 2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
 
@@ -216,7 +222,7 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
   case TYM_STMT_CONST_DEF:
     // Check arity, and use define-fun or declare-const as appropriate.
 
-    if (NULL == stmt->param.const_def->params && stmt->param.const_def->ty == TYM_UNIVERSE_TY) {
+    if (NULL == stmt->param.const_def->params && tym_decode_str(stmt->param.const_def->ty) == TYM_UNIVERSE_TY/*FIXME hack*/) {
       // We're dealing with a nullary constant.
       res = tym_buf_strcpy(dst, "(declare-const");
       assert(tym_is_ok_TymBufferWriteResult(res));
@@ -224,13 +230,13 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
 
       tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-      res = tym_buf_strcpy(dst, stmt->param.const_def->const_name);
+      res = tym_buf_strcpy(dst, tym_decode_str(stmt->param.const_def->const_name));
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
       tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-      res = tym_buf_strcpy(dst, stmt->param.const_def->ty);
+      res = tym_buf_strcpy(dst, tym_decode_str(stmt->param.const_def->ty));
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
@@ -242,7 +248,7 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
 
       tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
 
-      res = tym_buf_strcpy(dst, stmt->param.const_def->const_name);
+      res = tym_buf_strcpy(dst, tym_decode_str(stmt->param.const_def->const_name));
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
@@ -291,7 +297,7 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
         return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
       }
 
-      res = tym_buf_strcpy(dst, stmt->param.const_def->ty);
+      res = tym_buf_strcpy(dst, tym_decode_str(stmt->param.const_def->ty));
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 
@@ -454,8 +460,8 @@ void
 tym_test_statement(void)
 {
   printf("***test_statement***\n");
-  struct TymTerm * aT = tym_mk_term(TYM_CONST, strdup("a"));
-  struct TymTerm * bT = tym_mk_term(TYM_CONST, strdup("b"));
+  struct TymTerm * aT = tym_mk_term(TYM_CONST, tym_encode_str(strdup("a")));
+  struct TymTerm * bT = tym_mk_term(TYM_CONST, tym_encode_str(strdup("b")));
   struct TymTerms * terms = tym_mk_term_cell(aT, NULL);
   terms = tym_mk_term_cell(bT, terms);
 
@@ -463,15 +469,15 @@ tym_test_statement(void)
   tym_free_terms(terms);
 
   const struct TymStmt * s1S =
-    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_const("a"), tym_mk_const("a")));
-  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("X")), NULL);
-  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, strdup("Y")), terms);
+    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)), 2, tym_mk_const(tym_encode_str("a")), tym_mk_const(tym_encode_str("a"))));
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, tym_encode_str(strdup("X"))), NULL);
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, tym_encode_str(strdup("Y"))), terms);
   struct TymFmla * fmla =
-    tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2, tym_mk_var("X"), tym_mk_var("Y"));
-  const struct TymStmt * s2S = tym_mk_stmt_pred(strdup("some_predicate"), terms,
+    tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)), 2, tym_mk_var(tym_encode_str("X")), tym_mk_var(tym_encode_str("Y")));
+  const struct TymStmt * s2S = tym_mk_stmt_pred(tym_encode_str(strdup("some_predicate")), terms,
       tym_mk_fmla_not(fmla));
-  struct TymStmt * s3AS = tym_mk_stmt_const(strdup("x"), mdl->universe, TYM_UNIVERSE_TY);
-  const struct TymStmt * s3BS = tym_mk_stmt_const_def(strdup("x"), mdl->universe);
+  struct TymStmt * s3AS = tym_mk_stmt_const(tym_encode_str(strdup("x")), mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
+  const struct TymStmt * s3BS = tym_mk_stmt_const_def(tym_encode_str(strdup("x")), mdl->universe);
 
   tym_strengthen_model(mdl, s1S);
   tym_strengthen_model(mdl, s2S);
@@ -497,12 +503,15 @@ struct TymTerm *
 tym_new_const_in_stmt(const struct TymStmt * stmt)
 {
   struct TymTerm * result = NULL;
+  TymStrIdx * copied;
+
   switch (stmt->kind) {
   case TYM_STMT_AXIOM:
     result = NULL;
     break;
   case TYM_STMT_CONST_DEF:
-    result = tym_mk_term(TYM_CONST, strdup(stmt->param.const_def->const_name));
+    copied = tym_encode_str(strdup(tym_decode_str(stmt->param.const_def->const_name))); // FIXME hack
+    result = tym_mk_term(TYM_CONST, copied);
     break;
   default:
     assert(false);
@@ -541,16 +550,19 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
+    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
     tym_strengthen_model(mdl,
-        tym_mk_stmt_const(strdup(mdl->universe->element[i]), mdl->universe, TYM_UNIVERSE_TY));
+        tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
   }
 
   assert(0 < mdl->universe->cardinality);
   struct TymTerm ** args = malloc(sizeof *args * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    args[i] = tym_mk_term(TYM_CONST, strdup(mdl->universe->element[i]));
+    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
+    args[i] = tym_mk_term(TYM_CONST, copied);
   }
+  TymStrIdx * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack
   const struct TymFmla * distinctness_fmla =
-    tym_mk_fmla_atom(strdup(tym_distinctK), mdl->universe->cardinality, args);
+    tym_mk_fmla_atom(copied, mdl->universe->cardinality, args);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(distinctness_fmla));
 }

@@ -96,9 +96,9 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
 
   struct TymSymGen ** vg = malloc(sizeof *vg);
   *vg = NULL;
-  *vg = tym_mk_sym_gen(strdup("V"));
+  *vg = tym_mk_sym_gen(tym_encode_str(strdup("V")/*FIXME hack*/));
 
-  struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
+  struct TymSymGen * cg = tym_mk_sym_gen(tym_encode_str(strdup("c")/*FIXME hack*/));
 
   struct TymModel * mdl = NULL;
   if (NULL != ParsedInputFileContents) {

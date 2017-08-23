@@ -71,15 +71,18 @@ struct TymProgram * parse(const char * string);
 
 term : TK_CONST
        { char * identifier = $1;
-         struct TymTerm * t = tym_mk_term(TYM_CONST, identifier);
+         struct TymTerm * t = tym_mk_term(TYM_CONST,
+           tym_encode_str(identifier));
          $$ = t; }
      | TK_VAR
        { char * identifier = $1;
-         struct TymTerm * t = tym_mk_term(TYM_VAR, identifier);
+         struct TymTerm * t = tym_mk_term(TYM_VAR,
+           tym_encode_str(identifier));
          $$ = t; }
      | TK_STRING
        { char * identifier = $1;
-         struct TymTerm * t = tym_mk_term(TYM_STR, identifier);
+         struct TymTerm * t = tym_mk_term(TYM_STR,
+           tym_encode_str(identifier));
          $$ = t; }
 
 terms : term TK_R_RB
@@ -94,7 +97,8 @@ terms : term TK_R_RB
 atom : TK_CONST TK_L_RB terms
        { char * predicate = $1;
          struct TymTerms * ts = $3;
-         struct TymAtom * atom = tym_mk_atom(predicate, tym_len_TymTerms_cell(ts), ts);
+         struct TymAtom * atom = tym_mk_atom(tym_encode_str(predicate),
+           tym_len_TymTerms_cell(ts), ts);
          $$ = atom; }
 
 atoms : atom

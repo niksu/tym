@@ -15,7 +15,7 @@
 #include "util.h"
 
 uint8_t TymMaxVarWidth = 10;
-TymStrIdx TYM_UNIVERSE_TY = "Universe";
+char * TYM_UNIVERSE_TY = "Universe";
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
@@ -33,7 +33,7 @@ tym_mk_fmla_const(bool b)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom(TymStrIdx pred_name, uint8_t arity, struct TymTerm ** predargs)
+tym_mk_fmla_atom(TymStrIdx * pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
   struct TymFmlaAtom * result_content = malloc(sizeof *result_content);
   assert(NULL != result_content);
@@ -51,7 +51,7 @@ tym_mk_fmla_atom(TymStrIdx pred_name, uint8_t arity, struct TymTerm ** predargs)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom_varargs(TymStrIdx pred_name, uint8_t arity, ...)
+tym_mk_fmla_atom_varargs(TymStrIdx * pred_name, uint8_t arity, ...)
 {
   struct TymTerm ** args = NULL;
 
@@ -69,7 +69,7 @@ tym_mk_fmla_atom_varargs(TymStrIdx pred_name, uint8_t arity, ...)
 }
 
 struct TymFmla *
-tym_mk_fmla_quant(TymStrIdx bv, struct TymFmla * body)
+tym_mk_fmla_quant(TymStrIdx * bv, struct TymFmla * body)
 {
   assert(NULL != bv);
   assert(NULL != body);
@@ -196,7 +196,7 @@ tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, at->pred_name);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(at->pred_name));
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -235,7 +235,7 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
 
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, quant->bv);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(quant->bv));
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -363,7 +363,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
 
 struct TymSymGen *
-tym_mk_sym_gen(TymStrIdx prefix)
+tym_mk_sym_gen(TymStrIdx * prefix)
 {
   struct TymSymGen * result = malloc(sizeof *result);
   result->prefix = prefix;
@@ -375,22 +375,21 @@ struct TymSymGen *
 tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 {
   struct TymSymGen * result = malloc(sizeof *result);
-  char * prefix_copy = malloc(sizeof *prefix_copy * (strlen(cp_orig->prefix) + 1));
-  strcpy(prefix_copy, cp_orig->prefix);
-  result->prefix = prefix_copy;
+  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_orig->prefix))); // FIXME hack
+  result->prefix = copied;
   result->index = cp_orig->index;
   return result;
 }
 
-TymStrIdx
+TymStrIdx *
 tym_mk_new_var(struct TymSymGen * vg)
 {
-  size_t i = strlen(vg->prefix);
+  size_t i = strlen(tym_decode_str(vg->prefix));
   char * result = malloc(i + 1 + TymMaxVarWidth);
-  strcpy(result, vg->prefix);
+  strcpy(result, tym_decode_str(vg->prefix));
   snprintf(result + i, TymMaxVarWidth, "%lu", vg->index);
   vg->index += 1;
-  return result;
+  return tym_encode_str(result);
 }
 
 bool
@@ -424,7 +423,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
   if (atom->arity > 0) {
     var_args_T = malloc(sizeof *var_args_T * atom->arity);
-    char ** var_args = malloc(sizeof *var_args * atom->arity);
+    TymStrIdx ** var_args = malloc(sizeof *var_args * atom->arity);
     *v = NULL;
 
     struct TymValuation * v_cursor;
@@ -442,7 +441,8 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
       v_cursor->var = tym_mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      var_args_T[i] = tym_mk_term(TYM_VAR, strdup(v_cursor->var));
+      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(v_cursor->var))); // FIXME hack
+      var_args_T[i] = tym_mk_term(TYM_VAR, copied);
 
       v_cursor->next = NULL;
     }
@@ -450,7 +450,8 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
     free(var_args);
   }
 
-  return tym_mk_fmla_atom(strdup(atom->pred_name), atom->arity, var_args_T);
+  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->pred_name))); // FIXME hack
+  return tym_mk_fmla_atom(copied, atom->arity, var_args_T);
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
@@ -463,7 +464,7 @@ tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   while (NULL != v_cursor) {
-    res = tym_buf_strcpy(dst, v_cursor->var);
+    res = tym_buf_strcpy(dst, tym_decode_str(v_cursor->var));
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -631,8 +632,9 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 {
   struct TymFmla * result = NULL;
 
-  char * pred_name_copy = NULL;
+  TymStrIdx * pred_name_copy = NULL;
   struct TymTerm ** predargs_copy = NULL;
+  TymStrIdx * copied; // FIXME used in hack
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -644,8 +646,8 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_ATOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    pred_name_copy = strdup(fmla->param.atom->pred_name);
-    assert(NULL != pred_name_copy);
+    pred_name_copy = tym_encode_str(strdup(tym_decode_str(fmla->param.atom->pred_name))); // FIXME hack
+    assert(NULL != pred_name_copy); // FIXME no longer works as intended
 
     predargs_copy = NULL;
 
@@ -682,7 +684,8 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_EX:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct TymFmla *)tym_mk_fmla_quant(strdup(fmla->param.quant->bv),
+    copied = tym_encode_str(strdup(tym_decode_str(fmla->param.quant->bv))); // FIXME hack
+    result = (struct TymFmla *)tym_mk_fmla_quant(copied,
         tym_copy_fmla(fmla->param.quant->body));
 #pragma GCC diagnostic pop
     break;
@@ -699,23 +702,23 @@ tym_test_formula(void)
 {
   printf("***test_formula***\n");
   struct TymTerm ** args = malloc(sizeof *args * 2);
-  args[0] = tym_mk_term(TYM_CONST, strdup("arg0"));
-  args[1] = tym_mk_term(TYM_CONST, strdup("arg1"));
+  args[0] = tym_mk_term(TYM_CONST, tym_encode_str(strdup("arg0")));
+  args[1] = tym_mk_term(TYM_CONST, tym_encode_str(strdup("arg1")));
 
   for (int i = 0; i < 2; i++) {
-    printf("  :%s\n", args[i]->identifier);
+    printf("  :%s\n", tym_decode_str(args[i]->identifier));
   }
 
-  struct TymFmla * test_atom = tym_mk_fmla_atom(strdup("atom"), 2, args);
+  struct TymFmla * test_atom = tym_mk_fmla_atom(tym_encode_str(strdup("atom")), 2, args);
 
   for (int i = 0; i < 2; i++) {
-    printf("  ;%s\n", test_atom->param.atom->predargs[i]->identifier);
+    printf("  ;%s\n", tym_decode_str(test_atom->param.atom->predargs[i]->identifier));
   }
 
   struct TymFmla * test_not = tym_mk_fmla_not(tym_copy_fmla(test_atom));
   struct TymFmla * test_and = tym_mk_fmla_and(tym_copy_fmla(test_not), tym_copy_fmla(test_atom));
   struct TymFmla * test_or = tym_mk_fmla_or(tym_copy_fmla(test_not), tym_copy_fmla(test_and));
-  struct TymFmla * test_quant = tym_mk_fmla_quant(strdup("x"), tym_copy_fmla(test_or));
+  struct TymFmla * test_quant = tym_mk_fmla_quant(tym_encode_str(strdup("x")), tym_copy_fmla(test_or));
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(test_quant, outbuf);
@@ -732,14 +735,14 @@ tym_test_formula(void)
   tym_free_fmla(test_not);
   tym_free_fmla(test_quant);
 
-  struct TymTerm * c1 = tym_mk_const("ta1");
-  struct TymTerm * c2 = tym_mk_const("ta2");
-  struct TymTerm * c3 = tym_mk_const("ta3");
-  struct TymTerm * c4 = tym_mk_const("ta4");
-  test_atom = tym_mk_fmla_atom_varargs(strdup("testpred1"), 4, c1, c2, c3, c4);
-  const struct TymFmla * test_atom2 = tym_mk_fmla_atom_varargs(strdup("testpred2"),
+  struct TymTerm * c1 = tym_mk_const(tym_encode_str("ta1"));
+  struct TymTerm * c2 = tym_mk_const(tym_encode_str("ta2"));
+  struct TymTerm * c3 = tym_mk_const(tym_encode_str("ta3"));
+  struct TymTerm * c4 = tym_mk_const(tym_encode_str("ta4"));
+  test_atom = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred1")), 4, c1, c2, c3, c4);
+  const struct TymFmla * test_atom2 = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred2")),
       4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
-  const struct TymFmla * test_atom3 = tym_mk_fmla_atom_varargs(strdup("testpred3"),
+  const struct TymFmla * test_atom3 = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred3")),
       4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
   struct TymFmlas * test_fmlas = tym_mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct TymFmlas * test_fmlas2 = tym_copy_fmlas(test_fmlas);
@@ -806,8 +809,9 @@ tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body)
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(TYM_VAR == cursor->term->kind);
+    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
     struct TymFmla * pre_result =
-      tym_mk_fmla_quant(strdup(cursor->term->identifier), result);
+      tym_mk_fmla_quant(copied, result);
     result = pre_result;
 
     cursor = cursor->next;

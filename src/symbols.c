@@ -86,7 +86,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
 }
 
 struct TymPredicate *
-tym_mk_pred(TymStrIdx predicate, uint8_t arity)
+tym_mk_pred(TymStrIdx * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 
@@ -124,7 +124,7 @@ tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError 
     return true;
   }
 
-  if (0 != strcmp(p1.predicate, p2.predicate)) {
+  if (0 != strcmp(tym_decode_str(p1.predicate), tym_decode_str(p2.predicate)))/*FIXME this should simply be pointer comparison*/ {
     *result = false;
     return true;
   } else {
@@ -157,7 +157,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     success = true;
     *record = NULL;
   } else {
-    char h = tym_hash_str(atom->predicate);
+    char h = tym_hash_str(tym_decode_str(atom->predicate));
 
     if (NULL == adb->atom_database[(int)h]) {
       success = true;
@@ -165,7 +165,8 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     } else {
       bool exists = false;
 
-      struct TymPredicate * pred = tym_mk_pred(strdup(atom->predicate), atom->arity);
+      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
+      struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
 
       struct TymPredicates * cursor = adb->atom_database[(int)h];
 
@@ -201,9 +202,10 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
     *error_code = TYM_NO_ATOM_DATABASE;
     success = false;
   } else {
-    char h = tym_hash_str(atom->predicate);
+    char h = tym_hash_str(tym_decode_str(atom->predicate));
 
-    struct TymPredicate * pred = tym_mk_pred(strdup(atom->predicate), atom->arity);
+    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
+    struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
@@ -313,7 +315,7 @@ tym_predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst)
 {
   size_t initial_idx = dst->idx;
 
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, pred->predicate);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(pred->predicate));
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -371,7 +373,7 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
     assert(TYM_DIFF_ARITY == adl_lookup_error);
     *cdl_add_error = TYM_CDL_ADL_DIFF_ARITY;
     TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
-         *cdl_add_error, clause->head->predicate);
+         *cdl_add_error, tym_decode_str(clause->head->predicate));
     return false;
   } else if (NULL == record) {
     struct TymPredicate * result;
@@ -381,7 +383,7 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
       assert(TYM_NO_ATOM_DATABASE == adl_add_error);
       *cdl_add_error = TYM_CDL_ADL_NO_ATOM_DATABASE;
       TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
-           *cdl_add_error, clause->head->predicate);
+           *cdl_add_error, tym_decode_str(clause->head->predicate));
       return false;
     }
   } else if (success && NULL != record) {
@@ -404,7 +406,7 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
         assert(TYM_DIFF_ARITY == adl_lookup_error);
         *cdl_add_error = TYM_CDL_ADL_DIFF_ARITY;
         TYM_ERR("Looking-up atom failed (%d, %d): %s\n", adl_lookup_error,
-             *cdl_add_error, clause->body[i]->predicate);
+             *cdl_add_error, tym_decode_str(clause->body[i]->predicate));
         return false;
       } else if (NULL == record) {
         struct TymPredicate * result;
@@ -413,7 +415,7 @@ tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase * adb,
           assert(TYM_NO_ATOM_DATABASE == adl_add_error);
           *cdl_add_error = TYM_CDL_ADL_NO_ATOM_DATABASE;
           TYM_ERR("Adding atom failed (%d, %d): %s\n", adl_add_error,
-               *cdl_add_error, clause->body[i]->predicate);
+               *cdl_add_error, tym_decode_str(clause->body[i]->predicate));
           return false;
         }
       }
