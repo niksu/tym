@@ -20,7 +20,7 @@ tym_translate_atom(const struct TymAtom * at)
       args[i] = tym_copy_term(at->args[i]);
     }
   }
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(at->predicate))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(at->predicate))); // FIXME hack
   return tym_mk_fmla_atom(copied, at->arity, args);
 }
 
@@ -55,7 +55,7 @@ tym_translate_valuation(struct TymValuation * const v)
   struct TymFmlas * result = NULL;
   struct TymValuation * cursor = v;
   while (NULL != cursor) {
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cursor->var))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(cursor->var))); // FIXME hack
     result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)/*FIXME hack*/), 2,
           tym_mk_term(TYM_VAR, copied),
           tym_copy_term(cursor->val)), result);
@@ -72,10 +72,10 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
     args = malloc(sizeof *args * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (TYM_VAR == at->predargs[i]->kind) {
-        TymStrIdx * placeholder = tym_mk_new_var(cg);
+        TymStr * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(placeholder))); // FIXME hack
+        TymStr * copied = tym_encode_str(strdup(tym_decode_str(placeholder))); // FIXME hack
         struct TymStmt * stmt = tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
         tym_strengthen_model(mdl, stmt);
       } else {
@@ -226,7 +226,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(preds_cursor->predicate->predicate))); // FIXME hack
+      TymStr * copied = tym_encode_str(strdup(tym_decode_str(preds_cursor->predicate->predicate))); // FIXME hack
       const struct TymFmla * atom =
         tym_mk_fmla_atom(copied,
           preds_cursor->predicate->arity, var_args);
@@ -271,7 +271,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
           }
         }
 
-        TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(head_atom->predicate))); // FIXME hack
+        TymStr * copied = tym_encode_str(strdup(tym_decode_str(head_atom->predicate))); // FIXME hack
         // Abstract the atom's parameters.
         const struct TymFmla * head_fmla =
           tym_mk_fmla_atom(copied, head_atom->arity, args);
@@ -351,7 +351,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #endif
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(head->pred_name))); // FIXME hack
+      TymStr * copied = tym_encode_str(strdup(tym_decode_str(head->pred_name))); // FIXME hack
       tym_strengthen_model(mdl,
           tym_mk_stmt_pred(copied,
             tym_arguments_of_atom(head),

@@ -235,23 +235,23 @@ tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo
 }
 
 struct TymTerm *
-tym_mk_const(TymStrIdx * cp_identifier)
+tym_mk_const(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
   return tym_mk_term(TYM_CONST, copied);
 }
 
 struct TymTerm *
-tym_mk_var(TymStrIdx * cp_identifier)
+tym_mk_var(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
   return tym_mk_term(TYM_VAR, copied);
 }
 
 struct TymTerm *
-tym_mk_term(enum TymTermKind kind, TymStrIdx * identifier)
+tym_mk_term(enum TymTermKind kind, TymStr * identifier)
 {
   assert(NULL != identifier);
 
@@ -268,7 +268,7 @@ TYM_DEFINE_MUTABLE_LIST_MK(term, term, struct TymTerm, struct TymTerms)
 TYM_DEFINE_U8_LIST_LEN(TymTerms)
 
 struct TymAtom *
-tym_mk_atom(TymStrIdx * predicate, uint8_t arity, struct TymTerms * args) {
+tym_mk_atom(TymStr * predicate, uint8_t arity, struct TymTerms * args) {
   assert(NULL != predicate);
 
   struct TymAtom * at = malloc(sizeof *at);
@@ -632,7 +632,7 @@ struct TymTerm *
 tym_copy_term(const struct TymTerm * const cp_term)
 {
   assert(NULL != cp_term);
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_term->identifier))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_term->identifier))); // FIXME hack
   return tym_mk_term(cp_term->kind, copied);
 }
 
@@ -733,7 +733,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
   struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_atom->predicate))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_atom->predicate))); // FIXME hack
   at->predicate = copied;
   at->arity = cp_atom->arity;
   at->args = NULL;

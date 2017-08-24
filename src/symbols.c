@@ -86,7 +86,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
 }
 
 struct TymPredicate *
-tym_mk_pred(TymStrIdx * predicate, uint8_t arity)
+tym_mk_pred(TymStr * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 
@@ -165,7 +165,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     } else {
       bool exists = false;
 
-      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
+      TymStr * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
       struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
 
       struct TymPredicates * cursor = adb->atom_database[(int)h];
@@ -204,7 +204,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
   } else {
     char h = tym_hash_str(tym_decode_str(atom->predicate));
 
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(atom->predicate))); // FIXME hack
     struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {

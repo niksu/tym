@@ -13,19 +13,19 @@
 
 #if 1
 char *
-tym_decode_str (TymStrIdx * s)
+tym_decode_str (TymStr * s)
 {
   return s;
 }
 
-TymStrIdx *
+TymStr *
 tym_encode_str (char * s)
 {
   return s;
 }
 
 void
-tym_free_str (TymStrIdx * s)
+tym_free_str (TymStr * s)
 {
   free(s);
 }

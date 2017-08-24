@@ -33,7 +33,7 @@ tym_mk_fmla_const(bool b)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom(TymStrIdx * pred_name, uint8_t arity, struct TymTerm ** predargs)
+tym_mk_fmla_atom(TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
   struct TymFmlaAtom * result_content = malloc(sizeof *result_content);
   assert(NULL != result_content);
@@ -51,7 +51,7 @@ tym_mk_fmla_atom(TymStrIdx * pred_name, uint8_t arity, struct TymTerm ** predarg
 }
 
 struct TymFmla *
-tym_mk_fmla_atom_varargs(TymStrIdx * pred_name, uint8_t arity, ...)
+tym_mk_fmla_atom_varargs(TymStr * pred_name, uint8_t arity, ...)
 {
   struct TymTerm ** args = NULL;
 
@@ -69,7 +69,7 @@ tym_mk_fmla_atom_varargs(TymStrIdx * pred_name, uint8_t arity, ...)
 }
 
 struct TymFmla *
-tym_mk_fmla_quant(TymStrIdx * bv, struct TymFmla * body)
+tym_mk_fmla_quant(TymStr * bv, struct TymFmla * body)
 {
   assert(NULL != bv);
   assert(NULL != body);
@@ -363,7 +363,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
 
 struct TymSymGen *
-tym_mk_sym_gen(TymStrIdx * prefix)
+tym_mk_sym_gen(TymStr * prefix)
 {
   struct TymSymGen * result = malloc(sizeof *result);
   result->prefix = prefix;
@@ -375,13 +375,13 @@ struct TymSymGen *
 tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 {
   struct TymSymGen * result = malloc(sizeof *result);
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cp_orig->prefix))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_orig->prefix))); // FIXME hack
   result->prefix = copied;
   result->index = cp_orig->index;
   return result;
 }
 
-TymStrIdx *
+TymStr *
 tym_mk_new_var(struct TymSymGen * vg)
 {
   size_t i = strlen(tym_decode_str(vg->prefix));
@@ -423,7 +423,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
   if (atom->arity > 0) {
     var_args_T = malloc(sizeof *var_args_T * atom->arity);
-    TymStrIdx ** var_args = malloc(sizeof *var_args * atom->arity);
+    TymStr ** var_args = malloc(sizeof *var_args * atom->arity);
     *v = NULL;
 
     struct TymValuation * v_cursor;
@@ -441,7 +441,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
       v_cursor->var = tym_mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(v_cursor->var))); // FIXME hack
+      TymStr * copied = tym_encode_str(strdup(tym_decode_str(v_cursor->var))); // FIXME hack
       var_args_T[i] = tym_mk_term(TYM_VAR, copied);
 
       v_cursor->next = NULL;
@@ -450,7 +450,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
     free(var_args);
   }
 
-  TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(atom->pred_name))); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_decode_str(atom->pred_name))); // FIXME hack
   return tym_mk_fmla_atom(copied, atom->arity, var_args_T);
 }
 
@@ -632,9 +632,9 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 {
   struct TymFmla * result = NULL;
 
-  TymStrIdx * pred_name_copy = NULL;
+  TymStr * pred_name_copy = NULL;
   struct TymTerm ** predargs_copy = NULL;
-  TymStrIdx * copied; // FIXME used in hack
+  TymStr * copied; // FIXME used in hack
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -809,7 +809,7 @@ tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body)
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(TYM_VAR == cursor->term->kind);
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
     struct TymFmla * pre_result =
       tym_mk_fmla_quant(copied, result);
     result = pre_result;

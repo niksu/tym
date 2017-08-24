@@ -132,7 +132,7 @@ tym_mk_stmt_axiom(const struct TymFmla * axiom)
 }
 
 const struct TymStmt *
-tym_mk_stmt_pred(TymStrIdx * pred_name, struct TymTerms * params, struct TymFmla * body)
+tym_mk_stmt_pred(TymStr * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct TymStmt * result = malloc(sizeof *result);
   struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
@@ -149,7 +149,7 @@ tym_mk_stmt_pred(TymStrIdx * pred_name, struct TymTerms * params, struct TymFmla
 }
 
 struct TymStmt *
-tym_mk_stmt_const(TymStrIdx * const_name, struct TymUniverse * uni, TymStrIdx * ty)
+tym_mk_stmt_const(TymStr * const_name, struct TymUniverse * uni, TymStr * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -170,7 +170,7 @@ tym_mk_stmt_const(TymStrIdx * const_name, struct TymUniverse * uni, TymStrIdx * 
 }
 
 const struct TymStmt *
-tym_mk_stmt_const_def(TymStrIdx * const_name, struct TymUniverse * uni)
+tym_mk_stmt_const_def(TymStr * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -183,11 +183,11 @@ tym_mk_stmt_const_def(TymStrIdx * const_name, struct TymUniverse * uni)
       // Currently terms must have disjoint strings, since these are freed
       // up independently (without checking if a shared string has already been
       // freed, say).
-      TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(const_name))); // FIXME hack
+      TymStr * copied = tym_encode_str(strdup(tym_decode_str(const_name))); // FIXME hack
       const_name = copied;
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(uni->element[i]))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(uni->element[i]))); // FIXME hack
     struct TymTerm * arg2 = tym_mk_term(TYM_CONST, copied);
     copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
     struct TymFmla * fmla = tym_mk_fmla_atom_varargs(copied, 2, arg1, arg2);
@@ -503,7 +503,7 @@ struct TymTerm *
 tym_new_const_in_stmt(const struct TymStmt * stmt)
 {
   struct TymTerm * result = NULL;
-  TymStrIdx * copied;
+  TymStr * copied;
 
   switch (stmt->kind) {
   case TYM_STMT_AXIOM:
@@ -550,7 +550,7 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
     tym_strengthen_model(mdl,
         tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
   }
@@ -558,10 +558,10 @@ tym_statementise_universe(struct TymModel * mdl)
   assert(0 < mdl->universe->cardinality);
   struct TymTerm ** args = malloc(sizeof *args * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStrIdx * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
+    TymStr * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
     args[i] = tym_mk_term(TYM_CONST, copied);
   }
-  TymStrIdx * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack
+  TymStr * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack
   const struct TymFmla * distinctness_fmla =
     tym_mk_fmla_atom(copied, mdl->universe->cardinality, args);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(distinctness_fmla));
