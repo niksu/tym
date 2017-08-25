@@ -8,6 +8,7 @@
  */
 
 #include "stdlib.h"
+#include "string.h"
 
 #include "string_idx.h"
 
@@ -28,6 +29,18 @@ void
 tym_free_str (TymStr * s)
 {
   free(s);
+}
+
+size_t
+tym_len_str (TymStr * s)
+{
+  return strlen(s);
+}
+
+int
+tym_cmp_str (TymStr * s1, TymStr * s2)
+{
+  return strcmp(s1, s2);
 }
 #else
 struct TymStrIdxStruct {

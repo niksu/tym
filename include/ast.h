@@ -87,7 +87,6 @@ void tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteRe
 #define TYM_DBG_SYNTAX(...)
 #endif // TYM_DEBUG
 
-char tym_hash_str(const char * str);
 char tym_hash_term(const struct TymTerm *);
 char tym_hash_atom(const struct TymAtom *);
 char tym_hash_clause(const struct TymClause *);

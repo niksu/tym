@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "hash.h"
 #include "module_tests.h"
 #include "util.h"
 
@@ -502,22 +503,6 @@ tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult)
 }
 
 char
-tym_hash_str(const char * str)
-{
-  assert(NULL != str);
-
-  char result = 0;
-  const char * cursor;
-
-  cursor = str;
-  while ('\0' != *cursor) {
-    result ^= *(cursor++);
-  }
-
-  return result;
-}
-
-char
 tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
@@ -575,7 +560,7 @@ tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
     same_kind = true;
   }
 
-  if (0 == strcmp(tym_decode_str(t1->identifier), tym_decode_str(t2->identifier)))/*FIXME this should simply be pointer comparison*/ {
+  if (0 == tym_cmp_str(t1->identifier, t2->identifier)) {
     same_identifier = true;
   }
 

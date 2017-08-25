@@ -146,7 +146,7 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
     if (TYM_CONST == cursor->term->kind) {
       bool found = false;
       for (int i = 0; i < mdl->universe->cardinality; i++) {
-        if (0 == strcmp(tym_decode_str(cursor->term->identifier), tym_decode_str(mdl->universe->element[i]))/*FIXME this should simply be pointer comparison*/) {
+        if (0 == tym_cmp_str(cursor->term->identifier, mdl->universe->element[i])) {
           found = true;
           break;
         }

@@ -384,7 +384,7 @@ tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 TymStr *
 tym_mk_new_var(struct TymSymGen * vg)
 {
-  size_t i = strlen(tym_decode_str(vg->prefix));
+  size_t i = tym_len_str(vg->prefix);
   char * result = malloc(i + 1 + TymMaxVarWidth);
   strcpy(result, tym_decode_str(vg->prefix));
   snprintf(result + i, TymMaxVarWidth, "%lu", vg->index);

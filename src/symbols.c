@@ -7,6 +7,7 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
+#include "hash.h"
 #include "symbols.h"
 
 struct TymTermDatabase *
@@ -124,7 +125,7 @@ tym_eq_pred(struct TymPredicate p1, struct TymPredicate p2, enum TymEqPredError 
     return true;
   }
 
-  if (0 != strcmp(tym_decode_str(p1.predicate), tym_decode_str(p2.predicate)))/*FIXME this should simply be pointer comparison*/ {
+  if (0 != tym_cmp_str(p1.predicate, p2.predicate)) {
     *result = false;
     return true;
   } else {
