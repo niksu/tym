@@ -54,7 +54,7 @@ tym_translate_valuation(struct TymValuation * const v)
   struct TymFmlas * result = NULL;
   struct TymValuation * cursor = v;
   while (NULL != cursor) {
-    result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)/*FIXME hack*/), 2,
+    result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
           tym_mk_term(TYM_VAR, TYM_STR_DUPLICATE(cursor->var)),
           tym_copy_term(cursor->val)), result);
     cursor = cursor->next;
@@ -384,8 +384,8 @@ tym_order_statements(const struct TymStmts * stmts)
   const struct TymStmts * result = NULL;
 
   struct TymTerms * declared = NULL;
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, tym_encode_str(strdup(tym_eqK))), declared);
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, tym_encode_str(strdup(tym_distinctK))), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_eqK)), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_distinctK)), declared);
 
   bool cursor_is_waiting = false;
 

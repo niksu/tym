@@ -581,16 +581,16 @@ tym_test_clause(void) {
   printf("***test_clause***\n");
   struct TymTerm * t = malloc(sizeof *t);
   *t = (struct TymTerm){.kind = TYM_CONST,
-    .identifier = tym_encode_str(strdup("ok"))};
+    .identifier = TYM_CSTR_DUPLICATE("ok")};
 
   struct TymAtom * at = malloc(sizeof *at);
-  at->predicate = tym_encode_str(strdup("world"));
+  at->predicate = TYM_CSTR_DUPLICATE("world");
   at->arity = 1;
   at->args = malloc(sizeof *at->args * 1);
   at->args[0] = t;
 
   struct TymAtom * hd = malloc(sizeof *hd);
-  hd->predicate = tym_encode_str(strdup("hello"));
+  hd->predicate = TYM_CSTR_DUPLICATE("hello");
   hd->arity = 0;
   hd->args = NULL;
 

@@ -699,14 +699,14 @@ tym_test_formula(void)
 {
   printf("***test_formula***\n");
   struct TymTerm ** args = malloc(sizeof *args * 2);
-  args[0] = tym_mk_term(TYM_CONST, tym_encode_str(strdup("arg0")));
-  args[1] = tym_mk_term(TYM_CONST, tym_encode_str(strdup("arg1")));
+  args[0] = tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("arg0"));
+  args[1] = tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("arg1"));
 
   for (int i = 0; i < 2; i++) {
     printf("  :%s\n", tym_decode_str(args[i]->identifier));
   }
 
-  struct TymFmla * test_atom = tym_mk_fmla_atom(tym_encode_str(strdup("atom")), 2, args);
+  struct TymFmla * test_atom = tym_mk_fmla_atom(TYM_CSTR_DUPLICATE("atom"), 2, args);
 
   for (int i = 0; i < 2; i++) {
     printf("  ;%s\n", tym_decode_str(test_atom->param.atom->predargs[i]->identifier));
@@ -715,7 +715,8 @@ tym_test_formula(void)
   struct TymFmla * test_not = tym_mk_fmla_not(tym_copy_fmla(test_atom));
   struct TymFmla * test_and = tym_mk_fmla_and(tym_copy_fmla(test_not), tym_copy_fmla(test_atom));
   struct TymFmla * test_or = tym_mk_fmla_or(tym_copy_fmla(test_not), tym_copy_fmla(test_and));
-  struct TymFmla * test_quant = tym_mk_fmla_quant(tym_encode_str(strdup("x")), tym_copy_fmla(test_or));
+  struct TymFmla * test_quant = tym_mk_fmla_quant(TYM_CSTR_DUPLICATE("x"),
+      tym_copy_fmla(test_or));
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(test_quant, outbuf);
@@ -736,10 +737,10 @@ tym_test_formula(void)
   struct TymTerm * c2 = tym_mk_const(tym_encode_str("ta2"));
   struct TymTerm * c3 = tym_mk_const(tym_encode_str("ta3"));
   struct TymTerm * c4 = tym_mk_const(tym_encode_str("ta4"));
-  test_atom = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred1")), 4, c1, c2, c3, c4);
-  const struct TymFmla * test_atom2 = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred2")),
+  test_atom = tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE("testpred1"), 4, c1, c2, c3, c4);
+  const struct TymFmla * test_atom2 = tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE("testpred2"),
       4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
-  const struct TymFmla * test_atom3 = tym_mk_fmla_atom_varargs(tym_encode_str(strdup("testpred3")),
+  const struct TymFmla * test_atom3 = tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE("testpred3"),
       4, tym_copy_term(c1), tym_copy_term(c2), tym_copy_term(c3), tym_copy_term(c4));
   struct TymFmlas * test_fmlas = tym_mk_fmlas(3, test_atom, test_atom2, test_atom3);
   struct TymFmlas * test_fmlas2 = tym_copy_fmlas(test_fmlas);

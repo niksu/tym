@@ -137,7 +137,10 @@ tym_mk_stmt_pred(TymStr * pred_name, struct TymTerms * params, struct TymFmla * 
       {.const_name = pred_name,
        .params = params,
        .body = body,
-       .ty = tym_encode_str(tym_bool_ty)/*FIXME hack*/};
+       // NOTE no need to duplicate tym_bool_ty since statement predicates all
+       //      are typed bool, so this type need never be cleaned up for
+       //      individual statements.
+       .ty = tym_encode_str(tym_bool_ty)};
 
   result->kind = TYM_STMT_CONST_DEF;
   result->param.const_def = sub_result;
@@ -184,8 +187,8 @@ tym_mk_stmt_const_def(TymStr * const_name, struct TymUniverse * uni)
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
     struct TymTerm * arg2 =
       tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(uni->element[i]));
-    TymStr * copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
-    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(copied, 2, arg1, arg2);
+    struct TymFmla * fmla = tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK),
+        2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
 
@@ -455,8 +458,8 @@ void
 tym_test_statement(void)
 {
   printf("***test_statement***\n");
-  struct TymTerm * aT = tym_mk_term(TYM_CONST, tym_encode_str(strdup("a")));
-  struct TymTerm * bT = tym_mk_term(TYM_CONST, tym_encode_str(strdup("b")));
+  struct TymTerm * aT = tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("a"));
+  struct TymTerm * bT = tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("b"));
   struct TymTerms * terms = tym_mk_term_cell(aT, NULL);
   terms = tym_mk_term_cell(bT, terms);
 
@@ -464,15 +467,19 @@ tym_test_statement(void)
   tym_free_terms(terms);
 
   const struct TymStmt * s1S =
-    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)), 2, tym_mk_const(tym_encode_str("a")), tym_mk_const(tym_encode_str("a"))));
-  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, tym_encode_str(strdup("X"))), NULL);
-  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, tym_encode_str(strdup("Y"))), terms);
+    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2, tym_mk_const(tym_encode_str("a")), tym_mk_const(tym_encode_str("a"))));
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("X")), NULL);
+  terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("Y")), terms);
   struct TymFmla * fmla =
-    tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)), 2, tym_mk_var(tym_encode_str("X")), tym_mk_var(tym_encode_str("Y")));
-  const struct TymStmt * s2S = tym_mk_stmt_pred(tym_encode_str(strdup("some_predicate")), terms,
+    tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
+        tym_mk_var(tym_encode_str("X")), tym_mk_var(tym_encode_str("Y")));
+  const struct TymStmt * s2S = tym_mk_stmt_pred(TYM_CSTR_DUPLICATE("some_predicate"),
+      terms,
       tym_mk_fmla_not(fmla));
-  struct TymStmt * s3AS = tym_mk_stmt_const(tym_encode_str(strdup("x")), mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
-  const struct TymStmt * s3BS = tym_mk_stmt_const_def(tym_encode_str(strdup("x")), mdl->universe);
+  struct TymStmt * s3AS = tym_mk_stmt_const(TYM_CSTR_DUPLICATE("x"),
+      mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
+  const struct TymStmt * s3BS = tym_mk_stmt_const_def(TYM_CSTR_DUPLICATE("x"),
+      mdl->universe);
 
   tym_strengthen_model(mdl, s1S);
   tym_strengthen_model(mdl, s2S);
@@ -553,7 +560,7 @@ tym_statementise_universe(struct TymModel * mdl)
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(mdl->universe->element[i]));
   }
-  TymStr * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack
+  TymStr * copied = TYM_CSTR_DUPLICATE(tym_distinctK);
   const struct TymFmla * distinctness_fmla =
     tym_mk_fmla_atom(copied, mdl->universe->cardinality, args);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(distinctness_fmla));

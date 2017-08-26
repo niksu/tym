@@ -14,13 +14,18 @@
 
 #if 1
 typedef char TymStr;
-#else
-struct TymStrIdxStruct;
-typedef struct TymStrIdxStruct TymStr;
-#endif
 
 #define TYM_STR_DUPLICATE(s) \
   tym_encode_str(strdup(tym_decode_str(s)))
+#define TYM_CSTR_DUPLICATE(s) \
+  tym_encode_str(strdup(s))
+#else
+struct TymStrIdxStruct;
+typedef struct TymStrIdxStruct TymStr;
+#define TYM_STR_DUPLICATE(s) s
+#define TYM_CSTR_DUPLICATE(s) \
+  tym_encode_str(s)
+#endif
 
 char * tym_decode_str (TymStr *);
 TymStr * tym_encode_str (char *);
