@@ -375,8 +375,7 @@ struct TymSymGen *
 tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 {
   struct TymSymGen * result = malloc(sizeof *result);
-  TymStr * copied = TYM_STR_DUPLICATE(cp_orig->prefix);
-  result->prefix = copied;
+  result->prefix = TYM_STR_DUPLICATE(cp_orig->prefix);
   result->index = cp_orig->index;
   return result;
 }
@@ -441,8 +440,8 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
       v_cursor->var = tym_mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      TymStr * copied = TYM_STR_DUPLICATE(v_cursor->var);
-      var_args_T[i] = tym_mk_term(TYM_VAR, copied);
+      var_args_T[i] =
+        tym_mk_term(TYM_VAR, TYM_STR_DUPLICATE(v_cursor->var));
 
       v_cursor->next = NULL;
     }
@@ -450,8 +449,8 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
     free(var_args);
   }
 
-  TymStr * copied = TYM_STR_DUPLICATE(atom->pred_name);
-  return tym_mk_fmla_atom(copied, atom->arity, var_args_T);
+  return tym_mk_fmla_atom(TYM_STR_DUPLICATE(atom->pred_name),
+      atom->arity, var_args_T);
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
@@ -634,7 +633,6 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 
   TymStr * pred_name_copy = NULL;
   struct TymTerm ** predargs_copy = NULL;
-  TymStr * copied; // FIXME used in hack
 
   switch (fmla->kind) {
   case FMLA_CONST:
@@ -683,8 +681,8 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_EX:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    copied = TYM_STR_DUPLICATE(fmla->param.quant->bv);
-    result = (struct TymFmla *)tym_mk_fmla_quant(copied,
+    result =
+      (struct TymFmla *)tym_mk_fmla_quant(TYM_STR_DUPLICATE(fmla->param.quant->bv),
         tym_copy_fmla(fmla->param.quant->body));
 #pragma GCC diagnostic pop
     break;
@@ -808,9 +806,8 @@ tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body)
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(TYM_VAR == cursor->term->kind);
-    TymStr * copied = TYM_STR_DUPLICATE(cursor->term->identifier);
     struct TymFmla * pre_result =
-      tym_mk_fmla_quant(copied, result);
+      tym_mk_fmla_quant(TYM_STR_DUPLICATE(cursor->term->identifier), result);
     result = pre_result;
 
     cursor = cursor->next;

@@ -179,13 +179,12 @@ tym_mk_stmt_const_def(TymStr * const_name, struct TymUniverse * uni)
       // Currently terms must have disjoint strings, since these are freed
       // up independently (without checking if a shared string has already been
       // freed, say).
-      TymStr * copied = TYM_STR_DUPLICATE(const_name);
-      const_name = copied;
+      const_name = TYM_STR_DUPLICATE(const_name);
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
-    TymStr * copied = TYM_STR_DUPLICATE(uni->element[i]);
-    struct TymTerm * arg2 = tym_mk_term(TYM_CONST, copied);
-    copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
+    struct TymTerm * arg2 =
+      tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(uni->element[i]));
+    TymStr * copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
     struct TymFmla * fmla = tym_mk_fmla_atom_varargs(copied, 2, arg1, arg2);
     fmlas = tym_mk_fmla_cell(fmla, fmlas);
   }
@@ -499,15 +498,13 @@ struct TymTerm *
 tym_new_const_in_stmt(const struct TymStmt * stmt)
 {
   struct TymTerm * result = NULL;
-  TymStr * copied;
 
   switch (stmt->kind) {
   case TYM_STMT_AXIOM:
     result = NULL;
     break;
   case TYM_STMT_CONST_DEF:
-    copied = TYM_STR_DUPLICATE(stmt->param.const_def->const_name);
-    result = tym_mk_term(TYM_CONST, copied);
+    result = tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(stmt->param.const_def->const_name));
     break;
   default:
     assert(false);
@@ -546,16 +543,15 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStr * copied = TYM_STR_DUPLICATE(mdl->universe->element[i]);
     tym_strengthen_model(mdl,
-        tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
+        tym_mk_stmt_const(TYM_STR_DUPLICATE(mdl->universe->element[i]),
+          mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
   }
 
   assert(0 < mdl->universe->cardinality);
   struct TymTerm ** args = malloc(sizeof *args * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStr * copied = TYM_STR_DUPLICATE(mdl->universe->element[i]);
-    args[i] = tym_mk_term(TYM_CONST, copied);
+    args[i] = tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(mdl->universe->element[i]));
   }
   TymStr * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack
   const struct TymFmla * distinctness_fmla =

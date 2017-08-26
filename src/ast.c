@@ -239,16 +239,16 @@ struct TymTerm *
 tym_mk_const(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStr * copied = TYM_STR_DUPLICATE(cp_identifier);
-  return tym_mk_term(TYM_CONST, copied);
+  return tym_mk_term(TYM_CONST,
+      TYM_STR_DUPLICATE(cp_identifier));
 }
 
 struct TymTerm *
 tym_mk_var(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStr * copied = TYM_STR_DUPLICATE(cp_identifier);
-  return tym_mk_term(TYM_VAR, copied);
+  return tym_mk_term(TYM_VAR,
+      TYM_STR_DUPLICATE(cp_identifier));
 }
 
 struct TymTerm *
@@ -617,8 +617,8 @@ struct TymTerm *
 tym_copy_term(const struct TymTerm * const cp_term)
 {
   assert(NULL != cp_term);
-  TymStr * copied = TYM_STR_DUPLICATE(cp_term->identifier);
-  return tym_mk_term(cp_term->kind, copied);
+  return tym_mk_term(cp_term->kind,
+      TYM_STR_DUPLICATE(cp_term->identifier));
 }
 
 // In practice, simply checks that ss is a subset of ts.
@@ -718,8 +718,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
   struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
-  TymStr * copied = TYM_STR_DUPLICATE(cp_atom->predicate);
-  at->predicate = copied;
+  at->predicate = TYM_STR_DUPLICATE(cp_atom->predicate);
   at->arity = cp_atom->arity;
   at->args = NULL;
 

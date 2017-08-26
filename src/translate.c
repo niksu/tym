@@ -20,8 +20,7 @@ tym_translate_atom(const struct TymAtom * at)
       args[i] = tym_copy_term(at->args[i]);
     }
   }
-  TymStr * copied = TYM_STR_DUPLICATE(at->predicate);
-  return tym_mk_fmla_atom(copied, at->arity, args);
+  return tym_mk_fmla_atom(TYM_STR_DUPLICATE(at->predicate), at->arity, args);
 }
 
 struct TymFmla *
@@ -55,9 +54,8 @@ tym_translate_valuation(struct TymValuation * const v)
   struct TymFmlas * result = NULL;
   struct TymValuation * cursor = v;
   while (NULL != cursor) {
-    TymStr * copied = TYM_STR_DUPLICATE(cursor->var);
     result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(tym_encode_str(strdup(tym_eqK)/*FIXME hack*/), 2,
-          tym_mk_term(TYM_VAR, copied),
+          tym_mk_term(TYM_VAR, TYM_STR_DUPLICATE(cursor->var)),
           tym_copy_term(cursor->val)), result);
     cursor = cursor->next;
   }
@@ -75,8 +73,9 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
         TymStr * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        TymStr * copied = TYM_STR_DUPLICATE(placeholder);
-        struct TymStmt * stmt = tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
+        struct TymStmt * stmt =
+          tym_mk_stmt_const(TYM_STR_DUPLICATE(placeholder),
+              mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
         tym_strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
@@ -226,9 +225,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      TymStr * copied = TYM_STR_DUPLICATE(preds_cursor->predicate->predicate);
       const struct TymFmla * atom =
-        tym_mk_fmla_atom(copied,
+        tym_mk_fmla_atom(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
 #pragma GCC diagnostic pop
 
@@ -241,9 +239,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      copied = TYM_STR_DUPLICATE(preds_cursor->predicate->predicate);
       tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(copied,
+          tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
             tym_mk_fmla_const(false)));
 #pragma GCC diagnostic pop
@@ -271,10 +268,10 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
           }
         }
 
-        TymStr * copied = TYM_STR_DUPLICATE(head_atom->predicate);
         // Abstract the atom's parameters.
         const struct TymFmla * head_fmla =
-          tym_mk_fmla_atom(copied, head_atom->arity, args);
+          tym_mk_fmla_atom(TYM_STR_DUPLICATE(head_atom->predicate),
+              head_atom->arity, args);
 
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
@@ -351,9 +348,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #endif
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      TymStr * copied = TYM_STR_DUPLICATE(head->pred_name);
       tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(copied,
+          tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
             tym_arguments_of_atom(head),
             fmla));
       tym_free_fmla(abs_head_fmla);

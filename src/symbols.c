@@ -166,8 +166,8 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     } else {
       bool exists = false;
 
-      TymStr * copied = TYM_STR_DUPLICATE(atom->predicate);
-      struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
+      struct TymPredicate * pred =
+        tym_mk_pred(TYM_STR_DUPLICATE(atom->predicate), atom->arity);
 
       struct TymPredicates * cursor = adb->atom_database[(int)h];
 
@@ -205,8 +205,8 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
   } else {
     char h = tym_hash_str(atom->predicate);
 
-    TymStr * copied = TYM_STR_DUPLICATE(atom->predicate);
-    struct TymPredicate * pred = tym_mk_pred(copied, atom->arity);
+    struct TymPredicate * pred =
+      tym_mk_pred(TYM_STR_DUPLICATE(atom->predicate), atom->arity);
 
     if (NULL == adb->atom_database[(int)h]) {
       adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
