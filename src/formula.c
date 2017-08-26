@@ -375,7 +375,7 @@ struct TymSymGen *
 tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
 {
   struct TymSymGen * result = malloc(sizeof *result);
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_orig->prefix))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(cp_orig->prefix);
   result->prefix = copied;
   result->index = cp_orig->index;
   return result;
@@ -441,7 +441,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
       v_cursor->var = tym_mk_new_var(vg);
       var_args[i] = v_cursor->var;
-      TymStr * copied = tym_encode_str(strdup(tym_decode_str(v_cursor->var))); // FIXME hack
+      TymStr * copied = TYM_STR_DUPLICATE(v_cursor->var);
       var_args_T[i] = tym_mk_term(TYM_VAR, copied);
 
       v_cursor->next = NULL;
@@ -450,7 +450,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
     free(var_args);
   }
 
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(atom->pred_name))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(atom->pred_name);
   return tym_mk_fmla_atom(copied, atom->arity, var_args_T);
 }
 
@@ -646,7 +646,7 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_ATOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    pred_name_copy = tym_encode_str(strdup(tym_decode_str(fmla->param.atom->pred_name))); // FIXME hack
+    pred_name_copy = TYM_STR_DUPLICATE(fmla->param.atom->pred_name);
 
     predargs_copy = NULL;
 
@@ -683,7 +683,7 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_EX:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    copied = tym_encode_str(strdup(tym_decode_str(fmla->param.quant->bv))); // FIXME hack
+    copied = TYM_STR_DUPLICATE(fmla->param.quant->bv);
     result = (struct TymFmla *)tym_mk_fmla_quant(copied,
         tym_copy_fmla(fmla->param.quant->body));
 #pragma GCC diagnostic pop
@@ -808,7 +808,7 @@ tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body)
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(TYM_VAR == cursor->term->kind);
-    TymStr * copied = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
+    TymStr * copied = TYM_STR_DUPLICATE(cursor->term->identifier);
     struct TymFmla * pre_result =
       tym_mk_fmla_quant(copied, result);
     result = pre_result;

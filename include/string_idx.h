@@ -19,6 +19,9 @@ struct TymStrIdxStruct;
 typedef struct TymStrIdxStruct TymStr;
 #endif
 
+#define TYM_STR_DUPLICATE(s) \
+  tym_encode_str(strdup(tym_decode_str(s)))
+
 char * tym_decode_str (TymStr *);
 TymStr * tym_encode_str (char *);
 void tym_free_str (TymStr *);

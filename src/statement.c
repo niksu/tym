@@ -41,7 +41,7 @@ tym_mk_universe(struct TymTerms * terms)
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-    result->element[i] = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
+    result->element[i] = TYM_STR_DUPLICATE(cursor->term->identifier);
     cursor = cursor->next;
   }
 
@@ -179,11 +179,11 @@ tym_mk_stmt_const_def(TymStr * const_name, struct TymUniverse * uni)
       // Currently terms must have disjoint strings, since these are freed
       // up independently (without checking if a shared string has already been
       // freed, say).
-      TymStr * copied = tym_encode_str(strdup(tym_decode_str(const_name))); // FIXME hack
+      TymStr * copied = TYM_STR_DUPLICATE(const_name);
       const_name = copied;
     }
     struct TymTerm * arg1 = tym_mk_term(TYM_CONST, const_name);
-    TymStr * copied = tym_encode_str(strdup(tym_decode_str(uni->element[i]))); // FIXME hack
+    TymStr * copied = TYM_STR_DUPLICATE(uni->element[i]);
     struct TymTerm * arg2 = tym_mk_term(TYM_CONST, copied);
     copied = tym_encode_str(strdup(tym_eqK)); // FIXME hack
     struct TymFmla * fmla = tym_mk_fmla_atom_varargs(copied, 2, arg1, arg2);
@@ -506,7 +506,7 @@ tym_new_const_in_stmt(const struct TymStmt * stmt)
     result = NULL;
     break;
   case TYM_STMT_CONST_DEF:
-    copied = tym_encode_str(strdup(tym_decode_str(stmt->param.const_def->const_name))); // FIXME hack
+    copied = TYM_STR_DUPLICATE(stmt->param.const_def->const_name);
     result = tym_mk_term(TYM_CONST, copied);
     break;
   default:
@@ -546,7 +546,7 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStr * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
+    TymStr * copied = TYM_STR_DUPLICATE(mdl->universe->element[i]);
     tym_strengthen_model(mdl,
         tym_mk_stmt_const(copied, mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
   }
@@ -554,7 +554,7 @@ tym_statementise_universe(struct TymModel * mdl)
   assert(0 < mdl->universe->cardinality);
   struct TymTerm ** args = malloc(sizeof *args * mdl->universe->cardinality);
   for (int i = 0; i < mdl->universe->cardinality; i++) {
-    TymStr * copied = tym_encode_str(strdup(tym_decode_str(mdl->universe->element[i]))); // FIXME hack
+    TymStr * copied = TYM_STR_DUPLICATE(mdl->universe->element[i]);
     args[i] = tym_mk_term(TYM_CONST, copied);
   }
   TymStr * copied = tym_encode_str(strdup(tym_distinctK)); // FIXME hack

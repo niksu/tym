@@ -239,7 +239,7 @@ struct TymTerm *
 tym_mk_const(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(cp_identifier);
   return tym_mk_term(TYM_CONST, copied);
 }
 
@@ -247,7 +247,7 @@ struct TymTerm *
 tym_mk_var(TymStr * cp_identifier)
 {
   assert(NULL != cp_identifier);
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_identifier))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(cp_identifier);
   return tym_mk_term(TYM_VAR, copied);
 }
 
@@ -617,7 +617,7 @@ struct TymTerm *
 tym_copy_term(const struct TymTerm * const cp_term)
 {
   assert(NULL != cp_term);
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_term->identifier))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(cp_term->identifier);
   return tym_mk_term(cp_term->kind, copied);
 }
 
@@ -718,7 +718,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
   struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
-  TymStr * copied = tym_encode_str(strdup(tym_decode_str(cp_atom->predicate))); // FIXME hack
+  TymStr * copied = TYM_STR_DUPLICATE(cp_atom->predicate);
   at->predicate = copied;
   at->arity = cp_atom->arity;
   at->args = NULL;
