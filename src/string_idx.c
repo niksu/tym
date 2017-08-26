@@ -32,13 +32,13 @@ tym_free_str (TymStr * s)
 }
 
 size_t
-tym_len_str (TymStr * s)
+tym_len_str (const TymStr * s)
 {
   return strlen(s);
 }
 
 int
-tym_cmp_str (TymStr * s1, TymStr * s2)
+tym_cmp_str (const TymStr * s1, const TymStr * s2)
 {
   return strcmp(s1, s2);
 }

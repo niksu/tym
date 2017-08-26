@@ -10,6 +10,8 @@
 #ifndef __TYM_STRING_IDX_H__
 #define __TYM_STRING_IDX_H__
 
+#include <stdlib.h>
+
 #if 1
 typedef char TymStr;
 #else
@@ -20,7 +22,7 @@ typedef struct TymStrIdxStruct TymStr;
 char * tym_decode_str (TymStr *);
 TymStr * tym_encode_str (char *);
 void tym_free_str (TymStr *);
-size_t tym_len_str (TymStr *);
-int tym_cmp_str (TymStr *, TymStr *);
+size_t tym_len_str (const TymStr *);
+int tym_cmp_str (const TymStr *, const TymStr *);
 
 #endif // __TYM_STRING_IDX_H__

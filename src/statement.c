@@ -41,10 +41,6 @@ tym_mk_universe(struct TymTerms * terms)
 
   cursor = terms;
   for (int i = 0; i < result->cardinality; i++) {
-// FIXME check
-//    result->element[i] = malloc(sizeof result->element[i] *
-//        (strlen(tym_decode_str((cursor->term->identifier)) + 1));
-//    strcpy(result->element[i], cursor->term->identifier);
     result->element[i] = tym_encode_str(strdup(tym_decode_str(cursor->term->identifier))); // FIXME hack
     cursor = cursor->next;
   }

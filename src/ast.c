@@ -506,7 +506,7 @@ char
 tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
-  char result = tym_hash_str(tym_decode_str(term->identifier));
+  char result = tym_hash_str(term->identifier);
   result ^= (char)term->kind;
   return result;
 }
@@ -516,7 +516,7 @@ tym_hash_atom(const struct TymAtom * atom)
 {
   assert(NULL != atom);
 
-  char result = tym_hash_str(tym_decode_str(atom->predicate));
+  char result = tym_hash_str(atom->predicate);
 
   for (int i = 0; i < atom->arity; i++) {
     result = (char)(((result * tym_hash_term(atom->args[i])) % 256) - 128);

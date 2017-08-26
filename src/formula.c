@@ -647,7 +647,6 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
     pred_name_copy = tym_encode_str(strdup(tym_decode_str(fmla->param.atom->pred_name))); // FIXME hack
-    assert(NULL != pred_name_copy); // FIXME no longer works as intended
 
     predargs_copy = NULL;
 

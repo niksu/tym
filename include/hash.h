@@ -10,6 +10,8 @@
 #ifndef __TYM_HASH_H__
 #define __TYM_HASH_H__
 
-char tym_hash_str(const char * str);
+#include "string_idx.h"
+
+char tym_hash_str(TymStr * str);
 
 #endif // __TYM_HASH_H__

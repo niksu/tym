@@ -13,8 +13,10 @@
 #include "hash.h"
 
 char
-tym_hash_str(const char * str)
+tym_hash_str(TymStr * s)
 {
+  assert(NULL != s);
+  const char * str = tym_decode_str(s);
   assert(NULL != str);
 
   char result = 0;
