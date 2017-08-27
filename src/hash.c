@@ -8,9 +8,16 @@
  */
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "hash.h"
+
+#define FNV_OFFSET_BASIS 0xcbf29ce484222325
+#define FNV_PRIME 0x100000001b3
+
+// NOTE this implements then FNV hash:
+// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 
 TYM_HASH_VTYPE
 tym_hash_str(TymStr * s)
@@ -19,13 +26,14 @@ tym_hash_str(TymStr * s)
   const char * str = tym_decode_str(s);
   assert(NULL != str);
 
-  TYM_HASH_VTYPE result = 0;
-  const char * cursor;
+  uint64_t result = FNV_OFFSET_BASIS;
+  const char * cursor = str;
 
-  cursor = str;
   while ('\0' != *cursor) {
-    result ^= *(cursor++);
+    result *= FNV_PRIME;
+    result ^= (uint64_t)(*cursor);
+    cursor++;
   }
 
-  return result;
+  return (TYM_HASH_VTYPE)result;
 }
