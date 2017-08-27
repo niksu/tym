@@ -17,10 +17,10 @@
 #include <string.h>
 
 #include "ast.h"
+#include "hashtable.h"
 #include "string_idx.h"
 #include "util.h"
 
-#define TYM_HASH_RANGE 256
 // NOTE value of TERM_DATABASE_SIZE must be >= the range of the hash function for terms.
 #define TYM_TERM_DATABASE_SIZE TYM_HASH_RANGE
 
