@@ -12,7 +12,7 @@
 
 #include "string_idx.h"
 
-#if 0
+#if STRING_TYPE == 0
 char *
 tym_decode_str (TymStr * s)
 {
@@ -42,7 +42,7 @@ tym_cmp_str (const TymStr * s1, const TymStr * s2)
 {
   return strcmp(s1, s2);
 }
-#else
+#elif STRING_TYPE == 1
 struct TymStrIdxStruct {
   char * content;
 };
@@ -79,4 +79,6 @@ tym_cmp_str (const struct TymStrIdxStruct * s1, const struct TymStrIdxStruct * s
 {
   return strcmp(s1->content, s2->content);
 }
+#else
+  #error "Unknown STRING_TYPE"
 #endif
