@@ -497,7 +497,7 @@ tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
 void
 tym_free_fmla_atom(struct TymFmlaAtom * at)
 {
-  free(at->pred_name);
+  tym_free_str(at->pred_name);
 
   for (int i = 0; i < at->arity; i++) {
     tym_free_term(at->predargs[i]);
@@ -519,7 +519,7 @@ void
 tym_free_fmla_quant(struct TymFmlaQuant * q)
 {
   assert (NULL != q->bv);
-  free((void *)q->bv);
+  tym_free_str(q->bv);
 
   assert (NULL != q->body);
   tym_free_fmla(q->body);
@@ -587,7 +587,7 @@ void
 tym_free_sym_gen(struct TymSymGen * vg)
 {
   assert(NULL != vg->prefix);
-  free((void *)vg->prefix);
+  tym_free_str(vg->prefix);
 
   free(vg);
 }
@@ -599,7 +599,7 @@ tym_free_valuation(struct TymValuation * v)
   assert(NULL != v);
 
   assert(NULL != v->var);
-  free(v->var);
+  tym_free_str(v->var);
 
   assert(NULL != v->val);
   tym_free_term(v->val);

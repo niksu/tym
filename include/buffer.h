@@ -39,7 +39,7 @@ TYM_MAYBE_ERROR__ERRVAL_OF_DECL(TymBufferWriteResult, size_t, enum TymBufferErro
 TYM_MAYBE_ERROR__MKVAL_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
 TYM_MAYBE_ERROR__MKERRVAL_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors)
 
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_buf_strcpy(struct TymBufferInfo * dst, TymStr * src);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_buf_strcpy(struct TymBufferInfo * dst, char * src);
 
 void tym_buff_error_msg(void * x);
 TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_error_msg)

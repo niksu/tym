@@ -12,7 +12,7 @@
 
 #include "string_idx.h"
 
-#if 1
+#if 0
 char *
 tym_decode_str (TymStr * s)
 {
@@ -66,5 +66,17 @@ tym_free_str (struct TymStrIdxStruct * s)
 {
   free(s->content);
   free(s);
+}
+
+size_t
+tym_len_str (const struct TymStrIdxStruct * s)
+{
+  return strlen(s->content);
+}
+
+int
+tym_cmp_str (const struct TymStrIdxStruct * s1, const struct TymStrIdxStruct * s2)
+{
+  return strcmp(s1->content, s2->content);
 }
 #endif

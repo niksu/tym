@@ -27,7 +27,7 @@ tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
   bool exists = false;
   char h = tym_hash_term(term);
 
-  TYM_DBG("Trying adding to Herbrand universe: %s\n", term->identifier);
+  TYM_DBG("Trying adding to Herbrand universe: %s\n", tym_decode_str(term->identifier));
 
   if (TYM_CONST != term->kind) {
     return false;
@@ -36,7 +36,7 @@ tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
   if (NULL == tdb->term_database[(int)h]) {
     tdb->term_database[(int)h] = tym_mk_term_cell(tym_copy_term(term), NULL);
     tdb->herbrand_universe = tym_mk_term_cell(tym_copy_term(term), tdb->herbrand_universe);
-    TYM_DBG("Added to Herbrand universe: %s\n", term->identifier);
+    TYM_DBG("Added to Herbrand universe: %s\n", tym_decode_str(term->identifier));
   } else {
     struct TymTerms * cursor = tdb->term_database[(int)h];
     do {
@@ -54,7 +54,7 @@ tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
     if (!exists) {
       cursor->next = tym_mk_term_cell(tym_copy_term(term), NULL);
       tdb->herbrand_universe = tym_mk_term_cell(tym_copy_term(term), tdb->herbrand_universe);
-      TYM_DBG("Added to Herbrand universe: %s\n", term->identifier);
+      TYM_DBG("Added to Herbrand universe: %s\n", tym_decode_str(term->identifier));
     }
   }
 
@@ -105,7 +105,7 @@ tym_mk_pred(TymStr * predicate, uint8_t arity)
 void
 tym_free_pred(struct TymPredicate * pred)
 {
-  free((void *)pred->predicate);
+  tym_free_str(pred->predicate);
   if (NULL != pred->bodies) {
     tym_free_clauses(pred->bodies);
   }
@@ -234,7 +234,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
     *result = pred;
     success = true;
 
-    TYM_DBG("Added atom: %s{hash=%u}\n", atom->predicate, h);
+    TYM_DBG("Added atom: %s{hash=%u}\n", tym_decode_str(atom->predicate), h);
 
     assert(NULL != adb->tdb);
     for (int i = 0; i < atom->arity; i++) {

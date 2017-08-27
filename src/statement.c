@@ -112,7 +112,7 @@ tym_free_universe(struct TymUniverse * uni)
 {
   if (uni->cardinality > 0) {
     for (int i = 0; i < uni->cardinality; i++) {
-      free(uni->element[i]);
+      tym_free_str(uni->element[i]);
     }
     free(uni->element);
   }
@@ -137,10 +137,7 @@ tym_mk_stmt_pred(TymStr * pred_name, struct TymTerms * params, struct TymFmla * 
       {.const_name = pred_name,
        .params = params,
        .body = body,
-       // NOTE no need to duplicate tym_bool_ty since statement predicates all
-       //      are typed bool, so this type need never be cleaned up for
-       //      individual statements.
-       .ty = tym_encode_str(tym_bool_ty)};
+       .ty = TYM_CSTR_DUPLICATE(tym_bool_ty)};
 
   result->kind = TYM_STMT_CONST_DEF;
   result->param.const_def = sub_result;
@@ -220,7 +217,8 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
   case TYM_STMT_CONST_DEF:
     // Check arity, and use define-fun or declare-const as appropriate.
 
-    if (NULL == stmt->param.const_def->params && tym_decode_str(stmt->param.const_def->ty) == TYM_UNIVERSE_TY/*FIXME hack*/) {
+    if (NULL == stmt->param.const_def->params &&
+        0 == strcmp(tym_decode_str(stmt->param.const_def->ty), TYM_UNIVERSE_TY)) {
       // We're dealing with a nullary constant.
       res = tym_buf_strcpy(dst, "(declare-const");
       assert(tym_is_ok_TymBufferWriteResult(res));
@@ -336,13 +334,14 @@ tym_free_stmt(const struct TymStmt * stmt)
     tym_free_fmla(stmt->param.axiom);
     break;
   case TYM_STMT_CONST_DEF:
-    free((void *)stmt->param.const_def->const_name);
+    tym_free_str(stmt->param.const_def->const_name);
     if (NULL != stmt->param.const_def->params) {
       tym_free_terms(stmt->param.const_def->params);
     }
     if (NULL != stmt->param.const_def->body) {
       tym_free_fmla(stmt->param.const_def->body);
     }
+    tym_free_str(stmt->param.const_def->ty);
     free(stmt->param.const_def);
     break;
   default:
@@ -477,7 +476,7 @@ tym_test_statement(void)
       terms,
       tym_mk_fmla_not(fmla));
   struct TymStmt * s3AS = tym_mk_stmt_const(TYM_CSTR_DUPLICATE("x"),
-      mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
+      mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY));
   const struct TymStmt * s3BS = tym_mk_stmt_const_def(TYM_CSTR_DUPLICATE("x"),
       mdl->universe);
 
@@ -552,7 +551,7 @@ tym_statementise_universe(struct TymModel * mdl)
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     tym_strengthen_model(mdl,
         tym_mk_stmt_const(TYM_STR_DUPLICATE(mdl->universe->element[i]),
-          mdl->universe, tym_encode_str(TYM_UNIVERSE_TY)));
+          mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY)));
   }
 
   assert(0 < mdl->universe->cardinality);

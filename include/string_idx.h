@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 
-#if 1
+#if 0
 typedef char TymStr;
 
 #define TYM_STR_DUPLICATE(s) \
@@ -22,9 +22,10 @@ typedef char TymStr;
 #else
 struct TymStrIdxStruct;
 typedef struct TymStrIdxStruct TymStr;
-#define TYM_STR_DUPLICATE(s) s
+#define TYM_STR_DUPLICATE(s) \
+  tym_encode_str(strdup(tym_decode_str(s)))
 #define TYM_CSTR_DUPLICATE(s) \
-  tym_encode_str(s)
+  tym_encode_str(strdup(s))
 #endif
 
 char * tym_decode_str (TymStr *);

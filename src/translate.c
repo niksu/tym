@@ -75,7 +75,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
 
         struct TymStmt * stmt =
           tym_mk_stmt_const(TYM_STR_DUPLICATE(placeholder),
-              mdl->universe, tym_encode_str(TYM_UNIVERSE_TY));
+              mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY));
         tym_strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);

@@ -366,7 +366,7 @@ tym_free_term(struct TymTerm * term)
 
   assert(NULL != term->identifier);
 
-  free((void *)term->identifier);
+  tym_free_str(term->identifier);
 
   free((void *)term);
 }
@@ -398,7 +398,7 @@ tym_free_atom(struct TymAtom * at)
   TYM_DBG_SYNTAX((void *)at, (tym_x_to_str_t)tym_atom_to_str);
   TYM_DBG("\n");
 
-  free(at->predicate);
+  tym_free_str(at->predicate);
   for (int i = 0; i < at->arity; i++) {
     tym_free_term(at->args[i]);
   }
