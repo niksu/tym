@@ -30,7 +30,7 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -59,7 +59,7 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_str(atom->predicate) + 127);
+  sprintf(local_buf, "{hash=%u}", tym_hash_str(atom->predicate) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -118,7 +118,7 @@ tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -199,7 +199,7 @@ tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * 
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -502,37 +502,37 @@ tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult)
   tym_free_buffer(outbuf);
 }
 
-char
+TYM_HASH_VTYPE
 tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
-  char result = tym_hash_str(term->identifier);
-  result ^= (char)term->kind;
+  TYM_HASH_VTYPE result = tym_hash_str(term->identifier);
+  result ^= (TYM_HASH_VTYPE)term->kind;
   return result;
 }
 
-char
+TYM_HASH_VTYPE
 tym_hash_atom(const struct TymAtom * atom)
 {
   assert(NULL != atom);
 
-  char result = tym_hash_str(atom->predicate);
+  TYM_HASH_VTYPE result = tym_hash_str(atom->predicate);
 
   for (int i = 0; i < atom->arity; i++) {
-    result = (char)(((result * tym_hash_term(atom->args[i])) % 256) - 128);
+    result = (TYM_HASH_VTYPE)(((result * tym_hash_term(atom->args[i])) % 256) - 128/*FIXME brittle*/);
   }
 
   return result;
 }
 
-char
+TYM_HASH_VTYPE
 tym_hash_clause(const struct TymClause * clause) {
   assert(NULL != clause);
 
-  char result = tym_hash_atom(clause->head);
+  TYM_HASH_VTYPE result = tym_hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
-    result ^= (char)(((i + tym_hash_atom(clause->body[i])) % 256) - 128);
+    result ^= (TYM_HASH_VTYPE)(((i + tym_hash_atom(clause->body[i])) % 256) - 128/*FIXME brittle*/);
   }
 
   return result;

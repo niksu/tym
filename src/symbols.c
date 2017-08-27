@@ -25,7 +25,7 @@ bool
 tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
 {
   bool exists = false;
-  char h = tym_hash_term(term);
+  uint8_t h = tym_hash_term(term);
 
   TYM_DBG("Trying adding to Herbrand universe: %s\n", tym_decode_str(term->identifier));
 
@@ -33,12 +33,12 @@ tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb)
     return false;
   }
 
-  if (NULL == tdb->term_database[(int)h]) {
-    tdb->term_database[(int)h] = tym_mk_term_cell(tym_copy_term(term), NULL);
+  if (NULL == tdb->term_database[h]) {
+    tdb->term_database[h] = tym_mk_term_cell(tym_copy_term(term), NULL);
     tdb->herbrand_universe = tym_mk_term_cell(tym_copy_term(term), tdb->herbrand_universe);
     TYM_DBG("Added to Herbrand universe: %s\n", tym_decode_str(term->identifier));
   } else {
-    struct TymTerms * cursor = tdb->term_database[(int)h];
+    struct TymTerms * cursor = tdb->term_database[h];
     do {
       bool result;
       enum TymEqTermError error_code;
@@ -158,9 +158,9 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     success = true;
     *record = NULL;
   } else {
-    char h = tym_hash_str(atom->predicate);
+    uint8_t h = tym_hash_str(atom->predicate);
 
-    if (NULL == adb->atom_database[(int)h]) {
+    if (NULL == adb->atom_database[h]) {
       success = true;
       *record = NULL;
     } else {
@@ -169,7 +169,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
       struct TymPredicate * pred =
         tym_mk_pred(TYM_STR_DUPLICATE(atom->predicate), atom->arity);
 
-      struct TymPredicates * cursor = adb->atom_database[(int)h];
+      struct TymPredicates * cursor = adb->atom_database[h];
 
       do {
         enum TymEqPredError eq_pred_error_code;
@@ -203,16 +203,16 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
     *error_code = TYM_NO_ATOM_DATABASE;
     success = false;
   } else {
-    char h = tym_hash_str(atom->predicate);
+    uint8_t h = tym_hash_str(atom->predicate);
 
     struct TymPredicate * pred =
       tym_mk_pred(TYM_STR_DUPLICATE(atom->predicate), atom->arity);
 
-    if (NULL == adb->atom_database[(int)h]) {
-      adb->atom_database[(int)h] = tym_mk_pred_cell(pred, NULL);
+    if (NULL == adb->atom_database[h]) {
+      adb->atom_database[h] = tym_mk_pred_cell(pred, NULL);
     } else {
       bool exists = false;
-      struct TymPredicates * cursor = adb->atom_database[(int)h];
+      struct TymPredicates * cursor = adb->atom_database[h];
       while (NULL != cursor) {
         enum TymEqPredError eq_pred_error_code;
         bool eq_pred_result;
@@ -227,7 +227,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
         cursor = cursor->next;
       }
       if (!exists) {
-        adb->atom_database[(int)h] = tym_mk_pred_cell(pred, adb->atom_database[(int)h]);
+        adb->atom_database[h] = tym_mk_pred_cell(pred, adb->atom_database[h]);
       }
     }
 

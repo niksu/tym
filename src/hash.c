@@ -12,14 +12,14 @@
 
 #include "hash.h"
 
-char
+TYM_HASH_VTYPE
 tym_hash_str(TymStr * s)
 {
   assert(NULL != s);
   const char * str = tym_decode_str(s);
   assert(NULL != str);
 
-  char result = 0;
+  TYM_HASH_VTYPE result = 0;
   const char * cursor;
 
   cursor = str;

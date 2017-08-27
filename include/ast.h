@@ -15,6 +15,7 @@
 #include <stdint.h>
 
 #include "buffer.h"
+#include "hash.h"
 #include "string_idx.h"
 #include "util.h"
 
@@ -87,9 +88,9 @@ void tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteRe
 #define TYM_DBG_SYNTAX(...)
 #endif // TYM_DEBUG
 
-char tym_hash_term(const struct TymTerm *);
-char tym_hash_atom(const struct TymAtom *);
-char tym_hash_clause(const struct TymClause *);
+TYM_HASH_VTYPE tym_hash_term(const struct TymTerm *);
+TYM_HASH_VTYPE tym_hash_atom(const struct TymAtom *);
+TYM_HASH_VTYPE tym_hash_clause(const struct TymClause *);
 
 enum TymEqTermError {TYM_NO_ERROR = 0, TYM_DIFF_KIND_SAME_IDENTIFIER};
 bool tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2, enum TymEqTermError * error_code, bool * result);

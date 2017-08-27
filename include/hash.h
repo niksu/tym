@@ -12,6 +12,8 @@
 
 #include "string_idx.h"
 
-char tym_hash_str(TymStr * str);
+#define TYM_HASH_VTYPE uint8_t
+
+TYM_HASH_VTYPE tym_hash_str(TymStr * str);
 
 #endif // __TYM_HASH_H__
