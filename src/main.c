@@ -109,18 +109,21 @@ main(int argc, char ** argv)
     TYM_VERBOSE("query = %s\n", Params.query);
   }
 
+  enum TymReturnCodes result = TYM_AOK;
+
   struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
   if (NULL == ParsedInputFileContents) {
-     return TYM_NO_INPUT;
+    result = TYM_NO_INPUT;
   }
 
-  struct TymProgram * ParsedQuery = tym_parse_query(Params);
+  if (TYM_AOK == result) {
+    struct TymProgram * ParsedQuery = tym_parse_query(Params);
 
-  enum TymReturnCodes result = TYM_AOK;
-  if (Params.test_parsing) {
-    print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
-  } else {
-    result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+    if (Params.test_parsing) {
+      print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
+    } else {
+      result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+    }
   }
 
   return result;
