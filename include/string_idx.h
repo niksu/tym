@@ -12,22 +12,22 @@
 
 #include <stdlib.h>
 
-// STRING_TYPE values:
+// TYM_STRING_TYPE values:
 // 0: C strings
 // 1: abstract type (of C strings)
-#ifndef STRING_TYPE
-  #define STRING_TYPE 0
+#ifndef TYM_STRING_TYPE
+  #define TYM_STRING_TYPE 0
 #endif
-// If the value of STRING_TYPE was given externally then it will be checked later.
+// If the value of TYM_STRING_TYPE was given externally then it will be checked later.
 
-#if STRING_TYPE == 0
+#if TYM_STRING_TYPE == 0
   typedef char TymStr;
 
   #define TYM_STR_DUPLICATE(s) \
     tym_encode_str(strdup(tym_decode_str(s)))
   #define TYM_CSTR_DUPLICATE(s) \
     tym_encode_str(strdup(s))
-#elif STRING_TYPE == 1
+#elif TYM_STRING_TYPE == 1
   struct TymStrIdxStruct;
   typedef struct TymStrIdxStruct TymStr;
   #define TYM_STR_DUPLICATE(s) \
@@ -35,7 +35,7 @@
   #define TYM_CSTR_DUPLICATE(s) \
     tym_encode_str(strdup(s))
 #else
-  #error "Unknown STRING_TYPE"
+  #error "Unknown TYM_STRING_TYPE"
 #endif
 
 char * tym_decode_str (TymStr *);
