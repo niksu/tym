@@ -105,6 +105,13 @@ main(int argc, char ** argv)
   }
 
   if (Params.verbosity > 0) {
+#ifdef TYM_DEBUG
+    TYM_VERBOSE("TYM_DEBUG = %d\n", TYM_DEBUG);
+#else
+    TYM_VERBOSE("TYM_DEBUG Undefined\n");
+#endif
+    TYM_VERBOSE("TYM_STRING_TYPE = %d\n", TYM_STRING_TYPE); // TYM_STRING_TYPE macro should always be defined.
+
     TYM_VERBOSE("input_fine = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("test_parsing = %d\n", Params.test_parsing);
