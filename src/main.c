@@ -36,7 +36,7 @@ show_usage(const char * const argv_0)
 int
 main(int argc, char ** argv)
 {
-#ifdef TESTING
+#ifdef TYM_TESTING
   tym_init_str();
   tym_test_clause();
   tym_test_formula();
@@ -111,6 +111,12 @@ main(int argc, char ** argv)
     TYM_VERBOSE("TYM_DEBUG Undefined\n");
 #endif
     TYM_VERBOSE("TYM_STRING_TYPE = %d\n", TYM_STRING_TYPE); // TYM_STRING_TYPE macro should always be defined.
+
+#ifdef TYM_TESTING
+    // If TYM_TESTING is defined then this code should not be reachable.
+    assert(TYM_TESTING != TYM_TESTING);
+#endif
+    TYM_VERBOSE("TYM_TESTING Undefined\n");
 
     TYM_VERBOSE("input_fine = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);

@@ -47,7 +47,7 @@ out/%.o: src/%.c $(HEADERS) parser
 
 test_modules:
 	make clean
-	CFLAGS="$(CFLAGS) -DTESTING" make $(TGT)
+	CFLAGS="$(CFLAGS) -DTYM_TESTING" make $(TGT)
 	./$(OUT_DIR)/$(TGT)
 
 test_regression:
