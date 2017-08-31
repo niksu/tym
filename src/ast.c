@@ -236,25 +236,10 @@ tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo
 }
 
 struct TymTerm *
-tym_mk_const(TymStr * cp_identifier)
-{
-  assert(NULL != cp_identifier);
-  return tym_mk_term(TYM_CONST,
-      TYM_STR_DUPLICATE(cp_identifier));
-}
-
-struct TymTerm *
-tym_mk_var(TymStr * cp_identifier)
-{
-  assert(NULL != cp_identifier);
-  return tym_mk_term(TYM_VAR,
-      TYM_STR_DUPLICATE(cp_identifier));
-}
-
-struct TymTerm *
 tym_mk_term(enum TymTermKind kind, TymStr * identifier)
 {
   assert(NULL != identifier);
+  assert(TYM_CONST == kind || TYM_VAR == kind || TYM_STR == kind);
 
   struct TymTerm * t = malloc(sizeof *t);
   assert(NULL != t);

@@ -59,8 +59,6 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_atom_to_str(const struct
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst);
 
-struct TymTerm * tym_mk_const(TymStr * cp_identifier);
-struct TymTerm * tym_mk_var(TymStr * cp_identifier);
 struct TymTerm * tym_mk_term(enum TymTermKind kind, TymStr * identifier);
 struct TymAtom * tym_mk_atom(TymStr * predicate, uint8_t arity, struct TymTerms * args);
 struct TymClause * tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body);
