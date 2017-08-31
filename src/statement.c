@@ -466,12 +466,15 @@ tym_test_statement(void)
   tym_free_terms(terms);
 
   const struct TymStmt * s1S =
-    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2, tym_mk_const(tym_encode_str("a")), tym_mk_const(tym_encode_str("a"))));
+    tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
+          tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("a")),
+          tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("a"))));
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("X")), NULL);
   terms = tym_mk_term_cell(tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("Y")), terms);
   struct TymFmla * fmla =
     tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
-        tym_mk_var(tym_encode_str("X")), tym_mk_var(tym_encode_str("Y")));
+        tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("X")),
+        tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("Y")));
   const struct TymStmt * s2S = tym_mk_stmt_pred(TYM_CSTR_DUPLICATE("some_predicate"),
       terms,
       tym_mk_fmla_not(fmla));

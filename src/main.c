@@ -37,9 +37,11 @@ int
 main(int argc, char ** argv)
 {
 #ifdef TESTING
+  tym_init_str();
   tym_test_clause();
   tym_test_formula();
   tym_test_statement();
+  tym_fin_str();
   exit(0);
 #endif
 
@@ -109,6 +111,8 @@ main(int argc, char ** argv)
     TYM_VERBOSE("query = %s\n", Params.query);
   }
 
+  tym_init_str();
+
   enum TymReturnCodes result = TYM_AOK;
 
   struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
@@ -125,6 +129,8 @@ main(int argc, char ** argv)
       result = process_program(Params, ParsedInputFileContents, ParsedQuery);
     }
   }
+
+  tym_fin_str();
 
   return result;
 }

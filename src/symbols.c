@@ -158,7 +158,7 @@ tym_atom_database_member(const struct TymAtom * atom, struct TymAtomDatabase * a
     success = true;
     *record = NULL;
   } else {
-    uint8_t h = tym_hash_str(atom->predicate);
+    uint8_t h = tym_hash_str(tym_decode_str(atom->predicate));
 
     if (NULL == adb->atom_database[h]) {
       success = true;
@@ -203,7 +203,7 @@ tym_atom_database_add(const struct TymAtom * atom, struct TymAtomDatabase * adb,
     *error_code = TYM_NO_ATOM_DATABASE;
     success = false;
   } else {
-    uint8_t h = tym_hash_str(atom->predicate);
+    uint8_t h = tym_hash_str(tym_decode_str(atom->predicate));
 
     struct TymPredicate * pred =
       tym_mk_pred(TYM_STR_DUPLICATE(atom->predicate), atom->arity);

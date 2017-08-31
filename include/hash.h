@@ -10,10 +10,10 @@
 #ifndef __TYM_HASH_H__
 #define __TYM_HASH_H__
 
-#include "string_idx.h"
+#include <stdint.h>
 
 #define TYM_HASH_VTYPE uint8_t
 
-TYM_HASH_VTYPE tym_hash_str(TymStr * str);
+TYM_HASH_VTYPE tym_hash_str(char * str);
 
 #endif // __TYM_HASH_H__

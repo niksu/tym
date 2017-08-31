@@ -15,6 +15,7 @@
 // TYM_STRING_TYPE values:
 // 0: C strings
 // 1: abstract type (of C strings)
+// 2: abstract type of hashconsed C strings
 #ifndef TYM_STRING_TYPE
   #define TYM_STRING_TYPE 0
 #endif
@@ -34,9 +35,18 @@
     tym_encode_str(strdup(tym_decode_str(s)))
   #define TYM_CSTR_DUPLICATE(s) \
     tym_encode_str(strdup(s))
+#elif TYM_STRING_TYPE == 2
+  struct TymStrHashIdxStruct;
+  typedef struct TymStrHashIdxStruct TymStr;
+  #define TYM_STR_DUPLICATE(s) s
+  #define TYM_CSTR_DUPLICATE(s) tym_encode_str(strdup(s))
+  void tym_force_free_str (struct TymStrHashIdxStruct *);
 #else
   #error "Unknown TYM_STRING_TYPE"
 #endif
+
+void tym_init_str (void);
+void tym_fin_str (void);
 
 char * tym_decode_str (TymStr *);
 TymStr * tym_encode_str (char *);

@@ -8,7 +8,6 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "hash.h"
@@ -20,10 +19,8 @@
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 
 TYM_HASH_VTYPE
-tym_hash_str(TymStr * s)
+tym_hash_str(char * str)
 {
-  assert(NULL != s);
-  const char * str = tym_decode_str(s);
   assert(NULL != str);
 
   uint64_t result = FNV_OFFSET_BASIS;
