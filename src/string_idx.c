@@ -127,14 +127,23 @@ tym_fin_str(void)
   stringhash = NULL;
 }
 
+// NOTE the object pointed to by the "s" parameter (given to tym_encode_str)
+//      might not be available after the call -- instead you should decode the
+//      returned value.
 struct TymStrHashIdxStruct *
 tym_encode_str (char * s)
 {
   assert(NULL != stringhash);
 
-  struct TymStrHashIdxStruct * result = malloc(sizeof(*result));
-  result->content = s;
-  tym_ht_add(stringhash, s, &result);
+  struct TymStrHashIdxStruct * result = tym_ht_lookup(stringhash, s);
+  if (NULL == result) {
+    result = malloc(sizeof(*result));
+    result->content = s;
+    tym_ht_add(stringhash, s, &result);
+  } else {
+    free(s);
+  }
+
   return result;
 }
 

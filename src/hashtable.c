@@ -34,6 +34,10 @@ tym_ht_create(void)
 void
 tym_ht_add(TYM_HASHTABLE(String) * ht, char * key, TYM_HVALUETYPE * value)
 {
+  assert(NULL != ht);
+  assert(NULL != key);
+  assert(NULL != value);
+
   bool exists = false;
   TYM_HASH_VTYPE h = tym_hash_str(key);
   TYM_HASHTABLE_CELL(String) * precursor = NULL;
@@ -69,16 +73,19 @@ tym_ht_add(TYM_HASHTABLE(String) * ht, char * key, TYM_HVALUETYPE * value)
 TYM_HVALUETYPE
 tym_ht_lookup(TYM_HASHTABLE(String) * ht, char * key)
 {
+  assert(NULL != ht);
+  assert(NULL != key);
+
   TYM_HASH_VTYPE h = tym_hash_str(key);
   TYM_HASHTABLE_CELL(String) * cursor = ht->arr[h];
   while (NULL != cursor) {
     if (0 == strcmp(key, cursor->k)) {
-      break;
+      return cursor->v;
     } else {
       cursor = cursor->next;
     }
   }
-  return cursor->v;
+  return NULL;
 }
 
 void
