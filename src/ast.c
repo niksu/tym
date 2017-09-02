@@ -236,7 +236,7 @@ tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo
 }
 
 struct TymTerm *
-tym_mk_term(enum TymTermKind kind, TymStr * identifier)
+tym_mk_term(enum TymTermKind kind, const TymStr * identifier)
 {
   assert(NULL != identifier);
   assert(TYM_CONST == kind || TYM_VAR == kind || TYM_STR == kind);

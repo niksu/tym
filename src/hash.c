@@ -19,7 +19,7 @@
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 
 TYM_HASH_VTYPE
-tym_hash_str(char * str)
+tym_hash_str(const char * str)
 {
   assert(NULL != str);
 

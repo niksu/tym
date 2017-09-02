@@ -33,7 +33,7 @@ tym_mk_fmla_const(bool b)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom(TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs)
+tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs)
 {
   struct TymFmlaAtom * result_content = malloc(sizeof *result_content);
   assert(NULL != result_content);
@@ -51,7 +51,7 @@ tym_mk_fmla_atom(TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs)
 }
 
 struct TymFmla *
-tym_mk_fmla_atom_varargs(TymStr * pred_name, uint8_t arity, ...)
+tym_mk_fmla_atom_varargs(const TymStr * pred_name, uint8_t arity, ...)
 {
   struct TymTerm ** args = NULL;
 
@@ -69,7 +69,7 @@ tym_mk_fmla_atom_varargs(TymStr * pred_name, uint8_t arity, ...)
 }
 
 struct TymFmla *
-tym_mk_fmla_quant(TymStr * bv, struct TymFmla * body)
+tym_mk_fmla_quant(const TymStr * bv, struct TymFmla * body)
 {
   assert(NULL != bv);
   assert(NULL != body);
@@ -363,7 +363,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
 
 struct TymSymGen *
-tym_mk_sym_gen(TymStr * prefix)
+tym_mk_sym_gen(const TymStr * prefix)
 {
   struct TymSymGen * result = malloc(sizeof *result);
   result->prefix = prefix;
@@ -380,7 +380,7 @@ tym_copy_sym_gen(const struct TymSymGen * const cp_orig)
   return result;
 }
 
-TymStr *
+const TymStr *
 tym_mk_new_var(struct TymSymGen * vg)
 {
   size_t i = tym_len_str(vg->prefix);
@@ -422,7 +422,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 
   if (atom->arity > 0) {
     var_args_T = malloc(sizeof *var_args_T * atom->arity);
-    TymStr ** var_args = malloc(sizeof *var_args * atom->arity);
+    const TymStr ** var_args = malloc(sizeof *var_args * atom->arity);
     *v = NULL;
 
     struct TymValuation * v_cursor;
@@ -631,7 +631,6 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 {
   struct TymFmla * result = NULL;
 
-  TymStr * pred_name_copy = NULL;
   struct TymTerm ** predargs_copy = NULL;
 
   switch (fmla->kind) {
@@ -644,8 +643,6 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_ATOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    pred_name_copy = TYM_STR_DUPLICATE(fmla->param.atom->pred_name);
-
     predargs_copy = NULL;
 
     if (fmla->param.atom->arity > 0) {
@@ -655,7 +652,8 @@ tym_copy_fmla(const struct TymFmla * const fmla)
       }
     }
 
-    result = tym_mk_fmla_atom(pred_name_copy, fmla->param.atom->arity, predargs_copy);
+    result = tym_mk_fmla_atom(TYM_STR_DUPLICATE(fmla->param.atom->pred_name),
+        fmla->param.atom->arity, predargs_copy);
 #pragma GCC diagnostic pop
     break;
   case FMLA_AND:

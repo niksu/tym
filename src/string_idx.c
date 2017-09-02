@@ -26,23 +26,26 @@ tym_fin_str(void)
   // Nothing needed here.
 }
 
-char *
-tym_decode_str (TymStr * s)
+const char *
+tym_decode_str (const TymStr * s)
 {
   return s;
 }
 
-TymStr *
-tym_encode_str (char * s)
+const TymStr *
+tym_encode_str (const char * s)
 {
   return s;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
-tym_free_str (TymStr * s)
+tym_free_str (const TymStr * s)
 {
-  free(s);
+  free((void *)s);
 }
+#pragma GCC diagnostic pop
 
 size_t
 tym_len_str (const TymStr * s)
@@ -57,7 +60,7 @@ tym_cmp_str (const TymStr * s1, const TymStr * s2)
 }
 #elif TYM_STRING_TYPE == 1
 struct TymStrIdxStruct {
-  char * content;
+  const char * content;
 };
 
 void
@@ -72,26 +75,29 @@ tym_fin_str(void)
   // Nothing needed here.
 }
 
-char *
-tym_decode_str (struct TymStrIdxStruct * s)
+const char *
+tym_decode_str (const struct TymStrIdxStruct * s)
 {
   return s->content;
 }
 
-struct TymStrIdxStruct *
-tym_encode_str (char * s)
+const struct TymStrIdxStruct *
+tym_encode_str (const char * s)
 {
   struct TymStrIdxStruct * result = malloc(sizeof(*result));
   result->content = s;
   return result;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
-tym_free_str (struct TymStrIdxStruct * s)
+tym_free_str (const struct TymStrIdxStruct * s)
 {
-  free(s->content);
-  free(s);
+  free((void *)s->content);
+  free((void *)s);
 }
+#pragma GCC diagnostic pop
 
 size_t
 tym_len_str (const struct TymStrIdxStruct * s)
@@ -109,7 +115,7 @@ tym_cmp_str (const struct TymStrIdxStruct * s1, const struct TymStrIdxStruct * s
 
 TYM_HASHTABLE(String) * stringhash = NULL;
 struct TymStrHashIdxStruct {
-  char * content;
+  const char * content;
 };
 
 void
@@ -130,25 +136,28 @@ tym_fin_str(void)
 // NOTE the object pointed to by the "s" parameter (given to tym_encode_str)
 //      might not be available after the call -- instead you should decode the
 //      returned value.
-struct TymStrHashIdxStruct *
-tym_encode_str (char * s)
+const struct TymStrHashIdxStruct *
+tym_encode_str (const char * s)
 {
   assert(NULL != stringhash);
 
-  struct TymStrHashIdxStruct * result = tym_ht_lookup(stringhash, s);
-  if (NULL == result) {
-    result = malloc(sizeof(*result));
+  const struct TymStrHashIdxStruct * pre_result = tym_ht_lookup(stringhash, s);
+  if (NULL == pre_result) {
+    struct TymStrHashIdxStruct * result = malloc(sizeof(*result));
     result->content = s;
-    tym_ht_add(stringhash, s, &result);
+    assert(tym_ht_add(stringhash, s, result));
+    return result;
   } else {
-    free(s);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)s);
+#pragma GCC diagnostic pop
+    return pre_result;
   }
-
-  return result;
 }
 
-char *
-tym_decode_str (struct TymStrHashIdxStruct * s)
+const char *
+tym_decode_str (const struct TymStrHashIdxStruct * s)
 {
   assert(NULL != stringhash);
 
@@ -156,7 +165,7 @@ tym_decode_str (struct TymStrHashIdxStruct * s)
 }
 
 void
-tym_free_str (struct TymStrHashIdxStruct * s)
+tym_free_str (const struct TymStrHashIdxStruct * s)
 {
   assert(NULL != stringhash);
 
@@ -166,17 +175,20 @@ tym_free_str (struct TymStrHashIdxStruct * s)
   // NOTE for actual freeing see "tym_force_free_str"
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 void
-tym_force_free_str (struct TymStrHashIdxStruct * s)
+tym_force_free_str (const struct TymStrHashIdxStruct * s)
 {
   assert(NULL != stringhash);
 
   assert(NULL != s);
   assert(NULL != s->content);
 
-  free(s->content);
-  free(s);
+  free((void *)s->content);
+  free((void *)s);
 }
+#pragma GCC diagnostic pop
 
 size_t
 tym_len_str (const struct TymStrHashIdxStruct * s)

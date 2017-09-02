@@ -18,8 +18,8 @@
 // FIXME currently this only works if TYM_STRING_TYPE == 2.
 #if TYM_STRING_TYPE == 2
 // FIXME can factor out hashtable functions from symbols.c
-TYM_DECL_HASHTABLE_CELL(String, char *, TymStr *)
-TYM_DECL_HASHTABLE(String, char *, TymStr *)
+TYM_DECL_HASHTABLE_CELL(String, const char *, const TymStr *)
+TYM_DECL_HASHTABLE(String, const char *, const TymStr *)
 
 TYM_HASHTABLE(String) *
 tym_ht_create(void)
@@ -31,8 +31,8 @@ tym_ht_create(void)
   return result;
 }
 
-void
-tym_ht_add(TYM_HASHTABLE(String) * ht, char * key, TYM_HVALUETYPE * value)
+bool
+tym_ht_add(TYM_HASHTABLE(String) * ht, const char * key, TYM_HVALUETYPE value)
 {
   assert(NULL != ht);
   assert(NULL != key);
@@ -45,8 +45,6 @@ tym_ht_add(TYM_HASHTABLE(String) * ht, char * key, TYM_HVALUETYPE * value)
   while (NULL != cursor) {
     if (0 == strcmp(key, cursor->k)) {
       exists = true;
-      tym_force_free_str(*value);
-      *value = cursor->v;
       break;
     } else {
       precursor = cursor;
@@ -60,18 +58,20 @@ tym_ht_add(TYM_HASHTABLE(String) * ht, char * key, TYM_HVALUETYPE * value)
       ht->arr[h] = malloc(sizeof(*precursor));
       ht->arr[h]->next = NULL;
       ht->arr[h]->k = key;
-      ht->arr[h]->v = *value;
+      ht->arr[h]->v = value;
     } else {
       precursor->next = malloc(sizeof(*precursor->next));
       precursor->next->next = NULL;
       precursor->next->k = key;
-      precursor->next->v = *value;
+      precursor->next->v = value;
     }
   }
+
+  return (!exists);
 }
 
 TYM_HVALUETYPE
-tym_ht_lookup(TYM_HASHTABLE(String) * ht, char * key)
+tym_ht_lookup(TYM_HASHTABLE(String) * ht, const char * key)
 {
   assert(NULL != ht);
   assert(NULL != key);

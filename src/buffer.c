@@ -74,7 +74,7 @@ tym_unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-tym_buf_strcpy(struct TymBufferInfo * dst, char * src)
+tym_buf_strcpy(struct TymBufferInfo * dst, const char * src)
 {
   assert(NULL != src);
 

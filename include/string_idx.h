@@ -40,7 +40,7 @@
   typedef struct TymStrHashIdxStruct TymStr;
   #define TYM_STR_DUPLICATE(s) s
   #define TYM_CSTR_DUPLICATE(s) tym_encode_str(strdup(s))
-  void tym_force_free_str (struct TymStrHashIdxStruct *);
+  void tym_force_free_str (const struct TymStrHashIdxStruct *);
 #else
   #error "Unknown TYM_STRING_TYPE"
 #endif
@@ -48,9 +48,9 @@
 void tym_init_str (void);
 void tym_fin_str (void);
 
-char * tym_decode_str (TymStr *);
-TymStr * tym_encode_str (char *);
-void tym_free_str (TymStr *);
+const char * tym_decode_str (const TymStr *);
+const TymStr * tym_encode_str (const char *);
+void tym_free_str (const TymStr *);
 size_t tym_len_str (const TymStr *);
 int tym_cmp_str (const TymStr *, const TymStr *);
 

@@ -70,7 +70,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
     args = malloc(sizeof *args * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (TYM_VAR == at->predargs[i]->kind) {
-        TymStr * placeholder = tym_mk_new_var(cg);
+        const TymStr * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
         struct TymStmt * stmt =

@@ -87,7 +87,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
 }
 
 struct TymPredicate *
-tym_mk_pred(TymStr * predicate, uint8_t arity)
+tym_mk_pred(const TymStr * predicate, uint8_t arity)
 {
   assert(NULL != predicate);
 

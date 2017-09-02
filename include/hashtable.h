@@ -10,12 +10,14 @@
 #ifndef __TYM_HASHTABLE_H__
 #define __TYM_HASHTABLE_H__
 
+#include <stdbool.h>
+
 #include "hash.h"
 #include "string_idx.h"
 
 #define TYM_HASH_RANGE 256
 
-#define TYM_HVALUETYPE TymStr *
+#define TYM_HVALUETYPE const TymStr *
 
 #define TYM_HASHTABLE(typename) \
   struct TymHashTable_ ## typename
@@ -41,8 +43,8 @@ TYM_HASHTABLE(String);
 
 // FIXME generalise to make parametric to type, beyond "String" and TYM_HVALUETYPE constants
 TYM_HASHTABLE(String) * tym_ht_create(void);
-void tym_ht_add(TYM_HASHTABLE(String) *, char * key, TYM_HVALUETYPE * value);
-TYM_HVALUETYPE tym_ht_lookup(TYM_HASHTABLE(String) *, char * key);
+bool tym_ht_add(TYM_HASHTABLE(String) *, const char * key, TYM_HVALUETYPE value);
+TYM_HVALUETYPE tym_ht_lookup(TYM_HASHTABLE(String) *, const char * key);
 // NOTE "delete entry" doesn't seem needed at the moment.
 void tym_ht_free(TYM_HASHTABLE(String) *);
 #endif // TYM_STRING_TYPE == 2

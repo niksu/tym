@@ -128,7 +128,7 @@ tym_mk_stmt_axiom(const struct TymFmla * axiom)
 }
 
 const struct TymStmt *
-tym_mk_stmt_pred(TymStr * pred_name, struct TymTerms * params, struct TymFmla * body)
+tym_mk_stmt_pred(const TymStr * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct TymStmt * result = malloc(sizeof *result);
   struct TymStmtConst * sub_result = malloc(sizeof *sub_result);
@@ -145,7 +145,7 @@ tym_mk_stmt_pred(TymStr * pred_name, struct TymTerms * params, struct TymFmla * 
 }
 
 struct TymStmt *
-tym_mk_stmt_const(TymStr * const_name, struct TymUniverse * uni, TymStr * ty)
+tym_mk_stmt_const(const TymStr * const_name, struct TymUniverse * uni, const TymStr * ty)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -166,7 +166,7 @@ tym_mk_stmt_const(TymStr * const_name, struct TymUniverse * uni, TymStr * ty)
 }
 
 const struct TymStmt *
-tym_mk_stmt_const_def(TymStr * const_name, struct TymUniverse * uni)
+tym_mk_stmt_const_def(const TymStr * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
   assert(NULL != uni);
@@ -562,7 +562,7 @@ tym_statementise_universe(struct TymModel * mdl)
   for (int i = 0; i < mdl->universe->cardinality; i++) {
     args[i] = tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(mdl->universe->element[i]));
   }
-  TymStr * copied = TYM_CSTR_DUPLICATE(tym_distinctK);
+  const TymStr * copied = TYM_CSTR_DUPLICATE(tym_distinctK);
   const struct TymFmla * distinctness_fmla =
     tym_mk_fmla_atom(copied, mdl->universe->cardinality, args);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(distinctness_fmla));

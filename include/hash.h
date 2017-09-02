@@ -14,6 +14,6 @@
 
 #define TYM_HASH_VTYPE uint8_t
 
-TYM_HASH_VTYPE tym_hash_str(char * str);
+TYM_HASH_VTYPE tym_hash_str(const char * str);
 
 #endif // __TYM_HASH_H__
