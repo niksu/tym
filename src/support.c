@@ -111,7 +111,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
       NULL != mdl) {
     tym_translate_query(ParsedQuery, mdl, cg);
   }
-#if DEBUG
+#if TYM_DEBUG
   else {
     printf("(No query is being printed, since none was given as a parameter)\n");
   }
@@ -121,7 +121,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   if (NULL != mdl) {
-#if DEBUG
+#if TYM_DEBUG
     res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);

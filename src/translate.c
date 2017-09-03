@@ -120,7 +120,7 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
 void
 tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg)
 {
-#if DEBUG
+#if TYM_DEBUG
   printf("|query|=%d\n", query->no_clauses);
 #endif
   // NOTE we expect a query to contain exactly one clause.
@@ -129,14 +129,14 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
 
   struct TymFmla * q_fmla = tym_translate_atom(q_cl->head);
 
-#if DEBUG
-  struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-  struct buffer_write_result * res = fmla_str(q_fmla, outbuf);
-  assert(is_ok_buffer_write_result(res));
+#if TYM_DEBUG
+  struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+  struct TymLiftedTymBufferWriteResult * res = tym_fmla_str(q_fmla, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  free_buffer(outbuf);
+  tym_free_buffer(outbuf);
 #endif
 
   // Reject the query if it containts constants that don't appear in the program.
@@ -178,7 +178,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_atom_database_str(adb, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-#if DEBUG
+#if TYM_DEBUG
   printf("clause database (remaining=%zu)\n|%s|\n",
       outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 #endif
@@ -187,9 +187,9 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   // 1. Generate prologue: universe sort, and its inhabitants.
   struct TymModel * mdl = tym_mk_model(tym_mk_universe(adb->tdb->herbrand_universe));
 
-#if DEBUG
-  res = model_str(mdl, outbuf);
-  assert(is_ok_buffer_write_result(res));
+#if TYM_DEBUG
+  res = tym_model_str(mdl, outbuf);
+  assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
@@ -203,8 +203,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   struct TymPredicates * preds_cursor = tym_atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
-#if DEBUG
-    printf("no_bodies = %zu\n", num_predicate_bodies(preds_cursor->predicate));
+#if TYM_DEBUG
+    printf("no_bodies = %zu\n", tym_num_predicate_bodies(preds_cursor->predicate));
 #endif
 
     struct TymFmlas * fmlas = (struct TymFmlas *)tym_translate_bodies(preds_cursor->predicate->bodies);
@@ -233,7 +233,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       res = tym_fmla_str(atom, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-#if DEBUG
+#if TYM_DEBUG
       printf("bodyless: %s\n", outbuf->buffer);
 #endif
 
@@ -251,7 +251,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       const struct TymFmla * abs_head_fmla = NULL;
 
       while (NULL != body_cursor) {
-#if DEBUG
+#if TYM_DEBUG
         printf(">");
 #endif
 
@@ -276,7 +276,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if DEBUG
+#if TYM_DEBUG
         printf("from: %s\n", outbuf->buffer);
 #endif
 
@@ -289,14 +289,14 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(abs_head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if DEBUG
+#if TYM_DEBUG
         printf("to: %s\n", outbuf->buffer);
 #endif
 
         res = tym_valuation_str(*val, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
-#if DEBUG
-        if (0 == val_of_buffer_write_result(res)) {
+#if TYM_DEBUG
+        if (0 == tym_val_of_TymBufferWriteResult(res)) {
           printf("  where: (no substitutions)\n");
         } else {
           printf("  where: %s\n", outbuf->buffer);
@@ -309,7 +309,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
           tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
-        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla);
+        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla); // FIXME redundant?
         if (NULL != ts) {
           tym_free_terms(ts);
         }
@@ -318,7 +318,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(fmlas_cursor->fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if DEBUG
+#if TYM_DEBUG
         printf("  :|%s|\n", outbuf->buffer);
 #endif
 
@@ -343,7 +343,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       res = tym_fmla_str(fmla, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-#if DEBUG
+#if TYM_DEBUG
       printf("pre-result: %s\n", outbuf->buffer);
 #endif
 
@@ -363,7 +363,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
     free((void *)pre_preds_cursor);
 #pragma GCC diagnostic pop
 
-#if DEBUG
+#if TYM_DEBUG
     printf("\n");
 #endif
   }
@@ -391,23 +391,23 @@ tym_order_statements(const struct TymStmts * stmts)
 
   while (NULL != cursor || NULL != waiting) {
 
-#if DEBUG
-    struct TymBufferInfo * outbuf = mk_buffer(TYM_BUF_SIZE);
-    struct buffer_write_result * res = NULL;
+#if TYM_DEBUG
+    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+    struct TymLiftedTymBufferWriteResult * res = NULL;
 
     printf("|declared| = %d\n", tym_len_TymTerms_cell(declared));
 
     res = tym_terms_to_str(declared, outbuf);
-    assert(is_ok_buffer_write_result(res));
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
       outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-    free_buffer(outbuf);
+    tym_free_buffer(outbuf);
 #endif
 
     if (NULL == cursor && NULL != waiting) {
-#if DEBUG
+#if TYM_DEBUG
       printf("Making 'waiting' into 'cursor'.\n");
 #endif
       cursor = waiting;
@@ -415,42 +415,42 @@ tym_order_statements(const struct TymStmts * stmts)
       cursor_is_waiting = true;
       continue;
     }
-#if DEBUG
+#if TYM_DEBUG
     else {
       printf("Not making 'waiting' into 'cursor'.\n");
     }
 #endif
 
-#if DEBUG
-    outbuf = mk_buffer(TYM_BUF_SIZE);
-    res = stmt_str(cursor->stmt, outbuf);
-    assert(is_ok_buffer_write_result(res));
+#if TYM_DEBUG
+    outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+    res = tym_stmt_str(cursor->stmt, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",
         outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
 
-    free_buffer(outbuf);
+    tym_free_buffer(outbuf);
 #endif
 
     struct TymTerm * t = tym_new_const_in_stmt(cursor->stmt);
     struct TymTerms * term_consts = tym_consts_in_stmt(cursor->stmt);
     if (tym_terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
-#if DEBUG
-        printf("Term subsumption for %s\n", t->identifier);
+#if TYM_DEBUG
+        printf("Term subsumption for %s\n", tym_decode_str(t->identifier));
 #endif
         declared = tym_mk_term_cell(t, declared);
       }
-#if DEBUG
+#if TYM_DEBUG
       else {
         printf("NULL == t\n");
       }
 #endif
       result = tym_mk_stmt_cell(cursor->stmt, result);
     } else {
-#if DEBUG
+#if TYM_DEBUG
       if (NULL != t) {
-        printf("NO term subsumption for %s\n", t->identifier);
+        printf("NO term subsumption for %s\n", tym_decode_str(t->identifier));
       }
 #endif
       waiting = tym_mk_stmt_cell(cursor->stmt, waiting);
