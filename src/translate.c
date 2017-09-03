@@ -20,7 +20,7 @@ tym_translate_atom(const struct TymAtom * at)
       args[i] = tym_copy_term(at->args[i]);
     }
   }
-  return tym_mk_fmla_atom(strdup(at->predicate), at->arity, args);
+  return tym_mk_fmla_atom(TYM_STR_DUPLICATE(at->predicate), at->arity, args);
 }
 
 struct TymFmla *
@@ -54,8 +54,8 @@ tym_translate_valuation(struct TymValuation * const v)
   struct TymFmlas * result = NULL;
   struct TymValuation * cursor = v;
   while (NULL != cursor) {
-    result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(strdup(tym_eqK), 2,
-          tym_mk_term(TYM_VAR, strdup(cursor->var)),
+    result = tym_mk_fmla_cell(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
+          tym_mk_term(TYM_VAR, TYM_STR_DUPLICATE(cursor->var)),
           tym_copy_term(cursor->val)), result);
     cursor = cursor->next;
   }
@@ -70,10 +70,12 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
     args = malloc(sizeof *args * at->arity);
     for (int i = 0; i < at->arity; i++) {
       if (TYM_VAR == at->predargs[i]->kind) {
-        char * placeholder = tym_mk_new_var(cg);
+        const TymStr * placeholder = tym_mk_new_var(cg);
         args[i] = tym_mk_term(TYM_CONST, placeholder);
 
-        struct TymStmt * stmt = tym_mk_stmt_const(strdup(placeholder), mdl->universe, TYM_UNIVERSE_TY);
+        struct TymStmt * stmt =
+          tym_mk_stmt_const(TYM_STR_DUPLICATE(placeholder),
+              mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY));
         tym_strengthen_model(mdl, stmt);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
@@ -143,14 +145,14 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
     if (TYM_CONST == cursor->term->kind) {
       bool found = false;
       for (int i = 0; i < mdl->universe->cardinality; i++) {
-        if (0 == strcmp(cursor->term->identifier, mdl->universe->element[i])) {
+        if (0 == tym_cmp_str(cursor->term->identifier, mdl->universe->element[i])) {
           found = true;
           break;
         }
       }
       if (!found) {
         printf("The constant '%s' in the query doesn't appear in the program.\n",
-            cursor->term->identifier);
+            tym_decode_str(cursor->term->identifier));
         assert(false);
       }
       struct TymTerms * pre_cursor = cursor;
@@ -224,7 +226,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
       const struct TymFmla * atom =
-        tym_mk_fmla_atom(strdup(preds_cursor->predicate->predicate),
+        tym_mk_fmla_atom(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
 #pragma GCC diagnostic pop
 
@@ -238,7 +240,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
       tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(strdup(preds_cursor->predicate->predicate),
+          tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
             tym_mk_fmla_const(false)));
 #pragma GCC diagnostic pop
@@ -268,7 +270,8 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
         // Abstract the atom's parameters.
         const struct TymFmla * head_fmla =
-          tym_mk_fmla_atom(strdup(head_atom->predicate), head_atom->arity, args);
+          tym_mk_fmla_atom(TYM_STR_DUPLICATE(head_atom->predicate),
+              head_atom->arity, args);
 
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
@@ -346,7 +349,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
       tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(strdup(head->pred_name),
+          tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
             tym_arguments_of_atom(head),
             fmla));
       tym_free_fmla(abs_head_fmla);
@@ -381,8 +384,8 @@ tym_order_statements(const struct TymStmts * stmts)
   const struct TymStmts * result = NULL;
 
   struct TymTerms * declared = NULL;
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, strdup(tym_eqK)), declared);
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, strdup(tym_distinctK)), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_eqK)), declared);
+  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_distinctK)), declared);
 
   bool cursor_is_waiting = false;
 

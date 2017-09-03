@@ -15,20 +15,22 @@
 #include <stdint.h>
 
 #include "buffer.h"
+#include "hash.h"
+#include "string_idx.h"
 #include "util.h"
 
 enum TymTermKind {TYM_VAR=0, TYM_CONST=1, TYM_STR=2};
 
 struct TymTerm {
   enum TymTermKind kind;
-  const char * identifier;
+  const TymStr * identifier;
 };
 
 TYM_DECLARE_MUTABLE_LIST_TYPE(TymTerms, term, TymTerm)
 TYM_DECLARE_MUTABLE_LIST_MK(term, struct TymTerm, struct TymTerms)
 
 struct TymAtom {
-  char * predicate;
+  const TymStr * predicate;
   uint8_t arity;
   struct TymTerm ** args;
 };
@@ -57,10 +59,8 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_atom_to_str(const struct
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst);
 
-struct TymTerm * tym_mk_const(const char * cp_identifier);
-struct TymTerm * tym_mk_var(const char * cp_identifier);
-struct TymTerm * tym_mk_term(enum TymTermKind kind, const char * identifier);
-struct TymAtom * tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args);
+struct TymTerm * tym_mk_term(enum TymTermKind kind, const TymStr * identifier);
+struct TymAtom * tym_mk_atom(TymStr * predicate, uint8_t arity, struct TymTerms * args);
 struct TymClause * tym_mk_clause(struct TymAtom * head, uint8_t body_size, struct TymAtoms * body);
 struct TymProgram * tym_mk_program(uint8_t no_clauses, struct TymClauses * program);
 
@@ -86,10 +86,9 @@ void tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteRe
 #define TYM_DBG_SYNTAX(...)
 #endif // TYM_DEBUG
 
-char tym_hash_str(const char * str);
-char tym_hash_term(const struct TymTerm *);
-char tym_hash_atom(const struct TymAtom *);
-char tym_hash_clause(const struct TymClause *);
+TYM_HASH_VTYPE tym_hash_term(const struct TymTerm *);
+TYM_HASH_VTYPE tym_hash_atom(const struct TymAtom *);
+TYM_HASH_VTYPE tym_hash_clause(const struct TymClause *);
 
 enum TymEqTermError {TYM_NO_ERROR = 0, TYM_DIFF_KIND_SAME_IDENTIFIER};
 bool tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2, enum TymEqTermError * error_code, bool * result);

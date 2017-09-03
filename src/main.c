@@ -36,10 +36,12 @@ show_usage(const char * const argv_0)
 int
 main(int argc, char ** argv)
 {
-#ifdef TESTING
+#ifdef TYM_TESTING
+  tym_init_str();
   tym_test_clause();
   tym_test_formula();
   tym_test_statement();
+  tym_fin_str();
   exit(0);
 #endif
 
@@ -103,25 +105,45 @@ main(int argc, char ** argv)
   }
 
   if (Params.verbosity > 0) {
+#ifdef TYM_DEBUG
+    TYM_VERBOSE("TYM_DEBUG = %d\n", TYM_DEBUG);
+#else
+    TYM_VERBOSE("TYM_DEBUG Undefined\n");
+#endif
+    TYM_VERBOSE("TYM_STRING_TYPE = %d\n", TYM_STRING_TYPE); // TYM_STRING_TYPE macro should always be defined.
+
+#ifdef TYM_TESTING
+    // If TYM_TESTING is defined then this code should not be reachable.
+    assert(TYM_TESTING != TYM_TESTING);
+#endif
+    TYM_VERBOSE("TYM_TESTING Undefined\n");
+
     TYM_VERBOSE("input_fine = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("test_parsing = %d\n", Params.test_parsing);
     TYM_VERBOSE("query = %s\n", Params.query);
   }
 
-  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
-  if (NULL == ParsedInputFileContents) {
-     return TYM_NO_INPUT;
-  }
-
-  struct TymProgram * ParsedQuery = tym_parse_query(Params);
+  tym_init_str();
 
   enum TymReturnCodes result = TYM_AOK;
-  if (Params.test_parsing) {
-    print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
-  } else {
-    result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+
+  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
+  if (NULL == ParsedInputFileContents) {
+    result = TYM_NO_INPUT;
   }
+
+  if (TYM_AOK == result) {
+    struct TymProgram * ParsedQuery = tym_parse_query(Params);
+
+    if (Params.test_parsing) {
+      print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
+    } else {
+      result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+    }
+  }
+
+  tym_fin_str();
 
   return result;
 }

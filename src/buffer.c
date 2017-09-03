@@ -76,6 +76,8 @@ tym_unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_buf_strcpy(struct TymBufferInfo * dst, const char * src)
 {
+  assert(NULL != src);
+
   size_t l = strlen(src) + 1; // NOTE we include \0 in the size of the string.
   if (tym_have_space(dst, l)) {
     strcpy(dst->buffer + dst->idx, src);

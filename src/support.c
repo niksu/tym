@@ -5,13 +5,6 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-//#include <assert.h>
-//#include <getopt.h>
-//#include <stdbool.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-
 #include "support.h"
 
 #pragma GCC diagnostic push
@@ -103,9 +96,9 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
 
   struct TymSymGen ** vg = malloc(sizeof *vg);
   *vg = NULL;
-  *vg = tym_mk_sym_gen(strdup("V"));
+  *vg = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("V"));
 
-  struct TymSymGen * cg = tym_mk_sym_gen(strdup("c"));
+  struct TymSymGen * cg = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("c"));
 
   struct TymModel * mdl = NULL;
   if (NULL != ParsedInputFileContents) {

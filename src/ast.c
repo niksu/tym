@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "hash.h"
 #include "module_tests.h"
 #include "util.h"
 
@@ -21,7 +22,7 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
   assert(NULL != term);
   size_t initial_idx = dst->idx;
 
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, term->identifier);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(term->identifier));
   assert(TYM_MAYBE_ERROR__IS_OK_FNAME(TymBufferWriteResult)(res));
   free(res);
 
@@ -29,7 +30,7 @@ tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -50,7 +51,7 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
   assert(NULL != atom);
   size_t initial_idx = dst->idx;
 
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, atom->predicate);
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(atom->predicate));
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
@@ -58,7 +59,7 @@ tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_str(atom->predicate) + 127);
+  sprintf(local_buf, "{hash=%u}", tym_hash_str(tym_decode_str(atom->predicate)) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -117,7 +118,7 @@ tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -198,7 +199,7 @@ tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * 
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127);
+  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127/*FIXME brittle*/);
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -235,23 +236,10 @@ tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo
 }
 
 struct TymTerm *
-tym_mk_const(const char * cp_identifier)
-{
-  assert(NULL != cp_identifier);
-  return tym_mk_term(TYM_CONST, strdup(cp_identifier));
-}
-
-struct TymTerm *
-tym_mk_var(const char * cp_identifier)
-{
-  assert(NULL != cp_identifier);
-  return tym_mk_term(TYM_VAR, strdup(cp_identifier));
-}
-
-struct TymTerm *
-tym_mk_term(enum TymTermKind kind, const char * identifier)
+tym_mk_term(enum TymTermKind kind, const TymStr * identifier)
 {
   assert(NULL != identifier);
+  assert(TYM_CONST == kind || TYM_VAR == kind || TYM_STR == kind);
 
   struct TymTerm * t = malloc(sizeof *t);
   assert(NULL != t);
@@ -266,7 +254,7 @@ TYM_DEFINE_MUTABLE_LIST_MK(term, term, struct TymTerm, struct TymTerms)
 TYM_DEFINE_U8_LIST_LEN(TymTerms)
 
 struct TymAtom *
-tym_mk_atom(char * predicate, uint8_t arity, struct TymTerms * args) {
+tym_mk_atom(TymStr * predicate, uint8_t arity, struct TymTerms * args) {
   assert(NULL != predicate);
 
   struct TymAtom * at = malloc(sizeof *at);
@@ -363,7 +351,7 @@ tym_free_term(struct TymTerm * term)
 
   assert(NULL != term->identifier);
 
-  free((void *)term->identifier);
+  tym_free_str(term->identifier);
 
   free((void *)term);
 }
@@ -395,7 +383,7 @@ tym_free_atom(struct TymAtom * at)
   TYM_DBG_SYNTAX((void *)at, (tym_x_to_str_t)tym_atom_to_str);
   TYM_DBG("\n");
 
-  free(at->predicate);
+  tym_free_str(at->predicate);
   for (int i = 0; i < at->arity; i++) {
     tym_free_term(at->args[i]);
   }
@@ -499,53 +487,37 @@ tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult)
   tym_free_buffer(outbuf);
 }
 
-char
-tym_hash_str(const char * str)
-{
-  assert(NULL != str);
-
-  char result = 0;
-  const char * cursor;
-
-  cursor = str;
-  while ('\0' != *cursor) {
-    result ^= *(cursor++);
-  }
-
-  return result;
-}
-
-char
+TYM_HASH_VTYPE
 tym_hash_term(const struct TymTerm * term)
 {
   assert(NULL != term);
-  char result = tym_hash_str(term->identifier);
-  result ^= (char)term->kind;
+  TYM_HASH_VTYPE result = tym_hash_str(tym_decode_str(term->identifier));
+  result ^= (TYM_HASH_VTYPE)term->kind;
   return result;
 }
 
-char
+TYM_HASH_VTYPE
 tym_hash_atom(const struct TymAtom * atom)
 {
   assert(NULL != atom);
 
-  char result = tym_hash_str(atom->predicate);
+  TYM_HASH_VTYPE result = tym_hash_str(tym_decode_str(atom->predicate));
 
   for (int i = 0; i < atom->arity; i++) {
-    result = (char)(((result * tym_hash_term(atom->args[i])) % 256) - 128);
+    result = (TYM_HASH_VTYPE)(((result * tym_hash_term(atom->args[i])) % 256) - 128/*FIXME brittle*/);
   }
 
   return result;
 }
 
-char
+TYM_HASH_VTYPE
 tym_hash_clause(const struct TymClause * clause) {
   assert(NULL != clause);
 
-  char result = tym_hash_atom(clause->head);
+  TYM_HASH_VTYPE result = tym_hash_atom(clause->head);
 
   for (int i = 0; i < clause->body_size; i++) {
-    result ^= (char)(((i + tym_hash_atom(clause->body[i])) % 256) - 128);
+    result ^= (TYM_HASH_VTYPE)(((i + tym_hash_atom(clause->body[i])) % 256) - 128/*FIXME brittle*/);
   }
 
   return result;
@@ -573,7 +545,7 @@ tym_eq_term(const struct TymTerm * const t1, const struct TymTerm * const t2,
     same_kind = true;
   }
 
-  if (0 == strcmp(t1->identifier, t2->identifier)) {
+  if (0 == tym_cmp_str(t1->identifier, t2->identifier)) {
     same_identifier = true;
   }
 
@@ -593,16 +565,17 @@ void
 tym_test_clause(void) {
   printf("***test_clause***\n");
   struct TymTerm * t = malloc(sizeof *t);
-  *t = (struct TymTerm){.kind = TYM_CONST, .identifier = strdup("ok")};
+  *t = (struct TymTerm){.kind = TYM_CONST,
+    .identifier = TYM_CSTR_DUPLICATE("ok")};
 
   struct TymAtom * at = malloc(sizeof *at);
-  at->predicate = strdup("world");
+  at->predicate = TYM_CSTR_DUPLICATE("world");
   at->arity = 1;
   at->args = malloc(sizeof *at->args * 1);
   at->args[0] = t;
 
   struct TymAtom * hd = malloc(sizeof *hd);
-  hd->predicate = strdup("hello");
+  hd->predicate = TYM_CSTR_DUPLICATE("hello");
   hd->arity = 0;
   hd->args = NULL;
 
@@ -629,7 +602,8 @@ struct TymTerm *
 tym_copy_term(const struct TymTerm * const cp_term)
 {
   assert(NULL != cp_term);
-  return tym_mk_term(cp_term->kind, strdup(cp_term->identifier));
+  return tym_mk_term(cp_term->kind,
+      TYM_STR_DUPLICATE(cp_term->identifier));
 }
 
 // In practice, simply checks that ss is a subset of ts.
@@ -729,7 +703,7 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
   struct TymAtom * at = malloc(sizeof *at);
   assert(NULL != at);
 
-  at->predicate = strdup(cp_atom->predicate);
+  at->predicate = TYM_STR_DUPLICATE(cp_atom->predicate);
   at->arity = cp_atom->arity;
   at->args = NULL;
 

@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "string_idx.h"
 #include "util.h"
 
 struct TymBufferInfo {

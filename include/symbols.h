@@ -17,9 +17,10 @@
 #include <string.h>
 
 #include "ast.h"
+#include "hashtable.h"
+#include "string_idx.h"
 #include "util.h"
 
-#define TYM_HASH_RANGE 256
 // NOTE value of TERM_DATABASE_SIZE must be >= the range of the hash function for terms.
 #define TYM_TERM_DATABASE_SIZE TYM_HASH_RANGE
 
@@ -33,12 +34,12 @@ bool tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst);
 
 struct TymPredicate {
-  const char * predicate;
+  const TymStr * predicate;
   struct TymClauses * bodies;
   uint8_t arity;
 };
 
-struct TymPredicate * tym_mk_pred(const char * predicate, uint8_t arity);
+struct TymPredicate * tym_mk_pred(const TymStr * predicate, uint8_t arity);
 void tym_free_pred(struct TymPredicate * pred);
 
 enum TymEqPredError {TYM_NO_ERROR_EQ_PRED, SAME_PREDICATE_DIFF_ARITY};
