@@ -23,6 +23,12 @@ tym_mk_buffer(const size_t buffer_size)
   return buf;
 }
 
+void
+tym_reset_buffer(struct TymBufferInfo * buf)
+{
+  buf->idx = 0;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 void

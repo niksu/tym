@@ -23,6 +23,7 @@ struct TymBufferInfo {
 };
 
 struct TymBufferInfo * tym_mk_buffer(const size_t buffer_size);
+void tym_reset_buffer(struct TymBufferInfo * buf);
 void tym_free_buffer(struct TymBufferInfo * buf);
 bool tym_have_space(struct TymBufferInfo * buf, size_t n);
 void tym_unsafe_buffer_char(struct TymBufferInfo * buf, char c);
