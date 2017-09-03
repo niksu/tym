@@ -17,7 +17,7 @@
 // 1: abstract type (of C strings)
 // 2: abstract type of hashconsed C strings
 #ifndef TYM_STRING_TYPE
-  #define TYM_STRING_TYPE 0
+  #define TYM_STRING_TYPE 2
 #endif
 // If the value of TYM_STRING_TYPE was given externally then it will be checked later.
 
