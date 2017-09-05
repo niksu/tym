@@ -37,15 +37,22 @@ struct TymFmlas *
 tym_translate_bodies(const struct TymClauses * cls)
 {
   const struct TymClauses * cursor = cls;
-  struct TymFmlas * fmlas = NULL;
+  struct TymFmlas * result = NULL;
+  struct TymFmlas * result_end = NULL;
   while (NULL != cursor) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    fmlas = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), fmlas);
+    if (NULL == result && NULL == result_end) {
+      result = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result_end = result;
+    } else {
+      result_end->next = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result_end = result_end->next;
+    }
 #pragma GCC diagnostic pop
     cursor = cursor->next;
   }
-  return fmlas;
+  return result;
 }
 
 struct TymFmla *
@@ -208,6 +215,18 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 #endif
 
     struct TymFmlas * fmlas = (struct TymFmlas *)tym_translate_bodies(preds_cursor->predicate->bodies);
+#if TYM_DEBUG
+    tym_reset_buffer(outbuf);
+    struct TymFmlas * fmlas_c = fmlas;
+    while (NULL != fmlas_c) {
+      res = tym_fmla_str(fmlas_c->fmla, outbuf);
+      assert(tym_is_ok_TymBufferWriteResult(res));
+      free(res);
+      fmlas_c = fmlas_c->next;
+    }
+    printf(">-: %s\n", outbuf->buffer);
+#endif
+
     struct TymFmlas * fmlas_cursor = fmlas;
 
     if (NULL == preds_cursor->predicate->bodies) {
@@ -273,10 +292,10 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
           tym_mk_fmla_atom(TYM_STR_DUPLICATE(head_atom->predicate),
               head_atom->arity, args);
 
+#if TYM_DEBUG // FIXME cover more code using the #if?
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if TYM_DEBUG
         printf("from: %s\n", outbuf->buffer);
 #endif
 
@@ -309,7 +328,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
           tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
-        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla); // FIXME redundant?
+        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla); // FIXME is the copying redundant?
         if (NULL != ts) {
           tym_free_terms(ts);
         }
