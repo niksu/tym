@@ -870,15 +870,21 @@ tym_fmla_size(const struct TymFmla * const fmla)
 struct TymTerms *
 tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
 {
-  struct TymTerms * result = acc;
+  struct TymTerms * result = NULL;
   switch (fmla->kind) {
   case FMLA_CONST:
     result = acc;
     break;
   case FMLA_ATOM:
-    // We don't add fmla->param.atom->pred_name to result since pred_name
-    // doesn't appear in the Herbrand Universe.
     result = acc;
+
+    // We add fmla->param.atom->pred_name to result (althought pred_name
+    // doesn't appear in the Herbrand Universe) otherwise the subsumption check
+    // wouldn't work well.
+    struct TymTerm * pred_const =
+      tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(fmla->param.atom->pred_name));
+    result = tym_mk_term_cell(pred_const, result);
+
     for (int i = 0; i < fmla->param.atom->arity; i++) {
       struct TymTerm * t = fmla->param.atom->predargs[i];
       if (TYM_CONST == t->kind) {
