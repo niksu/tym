@@ -44,6 +44,8 @@ tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** pred
   result->param.atom = result_content;
 
   result_content->pred_name = pred_name;
+  result_content->pred_const =
+    tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(pred_name));
   result_content->arity = arity;
   result_content->predargs = predargs;
 
@@ -498,6 +500,7 @@ void
 tym_free_fmla_atom(struct TymFmlaAtom * at)
 {
   tym_free_str(at->pred_name);
+  tym_free_term(at->pred_const);
 
   for (int i = 0; i < at->arity; i++) {
     tym_free_term(at->predargs[i]);
@@ -878,12 +881,10 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
   case FMLA_ATOM:
     result = acc;
 
-    // We add fmla->param.atom->pred_name to result (althought pred_name
+    // We add fmla->param.atom->pred_const to result (although pred_const
     // doesn't appear in the Herbrand Universe) otherwise the subsumption check
     // wouldn't work well.
-    struct TymTerm * pred_const =
-      tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(fmla->param.atom->pred_name));
-    result = tym_mk_term_cell(pred_const, result);
+    result = tym_mk_term_cell(fmla->param.atom->pred_const, result);
 
     for (int i = 0; i < fmla->param.atom->arity; i++) {
       struct TymTerm * t = fmla->param.atom->predargs[i];

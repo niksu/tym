@@ -467,11 +467,12 @@ tym_order_statements(const struct TymStmts * stmts)
 #endif
       result = tym_mk_stmt_cell(cursor->stmt, result);
     } else {
-#if TYM_DEBUG
       if (NULL != t) {
+#if TYM_DEBUG
         printf("NO term subsumption for %s\n", tym_decode_str(t->identifier));
-      }
 #endif
+        tym_free_term(t);
+      }
       waiting = tym_mk_stmt_cell(cursor->stmt, waiting);
     }
 
