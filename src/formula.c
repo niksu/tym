@@ -196,7 +196,7 @@ tym_mk_fmla_imply(struct TymFmla * antecedent, struct TymFmla * consequent)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(at->pred_name));
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -220,7 +220,7 @@ tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
 
   if (tym_have_space(dst, 1)) {
     tym_unsafe_buffer_char(dst, '\0');
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -229,7 +229,7 @@ tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   if (tym_have_space(dst, 2)) {
     tym_unsafe_buffer_str(dst, "((");
@@ -256,13 +256,13 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(fmlaL, dst);
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -274,13 +274,13 @@ tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct Tym
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   const size_t fmla_sz = tym_fmla_size(fmla);
   if (fmla_sz > 1) {
@@ -356,7 +356,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 
   if (tym_have_space(dst, 1)) {
     tym_unsafe_buffer_char(dst, '\0');
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -458,7 +458,7 @@ tym_mk_abstract_vars(const struct TymFmla * at, struct TymSymGen * vg, struct Ty
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TymValuation * v_cursor = v;
 
@@ -490,7 +490,7 @@ tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
 
   if (tym_have_space(dst, 1)) {
     tym_unsafe_buffer_char(dst, '\0');
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -724,9 +724,11 @@ tym_test_formula(void)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  printf("strlen=%zu\n", strlen(outbuf->buffer));
-  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
+  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
+  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
 
   tym_free_buffer(outbuf);
   tym_free_fmla(test_and);
@@ -753,9 +755,11 @@ tym_test_formula(void)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  printf("strlen=%zu\n", strlen(outbuf->buffer));
-  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
+  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
+  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
   tym_free_buffer(outbuf);
 
   outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -763,9 +767,11 @@ tym_test_formula(void)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  printf("strlen=%zu\n", strlen(outbuf->buffer));
-  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
+  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
+  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
   tym_free_buffer(outbuf);
 
   outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -773,9 +779,11 @@ tym_test_formula(void)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  printf("strlen=%zu\n", strlen(outbuf->buffer));
-  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
+  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
+  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
   tym_free_buffer(outbuf);
 
   tym_free_fmla(test_atom);

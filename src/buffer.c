@@ -12,6 +12,30 @@
 
 #include "buffer.h"
 
+struct TymBufferInfo {
+  char * buffer;
+  size_t idx;
+  size_t buffer_size;
+};
+
+const char *
+tym_buffer_contents(struct TymBufferInfo * buf)
+{
+  return buf->buffer;
+}
+
+size_t
+tym_buffer_len(struct TymBufferInfo * buf)
+{
+  return buf->idx;
+}
+
+size_t
+tym_buffer_size(struct TymBufferInfo * buf)
+{
+  return buf->buffer_size;
+}
+
 struct TymBufferInfo *
 tym_mk_buffer(const size_t buffer_size)
 {

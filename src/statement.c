@@ -51,7 +51,7 @@ tym_mk_universe(struct TymTerms * terms)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_universe_str(const struct TymUniverse * const uni, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
@@ -101,7 +101,7 @@ tym_universe_str(const struct TymUniverse * const uni, struct TymBufferInfo * ds
 
   if (tym_have_space(dst, 3)) {
     tym_unsafe_buffer_str(dst, ")\n");
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -195,7 +195,7 @@ tym_mk_stmt_const_def(const TymStr * const_name, struct TymUniverse * uni)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
@@ -318,7 +318,7 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
 
   if (tym_have_space(dst, 1)) {
     tym_unsafe_buffer_char(dst, '\0');
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -357,7 +357,7 @@ TYM_DEFINE_LIST_MK(stmt, stmt, struct TymStmt, struct TymStmts, const)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_stmts_str(const struct TymStmts * const stmts, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
   const struct TymStmts * cursor = stmts;
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
@@ -374,7 +374,7 @@ tym_stmts_str(const struct TymStmts * const stmts, struct TymBufferInfo * dst)
 
   if (tym_have_space(dst, 1)) {
     tym_unsafe_buffer_char(dst, '\0');
-    return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+    return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
   } else {
     return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
   }
@@ -406,7 +406,7 @@ tym_mk_model(struct TymUniverse * uni)
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_model_str(const struct TymModel * const mdl, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, "(declare-sort");
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -430,7 +430,7 @@ tym_model_str(const struct TymModel * const mdl, struct TymBufferInfo * dst)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 #pragma GCC diagnostic push
@@ -493,9 +493,11 @@ tym_test_statement(void)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("test model (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
-  printf("strlen=%zu\n", strlen(outbuf->buffer));
-  assert(strlen(outbuf->buffer) + 1 == outbuf->idx);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
+  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
+  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
   tym_free_buffer(outbuf);
 
   tym_free_model(mdl);

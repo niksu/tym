@@ -67,7 +67,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
   assert(NULL != tdb);
   assert(NULL != dst);
 
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   const struct TymTerms * cursor = tdb->herbrand_universe;
 
@@ -83,7 +83,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
     cursor = cursor->next;
   }
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TymPredicate *
@@ -253,7 +253,7 @@ tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
 {
   assert(NULL != adb);
 
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, "Terms:");
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -308,13 +308,13 @@ tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
     }
   }
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst)
 {
-  size_t initial_idx = dst->idx;
+  size_t initial_idx = tym_buffer_len(dst);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_buf_strcpy(dst, tym_decode_str(pred->predicate));
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -330,7 +330,7 @@ tym_predicate_str(const struct TymPredicate * pred, struct TymBufferInfo * dst)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 
-  return tym_mkval_TymBufferWriteResult(dst->idx - initial_idx);
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TymPredicates *
