@@ -66,7 +66,8 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
         tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
         tym_buffer_contents(outbuf));
     printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-    assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+    assert(((0 == strlen(tym_buffer_contents(outbuf))) && (0 == tym_buffer_len(outbuf))) ||
+           strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
 
     tym_free_program(ParsedInputFileContents);
     free(Params.input_file);
