@@ -142,7 +142,9 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+    tym_buffer_len(outbuf),
+    tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+    tym_buffer_contents(outbuf));
   tym_free_buffer(outbuf);
 #endif
 
@@ -186,8 +188,10 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
 #if TYM_DEBUG
-  printf("clause database (remaining=%zu)\n|%s|\n",
-      outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+  printf("clause database (size=%lu, remaining=%zu)\n|%s|\n",
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
 #endif
 
 
@@ -199,7 +203,9 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   printf("model (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
 #else
   res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -224,7 +230,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       free(res);
       fmlas_c = fmlas_c->next;
     }
-    printf(">-: %s\n", outbuf->buffer);
+    printf(">-: %s\n", tym_buffer_contents(outbuf));
 #endif
 
     struct TymFmlas * fmlas_cursor = fmlas;
@@ -253,7 +259,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if TYM_DEBUG
-      printf("bodyless: %s\n", outbuf->buffer);
+      printf("bodyless: %s\n", tym_buffer_contents(outbuf));
 #endif
 
 #pragma GCC diagnostic push
@@ -296,7 +302,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-        printf("from: %s\n", outbuf->buffer);
+        printf("from: %s\n", tym_buffer_contents(outbuf));
 #endif
 
         struct TymValuation ** val = malloc(sizeof *val);
@@ -309,7 +315,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if TYM_DEBUG
-        printf("to: %s\n", outbuf->buffer);
+        printf("to: %s\n", tym_buffer_contents(outbuf));
 #endif
 
         res = tym_valuation_str(*val, outbuf);
@@ -318,7 +324,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         if (0 == tym_val_of_TymBufferWriteResult(res)) {
           printf("  where: (no substitutions)\n");
         } else {
-          printf("  where: %s\n", outbuf->buffer);
+          printf("  where: %s\n", tym_buffer_contents(outbuf));
         }
 #endif
         free(res);
@@ -338,7 +344,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 #if TYM_DEBUG
-        printf("  :|%s|\n", outbuf->buffer);
+        printf("  :|%s|\n", tym_buffer_contents(outbuf));
 #endif
 
         tym_free_fmla(head_fmla);
@@ -363,7 +369,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
 #if TYM_DEBUG
-      printf("pre-result: %s\n", outbuf->buffer);
+      printf("pre-result: %s\n", tym_buffer_contents(outbuf));
 #endif
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
@@ -421,7 +427,9 @@ tym_order_statements(const struct TymStmts * stmts)
     free(res);
 
     printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
-      outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+      tym_buffer_len(outbuf),
+      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+      tym_buffer_contents(outbuf));
     tym_free_buffer(outbuf);
 #endif
 
@@ -446,7 +454,9 @@ tym_order_statements(const struct TymStmts * stmts)
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",
-        outbuf->idx, outbuf->buffer_size - outbuf->idx, outbuf->buffer);
+        tym_buffer_len(outbuf),
+        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
+        tym_buffer_contents(outbuf));
 
     tym_free_buffer(outbuf);
 #endif
