@@ -492,12 +492,7 @@ tym_test_statement(void)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test model (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+  TYM_DBG_BUFFER(outbuf, "test model")
   tym_free_buffer(outbuf);
 
   tym_free_model(mdl);

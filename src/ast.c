@@ -589,12 +589,7 @@ tym_test_clause(void) {
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_clause_to_str(cl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test clause (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+  TYM_DBG_BUFFER(outbuf, "test clause")
   tym_free_buffer(outbuf);
 
   tym_free_clause(cl);
@@ -646,12 +641,7 @@ tym_terms_subsumed_by(const struct TymTerms * const ts, const struct TymTerms * 
       struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_term_to_str(ss->term, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-      printf("unsubsumed (size=%zu, remaining=%zu)\n|%s|\n",
-          tym_buffer_len(outbuf),
-          tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-          tym_buffer_contents(outbuf));
-      printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-      assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+      TYM_DBG_BUFFER(outbuf, "unsubsumed")
       tym_free_buffer(outbuf);
 #endif
       result = false;

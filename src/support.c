@@ -61,14 +61,7 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
     res = tym_program_to_str(ParsedInputFileContents, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("stringed file contents (size=%lu, remaining=%zu)\n|%s|\n",
-        tym_buffer_len(outbuf),
-        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-        tym_buffer_contents(outbuf));
-    printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-    assert(((0 == strlen(tym_buffer_contents(outbuf))) && (0 == tym_buffer_len(outbuf))) ||
-           strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
-
+    TYM_DBG_BUFFER(outbuf, "stringed file contents")
     tym_free_program(ParsedInputFileContents);
     free(Params.input_file);
   }
@@ -77,13 +70,7 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
     res = tym_program_to_str(ParsedQuery, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("stringed query (size=%lu, remaining=%zu)\n|%s|\n",
-        tym_buffer_len(outbuf),
-        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-        tym_buffer_contents(outbuf));
-    printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-    assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
-
+    TYM_DBG_BUFFER(outbuf, "stringed query")
     tym_free_program(ParsedQuery);
     free(Params.query);
   }
@@ -134,12 +121,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
     res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("PREmodel (size=%zu, remaining=%zu)\n|%s|\n",
-        tym_buffer_len(outbuf),
-        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-        tym_buffer_contents(outbuf));
-    printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-    assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+    TYM_DBG_BUFFER(outbuf, "PREmodel")
 #endif
 
     const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
@@ -149,12 +131,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
     res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("model (size=%zu, remaining=%zu)\n|%s|\n",
-        tym_buffer_len(outbuf),
-        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-        tym_buffer_contents(outbuf));
-    printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-    assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+    TYM_DBG_BUFFER(outbuf, "model")
   }
 
   TYM_DBG("Cleaning up before exiting\n");

@@ -723,13 +723,7 @@ tym_test_formula(void)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(test_quant, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test formula (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
-
+  TYM_DBG_BUFFER(outbuf, "test formula")
   tym_free_buffer(outbuf);
   tym_free_fmla(test_and);
   tym_free_fmla(test_atom);
@@ -754,36 +748,21 @@ tym_test_formula(void)
   res = tym_fmla_str(test_atom, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test_atom formula (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+  TYM_DBG_BUFFER(outbuf, "test_atom formula")
   tym_free_buffer(outbuf);
 
   outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   res = tym_fmla_str(test_and2, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test_and2 formula (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+  TYM_DBG_BUFFER(outbuf, "test_and2 formula")
   tym_free_buffer(outbuf);
 
   outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   res = tym_fmla_str(test_or, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("test_or formula (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-  printf("strlen=%zu\n", strlen(tym_buffer_contents(outbuf)));
-  assert(strlen(tym_buffer_contents(outbuf)) + 1 == tym_buffer_len(outbuf));
+  TYM_DBG_BUFFER(outbuf, "test_or formula")
   tym_free_buffer(outbuf);
 
   tym_free_fmla(test_atom);

@@ -141,10 +141,7 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
   struct TymLiftedTymBufferWriteResult * res = tym_fmla_str(q_fmla, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("q_fmla (size=%zu, remaining=%zu)\n|%s|\n",
-    tym_buffer_len(outbuf),
-    tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-    tym_buffer_contents(outbuf));
+  TYM_DBG_BUFFER(outbuf, "q_fmla")
   tym_free_buffer(outbuf);
 #endif
 
@@ -187,12 +184,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_atom_database_str(adb, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-#if TYM_DEBUG
-  printf("clause database (size=%lu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
-#endif
+  TYM_DBG_BUFFER(outbuf, "clause database")
 
 
   // 1. Generate prologue: universe sort, and its inhabitants.
@@ -202,10 +194,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
-  printf("model (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
+  TYM_DBG_BUFFER(outbuf, "model")
 #else
   res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
@@ -230,7 +219,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       free(res);
       fmlas_c = fmlas_c->next;
     }
-    printf(">-: %s\n", tym_buffer_contents(outbuf));
+    TYM_DBG_BUFFER_PRINT(outbuf, ">-")
 #endif
 
     struct TymFmlas * fmlas_cursor = fmlas;
@@ -258,9 +247,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       res = tym_fmla_str(atom, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-#if TYM_DEBUG
-      printf("bodyless: %s\n", tym_buffer_contents(outbuf));
-#endif
+      TYM_DBG_BUFFER_PRINT(outbuf, "bodyless")
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -302,7 +289,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-        printf("from: %s\n", tym_buffer_contents(outbuf));
+        TYM_DBG_BUFFER_PRINT(outbuf, "from")
 #endif
 
         struct TymValuation ** val = malloc(sizeof *val);
@@ -314,9 +301,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(abs_head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if TYM_DEBUG
-        printf("to: %s\n", tym_buffer_contents(outbuf));
-#endif
+        TYM_DBG_BUFFER_PRINT(outbuf, "to")
 
         res = tym_valuation_str(*val, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
@@ -324,7 +309,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         if (0 == tym_val_of_TymBufferWriteResult(res)) {
           printf("  where: (no substitutions)\n");
         } else {
-          printf("  where: %s\n", tym_buffer_contents(outbuf));
+          TYM_DBG_BUFFER_PRINT(outbuf, "  where")
         }
 #endif
         free(res);
@@ -343,9 +328,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_fmla_str(fmlas_cursor->fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
-#if TYM_DEBUG
-        printf("  :|%s|\n", tym_buffer_contents(outbuf));
-#endif
+        TYM_DBG_BUFFER_PRINT_ENCLOSE(outbuf, "  :|", "|")
 
         tym_free_fmla(head_fmla);
         if (NULL != *val) {
@@ -368,9 +351,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       res = tym_fmla_str(fmla, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-#if TYM_DEBUG
-      printf("pre-result: %s\n", tym_buffer_contents(outbuf));
-#endif
+      TYM_DBG_BUFFER_PRINT(outbuf, "pre-result")
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
       tym_strengthen_model(mdl,
@@ -420,23 +401,18 @@ tym_order_statements(const struct TymStmts * stmts)
     struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
     struct TymLiftedTymBufferWriteResult * res = NULL;
 
-    printf("|declared| = %d\n", tym_len_TymTerms_cell(declared));
+    TYM_DBG("|declared| = %d\n", tym_len_TymTerms_cell(declared));
 
     res = tym_terms_to_str(declared, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
-    printf("declared (size=%zu, remaining=%zu)\n|%s|\n",
-      tym_buffer_len(outbuf),
-      tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-      tym_buffer_contents(outbuf));
+    TYM_DBG_BUFFER(outbuf, "declared")
     tym_free_buffer(outbuf);
 #endif
 
     if (NULL == cursor && NULL != waiting) {
-#if TYM_DEBUG
-      printf("Making 'waiting' into 'cursor'.\n");
-#endif
+      TYM_DBG("Making 'waiting' into 'cursor'.\n");
       cursor = waiting;
       waiting = NULL;
       cursor_is_waiting = true;
@@ -444,7 +420,7 @@ tym_order_statements(const struct TymStmts * stmts)
     }
 #if TYM_DEBUG
     else {
-      printf("Not making 'waiting' into 'cursor'.\n");
+      TYM_DBG("Not making 'waiting' into 'cursor'.\n");
     }
 #endif
 
@@ -453,11 +429,7 @@ tym_order_statements(const struct TymStmts * stmts)
     res = tym_stmt_str(cursor->stmt, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("cursor->stmt (size=%zu, remaining=%zu)\n|%s|\n",
-        tym_buffer_len(outbuf),
-        tym_buffer_size(outbuf) - tym_buffer_len(outbuf),
-        tym_buffer_contents(outbuf));
-
+    TYM_DBG_BUFFER(outbuf, "cursor->stmt")
     tym_free_buffer(outbuf);
 #endif
 
