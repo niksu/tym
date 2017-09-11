@@ -52,12 +52,12 @@ struct TymProgram {
   struct TymClause ** program;
 };
 
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_to_str(const struct TymTerm * const term, struct TymBufferInfo * dst);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_terms_to_str(const struct TymTerms * const terms, struct TymBufferInfo * dst);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_predicate_to_str(const struct TymAtom * atom, struct TymBufferInfo * dst);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_atom_to_str(const struct TymAtom * const atom, struct TymBufferInfo * dst);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_clause_to_str(const struct TymClause * const clause, struct TymBufferInfo * dst);
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_program_to_str(const struct TymProgram * const program, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_str(const struct TymTerm * const term, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_terms_str(const struct TymTerms * const terms, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_predicate_atom_str(const struct TymAtom * atom, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_atom_str(const struct TymAtom * const atom, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_clause_str(const struct TymClause * const clause, struct TymBufferInfo * dst);
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_program_str(const struct TymProgram * const program, struct TymBufferInfo * dst);
 
 struct TymTerm * tym_mk_term(enum TymTermKind kind, const TymStr * identifier);
 struct TymAtom * tym_mk_atom(TymStr * predicate, uint8_t arity, struct TymTerms * args);
@@ -76,9 +76,9 @@ void tym_free_clause(struct TymClause * clause);
 void tym_free_clauses(struct TymClauses * clauses);
 void tym_free_program(struct TymProgram * program);
 
-typedef struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_to_str_t)(void *, struct TymBufferInfo * dst);
+typedef struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_str_t)(void *, struct TymBufferInfo * dst);
 
-void tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_to_str)(void *, struct TymBufferInfo * dst));
+void tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_str)(void *, struct TymBufferInfo * dst));
 
 #if TYM_DEBUG
 #define TYM_DBG_SYNTAX tym_debug_out_syntax

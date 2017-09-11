@@ -211,7 +211,7 @@ tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst)
       return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
     }
 
-    res = tym_term_to_str(at->predargs[i], dst);
+    res = tym_term_str(at->predargs[i], dst);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -471,7 +471,7 @@ tym_valuation_str(struct TymValuation * v, struct TymBufferInfo * dst)
 
     tym_safe_buffer_replace_last(dst, '='); // replace the trailing \0.
 
-    res = tym_term_to_str(v_cursor->val, dst);
+    res = tym_term_str(v_cursor->val, dst);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 

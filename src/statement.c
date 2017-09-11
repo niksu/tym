@@ -264,7 +264,7 @@ tym_stmt_str(const struct TymStmt * const stmt, struct TymBufferInfo * dst)
           return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
         }
 
-        res = tym_term_to_str(params_cursor->term, dst);
+        res = tym_term_str(params_cursor->term, dst);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 

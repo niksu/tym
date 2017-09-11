@@ -74,7 +74,7 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   while (NULL != cursor) {
-    res = tym_term_to_str(cursor->term, dst);
+    res = tym_term_str(cursor->term, dst);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 
@@ -295,7 +295,7 @@ tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
           return tym_mkerrval_TymBufferWriteResult(BUFF_ERR_OVERFLOW);
         }
 
-        res = tym_clause_to_str(clause_cursor->clause, dst);
+        res = tym_clause_str(clause_cursor->clause, dst);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
 

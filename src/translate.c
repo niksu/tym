@@ -403,7 +403,7 @@ tym_order_statements(const struct TymStmts * stmts)
 
     TYM_DBG("|declared| = %d\n", tym_len_TymTerms_cell(declared));
 
-    res = tym_terms_to_str(declared, outbuf);
+    res = tym_terms_str(declared, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
 

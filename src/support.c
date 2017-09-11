@@ -58,7 +58,7 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
   if (NULL != Params.input_file) {
-    res = tym_program_to_str(ParsedInputFileContents, outbuf);
+    res = tym_program_str(ParsedInputFileContents, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_BUFFER(outbuf, "stringed file contents")
@@ -67,7 +67,7 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
   }
 
   if (NULL != Params.query) {
-    res = tym_program_to_str(ParsedQuery, outbuf);
+    res = tym_program_str(ParsedQuery, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_BUFFER(outbuf, "stringed query")
