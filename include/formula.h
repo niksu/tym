@@ -23,7 +23,7 @@ extern char * TYM_UNIVERSE_TY;
 
 struct TymFmlaAtom {
   const TymStr * pred_name;
-  /* FIXME make "const"*/ struct TymTerm * pred_const;
+  const struct TymTerm * pred_const;
   uint8_t arity;
   struct TymTerm ** predargs;
 };

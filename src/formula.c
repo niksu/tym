@@ -500,7 +500,10 @@ void
 tym_free_fmla_atom(struct TymFmlaAtom * at)
 {
   tym_free_str(at->pred_name);
-  tym_free_term(at->pred_const);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  tym_free_term((struct TymTerm *)at->pred_const);
+#pragma GCC diagnostic pop
 
   for (int i = 0; i < at->arity; i++) {
     tym_free_term(at->predargs[i]);
@@ -871,7 +874,11 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
     // We add fmla->param.atom->pred_const to result (although pred_const
     // doesn't appear in the Herbrand Universe) otherwise the subsumption check
     // wouldn't work well.
-    result = tym_mk_term_cell(fmla->param.atom->pred_const, result);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    // FIXME pass immutable elements to tym_mk_term_cell?
+    result = tym_mk_term_cell((struct TymTerm *)fmla->param.atom->pred_const, result);
+#pragma GCC diagnostic pop
 
     for (int i = 0; i < fmla->param.atom->arity; i++) {
       struct TymTerm * t = fmla->param.atom->predargs[i];
