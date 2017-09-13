@@ -127,9 +127,7 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
 void
 tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg)
 {
-#if TYM_DEBUG
-  printf("|query|=%d\n", query->no_clauses);
-#endif
+  TYM_DBG("|query|=%d\n", query->no_clauses);
   // NOTE we expect a query to contain exactly one clause.
   assert(1 == query->no_clauses);
   const struct TymClause * q_cl = query->program[0];
@@ -263,9 +261,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       const struct TymFmla * abs_head_fmla = NULL;
 
       while (NULL != body_cursor) {
-#if TYM_DEBUG
-        printf(">");
-#endif
+        TYM_DBG(">");
 
         struct TymSymGen * vg_copy = tym_copy_sym_gen(*vg);
 
@@ -285,7 +281,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
           tym_mk_fmla_atom(TYM_STR_DUPLICATE(head_atom->predicate),
               head_atom->arity, args);
 
-#if TYM_DEBUG // FIXME cover more code using the #if?
+#if TYM_DEBUG
         res = tym_fmla_str(head_fmla, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         free(res);
@@ -303,16 +299,16 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         free(res);
         TYM_DBG_BUFFER_PRINT(outbuf, "to")
 
+#if TYM_DEBUG
         res = tym_valuation_str(*val, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
-#if TYM_DEBUG
         if (0 == tym_val_of_TymBufferWriteResult(res)) {
           printf("  where: (no substitutions)\n");
         } else {
           TYM_DBG_BUFFER_PRINT(outbuf, "  where")
         }
-#endif
         free(res);
+#endif
 
         struct TymFmla * valuation_fmla = tym_translate_valuation(*val);
         fmlas_cursor->fmla = tym_mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
