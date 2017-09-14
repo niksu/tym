@@ -51,6 +51,7 @@ void
 tym_reset_buffer(struct TymBufferInfo * buf)
 {
   buf->idx = 0;
+  buf->buffer[0] = '\0';
 }
 
 #pragma GCC diagnostic push
