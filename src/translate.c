@@ -312,7 +312,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
           tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
-        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla); // FIXME is the copying redundant?
+        fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla);
         if (NULL != ts) {
           tym_free_terms(ts);
         }
