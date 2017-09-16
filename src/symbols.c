@@ -308,6 +308,8 @@ tym_atom_database_str(struct TymAtomDatabase * adb, struct TymBufferInfo * dst)
     }
   }
 
+  tym_safe_buffer_replace_last(dst, '\0');
+
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 

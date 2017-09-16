@@ -189,14 +189,11 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   struct TymModel * mdl = tym_mk_model(tym_mk_universe(adb->tdb->herbrand_universe));
 
 #if TYM_DEBUG
+  tym_reset_buffer(outbuf);
   res = tym_model_str(mdl, outbuf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
   TYM_DBG_BUFFER(outbuf, "model")
-#else
-  res = tym_model_str(mdl, outbuf);
-  assert(tym_is_ok_TymBufferWriteResult(res));
-  free(res);
 #endif
 
 

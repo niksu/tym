@@ -118,6 +118,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
 
   if (NULL != mdl) {
 #if TYM_DEBUG
+    tym_reset_buffer(outbuf);
     res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
@@ -128,6 +129,7 @@ process_program(struct Params Params, struct TymProgram * ParsedInputFileContent
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 
+    tym_reset_buffer(outbuf);
     res = tym_model_str(mdl, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
