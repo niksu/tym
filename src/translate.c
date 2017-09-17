@@ -200,9 +200,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   // 2. Add axiom characterising the provability of all elements of the Hilbert base.
   struct TymPredicates * preds_cursor = tym_atom_database_to_predicates(adb);
   while (NULL != preds_cursor) {
-#if TYM_DEBUG
-    printf("no_bodies = %zu\n", tym_num_predicate_bodies(preds_cursor->predicate));
-#endif
+    TYM_DBG("no_bodies = %zu\n", tym_num_predicate_bodies(preds_cursor->predicate));
 
     struct TymFmlas * fmlas = (struct TymFmlas *)tym_translate_bodies(preds_cursor->predicate->bodies);
 #if TYM_DEBUG
@@ -300,7 +298,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         res = tym_valuation_str(*val, outbuf);
         assert(tym_is_ok_TymBufferWriteResult(res));
         if (0 == tym_val_of_TymBufferWriteResult(res)) {
-          printf("  where: (no substitutions)\n");
+          TYM_DBG("  where: (no substitutions)\n");
         } else {
           TYM_DBG_BUFFER_PRINT(outbuf, "  where")
         }
@@ -362,9 +360,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
     free((void *)pre_preds_cursor);
 #pragma GCC diagnostic pop
 
-#if TYM_DEBUG
-    printf("\n");
-#endif
+    TYM_DBG("\n");
   }
 
   tym_free_buffer(outbuf);
@@ -430,22 +426,18 @@ tym_order_statements(const struct TymStmts * stmts)
     struct TymTerms * term_consts = tym_consts_in_stmt(cursor->stmt);
     if (tym_terms_subsumed_by(declared, term_consts)) {
       if (NULL != t) {
-#if TYM_DEBUG
-        printf("Term subsumption for %s\n", tym_decode_str(t->identifier));
-#endif
+        TYM_DBG("Term subsumption for %s\n", tym_decode_str(t->identifier));
         declared = tym_mk_term_cell(t, declared);
       }
 #if TYM_DEBUG
       else {
-        printf("NULL == t\n");
+        TYM_DBG("NULL == t\n");
       }
 #endif
       result = tym_mk_stmt_cell(cursor->stmt, result);
     } else {
       if (NULL != t) {
-#if TYM_DEBUG
-        printf("NO term subsumption for %s\n", tym_decode_str(t->identifier));
-#endif
+        TYM_DBG("NO term subsumption for %s\n", tym_decode_str(t->identifier));
         tym_free_term(t);
       }
       waiting = tym_mk_stmt_cell(cursor->stmt, waiting);
