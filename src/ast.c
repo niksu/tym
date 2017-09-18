@@ -30,7 +30,7 @@ tym_term_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_term(term) + 127/*FIXME brittle*/);
+  sprintf(local_buf, "{hash=%d}", tym_hash_term(term));
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -59,7 +59,7 @@ tym_predicate_atom_str(const struct TymAtom * atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%u}", tym_hash_str(tym_decode_str(atom->predicate)) + 127/*FIXME brittle*/);
+  sprintf(local_buf, "{hash=%u}", tym_hash_str(tym_decode_str(atom->predicate)));
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -118,7 +118,7 @@ tym_atom_str(const struct TymAtom * const atom, struct TymBufferInfo * dst)
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom) + 127/*FIXME brittle*/);
+  sprintf(local_buf, "{hash=%d}", tym_hash_atom(atom));
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -199,7 +199,7 @@ tym_clause_str(const struct TymClause * const clause, struct TymBufferInfo * dst
 
 #if TYM_DEBUG
   char local_buf[TYM_BUF_SIZE];
-  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause) + 127/*FIXME brittle*/);
+  sprintf(local_buf, "{hash=%d}", tym_hash_clause(clause));
   res = tym_buf_strcpy(dst, local_buf);
   assert(tym_is_ok_TymBufferWriteResult(res));
   free(res);
@@ -503,8 +503,10 @@ tym_hash_atom(const struct TymAtom * atom)
 
   TYM_HASH_VTYPE result = tym_hash_str(tym_decode_str(atom->predicate));
 
+  result ^= (TYM_HASH_VTYPE)atom->arity;
+
   for (int i = 0; i < atom->arity; i++) {
-    result = (TYM_HASH_VTYPE)(((result * tym_hash_term(atom->args[i])) % 256) - 128/*FIXME brittle*/);
+    result ^= (TYM_HASH_VTYPE)((i + 1) * tym_hash_term(atom->args[i]));
   }
 
   return result;
@@ -516,8 +518,10 @@ tym_hash_clause(const struct TymClause * clause) {
 
   TYM_HASH_VTYPE result = tym_hash_atom(clause->head);
 
+  result ^= (TYM_HASH_VTYPE)clause->body_size;
+
   for (int i = 0; i < clause->body_size; i++) {
-    result ^= (TYM_HASH_VTYPE)(((i + tym_hash_atom(clause->body[i])) % 256) - 128/*FIXME brittle*/);
+    result ^= (TYM_HASH_VTYPE)((i + 1) * tym_hash_atom(clause->body[i]));
   }
 
   return result;
