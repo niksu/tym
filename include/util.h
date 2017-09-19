@@ -56,8 +56,6 @@
     return result; \
   }
 
-// FIXME include functions for FREE and STR wrt list.
-
 #define __TYM_DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE, RESULT_TYCON) \
   RESULT_TYCON LIST_TYPE * tym_mk_ ## NAME ## _cell (const EL_TYPE * const el, const LIST_TYPE * const lst)
 #define TYM_DECLARE_LIST_MK(NAME, EL_TYPE, LIST_TYPE, RESULT_TYCON) \
@@ -115,5 +113,23 @@
       free((void *)pre_cursor); \
     } \
   }
+
+#define TYM_LIST_LEN(NAME) tym_list_len_ ## NAME
+#define __TYM_DECLARE_LIST_LEN(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  unsigned int TYM_LIST_LEN(NAME) (TYPE_OP_PRE TYPE_NAME * lst)
+#define TYM_DECLARE_LIST_LEN(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  __TYM_DECLARE_LIST_LEN(NAME, TYPE_OP_PRE, TYPE_NAME);
+#define TYM_DEFINE_LIST_LEN(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  __TYM_DECLARE_LIST_LEN(NAME, TYPE_OP_PRE, TYPE_NAME) \
+  { \
+    unsigned int result = 0; \
+    while (NULL != lst) { \
+      lst = lst->next; \
+      result++; \
+    } \
+    return result; \
+  }
+
+// NOTE could also include functions for (deep)FREE and STR wrt list.
 
 #endif /* __TYM_UTIL_H__ */

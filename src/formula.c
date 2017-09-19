@@ -17,7 +17,11 @@
 uint8_t TymMaxVarWidth = 10;
 char * TYM_UNIVERSE_TY = "Universe";
 
+#if 0
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
+#else
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst);
+#endif
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 
 struct TymFmla *
@@ -96,11 +100,12 @@ tym_mk_fmla_not(struct TymFmla * subfmla)
 struct TymFmla *
 tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
-  struct TymFmla ** result_content = malloc(sizeof *result_content * 2);
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
   struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_AND;
   result_content[0] = subfmlaL;
   result_content[1] = subfmlaR;
+  result_content[2] = NULL;
   result->param.args = result_content;
   return result;
 }
@@ -108,11 +113,12 @@ tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 struct TymFmla *
 tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
-  struct TymFmla ** result_content = malloc(sizeof *result_content * 2);
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
   struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_OR;
   result_content[0] = subfmlaL;
   result_content[1] = subfmlaR;
+  result_content[2] = NULL;
   result->param.args = result_content;
   return result;
 }
@@ -128,6 +134,22 @@ tym_mk_fmla_ands(struct TymFmlas * fmlas)
       result = fmlas->fmla;
       free(fmlas);
     } else {
+#if 1
+      unsigned int no_fmlas = TYM_LIST_LEN(TymFmlas)(fmlas);
+      struct TymFmla ** result_content = malloc(sizeof *result_content *
+        (no_fmlas + 1));
+      result = malloc(sizeof *result);
+      result->kind = FMLA_AND;
+      struct TymFmlas * cursor = fmlas;
+      for (unsigned int i = 0; i < no_fmlas; i++) {
+        result_content[i] = cursor->fmla;
+        cursor = cursor->next;
+        free(fmlas);
+        fmlas = cursor;
+      }
+      result_content[no_fmlas] = NULL;
+      result->param.args = result_content;
+#else
       const struct TymFmlas * cursor = fmlas;
       const struct TymFmlas * pre_cursor = cursor;
       result = tym_mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
@@ -146,6 +168,7 @@ tym_mk_fmla_ands(struct TymFmlas * fmlas)
         free((void *)pre_cursor);
 #pragma GCC diagnostic pop
       }
+#endif
     }
   }
   return result;
@@ -162,6 +185,22 @@ tym_mk_fmla_ors(struct TymFmlas * fmlas)
       result = fmlas->fmla;
       free(fmlas);
     } else {
+#if 1
+      unsigned int no_fmlas = TYM_LIST_LEN(TymFmlas)(fmlas);
+      struct TymFmla ** result_content = malloc(sizeof *result_content *
+        (no_fmlas + 1));
+      result = malloc(sizeof *result);
+      result->kind = FMLA_OR;
+      struct TymFmlas * cursor = fmlas;
+      for (unsigned int i = 0; i < no_fmlas; i++) {
+        result_content[i] = cursor->fmla;
+        cursor = cursor->next;
+        free(fmlas);
+        fmlas = cursor;
+      }
+      result_content[no_fmlas] = NULL;
+      result->param.args = result_content;
+#else
       const struct TymFmlas * cursor = fmlas;
       const struct TymFmlas * pre_cursor = cursor;
       result = tym_mk_fmla_or(fmlas->fmla, fmlas->next->fmla);
@@ -180,6 +219,7 @@ tym_mk_fmla_ors(struct TymFmlas * fmlas)
         free((void *)pre_cursor);
 #pragma GCC diagnostic pop
       }
+#endif
     }
   }
   return result;
@@ -259,6 +299,7 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
+#if 0
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst)
 {
@@ -276,6 +317,27 @@ tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct Tym
 
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
+#else
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
+tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst)
+{
+  size_t initial_idx = tym_buffer_len(dst);
+
+  while (NULL != *fmla) {
+    struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res =
+      tym_fmla_str(*fmla, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    fmla++;
+  }
+
+  tym_safe_buffer_replace_last(dst, '\0');
+
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
+}
+#endif
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
@@ -308,6 +370,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
+#if 0
   case FMLA_AND:
     res = tym_buf_strcpy(dst, "and");
     assert(tym_is_ok_TymBufferWriteResult(res));
@@ -326,6 +389,27 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
+#else
+  case FMLA_AND:
+    res = tym_buf_strcpy(dst, "and");
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    res = tym_fmla_junction_str(fmla->param.args, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    break;
+  case FMLA_OR:
+    res = tym_buf_strcpy(dst, "or");
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    res = tym_fmla_junction_str(fmla->param.args, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    break;
+    break;
+#endif
   case FMLA_NOT:
     res = tym_buf_strcpy(dst, "not");
     assert(tym_is_ok_TymBufferWriteResult(res));
@@ -363,6 +447,7 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
 }
 
 TYM_DEFINE_MUTABLE_LIST_MK(fmla, fmla, struct TymFmla, struct TymFmlas)
+TYM_DEFINE_LIST_LEN(TymFmlas, , struct TymFmlas)
 
 struct TymSymGen *
 tym_mk_sym_gen(const TymStr * prefix)
@@ -547,13 +632,25 @@ tym_free_fmla(const struct TymFmla * fmla)
     tym_free_fmla_atom(fmla->param.atom);
     break;
   case FMLA_AND:
+#if 1
+    for (int i = 0; NULL != fmla->param.args[i]; i++) {
+      tym_free_fmla(fmla->param.args[i]);
+    }
+#else
     tym_free_fmla(fmla->param.args[0]);
     tym_free_fmla(fmla->param.args[1]);
+#endif
     free(fmla->param.args);
     break;
   case FMLA_OR:
+#if 1
+    for (int i = 0; NULL != fmla->param.args[i]; i++) {
+      tym_free_fmla(fmla->param.args[i]);
+    }
+#else
     tym_free_fmla(fmla->param.args[0]);
     tym_free_fmla(fmla->param.args[1]);
+#endif
     free(fmla->param.args);
     break;
   case FMLA_NOT:
