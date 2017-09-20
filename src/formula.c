@@ -17,11 +17,7 @@
 uint8_t TymMaxVarWidth = 10;
 char * TYM_UNIVERSE_TY = "Universe";
 
-#if 0
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst);
-#else
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst);
-#endif
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 
 struct TymFmla *
@@ -134,7 +130,6 @@ tym_mk_fmla_ands(struct TymFmlas * fmlas)
       result = fmlas->fmla;
       free(fmlas);
     } else {
-#if 1
       unsigned int no_fmlas = TYM_LIST_LEN(TymFmlas)(fmlas);
       struct TymFmla ** result_content = malloc(sizeof *result_content *
         (no_fmlas + 1));
@@ -149,26 +144,6 @@ tym_mk_fmla_ands(struct TymFmlas * fmlas)
       }
       result_content[no_fmlas] = NULL;
       result->param.args = result_content;
-#else
-      const struct TymFmlas * cursor = fmlas;
-      const struct TymFmlas * pre_cursor = cursor;
-      result = tym_mk_fmla_and(fmlas->fmla, fmlas->next->fmla);
-      cursor = fmlas->next->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      free((void *)pre_cursor->next);
-      free((void *)pre_cursor);
-#pragma GCC diagnostic pop
-      while (NULL != cursor) {
-        result = tym_mk_fmla_and(result, cursor->fmla);
-        pre_cursor = cursor;
-        cursor = cursor->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-        free((void *)pre_cursor);
-#pragma GCC diagnostic pop
-      }
-#endif
     }
   }
   return result;
@@ -185,7 +160,6 @@ tym_mk_fmla_ors(struct TymFmlas * fmlas)
       result = fmlas->fmla;
       free(fmlas);
     } else {
-#if 1
       unsigned int no_fmlas = TYM_LIST_LEN(TymFmlas)(fmlas);
       struct TymFmla ** result_content = malloc(sizeof *result_content *
         (no_fmlas + 1));
@@ -200,26 +174,6 @@ tym_mk_fmla_ors(struct TymFmlas * fmlas)
       }
       result_content[no_fmlas] = NULL;
       result->param.args = result_content;
-#else
-      const struct TymFmlas * cursor = fmlas;
-      const struct TymFmlas * pre_cursor = cursor;
-      result = tym_mk_fmla_or(fmlas->fmla, fmlas->next->fmla);
-      cursor = fmlas->next->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      free((void *)pre_cursor->next);
-      free((void *)pre_cursor);
-#pragma GCC diagnostic pop
-      while (NULL != cursor) {
-        result = tym_mk_fmla_or(result, cursor->fmla);
-        pre_cursor = cursor;
-        cursor = cursor->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-        free((void *)pre_cursor);
-#pragma GCC diagnostic pop
-      }
-#endif
     }
   }
   return result;
@@ -299,25 +253,6 @@ tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
-#if 0
-struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
-tym_fmla_junction_str(struct TymFmla * fmlaL, struct TymFmla * fmlaR, struct TymBufferInfo * dst)
-{
-  size_t initial_idx = tym_buffer_len(dst);
-
-  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = tym_fmla_str(fmlaL, dst);
-  assert(tym_is_ok_TymBufferWriteResult(res));
-  free(res);
-
-  tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-
-  res = tym_fmla_str(fmlaR, dst);
-  assert(tym_is_ok_TymBufferWriteResult(res));
-  free(res);
-
-  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
-}
-#else
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst)
 {
@@ -337,7 +272,6 @@ tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst)
 
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
-#endif
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
@@ -370,26 +304,6 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
-#if 0
-  case FMLA_AND:
-    res = tym_buf_strcpy(dst, "and");
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = tym_fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    break;
-  case FMLA_OR:
-    res = tym_buf_strcpy(dst, "or");
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
-    res = tym_fmla_junction_str(fmla->param.args[0], fmla->param.args[1], dst);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    break;
-#else
   case FMLA_AND:
     res = tym_buf_strcpy(dst, "and");
     assert(tym_is_ok_TymBufferWriteResult(res));
@@ -409,7 +323,6 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     free(res);
     break;
     break;
-#endif
   case FMLA_NOT:
     res = tym_buf_strcpy(dst, "not");
     assert(tym_is_ok_TymBufferWriteResult(res));
@@ -632,25 +545,15 @@ tym_free_fmla(const struct TymFmla * fmla)
     tym_free_fmla_atom(fmla->param.atom);
     break;
   case FMLA_AND:
-#if 1
     for (int i = 0; NULL != fmla->param.args[i]; i++) {
       tym_free_fmla(fmla->param.args[i]);
     }
-#else
-    tym_free_fmla(fmla->param.args[0]);
-    tym_free_fmla(fmla->param.args[1]);
-#endif
     free(fmla->param.args);
     break;
   case FMLA_OR:
-#if 1
     for (int i = 0; NULL != fmla->param.args[i]; i++) {
       tym_free_fmla(fmla->param.args[i]);
     }
-#else
-    tym_free_fmla(fmla->param.args[0]);
-    tym_free_fmla(fmla->param.args[1]);
-#endif
     free(fmla->param.args);
     break;
   case FMLA_NOT:
