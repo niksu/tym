@@ -47,6 +47,7 @@ struct TymFmla {
 
 TYM_DECLARE_MUTABLE_LIST_TYPE(TymFmlas, fmla, TymFmla)
 TYM_DECLARE_MUTABLE_LIST_MK(fmla, struct TymFmla, struct TymFmlas)
+TYM_DECLARE_LIST_LEN(TymFmlas, , struct TymFmlas)
 
 struct TymFmla * tym_mk_fmla_const(bool b);
 struct TymFmla * tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs);
