@@ -17,7 +17,13 @@
 
 #include "lifted.h"
 
+#ifndef TYM_BUF_SIZE
 #define TYM_BUF_SIZE 2600
+#else
+  #if TYM_BUF_SIZE < 100
+  #warn TYM_BUF_SIZE < 100
+  #endif
+#endif
 
 #define TYM_VERBOSE printf
 #define TYM_ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
