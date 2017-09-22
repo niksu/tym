@@ -51,7 +51,7 @@ TYM_DECLARE_LIST_LEN(TymFmlas, , struct TymFmlas)
 
 struct TymFmla * tym_mk_fmla_const(bool b);
 struct TymFmla * tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs);
-struct TymFmla * tym_mk_fmla_atom_varargs(const TymStr * pred_name, uint8_t arity, ...);
+struct TymFmla * tym_mk_fmla_atom_varargs(const TymStr * pred_name, unsigned int arity, ...);
 struct TymFmla * tym_mk_fmla_quant(const TymStr * bv, struct TymFmla * body);
 struct TymFmla * tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body);
 struct TymFmla * tym_mk_fmla_not(struct TymFmla * subfmla);
@@ -62,7 +62,7 @@ struct TymFmla * tym_mk_fmla_ors(struct TymFmlas * fmlas);
 struct TymFmla * tym_mk_fmla_imply(struct TymFmla * antecedent, struct TymFmla * consequent);
 struct TymFmla * tym_copy_fmla(const struct TymFmla * const);
 
-struct TymFmlas * tym_mk_fmlas(uint8_t no_fmlas, ...);
+struct TymFmlas * tym_mk_fmlas(unsigned int no_fmlas, ...);
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_atom_str(struct TymFmlaAtom * at, struct TymBufferInfo * dst);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_quant_str(struct TymFmlaQuant * quant, struct TymBufferInfo * dst);

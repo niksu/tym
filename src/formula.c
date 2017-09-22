@@ -53,7 +53,7 @@ tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** pred
 }
 
 struct TymFmla *
-tym_mk_fmla_atom_varargs(const TymStr * pred_name, uint8_t arity, ...)
+tym_mk_fmla_atom_varargs(const TymStr * pred_name, unsigned int arity, ...)
 {
   struct TymTerm ** args = NULL;
 
@@ -61,13 +61,13 @@ tym_mk_fmla_atom_varargs(const TymStr * pred_name, uint8_t arity, ...)
   va_start(varargs, arity);
   if (arity > 0) {
     args = malloc(sizeof *args * arity);
-    for (int i = 0; i < arity; i++) {
+    for (unsigned int i = 0; i < arity; i++) {
       args[i] = va_arg(varargs, struct TymTerm *);
     }
   }
   va_end(varargs);
 
-  return tym_mk_fmla_atom(pred_name, arity, args);
+  return tym_mk_fmla_atom(pred_name, (uint8_t)arity, args);
 }
 
 struct TymFmla *
@@ -618,12 +618,12 @@ tym_free_valuation(struct TymValuation * v)
 }
 
 struct TymFmlas *
-tym_mk_fmlas(uint8_t no_fmlas, ...)
+tym_mk_fmlas(unsigned int no_fmlas, ...)
 {
   va_list varargs;
   va_start(varargs, no_fmlas);
   struct TymFmlas * result = NULL;
-  for (int i = 0; i < no_fmlas; i++) {
+  for (unsigned int i = 0; i < no_fmlas; i++) {
     struct TymFmla * cur_fmla = va_arg(varargs, struct TymFmla *);
     assert(NULL != cur_fmla);
     result = tym_mk_fmla_cell(tym_copy_fmla(cur_fmla), result);
