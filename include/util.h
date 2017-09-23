@@ -18,7 +18,7 @@
 #include "lifted.h"
 
 #ifndef TYM_BUF_SIZE
-#define TYM_BUF_SIZE 2600
+#define TYM_BUF_SIZE 2000
 #else
   #if TYM_BUF_SIZE < 100
   #warn TYM_BUF_SIZE < 100
