@@ -45,7 +45,7 @@ main(int argc, char ** argv)
   exit(0);
 #endif
 
-  struct Params Params = {
+  struct TymParams Params = {
     .input_file = NULL,
     .verbosity = 0,
     .query = NULL,

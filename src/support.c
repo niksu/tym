@@ -13,7 +13,7 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
 struct TymProgram *
-tym_parse_input_file(struct Params Params)
+tym_parse_input_file(struct TymParams Params)
 {
   struct TymProgram * result = NULL;
   if (NULL != Params.input_file) {
@@ -33,7 +33,7 @@ tym_parse_input_file(struct Params Params)
 }
 
 struct TymProgram *
-tym_parse_query(struct Params Params)
+tym_parse_query(struct TymParams Params)
 {
   struct TymProgram * result = NULL;
   if (NULL != Params.query) {
@@ -51,7 +51,7 @@ tym_parse_query(struct Params Params)
 }
 
 void
-print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileContents,
+print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -79,7 +79,7 @@ print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileCo
 }
 
 enum TymReturnCodes
-process_program(struct Params Params, struct TymProgram * ParsedInputFileContents,
+process_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
   if (NULL == Params.input_file) {

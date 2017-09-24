@@ -20,7 +20,7 @@
 #include "translate.h"
 #include "util.h"
 
-struct Params {
+struct TymParams {
   char * input_file;
   char verbosity;
   char * query;
@@ -31,10 +31,10 @@ enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER, TYM_NO_INPUT, TYM_IN
 
 struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
-struct TymProgram * tym_parse_input_file(struct Params Params);
-struct TymProgram * tym_parse_query(struct Params Params);
-void print_parsed_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
-enum TymReturnCodes process_program(struct Params Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+struct TymProgram * tym_parse_input_file(struct TymParams Params);
+struct TymProgram * tym_parse_query(struct TymParams Params);
+void print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCodes process_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 
