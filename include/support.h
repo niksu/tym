@@ -20,7 +20,7 @@
 #include "translate.h"
 #include "util.h"
 
-enum TymFunction {TYM_CONVERT_TO_SMT=0};
+enum TymFunction {TYM_NO_FUNCTION=0, TYM_CONVERT_TO_SMT};
 
 struct TymParams {
   char * input_file;

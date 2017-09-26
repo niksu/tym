@@ -50,7 +50,8 @@ main(int argc, char ** argv)
     .input_file = NULL,
     .verbosity = 0,
     .query = NULL,
-    .test_parsing = false
+    .test_parsing = false,
+    .function = TYM_NO_FUNCTION
   };
 
   static struct option long_options[] = {
@@ -134,6 +135,8 @@ main(int argc, char ** argv)
     TYM_VERBOSE("query = %s\n", Params.query);
     TYM_VERBOSE("function = %d\n", Params.function);
   }
+
+  assert(Params.function != TYM_NO_FUNCTION);
 
   tym_init_str();
 
