@@ -25,6 +25,7 @@ show_usage(const char * const argv_0)
   printf("usage: %s PARAMETERS \n"
          " Mandatory parameters: \n"
          "   -i, --input_file FILENAME \n"
+         "   -f, --function FUNCTION \n"
          " Optional parameters: \n"
          "   -q, --query QUERY \n"
          "   -v, --verbose \n"
@@ -62,20 +63,27 @@ main(int argc, char ** argv)
 #define LONG_OPT_TESTPARSING 4
     {"test_parsing", no_argument, NULL, LONG_OPT_TESTPARSING},
 #define LONG_OPT_MAX_VAR_WIDTH 5
-    {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH}
+    {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH},
+#define LONG_OPT_FUNCTION 6
+    {"function", required_argument, NULL, LONG_OPT_FUNCTION}
   };
 
   int option_index = 0;
   long v;
 
   int option;
-  while ((option = getopt_long(argc, argv, "hi:q:v", long_options,
+  while ((option = getopt_long(argc, argv, "f:hi:q:v", long_options,
           &option_index)) != -1) {
     switch (option) {
     case LONG_OPT_INPUT:
     case 'i':
       Params.input_file = malloc(strlen(optarg) + 1);
       strcpy(Params.input_file, optarg);
+      break;
+    case LONG_OPT_FUNCTION:
+    case 'f':
+      Params.function = (enum TymFunction)strtol(optarg, NULL, 10);
+      assert(TYM_CONVERT_TO_SMT == Params.function);
       break;
     case LONG_OPT_VERBOSE:
     case 'v':
@@ -104,6 +112,8 @@ main(int argc, char ** argv)
     }
   }
 
+  // FIXME check if there remain any unprocess command-line options.
+
   if (Params.verbosity > 0) {
 #ifdef TYM_DEBUG
     TYM_VERBOSE("TYM_DEBUG = %d\n", TYM_DEBUG);
@@ -122,6 +132,7 @@ main(int argc, char ** argv)
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("test_parsing = %d\n", Params.test_parsing);
     TYM_VERBOSE("query = %s\n", Params.query);
+    TYM_VERBOSE("function = %d\n", Params.function);
   }
 
   tym_init_str();

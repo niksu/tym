@@ -134,6 +134,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_BUFFER(outbuf, "model")
+    // FIXME assuming we're in mode TYM_CONVERT_TO_SMT
+    //       Maybe this function should be renamed to indicate that it only
+    //       deals with this mode of operation.
+    printf("%s", tym_buffer_contents(outbuf));
   }
 
   TYM_DBG("Cleaning up before exiting\n");

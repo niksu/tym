@@ -20,11 +20,14 @@
 #include "translate.h"
 #include "util.h"
 
+enum TymFunction {TYM_CONVERT_TO_SMT=0};
+
 struct TymParams {
   char * input_file;
   char verbosity;
   char * query;
   bool test_parsing;
+  enum TymFunction function;
 };
 
 enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER, TYM_NO_INPUT, TYM_INVALID_INPUT};
