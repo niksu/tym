@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "tym.h"
 #include "module_tests.h"
@@ -113,7 +114,14 @@ main(int argc, char ** argv)
     }
   }
 
-  // FIXME check if there remain any unprocess command-line options.
+  if (optind != argc) {
+    printf("Unrecognised parameter%s:", optind + 1 < argc ? "s" : "");
+    for (int i = optind; i < argc; ++i) {
+      printf(" %s", argv[i]);
+    }
+    printf("\n");
+    return TYM_UNRECOGNISED_PARAMETER;
+  }
 
   if (Params.verbosity > 0) {
 #ifdef TYM_DEBUG
