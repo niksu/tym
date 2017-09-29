@@ -26,13 +26,12 @@ show_usage(const char * const argv_0)
   printf("usage: %s PARAMETERS \n"
          " Mandatory parameters: \n"
          "   -i, --input_file FILENAME \n"
-         "   -f, --function FUNCTION \n"
+         "   -f, --function FUNCTION (%s)\n"
          " Optional parameters: \n"
          "   -q, --query QUERY \n"
          "   -v, --verbose \n"
-         "   --test_parsing \n"
          "   --max_var_width N \n"
-         "   -h \n", argv_0);
+         "   -h \n", argv_0, tym_functions());
 }
 
 int
@@ -51,7 +50,6 @@ main(int argc, char ** argv)
     .input_file = NULL,
     .verbosity = 0,
     .query = NULL,
-    .test_parsing = false,
     .function = TYM_NO_FUNCTION
   };
 
@@ -62,11 +60,9 @@ main(int argc, char ** argv)
     {"verbose", no_argument, NULL, LONG_OPT_VERBOSE},
 #define LONG_OPT_QUERY 3
     {"query", required_argument, NULL, LONG_OPT_QUERY},
-#define LONG_OPT_TESTPARSING 4
-    {"test_parsing", no_argument, NULL, LONG_OPT_TESTPARSING},
-#define LONG_OPT_MAX_VAR_WIDTH 5
+#define LONG_OPT_MAX_VAR_WIDTH 4
     {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH},
-#define LONG_OPT_FUNCTION 6
+#define LONG_OPT_FUNCTION 5
     {"function", required_argument, NULL, LONG_OPT_FUNCTION}
   };
 
@@ -84,8 +80,16 @@ main(int argc, char ** argv)
       break;
     case LONG_OPT_FUNCTION:
     case 'f':
-      Params.function = (enum TymFunction)strtol(optarg, NULL, 10);
-      assert(TYM_CONVERT_TO_SMT == Params.function);
+      Params.function = TYM_NO_FUNCTION;
+      for (unsigned i = 0; i < TYM_NO_FUNCTION; ++i) {
+         if (0 == strcmp(optarg, TymFunctionCommandMapping[i])) {
+            Params.function = i;
+         }
+      }
+      if (TYM_NO_FUNCTION == Params.function) {
+        TYM_ERR("Unrecognized function: %s\n", optarg);
+        return TYM_UNRECOGNISED_PARAMETER;
+      }
       break;
     case LONG_OPT_VERBOSE:
     case 'v':
@@ -95,9 +99,6 @@ main(int argc, char ** argv)
     case 'q':
       Params.query = malloc(strlen(optarg) + 1);
       strcpy(Params.query, optarg);
-      break;
-    case LONG_OPT_TESTPARSING:
-      Params.test_parsing = true;
       break;
     case LONG_OPT_MAX_VAR_WIDTH:
       v = strtol(optarg, NULL, 10);
@@ -115,11 +116,11 @@ main(int argc, char ** argv)
   }
 
   if (optind != argc) {
-    printf("Unrecognised parameter%s:", optind + 1 < argc ? "s" : "");
+    TYM_ERR("Unrecognised parameter%s:", optind + 1 < argc ? "s" : "");
     for (int i = optind; i < argc; ++i) {
-      printf(" %s", argv[i]);
+      TYM_ERR(" %s", argv[i]);
     }
-    printf("\n");
+    TYM_ERR("\n");
     return TYM_UNRECOGNISED_PARAMETER;
   }
 
@@ -139,9 +140,8 @@ main(int argc, char ** argv)
 
     TYM_VERBOSE("input_fine = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
-    TYM_VERBOSE("test_parsing = %d\n", Params.test_parsing);
     TYM_VERBOSE("query = %s\n", Params.query);
-    TYM_VERBOSE("function = %d\n", Params.function);
+    TYM_VERBOSE("function = %s\n", TymFunctionCommandMapping[Params.function]);
   }
 
   assert(Params.function != TYM_NO_FUNCTION);
@@ -158,7 +158,7 @@ main(int argc, char ** argv)
   if (TYM_AOK == result) {
     struct TymProgram * ParsedQuery = tym_parse_query(Params);
 
-    if (Params.test_parsing) {
+    if (TYM_TEST_PARSING == Params.function) {
       print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
     } else {
       result = process_program(Params, ParsedInputFileContents, ParsedQuery);

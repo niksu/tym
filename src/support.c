@@ -12,13 +12,39 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
+const char * TymFunctionCommandMapping[] =
+  {"test_parsing",
+   "smt",
+   NULL
+  };
+
+const char *
+tym_functions(void) {
+  unsigned string_length = 0;
+  for (unsigned i = 0; i < TYM_NO_FUNCTION; ++i) {
+     string_length += strlen(TymFunctionCommandMapping[i]) + 2;
+  }
+  char * result = malloc(string_length + 1);
+  const char * sep = ", ";
+  for (unsigned offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
+     strcpy(result + offset, TymFunctionCommandMapping[i]);
+     offset += strlen(TymFunctionCommandMapping[i]);
+     if (TYM_NO_FUNCTION - 1 != i) {
+       strcpy(result + offset, sep);
+       offset += strlen(sep);
+     }
+  }
+
+  return result;
+}
+
 struct TymProgram *
 tym_parse_input_file(struct TymParams Params)
 {
   struct TymProgram * result = NULL;
   if (NULL != Params.input_file) {
     char * InputFileContents = read_file(Params.input_file);
-    if (Params.test_parsing) {
+    if (TYM_TEST_PARSING == Params.function) {
       printf("input contents |%s|\n", InputFileContents);
     }
     result = parse(InputFileContents);
@@ -26,7 +52,7 @@ tym_parse_input_file(struct TymParams Params)
       TYM_VERBOSE("input : %d clauses\n", result->no_clauses);
     }
     free(InputFileContents);
-  } else if (Params.test_parsing) {
+  } else if (TYM_TEST_PARSING == Params.function) {
     printf("(no input file given)\n");
   }
   return result;
@@ -37,14 +63,14 @@ tym_parse_query(struct TymParams Params)
 {
   struct TymProgram * result = NULL;
   if (NULL != Params.query) {
-    if (Params.test_parsing && 0 == Params.verbosity) {
+    if ((TYM_TEST_PARSING == Params.function) && 0 == Params.verbosity) {
       printf("query contents |%s|\n", Params.query);
     }
     result = parse(Params.query);
     if (Params.verbosity > 0 && NULL != Params.query) {
       TYM_VERBOSE("query : %d clauses\n", result->no_clauses);
     }
-  } else if (Params.test_parsing) {
+  } else if (TYM_TEST_PARSING == Params.function) {
     printf("(no query given)\n");
   }
   return result;

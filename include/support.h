@@ -20,13 +20,16 @@
 #include "translate.h"
 #include "util.h"
 
-enum TymFunction {TYM_NO_FUNCTION=0, TYM_CONVERT_TO_SMT};
+enum TymFunction {TYM_TEST_PARSING=0, TYM_CONVERT_TO_SMT, TYM_NO_FUNCTION};
+
+extern const char * TymFunctionCommandMapping[];
+
+const char * tym_functions(void);
 
 struct TymParams {
   char * input_file;
   char verbosity;
   char * query;
-  bool test_parsing;
   enum TymFunction function;
 };
 
