@@ -93,6 +93,7 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
   }
 
   if (NULL != Params.query) {
+    tym_reset_buffer(outbuf);
     res = tym_program_str(ParsedQuery, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
