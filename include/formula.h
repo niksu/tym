@@ -102,6 +102,6 @@ struct TymTerms * tym_filter_var_values(struct TymValuation * const v);
 
 size_t tym_fmla_size(const struct TymFmla * const);
 
-struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc);
+struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const);
 
 #endif /* __TYM_FORMULA_H__ */

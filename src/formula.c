@@ -861,7 +861,7 @@ tym_fmla_size(const struct TymFmla * const fmla)
 }
 
 struct TymTerms *
-tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
+tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const)
 {
   struct TymTerms * result = NULL;
   switch (fmla->kind) {
@@ -876,8 +876,10 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
     // wouldn't work well.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    // FIXME pass immutable elements to tym_mk_term_cell?
-    result = tym_mk_term_cell((struct TymTerm *)fmla->param.atom->pred_const, result);
+    if (with_pred_const) {
+      // FIXME pass immutable elements to tym_mk_term_cell?
+      result = tym_mk_term_cell((struct TymTerm *)fmla->param.atom->pred_const, result);
+    }
 #pragma GCC diagnostic pop
 
     for (int i = 0; i < fmla->param.atom->arity; i++) {
@@ -889,14 +891,14 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc)
     break;
   case FMLA_AND:
   case FMLA_OR:
-    acc = tym_consts_in_fmla(fmla->param.args[0], acc);
-    result = tym_consts_in_fmla(fmla->param.args[1], acc);
+    acc = tym_consts_in_fmla(fmla->param.args[0], acc, true);
+    result = tym_consts_in_fmla(fmla->param.args[1], acc, true);
     break;
   case FMLA_NOT:
-    result = tym_consts_in_fmla(fmla->param.args[0], acc);
+    result = tym_consts_in_fmla(fmla->param.args[0], acc, true);
     break;
   case FMLA_EX:
-    result = tym_consts_in_fmla(fmla->param.quant->body, acc);
+    result = tym_consts_in_fmla(fmla->param.quant->body, acc, true);
     break;
   default:
     assert(false);

@@ -144,11 +144,11 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
 #endif
 
   // Reject the query if it containts constants that don't appear in the program.
-  struct TymTerms * cursor = tym_consts_in_fmla(q_fmla, NULL);
+  struct TymTerms * cursor = tym_consts_in_fmla(q_fmla, NULL, false);
   while (NULL != cursor) {
     if (TYM_CONST == cursor->term->kind) {
       bool found = false;
-      for (int i = 0; i < mdl->universe->cardinality; i++) {
+      for (int i = 0; i < mdl->universe->cardinality; i++) { // FIXME linear-time lookup
         if (0 == tym_cmp_str(cursor->term->identifier, mdl->universe->element[i])) {
           found = true;
           break;

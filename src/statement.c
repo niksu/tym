@@ -525,11 +525,11 @@ tym_consts_in_stmt(const struct TymStmt * stmt)
   struct TymTerms * result = NULL;
   switch (stmt->kind) {
   case TYM_STMT_AXIOM:
-    result = tym_consts_in_fmla(stmt->param.axiom, NULL);
+    result = tym_consts_in_fmla(stmt->param.axiom, NULL, true);
     break;
   case TYM_STMT_CONST_DEF:
     if (NULL != stmt->param.const_def->body) {
-      result = tym_consts_in_fmla(stmt->param.const_def->body, NULL);
+      result = tym_consts_in_fmla(stmt->param.const_def->body, NULL, true);
     }
     break;
   default:
