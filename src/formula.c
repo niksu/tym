@@ -96,6 +96,31 @@ tym_mk_fmla_not(struct TymFmla * subfmla)
 struct TymFmla *
 tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
+  if (tym_fmla_is_const(subfmlaL)) {
+    if (tym_fmla_as_const(subfmlaL)) {
+      if (tym_fmla_is_const(subfmlaR)) {
+        tym_free_fmla(subfmlaR);
+        return subfmlaL;
+      } else {
+        tym_free_fmla(subfmlaL);
+        return subfmlaR;
+      }
+    } else {
+      tym_free_fmla(subfmlaR);
+      return subfmlaL;
+    }
+  } else {
+    if (tym_fmla_is_const(subfmlaR)) {
+      if (tym_fmla_as_const(subfmlaR)) {
+        tym_free_fmla(subfmlaR);
+        return subfmlaL;
+      } else {
+        tym_free_fmla(subfmlaL);
+        return subfmlaR;
+      }
+    }
+  }
+
   struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
   struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_AND;
@@ -409,6 +434,27 @@ tym_fmla_as_atom(const struct TymFmla * fmla)
     return fmla->param.atom;
   } else {
     return NULL;
+  }
+}
+
+bool
+tym_fmla_is_const(const struct TymFmla * fmla)
+{
+  switch (fmla->kind) {
+  case FMLA_CONST:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool
+tym_fmla_as_const(const struct TymFmla * fmla)
+{
+  if (tym_fmla_is_const(fmla)) {
+    return fmla->param.const_value;
+  } else {
+    assert(false);
   }
 }
 

@@ -88,6 +88,8 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_valuation_str(struct Tym
 
 bool tym_fmla_is_atom(const struct TymFmla * fmla);
 struct TymFmlaAtom * tym_fmla_as_atom(const struct TymFmla * fmla);
+bool tym_fmla_is_const(const struct TymFmla * fmla);
+bool tym_fmla_as_const(const struct TymFmla * fmla);
 const struct TymFmla * tym_mk_abstract_vars(const struct TymFmla *, struct TymSymGen *, struct TymValuation **);
 struct TymTerms * tym_arguments_of_atom(struct TymFmlaAtom * fmla);
 
