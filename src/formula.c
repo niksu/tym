@@ -753,13 +753,13 @@ tym_test_formula(void)
   args[1] = tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("arg1"));
 
   for (int i = 0; i < 2; i++) {
-    printf("  :%s\n", tym_decode_str(args[i]->identifier));
+    TYM_DBG("  :%s\n", tym_decode_str(args[i]->identifier));
   }
 
   struct TymFmla * test_atom = tym_mk_fmla_atom(TYM_CSTR_DUPLICATE("atom"), 2, args);
 
   for (int i = 0; i < 2; i++) {
-    printf("  ;%s\n", tym_decode_str(test_atom->param.atom->predargs[i]->identifier));
+    TYM_DBG("  ;%s\n", tym_decode_str(test_atom->param.atom->predargs[i]->identifier));
   }
 
   struct TymFmla * test_not = tym_mk_fmla_not(tym_copy_fmla(test_atom));
