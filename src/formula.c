@@ -134,6 +134,26 @@ tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 struct TymFmla *
 tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 {
+  if (tym_fmla_is_const(subfmlaL)) {
+    if (tym_fmla_as_const(subfmlaL)) {
+      tym_free_fmla(subfmlaR);
+      return subfmlaL;
+    } else {
+      tym_free_fmla(subfmlaL);
+      return subfmlaR;
+    }
+  } else {
+    if (tym_fmla_is_const(subfmlaR)) {
+      if (tym_fmla_as_const(subfmlaR)) {
+        tym_free_fmla(subfmlaL);
+        return subfmlaR;
+      } else {
+        tym_free_fmla(subfmlaR);
+        return subfmlaL;
+      }
+    }
+  }
+
   struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
   struct TymFmla * result = malloc(sizeof *result);
   result->kind = FMLA_OR;
