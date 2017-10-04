@@ -19,6 +19,7 @@ char * TYM_UNIVERSE_TY = "Universe";
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
+static struct TymFmlas * filter_before_ands(struct TymFmlas * fmlas);
 
 struct TymFmla *
 tym_mk_fmla_const(bool b)
@@ -164,9 +165,66 @@ tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
   return result;
 }
 
+struct TymFmlas *
+filter_before_ands(struct TymFmlas * fmlas)
+{
+  struct TymFmlas * new_fmlas = NULL;
+  bool saw_false = false;
+  if (NULL != fmlas) {
+    struct TymFmlas * cursor = fmlas;
+    while (NULL != cursor) {
+      if (tym_fmla_is_const(cursor->fmla)) {
+        if (tym_fmla_as_const(cursor->fmla)) {
+          // FIXME DRY principle wrt below
+          if (NULL == new_fmlas) {
+            new_fmlas = tym_mk_fmla_cell(cursor->fmla, NULL);
+            struct TymFmlas * next = cursor->next;
+            free(cursor);
+            cursor = next;
+          } else {
+            new_fmlas = tym_mk_fmla_cell(cursor->fmla, new_fmlas); // NOTE reversed
+            struct TymFmlas * next = cursor->next;
+            free(cursor);
+            cursor = next;
+          }
+        } else {
+          saw_false = true;
+          break;
+        }
+      } else {
+        // FIXME DRY principle wrt above
+        if (NULL == new_fmlas) {
+          new_fmlas = tym_mk_fmla_cell(cursor->fmla, NULL);
+          struct TymFmlas * next = cursor->next;
+          free(cursor);
+          cursor = next;
+        } else {
+          new_fmlas = tym_mk_fmla_cell(cursor->fmla, new_fmlas); // NOTE reversed
+          struct TymFmlas * next = cursor->next;
+          free(cursor);
+          cursor = next;
+        }
+      }
+    }
+
+    if (saw_false) {
+      // fmlas degenerates to "false"
+      if (NULL != new_fmlas) {
+        tym_free_fmlas(new_fmlas);
+      }
+      if (NULL != cursor) {
+        tym_free_fmlas(cursor);
+      }
+      new_fmlas = tym_mk_fmla_cell(tym_mk_fmla_const(false), NULL);
+    }
+  }
+  return new_fmlas; // FIXME reverse
+}
+
 struct TymFmla *
 tym_mk_fmla_ands(struct TymFmlas * fmlas)
 {
+  fmlas = filter_before_ands(fmlas);
   struct TymFmla * result;
   if (NULL == fmlas) {
     result = tym_mk_fmla_const(true);
