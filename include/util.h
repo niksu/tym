@@ -93,13 +93,13 @@
 #define TYM_DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   __TYM_DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST);
 // FIXME "const" is sticky, in that if TYPE_OP_PRE==const then must be that TYPE_OP_POST==const
-#define TYM_DEFINE_LIST_REV(NAME, CELL_MAKER, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
+#define TYM_DEFINE_LIST_REV(SINGULAR, NAME, CELL_MAKER, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   __TYM_DECLARE_LIST_REV(NAME, TYPE_OP_PRE, TYPE_NAME, TYPE_OP_POST) \
   { \
     TYPE_OP_POST TYPE_NAME * result = NULL; \
     while (NULL != lst) { \
-      assert(NULL != lst->stmt); \
-      result = CELL_MAKER(lst->stmt, result); \
+      assert(NULL != lst->SINGULAR); \
+      result = CELL_MAKER(lst->SINGULAR, result); \
       lst = lst->next; \
     } \
     return result; \

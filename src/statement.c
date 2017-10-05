@@ -498,7 +498,7 @@ tym_test_statement(void)
   tym_free_model(mdl);
 }
 
-TYM_DEFINE_LIST_REV(stmts, tym_mk_stmt_cell, const, struct TymStmts, const)
+TYM_DEFINE_LIST_REV(stmt, stmts, tym_mk_stmt_cell, const, struct TymStmts, const)
 
 struct TymTerm *
 tym_new_const_in_stmt(const struct TymStmt * stmt)
