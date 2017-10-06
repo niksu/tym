@@ -17,6 +17,8 @@
 uint8_t TymMaxVarWidth = 10;
 char * TYM_UNIVERSE_TY = "Universe";
 
+TYM_DEFINE_LIST_REV(fmla, fmlas, tym_mk_fmla_cell, , struct TymFmlas, )
+
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 static struct TymFmlas * filter_before_ands(struct TymFmlas * fmlas);
@@ -165,6 +167,24 @@ tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
   return result;
 }
 
+void transfer_cell(struct TymFmlas ** from_fmlas, struct TymFmlas ** to_fmlas);
+
+void
+transfer_cell(struct TymFmlas ** from_fmlas, struct TymFmlas ** to_fmlas)
+{
+  if (NULL == *to_fmlas) {
+    *to_fmlas = tym_mk_fmla_cell((*from_fmlas)->fmla, NULL);
+    struct TymFmlas * next = (*from_fmlas)->next;
+    free(*from_fmlas);
+    *from_fmlas = next;
+  } else {
+    *to_fmlas = tym_mk_fmla_cell((*from_fmlas)->fmla, *to_fmlas); // NOTE reversed
+    struct TymFmlas * next = (*from_fmlas)->next;
+    free(*from_fmlas);
+    *from_fmlas = next;
+  }
+}
+
 struct TymFmlas *
 filter_before_ands(struct TymFmlas * fmlas)
 {
@@ -175,35 +195,13 @@ filter_before_ands(struct TymFmlas * fmlas)
     while (NULL != cursor) {
       if (tym_fmla_is_const(cursor->fmla)) {
         if (tym_fmla_as_const(cursor->fmla)) {
-          // FIXME DRY principle wrt below
-          if (NULL == new_fmlas) {
-            new_fmlas = tym_mk_fmla_cell(cursor->fmla, NULL);
-            struct TymFmlas * next = cursor->next;
-            free(cursor);
-            cursor = next;
-          } else {
-            new_fmlas = tym_mk_fmla_cell(cursor->fmla, new_fmlas); // NOTE reversed
-            struct TymFmlas * next = cursor->next;
-            free(cursor);
-            cursor = next;
-          }
+          transfer_cell(&cursor, &new_fmlas);
         } else {
           saw_false = true;
           break;
         }
       } else {
-        // FIXME DRY principle wrt above
-        if (NULL == new_fmlas) {
-          new_fmlas = tym_mk_fmla_cell(cursor->fmla, NULL);
-          struct TymFmlas * next = cursor->next;
-          free(cursor);
-          cursor = next;
-        } else {
-          new_fmlas = tym_mk_fmla_cell(cursor->fmla, new_fmlas); // NOTE reversed
-          struct TymFmlas * next = cursor->next;
-          free(cursor);
-          cursor = next;
-        }
+        transfer_cell(&cursor, &new_fmlas);
       }
     }
 
@@ -218,7 +216,18 @@ filter_before_ands(struct TymFmlas * fmlas)
       new_fmlas = tym_mk_fmla_cell(tym_mk_fmla_const(false), NULL);
     }
   }
-  return new_fmlas; // FIXME reverse
+  struct TymFmlas * reversed = tym_reverse_fmlas(new_fmlas);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  struct TymFmlas * pre_cursor = NULL;
+  struct TymFmlas * cursor = new_fmlas;
+  while (NULL != cursor) {
+    pre_cursor = cursor;
+    cursor = cursor->next;
+    free((void *)pre_cursor);
+  }
+#pragma GCC diagnostic pop
+  return reversed;
 }
 
 struct TymFmla *
