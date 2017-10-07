@@ -21,7 +21,8 @@ TYM_DEFINE_LIST_REV(fmla, fmlas, tym_mk_fmla_cell, , struct TymFmlas, )
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct TymFmla ** fmla, struct TymBufferInfo * dst);
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
-static struct TymFmlas * filter_before_ands(struct TymFmlas * fmlas);
+static struct TymFmlas * filter_before_juncts(struct TymFmlas * fmlas, bool is_and_behaviour);
+
 
 struct TymFmla *
 tym_mk_fmla_const(bool b)
@@ -168,44 +169,61 @@ tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
 }
 
 void transfer_cell(struct TymFmlas ** from_fmlas, struct TymFmlas ** to_fmlas);
+void chomp_cell(struct TymFmlas ** fmlas);
+
+void
+chomp_cell(struct TymFmlas ** fmlas)
+{
+  if (NULL != *fmlas) {
+    struct TymFmlas * next = (*fmlas)->next;
+    free(*fmlas);
+    *fmlas = next;
+  }
+}
 
 void
 transfer_cell(struct TymFmlas ** from_fmlas, struct TymFmlas ** to_fmlas)
 {
   if (NULL == *to_fmlas) {
     *to_fmlas = tym_mk_fmla_cell((*from_fmlas)->fmla, NULL);
-    struct TymFmlas * next = (*from_fmlas)->next;
-    free(*from_fmlas);
-    *from_fmlas = next;
+    chomp_cell(from_fmlas);
   } else {
     *to_fmlas = tym_mk_fmla_cell((*from_fmlas)->fmla, *to_fmlas); // NOTE reversed
-    struct TymFmlas * next = (*from_fmlas)->next;
-    free(*from_fmlas);
-    *from_fmlas = next;
+    chomp_cell(from_fmlas);
   }
 }
 
 struct TymFmlas *
-filter_before_ands(struct TymFmlas * fmlas)
+filter_before_juncts(struct TymFmlas * fmlas, bool is_and_behaviour)
 {
   struct TymFmlas * new_fmlas = NULL;
   bool saw_false = false;
+  bool saw_true = false;
   if (NULL != fmlas) {
     struct TymFmlas * cursor = fmlas;
     while (NULL != cursor) {
       if (tym_fmla_is_const(cursor->fmla)) {
         if (tym_fmla_as_const(cursor->fmla)) {
-          transfer_cell(&cursor, &new_fmlas);
+          if (is_and_behaviour) {
+            chomp_cell(&cursor);
+          } else {
+            saw_true = true;
+            break;
+          }
         } else {
-          saw_false = true;
-          break;
+          if (is_and_behaviour) {
+            saw_false = true;
+            break;
+          } else {
+            chomp_cell(&cursor);
+          }
         }
       } else {
         transfer_cell(&cursor, &new_fmlas);
       }
     }
 
-    if (saw_false) {
+    if (saw_false && is_and_behaviour) {
       // fmlas degenerates to "false"
       if (NULL != new_fmlas) {
         tym_free_fmlas(new_fmlas);
@@ -214,8 +232,20 @@ filter_before_ands(struct TymFmlas * fmlas)
         tym_free_fmlas(cursor);
       }
       new_fmlas = tym_mk_fmla_cell(tym_mk_fmla_const(false), NULL);
+    } else if (saw_true && !is_and_behaviour) {
+      // fmlas degenerates to "true"
+      if (NULL != new_fmlas) {
+        tym_free_fmlas(new_fmlas);
+      }
+      if (NULL != cursor) {
+        tym_free_fmlas(cursor);
+      }
+      new_fmlas = tym_mk_fmla_cell(tym_mk_fmla_const(true), NULL);
+    } else {
+      assert(!(saw_false || saw_true));
     }
   }
+
   struct TymFmlas * reversed = tym_reverse_fmlas(new_fmlas);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -233,7 +263,7 @@ filter_before_ands(struct TymFmlas * fmlas)
 struct TymFmla *
 tym_mk_fmla_ands(struct TymFmlas * fmlas)
 {
-  fmlas = filter_before_ands(fmlas);
+  fmlas = filter_before_juncts(fmlas, true);
   struct TymFmla * result;
   if (NULL == fmlas) {
     result = tym_mk_fmla_const(true);
@@ -264,6 +294,7 @@ tym_mk_fmla_ands(struct TymFmlas * fmlas)
 struct TymFmla *
 tym_mk_fmla_ors(struct TymFmlas * fmlas)
 {
+  fmlas = filter_before_juncts(fmlas, false);
   struct TymFmla * result;
   if (NULL == fmlas) {
     result = tym_mk_fmla_const(false);
