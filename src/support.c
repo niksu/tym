@@ -87,7 +87,7 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
     res = tym_program_str(ParsedInputFileContents, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    TYM_DBG_BUFFER(outbuf, "stringed file contents")
+    TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed file contents")
     tym_free_program(ParsedInputFileContents);
     free(Params.input_file);
   }
@@ -97,7 +97,7 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
     res = tym_program_str(ParsedQuery, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    TYM_DBG_BUFFER(outbuf, "stringed query")
+    TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed query")
     tym_free_program(ParsedQuery);
     free(Params.query);
   }

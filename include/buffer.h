@@ -44,19 +44,21 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_buf_strcpy(struct TymBuf
 void tym_buff_error_msg(void * x);
 TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_error_msg)
 
-#if TYM_DEBUG
-#define TYM_DBG_BUFFER(buffvar, txt) \
-  TYM_DBG("%s (size=%zu, remaining=%zu)\n|%s|\n", \
+#define TYM_DBG_PRINT_BUFFER(PRINT, buffvar, txt) \
+  PRINT("%s (size=%zu, remaining=%zu)\n|%s|\n", \
     txt, \
     tym_buffer_len(buffvar), \
     tym_buffer_size(buffvar) - tym_buffer_len(buffvar), \
     tym_buffer_contents(buffvar)); \
-  TYM_DBG("%s strlen=%zu\n", \
+  PRINT("%s strlen=%zu\n", \
     txt, \
     strlen(tym_buffer_contents(buffvar))); \
     assert(((0 == strlen(tym_buffer_contents(buffvar))) && \
             (0 == tym_buffer_len(buffvar))) || \
            strlen(tym_buffer_contents(buffvar)) + 1 == tym_buffer_len(buffvar));
+#if TYM_DEBUG
+#define TYM_DBG_BUFFER(buffvar, txt) \
+  TYM_DBG_PRINT_BUFFER(TYM_DBG, buffvar, txt)
 #define TYM_DBG_BUFFER_PRINT(buffvar, txt) \
   TYM_DBG("%s: %s\n", txt,  tym_buffer_contents(buffvar));
 #define TYM_DBG_BUFFER_PRINT_ENCLOSE(buffvar, txt, txtend) \
