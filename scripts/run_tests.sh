@@ -23,11 +23,11 @@ for FILE in $(ls ${TYMDIR}/tests/*.test)
 do
   if [ "${MEM_CHECK}" == "1" ]
   then
-    CMD="${PREFIX} ${TYMDIR}/out/tym -i ${FILE} --test_parsing 2>&1"
+    CMD="${PREFIX} ${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
     echo "Running \"${CMD}\""
     eval ${CMD} | grep "ERROR SUMMARY"
   else
-    CMD="${TYMDIR}/out/tym -i ${FILE} --test_parsing 2>&1"
+    CMD="${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
     echo "Running \"${CMD}\""
     diff ${QUIET} <(eval ${CMD}) ${FILE}.expected
   fi
