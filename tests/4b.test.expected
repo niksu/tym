@@ -3,7 +3,8 @@ b(h2).
 c(h3).
 |
 (no query given)
-stringed file contents (size=37, remaining=2563)
+stringed file contents (size=37, remaining=1963)
 |a(X, Y) :- b(X), c(Y).
 b(h2).
 c(h3).|
+stringed file contents strlen=36
