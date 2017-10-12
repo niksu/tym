@@ -171,9 +171,18 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     tym_z3_begin();
     tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
     tym_z3_check();
-    enum TymSatisfiable x = tym_z3_satisfied();
-    printf("sat=%d\n", (int)x);
-    tym_z3_print_model();
+    enum TymSatisfiable result = tym_z3_satisfied();
+      printf("sat=%d\n", (int)result);
+    switch (result) {
+    case TYM_SAT_YES:
+      tym_z3_print_model();
+      break;
+    case TYM_SAT_NO:
+    case TYM_SAT_UNKNOWN:
+      break;
+    default:
+      assert(0);
+    }
     tym_z3_end();
 #endif
   }
