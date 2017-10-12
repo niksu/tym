@@ -5,6 +5,7 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
+#include "interface_z3.h"
 #include "support.h"
 
 #pragma GCC diagnostic push
@@ -165,6 +166,16 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     //       Maybe this function should be renamed to indicate that it only
     //       deals with this mode of operation.
     printf("%s", tym_buffer_contents(outbuf));
+
+#ifdef INTERFACE_Z3
+    tym_z3_begin();
+    tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
+    tym_z3_check();
+    enum TymSatisfiable x = tym_z3_satisfied();
+    printf("sat=%d\n", (int)x);
+    tym_z3_print_model();
+    tym_z3_end();
+#endif
   }
 
   TYM_DBG("Cleaning up before exiting\n");
