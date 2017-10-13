@@ -36,7 +36,6 @@ tym_mk_universe(struct TymTerms * terms)
     cursor = cursor->next;
   }
 
-  assert(result->cardinality > 0);
   result->element = malloc(sizeof *result->element * result->cardinality);
 
   cursor = terms;
