@@ -1,0 +1,8 @@
+% Example of recursive predicate.
+
+a().
+b() :- c().
+b() :- b().
+
+% Mutually recursive.
+%c() :- b().
