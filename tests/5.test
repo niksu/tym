@@ -4,5 +4,3 @@ a().
 b() :- c().
 b() :- b().
 
-% Mutually recursive.
-%c() :- b().
