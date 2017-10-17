@@ -27,10 +27,20 @@ struct TymFmla *
 tym_translate_body(const struct TymClause * cl)
 {
   struct TymFmlas * fmlas = NULL;
+  struct TymTerms * hidden_vars = tym_hidden_vars_of_clause(cl);
   for (int i = 0; i < cl->body_size; i++) {
     fmlas = tym_mk_fmla_cell(tym_translate_atom(cl->body[i]), fmlas);
   }
-  return tym_mk_fmla_ands(fmlas);
+
+  struct TymFmla * result = tym_mk_fmla_ands(fmlas);
+  struct TymTerms * cursor = hidden_vars;
+  while (NULL != cursor) {
+    result = tym_mk_fmla_quant(TYM_STR_DUPLICATE(cursor->term->identifier), result);
+    cursor = cursor->next;
+  }
+  tym_shallow_free_terms(hidden_vars);
+
+  return result;
 }
 
 struct TymFmlas *
