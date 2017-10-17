@@ -1,0 +1,17 @@
+input contents |% Example of mutual recursion.
+
+c().
+a().
+b() :- c().
+b() :- b().
+
+c() :- b().
+|
+(no query given)
+stringed file contents (size=46, remaining=1954)
+|c().
+a().
+b() :- c().
+b() :- b().
+c() :- b().|
+stringed file contents strlen=45

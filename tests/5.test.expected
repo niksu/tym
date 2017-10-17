@@ -1,0 +1,13 @@
+input contents |% Example of recursive predicate.
+
+a().
+b() :- c().
+b() :- b().
+
+|
+(no query given)
+stringed file contents (size=29, remaining=1971)
+|a().
+b() :- c().
+b() :- b().|
+stringed file contents strlen=28
