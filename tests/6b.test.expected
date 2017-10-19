@@ -1,0 +1,16 @@
+input contents |%v(a).
+%v(b).
+%v(c).
+%e(a,a).
+%e(b,b).
+%e(a,b).
+%e(b,c).
+d(X, X).
+e(X,Y) :- d(X, Z), d(Z, Y).
+%d(X, X).
+|
+(no query given)
+stringed file contents (size=38, remaining=1962)
+|d(X, X).
+e(X, Y) :- d(X, Z), d(Z, Y).|
+stringed file contents strlen=37

@@ -1,0 +1,22 @@
+input contents |v(a).
+v(b).
+v(c).
+e(a,a).
+e(b,b).
+e(a,b).
+e(b,c).
+e(X,Y) :- e(X, Z), e(Z, Y).
+
+%?- e(a,c).
+|
+(no query given)
+stringed file contents (size=83, remaining=1917)
+|v(a).
+v(b).
+v(c).
+e(a, a).
+e(b, b).
+e(a, b).
+e(b, c).
+e(X, Y) :- e(X, Z), e(Z, Y).|
+stringed file contents strlen=82
