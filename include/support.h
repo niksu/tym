@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_SUPPORT_H__
-#define __TYM_SUPPORT_H__
+#ifndef TYM_SUPPORT_H
+#define TYM_SUPPORT_H
 
 #include "ast.h"
 #include "buffer.h"
@@ -44,4 +44,4 @@ enum TymReturnCodes process_program(struct TymParams Params, struct TymProgram *
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 
-#endif // __TYM_SUPPORT_H__
+#endif // TYM_SUPPORT_H

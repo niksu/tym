@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_UTIL_H__
-#define __TYM_UTIL_H__
+#ifndef TYM_UTIL_H
+#define TYM_UTIL_H
 
 #include <assert.h>
 #include <stdarg.h>
@@ -138,4 +138,4 @@
 
 // NOTE could also include functions for (deep)FREE and STR wrt list.
 
-#endif /* __TYM_UTIL_H__ */
+#endif /* TYM_UTIL_H */

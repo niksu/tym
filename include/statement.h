@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_STATEMENT_H__
-#define __TYM_STATEMENT_H__
+#ifndef TYM_STATEMENT_H
+#define TYM_STATEMENT_H
 
 #include "string_idx.h"
 
