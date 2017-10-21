@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_AST_H__
-#define __TYM_AST_H__
+#ifndef TYM_AST_H
+#define TYM_AST_H
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -106,4 +106,4 @@ struct TymTerms * tym_hidden_vars_of_clause(const struct TymClause *);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(terms, , struct TymTerms)
 
-#endif // __TYM_AST_H__
+#endif // TYM_AST_H

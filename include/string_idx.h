@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_STRING_IDX_H__
-#define __TYM_STRING_IDX_H__
+#ifndef TYM_STRING_IDX_H
+#define TYM_STRING_IDX_H
 
 #include <stdlib.h>
 
@@ -54,4 +54,4 @@ void tym_free_str (const TymStr *);
 size_t tym_len_str (const TymStr *);
 int tym_cmp_str (const TymStr *, const TymStr *);
 
-#endif // __TYM_STRING_IDX_H__
+#endif // TYM_STRING_IDX_H

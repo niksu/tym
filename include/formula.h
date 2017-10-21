@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_FORMULA_H__
-#define __TYM_FORMULA_H__
+#ifndef TYM_FORMULA_H
+#define TYM_FORMULA_H
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -107,4 +107,4 @@ size_t tym_fmla_size(const struct TymFmla * const);
 
 struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const);
 
-#endif /* __TYM_FORMULA_H__ */
+#endif /* TYM_FORMULA_H */

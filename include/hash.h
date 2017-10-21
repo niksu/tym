@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_HASH_H__
-#define __TYM_HASH_H__
+#ifndef TYM_HASH_H
+#define TYM_HASH_H
 
 #include <stdint.h>
 
@@ -16,4 +16,4 @@
 
 TYM_HASH_VTYPE tym_hash_str(const char * str);
 
-#endif // __TYM_HASH_H__
+#endif // TYM_HASH_H

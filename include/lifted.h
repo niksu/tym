@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_LIFTED_H__
-#define __TYM_LIFTED_H__
+#ifndef TYM_LIFTED_H
+#define TYM_LIFTED_H
 
 #define TYM_LIFTED_TYPE_NAME(TYPE_NAME) TymLifted ## TYPE_NAME
 
@@ -101,4 +101,4 @@
     }; \
   }
 
-#endif /* __TYM_LIFTED_H__ */
+#endif /* TYM_LIFTED_H */

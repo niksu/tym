@@ -7,11 +7,11 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_MODULE_TESTS_H__
-#define __TYM_MODULE_TESTS_H__
+#ifndef TYM_MODULE_TESTS_H
+#define TYM_MODULE_TESTS_H
 
 void tym_test_clause(void);
 void tym_test_formula(void);
 void tym_test_statement(void);
 
-#endif /* __TYM_MODULE_TESTS_H__ */
+#endif /* TYM_MODULE_TESTS_H */
