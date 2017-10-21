@@ -45,6 +45,7 @@ void tym_free_universe(struct TymUniverse *);
 
 const struct TymStmt * tym_mk_stmt_axiom(const struct TymFmla * axiom);
 const struct TymStmt * tym_mk_stmt_pred(const TymStr * pred_name, struct TymTerms * params, struct TymFmla * body);
+const struct TymStmt * tym_split_stmt_pred(struct TymStmt * stmt);
 struct TymStmt * tym_mk_stmt_const(const TymStr * const_name, struct TymUniverse *, const TymStr * ty);
 const struct TymStmt * tym_mk_stmt_const_def(const TymStr * const_name, struct TymUniverse * uni);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_stmt_str(const struct TymStmt * const, struct TymBufferInfo * dst);

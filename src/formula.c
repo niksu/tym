@@ -75,15 +75,16 @@ tym_mk_fmla_atom_varargs(const TymStr * pred_name, unsigned int arity, ...)
 }
 
 struct TymFmla *
-tym_mk_fmla_quant(const TymStr * bv, struct TymFmla * body)
+tym_mk_fmla_quant(const enum TymFmlaKind quant, const TymStr * bv, struct TymFmla * body)
 {
+  assert(FMLA_EX == quant || FMLA_ALL == quant);
   assert(NULL != bv);
   assert(NULL != body);
   struct TymFmlaQuant * result_content = malloc(sizeof *result_content);
   struct TymFmla * result = malloc(sizeof *result);
   result_content->bv = bv;
   result_content->body = body;
-  *result = (struct TymFmla){.kind = FMLA_EX, .param.quant = result_content};
+  *result = (struct TymFmla){.kind = quant, .param.quant = result_content};
   return result;
 }
 
@@ -94,6 +95,73 @@ tym_mk_fmla_not(struct TymFmla * subfmla)
   struct TymFmla * result = malloc(sizeof *result);
   result_content[0] = subfmla;
   *result = (struct TymFmla){.kind = FMLA_NOT, .param.args = result_content};
+  return result;
+}
+
+struct TymFmla *
+tym_mk_fmla_if(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
+{
+  if (tym_fmla_is_const(subfmlaL)) {
+    if (tym_fmla_as_const(subfmlaL)) {
+      tym_free_fmla(subfmlaL);
+      return subfmlaR;
+    } else {
+      tym_free_fmla(subfmlaL);
+      tym_free_fmla(subfmlaR);
+      return tym_mk_fmla_const(true);
+    }
+  } else {
+    if (tym_fmla_is_const(subfmlaR)) {
+      if (tym_fmla_as_const(subfmlaR)) {
+        tym_free_fmla(subfmlaR);
+        return subfmlaL;
+      } else {
+        tym_free_fmla(subfmlaR);
+        return tym_mk_fmla_not(subfmlaL);
+      }
+    }
+  }
+
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
+  struct TymFmla * result = malloc(sizeof *result);
+  result->kind = FMLA_IF;
+  result_content[0] = subfmlaL;
+  result_content[1] = subfmlaR;
+  result_content[2] = NULL;
+  result->param.args = result_content;
+  return result;
+}
+
+struct TymFmla *
+tym_mk_fmla_iff(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR)
+{
+  if (tym_fmla_is_const(subfmlaL)) {
+    if (tym_fmla_as_const(subfmlaL)) {
+      if (tym_fmla_is_const(subfmlaR)) {
+        tym_free_fmla(subfmlaL);
+        return subfmlaR;
+      }
+    } else {
+      if (tym_fmla_is_const(subfmlaR)) {
+        if (tym_fmla_as_const(subfmlaR)) {
+          tym_free_fmla(subfmlaR);
+          return subfmlaL;
+        } else {
+          tym_free_fmla(subfmlaL);
+          tym_free_fmla(subfmlaR);
+          return tym_mk_fmla_const(true);
+        }
+      }
+    }
+  }
+
+  struct TymFmla ** result_content = malloc(sizeof *result_content * 3);
+  struct TymFmla * result = malloc(sizeof *result);
+  result->kind = FMLA_IFF;
+  result_content[0] = subfmlaL;
+  result_content[1] = subfmlaR;
+  result_content[2] = NULL;
+  result->param.args = result_content;
   return result;
 }
 
@@ -465,7 +533,6 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
-    break;
   case FMLA_NOT:
     res = tym_buf_strcpy(dst, "not");
     assert(tym_is_ok_TymBufferWriteResult(res));
@@ -481,6 +548,33 @@ tym_fmla_str(const struct TymFmla * fmla, struct TymBufferInfo * dst)
     free(res);
     tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
     res = tym_fmla_quant_str(fmla->param.quant, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    break;
+  case FMLA_ALL:
+    res = tym_buf_strcpy(dst, "forall");
+    error_check_TymBufferWriteResult(res, tym_buff_error_msg, dst);
+    free(res);
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    res = tym_fmla_quant_str(fmla->param.quant, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    break;
+  case FMLA_IF:
+    res = tym_buf_strcpy(dst, "=>");
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    res = tym_fmla_junction_str(fmla->param.args, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    break;
+  case FMLA_IFF:
+    res = tym_buf_strcpy(dst, "=");
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    tym_safe_buffer_replace_last(dst, ' '); // replace the trailing \0.
+    res = tym_fmla_junction_str(fmla->param.args, dst);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     break;
@@ -709,12 +803,9 @@ tym_free_fmla(const struct TymFmla * fmla)
     tym_free_fmla_atom(fmla->param.atom);
     break;
   case FMLA_AND:
-    for (int i = 0; NULL != fmla->param.args[i]; i++) {
-      tym_free_fmla(fmla->param.args[i]);
-    }
-    free(fmla->param.args);
-    break;
   case FMLA_OR:
+  case FMLA_IF:
+  case FMLA_IFF:
     for (int i = 0; NULL != fmla->param.args[i]; i++) {
       tym_free_fmla(fmla->param.args[i]);
     }
@@ -725,6 +816,7 @@ tym_free_fmla(const struct TymFmla * fmla)
     free(fmla->param.args);
     break;
   case FMLA_EX:
+  case FMLA_ALL:
     tym_free_fmla_quant(fmla->param.quant);
     break;
   default:
@@ -850,7 +942,7 @@ tym_copy_fmla(const struct TymFmla * const fmla)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
     result =
-      (struct TymFmla *)tym_mk_fmla_quant(TYM_STR_DUPLICATE(fmla->param.quant->bv),
+      (struct TymFmla *)tym_mk_fmla_quant(FMLA_EX, TYM_STR_DUPLICATE(fmla->param.quant->bv),
         tym_copy_fmla(fmla->param.quant->body));
 #pragma GCC diagnostic pop
     break;
@@ -883,7 +975,7 @@ tym_test_formula(void)
   struct TymFmla * test_not = tym_mk_fmla_not(tym_copy_fmla(test_atom));
   struct TymFmla * test_and = tym_mk_fmla_and(tym_copy_fmla(test_not), tym_copy_fmla(test_atom));
   struct TymFmla * test_or = tym_mk_fmla_or(tym_copy_fmla(test_not), tym_copy_fmla(test_and));
-  struct TymFmla * test_quant = tym_mk_fmla_quant(TYM_CSTR_DUPLICATE("x"),
+  struct TymFmla * test_quant = tym_mk_fmla_quant(FMLA_EX, TYM_CSTR_DUPLICATE("x"),
       tym_copy_fmla(test_or));
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
@@ -956,14 +1048,15 @@ tym_filter_var_values(struct TymValuation * const v)
 }
 
 struct TymFmla *
-tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body)
+tym_mk_fmla_quants(const enum TymFmlaKind quant, const struct TymTerms * const vars, struct TymFmla * body)
 {
+  assert(FMLA_EX == quant || FMLA_ALL == quant);
   struct TymFmla * result = body;
   const struct TymTerms * cursor = vars;
   while (NULL != cursor) {
     assert(TYM_VAR == cursor->term->kind);
     struct TymFmla * pre_result =
-      tym_mk_fmla_quant(TYM_STR_DUPLICATE(cursor->term->identifier), result);
+      tym_mk_fmla_quant(quant, TYM_STR_DUPLICATE(cursor->term->identifier), result);
     result = pre_result;
 
     cursor = cursor->next;
@@ -1005,16 +1098,20 @@ tym_fmla_size(const struct TymFmla * const fmla)
     result = 1u + fmla->param.atom->arity;
     break;
   case FMLA_AND:
-    result = 1 + tym_fmla_size(fmla->param.args[0]) + tym_fmla_size(fmla->param.args[1]);
-    break;
   case FMLA_OR:
+  case FMLA_IFF:
+    // FIXME go through all the arguments, not only the first two.
     result = 1 + tym_fmla_size(fmla->param.args[0]) + tym_fmla_size(fmla->param.args[1]);
     break;
   case FMLA_NOT:
     result = 1 + tym_fmla_size(fmla->param.args[0]);
     break;
   case FMLA_EX:
+  case FMLA_ALL:
     result = 1 + tym_fmla_size(fmla->param.quant->body);
+    break;
+  case FMLA_IF:
+    result = 1 + tym_fmla_size(fmla->param.args[0]) + tym_fmla_size(fmla->param.args[1]);
     break;
   default:
     assert(false);
@@ -1055,6 +1152,8 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with
     break;
   case FMLA_AND:
   case FMLA_OR:
+  case FMLA_IFF:
+    // FIXME go through all the args, not only the first two.
     acc = tym_consts_in_fmla(fmla->param.args[0], acc, true);
     result = tym_consts_in_fmla(fmla->param.args[1], acc, true);
     break;
@@ -1063,6 +1162,13 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with
     break;
   case FMLA_EX:
     result = tym_consts_in_fmla(fmla->param.quant->body, acc, true);
+    break;
+  case FMLA_ALL:
+    result = tym_consts_in_fmla(fmla->param.quant->body, acc, true);
+    break;
+  case FMLA_IF:
+    acc = tym_consts_in_fmla(fmla->param.args[0], acc, true);
+    result = tym_consts_in_fmla(fmla->param.args[1], acc, true);
     break;
   default:
     assert(false);

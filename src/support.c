@@ -152,9 +152,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     TYM_DBG_BUFFER(outbuf, "PREmodel")
 #endif
 
-    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
-    tym_shallow_free_stmts(mdl->stmts);
-    mdl->stmts = reordered_stmts;
+// FIXME "tym_order_statements" needs updating
+//    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
+//    tym_shallow_free_stmts(mdl->stmts);
+//    mdl->stmts = reordered_stmts;
 
     tym_reset_buffer(outbuf);
     res = tym_model_str(mdl, outbuf);

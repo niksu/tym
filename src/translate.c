@@ -35,7 +35,7 @@ tym_translate_body(const struct TymClause * cl)
   struct TymFmla * result = tym_mk_fmla_ands(fmlas);
   struct TymTerms * cursor = hidden_vars;
   while (NULL != cursor) {
-    result = tym_mk_fmla_quant(TYM_STR_DUPLICATE(cursor->term->identifier), result);
+    result = tym_mk_fmla_quant(FMLA_EX, cursor->term->identifier, result);
     cursor = cursor->next;
   }
   tym_shallow_free_terms(hidden_vars);
@@ -115,10 +115,8 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
     tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
-    break;
   case FMLA_OR:
+    // FIXME: have it support more arguments
     tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
     tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
     break;
@@ -254,10 +252,13 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-      tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
+      const struct TymStmt * pred =
+        tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
-            tym_mk_fmla_const(false)));
+            tym_mk_fmla_const(false));
+      const struct TymStmt * def = tym_split_stmt_pred((struct TymStmt *)pred);
+      tym_strengthen_model(mdl, pred);
+      tym_strengthen_model(mdl, def);
 #pragma GCC diagnostic pop
 
       tym_free_fmla(atom);
@@ -319,7 +320,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         fmlas_cursor->fmla = tym_mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
-          tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
+          tym_mk_fmla_quants(FMLA_EX, ts, fmlas_cursor->fmla);
         fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla);
         if (NULL != ts) {
           tym_free_terms(ts);
@@ -355,13 +356,18 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       TYM_DBG_BUFFER_PRINT(outbuf, "pre-result")
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
+      const struct TymStmt * pred =
+        tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
             tym_arguments_of_atom(head),
-            fmla));
+            fmla);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+      const struct TymStmt * def = tym_split_stmt_pred((struct TymStmt *)pred);
+#pragma GCC diagnostic pop
+      tym_strengthen_model(mdl, pred);
+      tym_strengthen_model(mdl, def);
       tym_free_fmla(abs_head_fmla);
     }
-
 
     struct TymPredicates * pre_preds_cursor = preds_cursor;
     preds_cursor = preds_cursor->next;
