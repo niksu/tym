@@ -386,107 +386,57 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   return mdl;
 }
 
-// FIXME naive implementation
 const struct TymStmts *
-tym_order_statements(const struct TymStmts * stmts)
+tym_order_statements(struct TymStmts * stmts)
 {
-  const struct TymStmts * cursor = stmts;
-  const struct TymStmts * waiting = NULL;
-  const struct TymStmts * result = NULL;
+  // NOTE we assume that stmts contains only declarations or assertions,
+  //      i.e., no definitions. Definitions would have to be passed through
+  //      tym_split_stmt_pred first.
+  struct TymStmts * declarations = NULL;
+  struct TymStmts * assertions = NULL;
 
-  struct TymTerms * declared = NULL;
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_eqK)), declared);
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_distinctK)), declared);
+  struct TymStmts * last_declaration = NULL;
 
-  bool cursor_is_waiting = false;
+  struct TymStmts * cursor = stmts;
 
-  while (NULL != cursor || NULL != waiting) {
-
-#if TYM_DEBUG
-    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    struct TymLiftedTymBufferWriteResult * res = NULL;
-
-    TYM_DBG("|declared| = %d\n", tym_len_TymTerms_cell(declared));
-
-    res = tym_terms_str(declared, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-
-    TYM_DBG_BUFFER(outbuf, "declared")
-    tym_free_buffer(outbuf);
-#endif
-
-    if (NULL == cursor && NULL != waiting) {
-      TYM_DBG("Making 'waiting' into 'cursor'.\n");
-      cursor = waiting;
-      waiting = NULL;
-      cursor_is_waiting = true;
-      continue;
-    }
-#if TYM_DEBUG
-    else {
-      TYM_DBG("Not making 'waiting' into 'cursor'.\n");
-    }
-#endif
-
-#if TYM_DEBUG
-    outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    res = tym_stmt_str(cursor->stmt, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    TYM_DBG_BUFFER(outbuf, "cursor->stmt")
-    tym_free_buffer(outbuf);
-#endif
-
-    struct TymTerm * t = tym_new_const_in_stmt(cursor->stmt);
-    struct TymTerms * term_consts = tym_consts_in_stmt(cursor->stmt);
-    if (tym_terms_subsumed_by(declared, term_consts)) {
-      if (NULL != t) {
-        TYM_DBG("Term subsumption for %s\n", tym_decode_str(t->identifier));
-        declared = tym_mk_term_cell(t, declared);
-      }
-#if TYM_DEBUG
-      else {
-        TYM_DBG("NULL == t\n");
-      }
-#endif
-      result = tym_mk_stmt_cell(cursor->stmt, result);
-    } else {
-      if (NULL != t) {
-        TYM_DBG("NO term subsumption for %s\n", tym_decode_str(t->identifier));
-        tym_free_term(t);
-      }
-      waiting = tym_mk_stmt_cell(cursor->stmt, waiting);
-    }
-
+  while (NULL != cursor) {
+    switch (cursor->stmt->kind) {
+    case TYM_STMT_AXIOM:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    struct TymTerms * pre_term_consts = NULL;
-    while (NULL != term_consts) {
-      pre_term_consts = term_consts;
-      term_consts = term_consts->next;
-      free((void *)pre_term_consts);
+      assertions = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, assertions);
+#pragma GCC diagnostic pop
+      break;
+    case TYM_STMT_CONST_DEF:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+      declarations = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, declarations);
+#pragma GCC diagnostic pop
+      if (NULL == last_declaration) {
+        last_declaration = declarations;
+      }
+      break;
+    default:
+      assert(0); // FIXME give more info.
     }
 
     const struct TymStmts * pre_cursor = cursor;
-    cursor = cursor->next;
-    if (cursor_is_waiting) {
-      free((void *)pre_cursor);
-    }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    cursor = (struct TymStmts *)cursor->next;
+#pragma GCC diagnostic pop
+    // FIXME horrid style -- remove the "const" qualifier to avoid this.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)pre_cursor);
 #pragma GCC diagnostic pop
   }
 
-  const struct TymStmts * reversed = tym_reverse_stmts(result);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-  const struct TymStmts * pre_cursor = NULL;
-  cursor = result;
-  while (NULL != cursor) {
-    pre_cursor = cursor;
-    cursor = cursor->next;
-    free((void *)pre_cursor);
+  if (NULL == last_declaration) {
+    assert(NULL == declarations);
+    return assertions;
+  } else {
+    last_declaration->next = assertions;
+    return declarations;
   }
-#pragma GCC diagnostic pop
-  tym_free_terms(declared);
-  return reversed;
 }
