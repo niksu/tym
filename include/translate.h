@@ -32,6 +32,6 @@ void tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struc
 
 struct TymModel * tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg);
 
-const struct TymStmts * tym_order_statements(struct TymStmts * stmts);
+struct TymStmts * tym_order_statements(struct TymStmts * stmts);
 
 #endif /* __TYM_TRANSLATE_H__ */

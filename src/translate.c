@@ -174,7 +174,7 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
   }
   tym_translate_query_fmla(mdl, cg, q_fmla);
 
-  const struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
+  struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
   tym_strengthen_model(mdl, stmt);
 }
 
@@ -250,16 +250,13 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       free(res);
       TYM_DBG_BUFFER_PRINT(outbuf, "bodyless")
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct TymStmt * pred =
+      struct TymStmt * pred =
         tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
             tym_mk_fmla_const(false));
-      const struct TymStmt * def = tym_split_stmt_pred((struct TymStmt *)pred);
+      struct TymStmt * def = tym_split_stmt_pred(pred);
       tym_strengthen_model(mdl, pred);
       tym_strengthen_model(mdl, def);
-#pragma GCC diagnostic pop
 
       tym_free_fmla(atom);
     } else {
@@ -356,14 +353,11 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       TYM_DBG_BUFFER_PRINT(outbuf, "pre-result")
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      const struct TymStmt * pred =
+      struct TymStmt * pred =
         tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
             tym_arguments_of_atom(head),
             fmla);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct TymStmt * def = tym_split_stmt_pred((struct TymStmt *)pred);
-#pragma GCC diagnostic pop
+      struct TymStmt * def = tym_split_stmt_pred(pred);
       tym_strengthen_model(mdl, pred);
       tym_strengthen_model(mdl, def);
       tym_free_fmla(abs_head_fmla);
@@ -386,7 +380,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   return mdl;
 }
 
-const struct TymStmts *
+struct TymStmts *
 tym_order_statements(struct TymStmts * stmts)
 {
   // NOTE we assume that stmts contains only declarations or assertions,
@@ -402,16 +396,10 @@ tym_order_statements(struct TymStmts * stmts)
   while (NULL != cursor) {
     switch (cursor->stmt->kind) {
     case TYM_STMT_AXIOM:
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
       assertions = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, assertions);
-#pragma GCC diagnostic pop
       break;
     case TYM_STMT_CONST_DEF:
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
       declarations = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, declarations);
-#pragma GCC diagnostic pop
       if (NULL == last_declaration) {
         last_declaration = declarations;
       }
@@ -420,16 +408,9 @@ tym_order_statements(struct TymStmts * stmts)
       assert(0); // FIXME give more info.
     }
 
-    const struct TymStmts * pre_cursor = cursor;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-    cursor = (struct TymStmts *)cursor->next;
-#pragma GCC diagnostic pop
-    // FIXME horrid style -- remove the "const" qualifier to avoid this.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
+    struct TymStmts * pre_cursor = cursor;
+    cursor = cursor->next;
     free((void *)pre_cursor);
-#pragma GCC diagnostic pop
   }
 
   if (NULL == last_declaration) {

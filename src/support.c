@@ -152,11 +152,8 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     TYM_DBG_BUFFER(outbuf, "PREmodel")
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-    const struct TymStmts * reordered_stmts =
-      tym_order_statements((struct TymStmts *)mdl->stmts);
-#pragma GCC diagnostic pop
+    struct TymStmts * reordered_stmts =
+      tym_order_statements(mdl->stmts);
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 

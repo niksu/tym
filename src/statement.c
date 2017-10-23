@@ -120,15 +120,15 @@ tym_free_universe(struct TymUniverse * uni)
   free(uni);
 }
 
-const struct TymStmt *
-tym_mk_stmt_axiom(const struct TymFmla * axiom)
+struct TymStmt *
+tym_mk_stmt_axiom(struct TymFmla * axiom)
 {
   struct TymStmt * result = malloc(sizeof *result);
   *result = (struct TymStmt){.kind = TYM_STMT_AXIOM, .param.axiom = axiom};
   return result;
 }
 
-const struct TymStmt *
+struct TymStmt *
 tym_mk_stmt_pred(const TymStr * pred_name, struct TymTerms * params, struct TymFmla * body)
 {
   struct TymStmt * result = malloc(sizeof *result);
@@ -145,7 +145,7 @@ tym_mk_stmt_pred(const TymStr * pred_name, struct TymTerms * params, struct TymF
   return result;
 }
 
-const struct TymStmt *
+struct TymStmt *
 tym_split_stmt_pred(struct TymStmt * stmt)
 {
   struct TymFmla * def = stmt->param.const_def->body;
@@ -191,7 +191,7 @@ tym_mk_stmt_const(const TymStr * const_name, struct TymUniverse * uni, const Tym
   return result;
 }
 
-const struct TymStmt *
+struct TymStmt *
 tym_mk_stmt_const_def(const TymStr * const_name, struct TymUniverse * uni)
 {
   assert(NULL != const_name);
@@ -391,7 +391,7 @@ tym_free_stmt(const struct TymStmt * stmt)
 }
 #pragma GCC diagnostic pop
 
-TYM_DEFINE_LIST_MK(stmt, stmt, struct TymStmt, struct TymStmts, const)
+TYM_DEFINE_MUTABLE_LIST_MK(stmt, stmt, struct TymStmt, struct TymStmts)
 
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_stmts_str(const struct TymStmts * const stmts, struct TymBufferInfo * dst)
@@ -486,9 +486,9 @@ tym_free_model(const struct TymModel * mdl)
 #pragma GCC diagnostic pop
 
 void
-tym_strengthen_model(struct TymModel * mdl, const struct TymStmt * stmt)
+tym_strengthen_model(struct TymModel * mdl, struct TymStmt * stmt)
 {
-  const struct TymStmts * stmts = mdl->stmts;
+  struct TymStmts * stmts = mdl->stmts;
   mdl->stmts = tym_mk_stmt_cell(stmt, stmts);
 }
 
@@ -504,7 +504,7 @@ tym_test_statement(void)
   struct TymModel * mdl = tym_mk_model(tym_mk_universe(terms));
   tym_free_terms(terms);
 
-  const struct TymStmt * s1S =
+  struct TymStmt * s1S =
     tym_mk_stmt_axiom(tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
           tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("a")),
           tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE("a"))));
@@ -514,12 +514,12 @@ tym_test_statement(void)
     tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
         tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("X")),
         tym_mk_term(TYM_VAR, TYM_CSTR_DUPLICATE("Y")));
-  const struct TymStmt * s2S = tym_mk_stmt_pred(TYM_CSTR_DUPLICATE("some_predicate"),
+  struct TymStmt * s2S = tym_mk_stmt_pred(TYM_CSTR_DUPLICATE("some_predicate"),
       terms,
       tym_mk_fmla_not(fmla));
   struct TymStmt * s3AS = tym_mk_stmt_const(TYM_CSTR_DUPLICATE("x"),
       mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY));
-  const struct TymStmt * s3BS = tym_mk_stmt_const_def(TYM_CSTR_DUPLICATE("x"),
+  struct TymStmt * s3BS = tym_mk_stmt_const_def(TYM_CSTR_DUPLICATE("x"),
       mdl->universe);
 
   tym_strengthen_model(mdl, s1S);
@@ -537,7 +537,7 @@ tym_test_statement(void)
   tym_free_model(mdl);
 }
 
-TYM_DEFINE_LIST_REV(stmt, stmts, tym_mk_stmt_cell, const, struct TymStmts, const)
+TYM_DEFINE_LIST_REV(stmt, stmts, tym_mk_stmt_cell, , struct TymStmts, )
 
 struct TymTerm *
 tym_new_const_in_stmt(const struct TymStmt * stmt)
@@ -599,7 +599,7 @@ tym_statementise_universe(struct TymModel * mdl)
     args[i] = tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(mdl->universe->element[i]));
   }
   const TymStr * copied = TYM_CSTR_DUPLICATE(tym_distinctK);
-  const struct TymFmla * distinctness_fmla =
+  struct TymFmla * distinctness_fmla =
     tym_mk_fmla_atom(copied, mdl->universe->cardinality, args);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(distinctness_fmla));
 
