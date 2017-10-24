@@ -50,16 +50,13 @@ tym_translate_bodies(const struct TymClauses * cls)
   struct TymFmlas * result = NULL;
   struct TymFmlas * result_end = NULL;
   while (NULL != cursor) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
     if (NULL == result && NULL == result_end) {
-      result = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result = tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
       result_end = result;
     } else {
-      result_end->next = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result_end->next = tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
       result_end = result_end->next;
     }
-#pragma GCC diagnostic pop
     cursor = cursor->next;
   }
   return result;
@@ -238,12 +235,9 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         }
       }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct TymFmla * atom =
+      struct TymFmla * atom =
         tym_mk_fmla_atom(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
-#pragma GCC diagnostic pop
 
       res = tym_fmla_str(atom, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
@@ -365,10 +359,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
 
     struct TymPredicates * pre_preds_cursor = preds_cursor;
     preds_cursor = preds_cursor->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
     free((void *)pre_preds_cursor);
-#pragma GCC diagnostic pop
 
     TYM_DBG("\n");
   }
