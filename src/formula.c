@@ -1100,8 +1100,12 @@ tym_fmla_size(const struct TymFmla * const fmla)
   case FMLA_AND:
   case FMLA_OR:
   case FMLA_IFF:
-    // FIXME go through all the arguments, not only the first two.
-    result = 1 + tym_fmla_size(fmla->param.args[0]) + tym_fmla_size(fmla->param.args[1]);
+    result = 1;
+    int i = 0;
+    while (NULL != fmla->param.args[i]) {
+      result += tym_fmla_size(fmla->param.args[i]);
+      i += 1;
+    }
     break;
   case FMLA_NOT:
     result = 1 + tym_fmla_size(fmla->param.args[0]);
@@ -1125,6 +1129,7 @@ struct TymTerms *
 tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const)
 {
   struct TymTerms * result = NULL;
+  int idx;
   switch (fmla->kind) {
   case FMLA_CONST:
     result = acc;
@@ -1153,9 +1158,12 @@ tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with
   case FMLA_AND:
   case FMLA_OR:
   case FMLA_IFF:
-    // FIXME go through all the args, not only the first two.
-    acc = tym_consts_in_fmla(fmla->param.args[0], acc, true);
-    result = tym_consts_in_fmla(fmla->param.args[1], acc, true);
+    idx = 0;
+    while (NULL != fmla->param.args[idx]) {
+      acc = tym_consts_in_fmla(fmla->param.args[idx], acc, true);
+      idx += 1;
+    }
+    result = acc;
     break;
   case FMLA_NOT:
     result = tym_consts_in_fmla(fmla->param.args[0], acc, true);

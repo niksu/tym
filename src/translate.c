@@ -104,6 +104,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
 void
 tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
 {
+  int i;
   switch (fmla->kind) {
   case FMLA_CONST:
     // Nothing to do
@@ -112,13 +113,17 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
     tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
+    i = 0;
+    while (NULL != fmla->param.args[i]) {
+      tym_translate_query_fmla(mdl, cg, fmla->param.args[i]);
+      i += 1;
+    }
+    break;
   case FMLA_OR:
-    // FIXME: have it support more arguments
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    assert(false); // Disjunctions cannot appear in queries at the moment.
     break;
   case FMLA_NOT:
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    assert(false); // Negations cannot appear in queries at the moment.
     break;
   case FMLA_EX:
     assert(false); // Existential quantifier cannot appear in queries.
