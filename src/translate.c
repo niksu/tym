@@ -396,7 +396,7 @@ tym_order_statements(struct TymStmts * stmts)
       }
       break;
     default:
-      assert(0); // FIXME give more info.
+      assert(false);
     }
 
     struct TymStmts * pre_cursor = cursor;
