@@ -392,11 +392,12 @@ tym_order_statements(struct TymStmts * stmts)
   while (NULL != cursor) {
     switch (cursor->stmt->kind) {
     case TYM_STMT_AXIOM:
-      assertions = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, assertions);
+      assertions = tym_mk_stmt_cell(cursor->stmt, assertions);
       break;
     case TYM_STMT_CONST_DEF:
-      declarations = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, declarations);
+      declarations = tym_mk_stmt_cell(cursor->stmt, declarations);
       if (NULL == last_declaration) {
+        assert(NULL == declarations->next);
         last_declaration = declarations;
       }
       break;
@@ -404,9 +405,7 @@ tym_order_statements(struct TymStmts * stmts)
       assert(false);
     }
 
-    struct TymStmts * pre_cursor = cursor;
     cursor = cursor->next;
-    free((void *)pre_cursor);
   }
 
   if (NULL == last_declaration) {
