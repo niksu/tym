@@ -35,7 +35,7 @@ tym_translate_body(const struct TymClause * cl)
   struct TymFmla * result = tym_mk_fmla_ands(fmlas);
   struct TymTerms * cursor = hidden_vars;
   while (NULL != cursor) {
-    result = tym_mk_fmla_quant(TYM_STR_DUPLICATE(cursor->term->identifier), result);
+    result = tym_mk_fmla_quant(FMLA_EX, cursor->term->identifier, result);
     cursor = cursor->next;
   }
   tym_shallow_free_terms(hidden_vars);
@@ -50,16 +50,13 @@ tym_translate_bodies(const struct TymClauses * cls)
   struct TymFmlas * result = NULL;
   struct TymFmlas * result_end = NULL;
   while (NULL != cursor) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
     if (NULL == result && NULL == result_end) {
-      result = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result = tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
       result_end = result;
     } else {
-      result_end->next = (struct TymFmlas *)tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
+      result_end->next = tym_mk_fmla_cell(tym_translate_body(cursor->clause), NULL);
       result_end = result_end->next;
     }
-#pragma GCC diagnostic pop
     cursor = cursor->next;
   }
   return result;
@@ -107,6 +104,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
 void
 tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
 {
+  int i;
   switch (fmla->kind) {
   case FMLA_CONST:
     // Nothing to do
@@ -115,15 +113,17 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
     tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom);
     break;
   case FMLA_AND:
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    i = 0;
+    while (NULL != fmla->param.args[i]) {
+      tym_translate_query_fmla(mdl, cg, fmla->param.args[i]);
+      i += 1;
+    }
     break;
   case FMLA_OR:
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[1]);
+    assert(false); // Disjunctions cannot appear in queries at the moment.
     break;
   case FMLA_NOT:
-    tym_translate_query_fmla(mdl, cg, fmla->param.args[0]);
+    assert(false); // Negations cannot appear in queries at the moment.
     break;
   case FMLA_EX:
     assert(false); // Existential quantifier cannot appear in queries.
@@ -176,7 +176,7 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
   }
   tym_translate_query_fmla(mdl, cg, q_fmla);
 
-  const struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
+  struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
   tym_strengthen_model(mdl, stmt);
 }
 
@@ -240,25 +240,22 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         }
       }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      const struct TymFmla * atom =
+      struct TymFmla * atom =
         tym_mk_fmla_atom(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
           preds_cursor->predicate->arity, var_args);
-#pragma GCC diagnostic pop
 
       res = tym_fmla_str(atom, outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
       TYM_DBG_BUFFER_PRINT(outbuf, "bodyless")
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-      tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
+      struct TymStmt * pred =
+        tym_mk_stmt_pred(TYM_STR_DUPLICATE(preds_cursor->predicate->predicate),
             tym_arguments_of_atom(tym_fmla_as_atom(atom)),
-            tym_mk_fmla_const(false)));
-#pragma GCC diagnostic pop
+            tym_mk_fmla_const(false));
+      struct TymStmt * def = tym_split_stmt_pred(pred);
+      tym_strengthen_model(mdl, pred);
+      tym_strengthen_model(mdl, def);
 
       tym_free_fmla(atom);
     } else {
@@ -319,7 +316,7 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
         fmlas_cursor->fmla = tym_mk_fmla_and(fmlas_cursor->fmla, valuation_fmla);
         struct TymTerms * ts = tym_filter_var_values(*val);
         const struct TymFmla * quantified_fmla =
-          tym_mk_fmla_quants(ts, fmlas_cursor->fmla);
+          tym_mk_fmla_quants(FMLA_EX, ts, fmlas_cursor->fmla);
         fmlas_cursor->fmla = tym_copy_fmla(quantified_fmla);
         if (NULL != ts) {
           tym_free_terms(ts);
@@ -355,20 +352,19 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
       TYM_DBG_BUFFER_PRINT(outbuf, "pre-result")
 
       struct TymFmlaAtom * head = tym_fmla_as_atom(abs_head_fmla);
-      tym_strengthen_model(mdl,
-          tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
+      struct TymStmt * pred =
+        tym_mk_stmt_pred(TYM_STR_DUPLICATE(head->pred_name),
             tym_arguments_of_atom(head),
-            fmla));
+            fmla);
+      struct TymStmt * def = tym_split_stmt_pred(pred);
+      tym_strengthen_model(mdl, pred);
+      tym_strengthen_model(mdl, def);
       tym_free_fmla(abs_head_fmla);
     }
 
-
     struct TymPredicates * pre_preds_cursor = preds_cursor;
     preds_cursor = preds_cursor->next;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
     free((void *)pre_preds_cursor);
-#pragma GCC diagnostic pop
 
     TYM_DBG("\n");
   }
@@ -380,107 +376,44 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   return mdl;
 }
 
-// FIXME naive implementation
-const struct TymStmts *
-tym_order_statements(const struct TymStmts * stmts)
+struct TymStmts *
+tym_order_statements(struct TymStmts * stmts)
 {
-  const struct TymStmts * cursor = stmts;
-  const struct TymStmts * waiting = NULL;
-  const struct TymStmts * result = NULL;
+  // NOTE we assume that stmts contains only declarations or assertions,
+  //      i.e., no definitions. Definitions would have to be passed through
+  //      tym_split_stmt_pred first.
+  struct TymStmts * declarations = NULL;
+  struct TymStmts * assertions = NULL;
 
-  struct TymTerms * declared = NULL;
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_eqK)), declared);
-  declared = tym_mk_term_cell(tym_mk_term(TYM_CONST, TYM_CSTR_DUPLICATE(tym_distinctK)), declared);
+  struct TymStmts * last_declaration = NULL;
 
-  bool cursor_is_waiting = false;
+  struct TymStmts * cursor = stmts;
 
-  while (NULL != cursor || NULL != waiting) {
-
-#if TYM_DEBUG
-    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    struct TymLiftedTymBufferWriteResult * res = NULL;
-
-    TYM_DBG("|declared| = %d\n", tym_len_TymTerms_cell(declared));
-
-    res = tym_terms_str(declared, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-
-    TYM_DBG_BUFFER(outbuf, "declared")
-    tym_free_buffer(outbuf);
-#endif
-
-    if (NULL == cursor && NULL != waiting) {
-      TYM_DBG("Making 'waiting' into 'cursor'.\n");
-      cursor = waiting;
-      waiting = NULL;
-      cursor_is_waiting = true;
-      continue;
-    }
-#if TYM_DEBUG
-    else {
-      TYM_DBG("Not making 'waiting' into 'cursor'.\n");
-    }
-#endif
-
-#if TYM_DEBUG
-    outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    res = tym_stmt_str(cursor->stmt, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    TYM_DBG_BUFFER(outbuf, "cursor->stmt")
-    tym_free_buffer(outbuf);
-#endif
-
-    struct TymTerm * t = tym_new_const_in_stmt(cursor->stmt);
-    struct TymTerms * term_consts = tym_consts_in_stmt(cursor->stmt);
-    if (tym_terms_subsumed_by(declared, term_consts)) {
-      if (NULL != t) {
-        TYM_DBG("Term subsumption for %s\n", tym_decode_str(t->identifier));
-        declared = tym_mk_term_cell(t, declared);
-      }
-#if TYM_DEBUG
-      else {
-        TYM_DBG("NULL == t\n");
-      }
-#endif
-      result = tym_mk_stmt_cell(cursor->stmt, result);
-    } else {
-      if (NULL != t) {
-        TYM_DBG("NO term subsumption for %s\n", tym_decode_str(t->identifier));
-        tym_free_term(t);
-      }
-      waiting = tym_mk_stmt_cell(cursor->stmt, waiting);
-    }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-    struct TymTerms * pre_term_consts = NULL;
-    while (NULL != term_consts) {
-      pre_term_consts = term_consts;
-      term_consts = term_consts->next;
-      free((void *)pre_term_consts);
-    }
-
-    const struct TymStmts * pre_cursor = cursor;
-    cursor = cursor->next;
-    if (cursor_is_waiting) {
-      free((void *)pre_cursor);
-    }
-#pragma GCC diagnostic pop
-  }
-
-  const struct TymStmts * reversed = tym_reverse_stmts(result);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-  const struct TymStmts * pre_cursor = NULL;
-  cursor = result;
   while (NULL != cursor) {
-    pre_cursor = cursor;
+    switch (cursor->stmt->kind) {
+    case TYM_STMT_AXIOM:
+      assertions = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, assertions);
+      break;
+    case TYM_STMT_CONST_DEF:
+      declarations = (struct TymStmts *)tym_mk_stmt_cell(cursor->stmt, declarations);
+      if (NULL == last_declaration) {
+        last_declaration = declarations;
+      }
+      break;
+    default:
+      assert(false);
+    }
+
+    struct TymStmts * pre_cursor = cursor;
     cursor = cursor->next;
     free((void *)pre_cursor);
   }
-#pragma GCC diagnostic pop
-  tym_free_terms(declared);
-  return reversed;
+
+  if (NULL == last_declaration) {
+    assert(NULL == declarations);
+    return assertions;
+  } else {
+    last_declaration->next = assertions;
+    return declarations;
+  }
 }

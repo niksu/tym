@@ -730,7 +730,7 @@ tym_vars_contained(const struct TymTerm * e, struct TymTerms * set)
         return true;
       }
     } else {
-      assert(0); // FIXME give more info
+      assert(false);
     }
     set = set->next;
   }
