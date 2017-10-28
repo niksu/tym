@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_HASHTABLE_H__
-#define __TYM_HASHTABLE_H__
+#ifndef TYM_HASHTABLE_H
+#define TYM_HASHTABLE_H
 
 #include <stdbool.h>
 
@@ -49,4 +49,4 @@ TYM_HVALUETYPE tym_ht_lookup(TYM_HASHTABLE(String) *, const char * key);
 void tym_ht_free(TYM_HASHTABLE(String) *);
 #endif // TYM_STRING_TYPE == 2
 
-#endif // __TYM_HASHTABLE_H__
+#endif // TYM_HASHTABLE_H

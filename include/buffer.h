@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_BUFFER_H__
-#define __TYM_BUFFER_H__
+#ifndef TYM_BUFFER_H
+#define TYM_BUFFER_H
 
 #include <stdbool.h>
 #include <string.h>
@@ -69,4 +69,4 @@ TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_er
 #define TYM_DBG_BUFFER_PRINT_ENCLOSE(buffvar, txt, txtend)
 #endif // TYM_DEBUG
 
-#endif /* __TYM_BUFFER_H__ */
+#endif /* TYM_BUFFER_H */

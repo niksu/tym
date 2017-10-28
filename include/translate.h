@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_TRANSLATE_H__
-#define __TYM_TRANSLATE_H__
+#ifndef TYM_TRANSLATE_H
+#define TYM_TRANSLATE_H
 
 #include <assert.h>
 
@@ -32,6 +32,6 @@ void tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struc
 
 struct TymModel * tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg);
 
-const struct TymStmts * tym_order_statements(const struct TymStmts * stmts);
+struct TymStmts * tym_order_statements(struct TymStmts * stmts);
 
-#endif /* __TYM_TRANSLATE_H__ */
+#endif /* TYM_TRANSLATE_H */

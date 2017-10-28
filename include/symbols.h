@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __SYMBOLS_H__
-#define __SYMBOLS_H__
+#ifndef SYMBOLS_H
+#define SYMBOLS_H
 
 #include <assert.h>
 #include <stdbool.h>
@@ -77,4 +77,4 @@ bool tym_clause_database_add(struct TymClause * clause, struct TymAtomDatabase *
 
 size_t tym_num_predicate_bodies(struct TymPredicate *);
 
-#endif /* __SYMBOLS_H__ */
+#endif /* SYMBOLS_H */

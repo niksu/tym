@@ -23,13 +23,13 @@ const char * TymFunctionCommandMapping[] =
 
 const char *
 tym_functions(void) {
-  unsigned string_length = 0;
+  size_t string_length = 0;
   for (unsigned i = 0; i < TYM_NO_FUNCTION; ++i) {
      string_length += strlen(TymFunctionCommandMapping[i]) + 2;
   }
   char * result = malloc(string_length + 1);
   const char * sep = ", ";
-  for (unsigned offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
+  for (size_t offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
      strcpy(result + offset, TymFunctionCommandMapping[i]);
      offset += strlen(TymFunctionCommandMapping[i]);
      if (TYM_NO_FUNCTION - 1 != i) {
@@ -155,7 +155,8 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     TYM_DBG_BUFFER(outbuf, "PREmodel")
 #endif
 
-    const struct TymStmts * reordered_stmts = tym_order_statements(mdl->stmts);
+    struct TymStmts * reordered_stmts =
+      tym_order_statements(mdl->stmts);
     tym_shallow_free_stmts(mdl->stmts);
     mdl->stmts = reordered_stmts;
 

@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __LIBTYM_H__
-#define __LIBTYM_H__
+#ifndef TYM_H
+#define TYM_H
 
 #include "ast.h"
 #include "buffer.h"
@@ -21,4 +21,4 @@
 #include "translate.h"
 #include "util.h"
 
-#endif /* __LIBTYM_H__ */
+#endif /* TYM_H */

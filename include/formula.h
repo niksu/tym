@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_FORMULA_H__
-#define __TYM_FORMULA_H__
+#ifndef TYM_FORMULA_H
+#define TYM_FORMULA_H
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -28,7 +28,7 @@ struct TymFmlaAtom {
   struct TymTerm ** predargs;
 };
 
-enum TymFmlaKind {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST};
+enum TymFmlaKind {FMLA_ATOM, FMLA_AND, FMLA_OR, FMLA_NOT, FMLA_EX, FMLA_CONST, FMLA_ALL, FMLA_IF, FMLA_IFF};
 
 struct TymFmlaQuant {
   const TymStr * bv;
@@ -53,11 +53,13 @@ TYM_DECLARE_LIST_REV(fmlas, , struct TymFmlas, )
 struct TymFmla * tym_mk_fmla_const(bool b);
 struct TymFmla * tym_mk_fmla_atom(const TymStr * pred_name, uint8_t arity, struct TymTerm ** predargs);
 struct TymFmla * tym_mk_fmla_atom_varargs(const TymStr * pred_name, unsigned int arity, ...);
-struct TymFmla * tym_mk_fmla_quant(const TymStr * bv, struct TymFmla * body);
-struct TymFmla * tym_mk_fmla_quants(const struct TymTerms * const vars, struct TymFmla * body);
+struct TymFmla * tym_mk_fmla_quant(const enum TymFmlaKind quant, const TymStr * bv, struct TymFmla * body);
+struct TymFmla * tym_mk_fmla_quants(const enum TymFmlaKind quant, const struct TymTerms * const vars, struct TymFmla * body);
 struct TymFmla * tym_mk_fmla_not(struct TymFmla * subfmla);
 struct TymFmla * tym_mk_fmla_and(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
 struct TymFmla * tym_mk_fmla_or(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
+struct TymFmla * tym_mk_fmla_if(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
+struct TymFmla * tym_mk_fmla_iff(struct TymFmla * subfmlaL, struct TymFmla * subfmlaR);
 struct TymFmla * tym_mk_fmla_ands(struct TymFmlas * fmlas);
 struct TymFmla * tym_mk_fmla_ors(struct TymFmlas * fmlas);
 struct TymFmla * tym_mk_fmla_imply(struct TymFmla * antecedent, struct TymFmla * consequent);
@@ -107,4 +109,4 @@ size_t tym_fmla_size(const struct TymFmla * const);
 
 struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const);
 
-#endif /* __TYM_FORMULA_H__ */
+#endif /* TYM_FORMULA_H */

@@ -717,3 +717,65 @@ tym_copy_atom(const struct TymAtom * const cp_atom)
 
   return at;
 }
+
+bool
+// FIXME this function can be made generic wrt the set, and made more efficient.
+tym_vars_contained(const struct TymTerm * e, struct TymTerms * set)
+{
+  while (NULL != set) {
+    enum TymEqTermError error_code;
+    bool result;
+    if (tym_eq_term(set->term, e, &error_code, &result)) {
+      if (result) {
+        return true;
+      }
+    } else {
+      assert(false);
+    }
+    set = set->next;
+  }
+  return false;
+}
+
+struct TymTerms *
+// FIXME this function can be made generic wrt the list.
+tym_terms_difference(struct TymTerms * set1, struct TymTerms * set2)
+{
+  struct TymTerms * result = NULL;
+  while (NULL != set1) {
+    if (!tym_vars_contained(set1->term, set2)) {
+      result = tym_mk_term_cell(set1->term, result);
+    }
+    set1 = set1->next;
+  }
+  return result;
+}
+
+void
+tym_vars_of_atom(struct TymAtom * atom, struct TymTerms ** acc)
+{
+  for (int i = 0; i < atom->arity; i++) {
+    if ((TYM_VAR == atom->args[i]->kind) &&
+        (!tym_vars_contained(atom->args[i], *acc))) {
+      *acc = tym_mk_term_cell(atom->args[i], *acc);
+    }
+  }
+}
+
+struct TymTerms *
+tym_hidden_vars_of_clause(const struct TymClause * cl)
+{
+  struct TymTerms * head_vars = NULL;
+  struct TymTerms * body_vars = NULL;
+  tym_vars_of_atom(cl->head, &head_vars);
+  for (int i = 0; i < cl->body_size; i++) {
+    tym_vars_of_atom(cl->body[i], &body_vars);
+  }
+
+  struct TymTerms * result = tym_terms_difference(body_vars, head_vars);
+  tym_shallow_free_terms(head_vars);
+  tym_shallow_free_terms(body_vars);
+  return result;
+}
+
+TYM_DEFINE_LIST_SHALLOW_FREE(terms, , struct TymTerms)
