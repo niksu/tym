@@ -7,7 +7,7 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifdef INTERFACE_Z3
+#ifdef TYM_INTERFACE_Z3
 #include "interface_z3.h"
 
 static Z3_sort universe_sort = NULL;
@@ -111,4 +111,4 @@ tym_z3_print_model(void)
 //struct fmla_t *
 #else
 void tym_no_z3(void);
-#endif // INTERFACE_Z3
+#endif // TYM_INTERFACE_Z3

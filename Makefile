@@ -8,20 +8,25 @@ CC?=gcc
 CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
 				-Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g \
 #				-fprofile-arcs -ftest-coverage -O0
-Z3?=z3-4.5.0-x64-osx-10.11.6
-Z3_LINK?=-L $(Z3)/bin -lz3
-Z3_INC?=-I $(Z3)/include
 TGT=tym
 LIB=libtym.a
 OUT_DIR=out
 PARSER_OBJ=$(OUT_DIR)/lexer.o $(OUT_DIR)/parser.o
-OBJ_FILES=ast.o buffer.o formula.o hash.o hashtable.o interface_z3.o statement.o string_idx.o support.o symbols.o translate.o
+OBJ_FILES=ast.o buffer.o formula.o hash.o hashtable.o statement.o string_idx.o support.o symbols.o translate.o
 OBJ=$(addprefix $(OUT_DIR)/, $(OBJ_FILES))
 OBJ_OF_TGT=$(OUT_DIR)/main.o
-HEADER_FILES=ast.h buffer.h formula.h hash.h hashtable.h interface_z3.h lifted.h statement.h string_idx.h support.h symbols.h translate.h util.h
+HEADER_FILES=ast.h buffer.h formula.h hash.h hashtable.h lifted.h statement.h string_idx.h support.h symbols.h translate.h util.h
 HEADER_DIR=include
 HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
+
+ifdef TYM_Z3_PATH
+Z3_LINK?=-L $(TYM_Z3_PATH)/bin -lz3
+Z3_INC?=-I $(TYM_Z3_PATH)/include
+OBJ_FILES+=interface_z3.o
+HEADER_FILES+=interface_z3.h
+CFLAGS+=-DTYM_INTERFACE_Z3
+endif
 
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
