@@ -23,9 +23,7 @@ STD=iso9899:1999
 
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-#	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR)
 	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR) -L $(Z3)/bin -lz3
-#	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR) -Bstatic -L $(Z3)/bin -lz3
 
 $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
