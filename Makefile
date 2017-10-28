@@ -9,6 +9,8 @@ CFLAGS+=-Wall -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
 				-Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wextra -g \
 #				-fprofile-arcs -ftest-coverage -O0
 Z3?=z3-4.5.0-x64-osx-10.11.6
+Z3_LINK?=-L $(Z3)/bin -lz3
+Z3_INC?=-I $(Z3)/include
 TGT=tym
 LIB=libtym.a
 OUT_DIR=out
@@ -23,7 +25,7 @@ STD=iso9899:1999
 
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR) -L $(Z3)/bin -lz3
+	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR) $(Z3_LINK)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
@@ -42,7 +44,7 @@ parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 
 out/%.o: src/%.c $(HEADERS) parser
 	mkdir -p $(OUT_DIR)
-	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) -I $(Z3)/include -o $@ $<
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) $(Z3_INC) -o $@ $<
 
 .PHONY: clean test
 
