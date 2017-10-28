@@ -7,8 +7,8 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
-#ifndef __TYM_INTERFACE_Z3_H__
-#define __TYM_INTERFACE_Z3_H__
+#ifndef TYM_INTERFACE_Z3_H
+#define TYM_INTERFACE_Z3_H
 
 #include "assert.h"
 #include "z3.h"
@@ -22,4 +22,4 @@ void tym_z3_check(void);
 void tym_z3_assert_smtlib2(const char * str);
 void tym_z3_print_model(void);
 
-#endif // __TYM_INTERFACE_Z3_H__
+#endif // TYM_INTERFACE_Z3_H
