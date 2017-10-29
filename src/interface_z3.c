@@ -92,51 +92,25 @@ tym_z3_print_model(void)
   for (unsigned i = 0; i < c; i++) {
     Z3_func_decl d = Z3_model_get_const_decl(z3_ctxt, z3_mdl, i);
     Z3_ast_opt a = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d);
-assert(NULL != a);
-a = (1 == 0 ? a : a);
+    assert(NULL != a);
 
-//Z3_API char const * Z3_get_symbol_string(Z3_context c, Z3_symbol s) {
-//Z3_symbol Z3_API Z3_get_decl_name(Z3_context c, Z3_func_decl d) {
+    Z3_symbol symb = Z3_get_decl_name(z3_ctxt, d);
+    char const * s = Z3_get_symbol_string(z3_ctxt, symb);
+    printf("  symb: %s\n    ", s);
 
-Z3_symbol symb = Z3_get_decl_name(z3_ctxt, d);
-char const * s = Z3_get_symbol_string(z3_ctxt, symb);
-printf("symb=%s\n", s);
+    for (unsigned j = 0; j < c; j++) {
+      Z3_func_decl d2 = Z3_model_get_const_decl(z3_ctxt, z3_mdl, j);
+      Z3_ast_opt a2 = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d2);
+      if (a2 == a) {
+        Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
+        char const * s2 = Z3_get_symbol_string(z3_ctxt, symb2);
+        printf("%s ", s2);
+      }
+    }
+  printf("\n");
 
-  for (unsigned j = 0; j < c; j++) {
-    Z3_func_decl d2 = Z3_model_get_const_decl(z3_ctxt, z3_mdl, j);
-    Z3_ast_opt a2 = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d2);
-if (a2 == a) {
-Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
-char const * s2 = Z3_get_symbol_string(z3_ctxt, symb2);
-printf(" %s", s2);
-}
-  }
-printf("\n");
-
-//    Z3_bool Z3_API Z3_model_has_interp(Z3_context c, Z3_model m, Z3_func_decl a) {
-Z3_bool b = Z3_model_has_interp(z3_ctxt, z3_mdl, d);
-assert(b == Z3_TRUE);
-
-//Z3_func_interp Z3_API Z3_model_get_func_interp(Z3_context c, Z3_model m, Z3_func_decl f) {
-//Z3_func_interp interp = Z3_model_get_func_interp(z3_ctxt, z3_mdl, d);
-//assert(interp != NULL);
-
-/*
-//Z3_func_interp_opt interp = Z3_model_get_func_interp(z3_ctxt, z3_mdl, d);
-Z3_func_interp_opt interp = Z3_model_get_func_interp(z3_ctxt, z3_mdl, d);
-Z3_func_interp_inc_ref(z3_ctxt, interp);
-//        name = Z3_get_decl_name(z3_ctxt, d);
-//        display_symbol(c, out, name);
-//        fprintf(out, " = {");
-unsigned num_entries = 0;
-//if (interp)
-//  num_entries = Z3_func_interp_get_num_entries(z3_ctxt, interp);
-
-printf("\n");
-printf("(%d)", num_entries);
-printf("\n");
-*/
-
+  Z3_bool b = Z3_model_has_interp(z3_ctxt, z3_mdl, d);
+  assert(b == Z3_TRUE);
   }
 
   if (NULL != z3_mdl) {
@@ -144,23 +118,6 @@ printf("\n");
   }
 }
 
-//    Z3_ast Z3_API Z3_parse_smtlib2_string(Z3_context c,
-//    void Z3_API Z3_parse_smtlib_string(Z3_context c,
-//
-//    void Z3_API Z3_get_version(unsigned * major, unsigned * minor, unsigned * build_number, unsigned * revision_number);
-//    void Z3_API Z3_finalize_memory(void);
-//    void Z3_API Z3_goal_assert(Z3_context c, Z3_goal g, Z3_ast a);
-//#ifndef SAFE_ERRORS
-
-//z3_begin(struct model_t * mdl)
-
-//return Z3_mk_const(ctx, s, ty);
-
-
-//struct stmt_t *
-//struct stmts_t *
-//struct fmla_t *
-//struct fmla_t *
 #else
 void tym_no_z3(void);
 #endif // TYM_INTERFACE_Z3
