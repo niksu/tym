@@ -107,10 +107,10 @@ tym_z3_print_model(void)
         printf("%s ", s2);
       }
     }
-  printf("\n");
+    printf("\n");
 
-  Z3_bool b = Z3_model_has_interp(z3_ctxt, z3_mdl, d);
-  assert(b == Z3_TRUE);
+    Z3_bool b = Z3_model_has_interp(z3_ctxt, z3_mdl, d);
+    assert(b == Z3_TRUE);
   }
 
   if (NULL != z3_mdl) {
