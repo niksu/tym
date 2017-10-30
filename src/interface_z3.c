@@ -10,6 +10,9 @@
 #ifdef TYM_INTERFACE_Z3
 #include "interface_z3.h"
 
+#include "stdlib.h"
+#include "string.h"
+
 static Z3_sort universe_sort = NULL;
 static Z3_context z3_ctxt = NULL;
 static Z3_solver z3_slvr = NULL;
@@ -111,6 +114,94 @@ tym_z3_print_model(void)
 
     Z3_bool b = Z3_model_has_interp(z3_ctxt, z3_mdl, d);
     assert(b == Z3_TRUE);
+  }
+
+  if (NULL != z3_mdl) {
+    Z3_model_dec_ref(z3_ctxt, z3_mdl);
+  }
+}
+
+struct TymMdlValuations *
+tym_z3_mk_valuations(const char ** consts)
+{
+  assert(NULL != consts);
+  unsigned count = 0;
+  while (NULL != consts[count]) {
+    count++;
+  }
+
+  struct TymMdlValuations * result = malloc(sizeof(*result));
+  result->count = count;
+  result->v = malloc(sizeof(*result->v) * count);
+  for (unsigned i = 0; i < count; i++) {
+    result->v[i].name = strdup(consts[i]);
+    result->v[i].value = NULL;
+  }
+
+  return result;
+}
+
+void
+tym_z3_free_valuations(struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  for (unsigned i = 0; i < vals->count; i++) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)vals->v[i].name);
+    free((void *)vals->v[i].value);
+#pragma GCC diagnostic pop
+  }
+  free(vals->v);
+  free(vals);
+}
+
+void
+tym_z3_print_valuations(struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  printf("Answers (%d):\n", vals->count);
+  for (unsigned i = 0; i < vals->count; i++) {
+    printf("%s = %s\n", vals->v[i].name, vals->v[i].value);
+  }
+}
+
+void
+tym_z3_get_model(struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  z3_mdl = Z3_solver_get_model(z3_ctxt, z3_slvr);
+  if (NULL != z3_mdl) {
+    Z3_model_inc_ref(z3_ctxt, z3_mdl);
+  }
+
+  unsigned c = Z3_model_get_num_consts(z3_ctxt, z3_mdl);
+  for (unsigned i = 0; i < c; i++) {
+    Z3_func_decl d = Z3_model_get_const_decl(z3_ctxt, z3_mdl, i);
+    Z3_ast_opt a = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d);
+    assert(NULL != a);
+
+    Z3_symbol symb = Z3_get_decl_name(z3_ctxt, d);
+    char const * s = Z3_get_symbol_string(z3_ctxt, symb);
+
+    for (unsigned vi = 0; vi < vals->count; vi++) {
+      if (0 == strcmp(vals->v[vi].name, s)) {
+        assert(NULL == vals->v[vi].value);
+
+        for (unsigned j = 0; j < c; j++) {
+          Z3_func_decl d2 = Z3_model_get_const_decl(z3_ctxt, z3_mdl, j);
+          Z3_ast_opt a2 = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d2);
+          if (a2 == a) {
+            Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
+            char const * s2 = Z3_get_symbol_string(z3_ctxt, symb2);
+            if (0 != strcmp(vals->v[vi].name, s2)) {
+              vals->v[vi].value = strdup(s2);
+            }
+          }
+        }
+
+      }
+    }
   }
 
   if (NULL != z3_mdl) {

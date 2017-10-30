@@ -20,6 +20,23 @@ void tym_z3_end(void);
 enum TymSatisfiable tym_z3_satisfied(void);
 void tym_z3_check(void);
 void tym_z3_assert_smtlib2(const char * str);
+
+struct TymMdlValuation {
+  const char * name;
+  const char * value;
+};
+
+struct TymMdlValuations {
+  unsigned count;
+  struct TymMdlValuation * v;
+};
+
+struct TymMdlValuations * tym_z3_mk_valuations(const char **);
+void tym_z3_free_valuations(struct TymMdlValuations *);
+void tym_z3_print_valuations(struct TymMdlValuations *);
+
+void tym_z3_get_model(struct TymMdlValuations *);
+
 void tym_z3_print_model(void);
 
 #endif // TYM_INTERFACE_Z3_H

@@ -179,6 +179,16 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     switch (result) {
     case TYM_SAT_YES:
       tym_z3_print_model();
+
+      // FIXME hardcoded
+      const char * c0 = strdup("c0");
+      const char ** cs = malloc(sizeof(*cs) * 2);
+      cs[0] = c0;
+      cs[1] = NULL;
+      struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
+      tym_z3_get_model(vals);
+      tym_z3_print_valuations(vals);
+      tym_z3_free_valuations(vals);
       break;
     case TYM_SAT_NO:
     case TYM_SAT_UNKNOWN:
