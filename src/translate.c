@@ -77,7 +77,7 @@ tym_translate_valuation(struct TymValuation * const v)
 }
 
 void
-tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at)
+tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at, struct TymValuation ** varmap)
 {
   struct TymTerm ** args = NULL;
   if (at->arity > 0) {
@@ -91,6 +91,12 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
           tym_mk_stmt_const(TYM_STR_DUPLICATE(placeholder),
               mdl->universe, TYM_CSTR_DUPLICATE(TYM_UNIVERSE_TY));
         tym_strengthen_model(mdl, stmt);
+
+        struct TymValuation * rest = *varmap;
+        *varmap = malloc(sizeof **varmap);
+        (*varmap)->next = rest;
+        (*varmap)->val = tym_copy_term(at->predargs[i]);
+        (*varmap)->var = placeholder;
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
       }
@@ -102,7 +108,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
 }
 
 void
-tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla)
+tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla, struct TymValuation ** varmap)
 {
   int i;
   switch (fmla->kind) {
@@ -110,12 +116,12 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
     // Nothing to do
     break;
   case FMLA_ATOM:
-    tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom);
+    tym_translate_query_fmla_atom(mdl, cg, fmla->param.atom, varmap);
     break;
   case FMLA_AND:
     i = 0;
     while (NULL != fmla->param.args[i]) {
-      tym_translate_query_fmla(mdl, cg, fmla->param.args[i]);
+      tym_translate_query_fmla(mdl, cg, fmla->param.args[i], varmap);
       i += 1;
     }
     break;
@@ -134,7 +140,7 @@ tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct Ty
   }
 }
 
-void
+struct TymValuation *
 tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg)
 {
   TYM_DBG("|query|=%d\n", query->no_clauses);
@@ -174,10 +180,12 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
       free(pre_cursor);
     }
   }
-  tym_translate_query_fmla(mdl, cg, q_fmla);
+  struct TymValuation * varmap = NULL;
+  tym_translate_query_fmla(mdl, cg, q_fmla, &varmap);
 
   struct TymStmt * stmt = tym_mk_stmt_axiom(q_fmla);
   tym_strengthen_model(mdl, stmt);
+  return varmap;
 }
 
 struct TymModel *

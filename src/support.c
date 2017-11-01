@@ -132,10 +132,11 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     tym_statementise_universe(mdl);
   }
 
+  struct TymValuation * varmap = NULL;
   if (NULL != ParsedQuery &&
       // If mdl is NULL then it means that the universe is empty, and there's nothing to be reasoned about.
       NULL != mdl) {
-    tym_translate_query(ParsedQuery, mdl, cg);
+    varmap = tym_translate_query(ParsedQuery, mdl, cg);
   }
 #if TYM_DEBUG
   else {
@@ -184,15 +185,20 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
       tym_z3_print_model();
 #endif
       {
-        // FIXME hardcoded
-        const char * c0 = strdup("c0");
-        const char ** cs = malloc(sizeof(*cs) * 2);
-        cs[0] = c0;
-        cs[1] = NULL;
+        size_t num_vars = tym_valuation_len(varmap);
+        const char ** cs = malloc(sizeof(*cs) * (num_vars + 1));
+        const struct TymValuation * varmap_cursor = varmap;
+        for (unsigned i = 0; i < (unsigned)num_vars; i++) {
+          cs[i] = tym_decode_str(varmap_cursor->var);
+          varmap_cursor = varmap_cursor->next;
+        }
+        cs[num_vars] = NULL;
         struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
         tym_z3_get_model(vals);
         tym_z3_print_valuations(vals);
         tym_z3_free_valuations(vals);
+        tym_free_valuation(varmap);
+        free(cs);
         // FIXME map the constant back to the variable in the query.
         // FIXME assert the new inequality and rerun the query.
       }
