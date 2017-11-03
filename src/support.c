@@ -195,11 +195,26 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
         cs[num_vars] = NULL;
         struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
         tym_z3_get_model(vals);
+        // Map the constant back to the variable in the query.
+        for (unsigned i = 0; i < vals->count; i++) {
+          varmap_cursor = varmap;
+          while (NULL != varmap_cursor) {
+            if (0 == strcmp(vals->v[i].name, tym_decode_str(varmap_cursor->var))) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+              free((void *)vals->v[i].name); // FIXME use TymStr more consistently, and free strings using tym_fin_str, rather than flip between cstrings and TymStr.
+#pragma GCC diagnostic pop
+              struct TymTerm * val = varmap_cursor->val;
+              assert(TYM_VAR == val->kind);
+              vals->v[i].name = strdup(tym_decode_str(val->identifier));
+            }
+            varmap_cursor = varmap_cursor->next;
+          }
+        }
         tym_z3_print_valuations(vals);
         tym_z3_free_valuations(vals);
         tym_free_valuation(varmap);
         free(cs);
-        // FIXME map the constant back to the variable in the query.
         // FIXME assert the new inequality and rerun the query.
       }
       break;
