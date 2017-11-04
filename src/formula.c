@@ -766,7 +766,7 @@ tym_free_fmla_atom(struct TymFmlaAtom * at)
   }
 
   if (NULL != at->predargs) {
-    assert(at->arity > 0);
+    assert(at->arity >= 0);
     free(at->predargs);
   } else {
     assert(0 == at->arity);
