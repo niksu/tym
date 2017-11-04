@@ -22,8 +22,8 @@ void tym_z3_check(void);
 void tym_z3_assert_smtlib2(const char * str);
 
 struct TymMdlValuation {
-  const char * name;
-  const char * value;
+  const TymStr * name;
+  const TymStr * value;
 };
 
 struct TymMdlValuations {
@@ -31,7 +31,7 @@ struct TymMdlValuations {
   struct TymMdlValuation * v;
 };
 
-struct TymMdlValuations * tym_z3_mk_valuations(const char **);
+struct TymMdlValuations * tym_z3_mk_valuations(const TymStr **);
 void tym_z3_free_valuations(struct TymMdlValuations *);
 void tym_z3_print_valuations(struct TymMdlValuations *);
 

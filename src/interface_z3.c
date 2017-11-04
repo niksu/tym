@@ -122,7 +122,7 @@ tym_z3_print_model(void)
 }
 
 struct TymMdlValuations *
-tym_z3_mk_valuations(const char ** consts)
+tym_z3_mk_valuations(const TymStr ** consts)
 {
   assert(NULL != consts);
   unsigned count = 0;
@@ -134,7 +134,7 @@ tym_z3_mk_valuations(const char ** consts)
   result->count = count;
   result->v = malloc(sizeof(*result->v) * count);
   for (unsigned i = 0; i < count; i++) {
-    result->v[i].name = strdup(consts[i]);
+    result->v[i].name = consts[i];
     result->v[i].value = NULL;
   }
 
@@ -146,11 +146,8 @@ tym_z3_free_valuations(struct TymMdlValuations * vals)
 {
   assert(NULL != vals);
   for (unsigned i = 0; i < vals->count; i++) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-    free((void *)vals->v[i].name);
-    free((void *)vals->v[i].value);
-#pragma GCC diagnostic pop
+    tym_free_str(vals->v[i].name);
+    tym_free_str(vals->v[i].value);
   }
   free(vals->v);
   free(vals);
@@ -162,7 +159,7 @@ tym_z3_print_valuations(struct TymMdlValuations * vals)
   assert(NULL != vals);
   printf("Answers (%d):\n", vals->count);
   for (unsigned i = 0; i < vals->count; i++) {
-    printf("%s = %s\n", vals->v[i].name, vals->v[i].value);
+    printf("%s = %s\n", tym_decode_str(vals->v[i].name), tym_decode_str(vals->v[i].value));
   }
 }
 
@@ -182,10 +179,10 @@ tym_z3_get_model(struct TymMdlValuations * vals)
     assert(NULL != a);
 
     Z3_symbol symb = Z3_get_decl_name(z3_ctxt, d);
-    char const * s = Z3_get_symbol_string(z3_ctxt, symb);
+    const TymStr * s = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb));
 
     for (unsigned vi = 0; vi < vals->count; vi++) {
-      if (0 == strcmp(vals->v[vi].name, s)) {
+      if (0 == tym_cmp_str(vals->v[vi].name, s)) {
         assert(NULL == vals->v[vi].value);
 
         for (unsigned j = 0; j < c; j++) {
@@ -193,9 +190,9 @@ tym_z3_get_model(struct TymMdlValuations * vals)
           Z3_ast_opt a2 = Z3_model_get_const_interp(z3_ctxt, z3_mdl, d2);
           if (a2 == a) {
             Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
-            char const * s2 = Z3_get_symbol_string(z3_ctxt, symb2);
-            if (0 != strcmp(vals->v[vi].name, s2)) {
-              vals->v[vi].value = strdup(s2);
+            const TymStr * s2 = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb2));
+            if (0 != tym_cmp_str(vals->v[vi].name, s2)) {
+              vals->v[vi].value = TYM_STR_DUPLICATE(s2);
             }
           }
         }

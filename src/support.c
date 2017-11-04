@@ -186,10 +186,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
 #endif
       {
         size_t num_vars = tym_valuation_len(varmap);
-        const char ** cs = malloc(sizeof(*cs) * (num_vars + 1));
+        const TymStr ** cs = malloc(sizeof(*cs) * (num_vars + 1));
         const struct TymValuation * varmap_cursor = varmap;
         for (unsigned i = 0; i < (unsigned)num_vars; i++) {
-          cs[i] = tym_decode_str(varmap_cursor->var);
+          cs[i] = varmap_cursor->var;
           varmap_cursor = varmap_cursor->next;
         }
         cs[num_vars] = NULL;
@@ -199,14 +199,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
         for (unsigned i = 0; i < vals->count; i++) {
           varmap_cursor = varmap;
           while (NULL != varmap_cursor) {
-            if (0 == strcmp(vals->v[i].name, tym_decode_str(varmap_cursor->var))) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-              free((void *)vals->v[i].name); // FIXME use TymStr more consistently, and free strings using tym_fin_str, rather than flip between cstrings and TymStr.
-#pragma GCC diagnostic pop
+            if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
               struct TymTerm * val = varmap_cursor->val;
               assert(TYM_VAR == val->kind);
-              vals->v[i].name = strdup(tym_decode_str(val->identifier));
+              vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
             }
             varmap_cursor = varmap_cursor->next;
           }

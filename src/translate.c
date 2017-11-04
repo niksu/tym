@@ -35,7 +35,7 @@ tym_translate_body(const struct TymClause * cl)
   struct TymFmla * result = tym_mk_fmla_ands(fmlas);
   struct TymTerms * cursor = hidden_vars;
   while (NULL != cursor) {
-    result = tym_mk_fmla_quant(FMLA_EX, cursor->term->identifier, result);
+    result = tym_mk_fmla_quant(FMLA_EX, TYM_STR_DUPLICATE(cursor->term->identifier), result);
     cursor = cursor->next;
   }
   tym_shallow_free_terms(hidden_vars);

@@ -162,10 +162,17 @@ tym_split_stmt_pred(struct TymStmt * stmt)
   }
 
   struct TymFmla * head =
-    tym_mk_fmla_atom(stmt->param.const_def->const_name, length, predargs);
+    tym_mk_fmla_atom(TYM_STR_DUPLICATE(stmt->param.const_def->const_name), length, predargs);
 
   def = tym_mk_fmla_iff(def, head);
-  def = tym_mk_fmla_quants(FMLA_ALL, stmt->param.const_def->params, def);
+
+  cursor = stmt->param.const_def->params;
+  struct TymTerms * params = NULL;
+  while (NULL != cursor) {
+    params = tym_mk_term_cell(tym_copy_term(cursor->term), params);
+    cursor = cursor->next;
+  }
+  def = tym_mk_fmla_quants(FMLA_ALL, params, def);
 
   return tym_mk_stmt_axiom(def);
 }
@@ -618,7 +625,7 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   struct TymFmla * cardinality_fmla = tym_mk_fmla_ors(cardinality_fmlas);
-  cardinality_fmla = tym_mk_fmla_quant(FMLA_ALL, varname, cardinality_fmla);
+  cardinality_fmla = tym_mk_fmla_quant(FMLA_ALL, TYM_STR_DUPLICATE(varname), cardinality_fmla);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(cardinality_fmla));
 
   tym_free_sym_gen(sg);
