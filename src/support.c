@@ -209,7 +209,6 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
         }
         tym_z3_print_valuations(vals);
         tym_z3_free_valuations(vals);
-        tym_free_valuation(varmap);
         free(cs);
         // FIXME assert the new inequality and rerun the query.
       }
@@ -222,6 +221,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     }
     tym_z3_end();
 #endif
+  }
+
+  if (NULL != varmap) {
+    tym_free_valuation(varmap);
   }
 
   TYM_DBG("Cleaning up before exiting\n");

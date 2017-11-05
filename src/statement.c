@@ -169,10 +169,12 @@ tym_split_stmt_pred(struct TymStmt * stmt)
   cursor = stmt->param.const_def->params;
   struct TymTerms * params = NULL;
   while (NULL != cursor) {
-    params = tym_mk_term_cell(tym_copy_term(cursor->term), params);
+    params = tym_mk_term_cell(cursor->term, params);
     cursor = cursor->next;
   }
   def = tym_mk_fmla_quants(FMLA_ALL, params, def);
+
+  tym_shallow_free_terms(params);
 
   return tym_mk_stmt_axiom(def);
 }
