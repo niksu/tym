@@ -96,7 +96,7 @@ tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, stru
         *varmap = malloc(sizeof **varmap);
         (*varmap)->next = rest;
         (*varmap)->val = tym_copy_term(at->predargs[i]);
-        (*varmap)->var = placeholder;
+        (*varmap)->var = TYM_STR_DUPLICATE(placeholder);
       } else {
         args[i] = tym_copy_term(at->predargs[i]);
       }

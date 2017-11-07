@@ -627,7 +627,7 @@ tym_statementise_universe(struct TymModel * mdl)
   }
 
   struct TymFmla * cardinality_fmla = tym_mk_fmla_ors(cardinality_fmlas);
-  cardinality_fmla = tym_mk_fmla_quant(FMLA_ALL, TYM_STR_DUPLICATE(varname), cardinality_fmla);
+  cardinality_fmla = tym_mk_fmla_quant(FMLA_ALL, varname, cardinality_fmla);
   tym_strengthen_model(mdl, tym_mk_stmt_axiom(cardinality_fmla));
 
   tym_free_sym_gen(sg);
