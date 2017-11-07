@@ -17,7 +17,8 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
-   "smt",
+   "smt_output",
+   "smt_solve",
    NULL
   };
 
@@ -166,10 +167,16 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_BUFFER(outbuf, "model")
-    // FIXME assuming we're in mode TYM_CONVERT_TO_SMT
-    //       Maybe this function should be renamed to indicate that it only
-    //       deals with this mode of operation.
-    printf("%s", tym_buffer_contents(outbuf));
+
+    if (TYM_CONVERT_TO_SMT != Params.function &&
+        TYM_CONVERT_TO_SMT_AND_SOLVE != Params.function) {
+      return TYM_AOK;
+    }
+
+    if (TYM_CONVERT_TO_SMT == Params.function) {
+      printf("%s", tym_buffer_contents(outbuf));
+      return TYM_AOK;
+    }
 
 #ifdef TYM_INTERFACE_Z3
     tym_z3_begin();

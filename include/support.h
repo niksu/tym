@@ -20,7 +20,7 @@
 #include "translate.h"
 #include "util.h"
 
-enum TymFunction {TYM_TEST_PARSING=0, TYM_CONVERT_TO_SMT, TYM_NO_FUNCTION};
+enum TymFunction {TYM_TEST_PARSING=0, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND_SOLVE, TYM_NO_FUNCTION};
 
 extern const char * TymFunctionCommandMapping[];
 
