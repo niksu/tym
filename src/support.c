@@ -109,6 +109,65 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
   tym_free_buffer(outbuf);
 }
 
+static void solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBufferInfo * outbuf); // FIXME move up.
+
+static void
+solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBufferInfo * outbuf)
+{
+    mdl = 0 ? mdl : mdl; // FIXME
+    outbuf = 0 ? outbuf : outbuf; // FIXME
+
+    tym_z3_begin();
+    tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
+    tym_z3_check();
+    enum TymSatisfiable result = tym_z3_satisfied();
+#if TYM_DEBUG
+    printf("sat=%d\n", (int)result);
+#endif
+    switch (result) {
+    case TYM_SAT_YES:
+#if TYM_DEBUG
+      tym_z3_print_model();
+#endif
+      {
+        size_t num_vars = tym_valuation_len(varmap);
+        const TymStr ** cs = malloc(sizeof(*cs) * (num_vars + 1));
+        const struct TymValuation * varmap_cursor = varmap;
+        for (unsigned i = 0; i < (unsigned)num_vars; i++) {
+          cs[i] = varmap_cursor->var;
+          varmap_cursor = varmap_cursor->next;
+        }
+        cs[num_vars] = NULL;
+        struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
+        tym_z3_get_model(vals);
+        // Map the constant back to the variable in the query.
+        for (unsigned i = 0; i < vals->count; i++) {
+          varmap_cursor = varmap;
+          while (NULL != varmap_cursor) {
+            if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
+              struct TymTerm * val = varmap_cursor->val;
+              assert(TYM_VAR == val->kind);
+              vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
+            }
+            varmap_cursor = varmap_cursor->next;
+          }
+        }
+        tym_z3_print_valuations(vals);
+        tym_z3_free_valuations(vals);
+        free(cs);
+        // FIXME assert the new inequality and rerun the query:
+        //       update "mdl", and reset and reuse "outbuf".
+      }
+      break;
+    case TYM_SAT_NO:
+    case TYM_SAT_UNKNOWN:
+      break;
+    default:
+      assert(0);
+    }
+    tym_z3_end();
+}
+
 enum TymReturnCodes
 process_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
@@ -170,64 +229,20 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
 
     if (TYM_CONVERT_TO_SMT != Params.function &&
         TYM_CONVERT_TO_SMT_AND_SOLVE != Params.function) {
-      return TYM_AOK;
+      return TYM_AOK; // FIXME skipping memory-freeing.
     }
 
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
-      return TYM_AOK;
+      return TYM_AOK; // FIXME skipping memory-freeing.
+    } else {
+#ifdef TYM_INTERFACE_Z3
+      solver_loop(varmap, mdl, outbuf);
+#else
+      // FIXME cannot run solver in this build mode.
+#endif // TYM_INTERFACE_Z3
     }
 
-#ifdef TYM_INTERFACE_Z3
-    tym_z3_begin();
-    tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
-    tym_z3_check();
-    enum TymSatisfiable result = tym_z3_satisfied();
-#if TYM_DEBUG
-    printf("sat=%d\n", (int)result);
-#endif
-    switch (result) {
-    case TYM_SAT_YES:
-#if TYM_DEBUG
-      tym_z3_print_model();
-#endif
-      {
-        size_t num_vars = tym_valuation_len(varmap);
-        const TymStr ** cs = malloc(sizeof(*cs) * (num_vars + 1));
-        const struct TymValuation * varmap_cursor = varmap;
-        for (unsigned i = 0; i < (unsigned)num_vars; i++) {
-          cs[i] = varmap_cursor->var;
-          varmap_cursor = varmap_cursor->next;
-        }
-        cs[num_vars] = NULL;
-        struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
-        tym_z3_get_model(vals);
-        // Map the constant back to the variable in the query.
-        for (unsigned i = 0; i < vals->count; i++) {
-          varmap_cursor = varmap;
-          while (NULL != varmap_cursor) {
-            if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
-              struct TymTerm * val = varmap_cursor->val;
-              assert(TYM_VAR == val->kind);
-              vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
-            }
-            varmap_cursor = varmap_cursor->next;
-          }
-        }
-        tym_z3_print_valuations(vals);
-        tym_z3_free_valuations(vals);
-        free(cs);
-        // FIXME assert the new inequality and rerun the query.
-      }
-      break;
-    case TYM_SAT_NO:
-    case TYM_SAT_UNKNOWN:
-      break;
-    default:
-      assert(0);
-    }
-    tym_z3_end();
-#endif
   }
 
   if (NULL != varmap) {
