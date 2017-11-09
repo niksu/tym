@@ -10,6 +10,8 @@
 #ifndef TYM_INTERFACE_Z3_H
 #define TYM_INTERFACE_Z3_H
 
+#include "string_idx.h"
+
 #include "assert.h"
 #include "z3.h"
 
