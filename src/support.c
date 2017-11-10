@@ -114,6 +114,9 @@ static void solver_loop(struct TymValuation * varmap, struct TymModel * mdl, str
 static void
 solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBufferInfo * outbuf)
 {
+#ifndef TYM_INTERFACE_Z3
+  assert(0); // Cannot run solver in this build mode.
+#else
     mdl = 0 ? mdl : mdl; // FIXME
     outbuf = 0 ? outbuf : outbuf; // FIXME
 
@@ -166,6 +169,7 @@ solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBuffe
       assert(0);
     }
     tym_z3_end();
+#endif // TYM_INTERFACE_Z3
 }
 
 enum TymReturnCodes
@@ -227,22 +231,11 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     free(res);
     TYM_DBG_BUFFER(outbuf, "model")
 
-    if (TYM_CONVERT_TO_SMT != Params.function &&
-        TYM_CONVERT_TO_SMT_AND_SOLVE != Params.function) {
-      return TYM_AOK; // FIXME skipping memory-freeing.
-    }
-
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
-      return TYM_AOK; // FIXME skipping memory-freeing.
-    } else {
-#ifdef TYM_INTERFACE_Z3
+    } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
       solver_loop(varmap, mdl, outbuf);
-#else
-      // FIXME cannot run solver in this build mode.
-#endif // TYM_INTERFACE_Z3
     }
-
   }
 
   if (NULL != varmap) {
