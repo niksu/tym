@@ -192,13 +192,16 @@ tym_z3_get_model(struct TymMdlValuations * vals)
             Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
             const TymStr * s2 = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb2));
             if (0 != tym_cmp_str(vals->v[vi].name, s2)) {
-              vals->v[vi].value = TYM_STR_DUPLICATE(s2);
+              vals->v[vi].value =s2;
+            } else {
+              tym_free_str(s2);
             }
           }
         }
 
       }
     }
+    tym_free_str(s);
   }
 
   if (NULL != z3_mdl) {
