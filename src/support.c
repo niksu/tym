@@ -16,7 +16,7 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
 static enum TymSatisfiable solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap);
-static void solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBufferInfo * outbuf);
+static void solver_loop(struct TymValuation * varmap, struct TymBufferInfo * outbuf);
 
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
@@ -125,23 +125,21 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 #if TYM_DEBUG
     tym_z3_print_model();
 #endif
-    {
-      tym_z3_get_model(vals);
-      // Map the constant back to the variable in the query.
-      for (unsigned i = 0; i < vals->count; i++) {
-        const struct TymValuation * varmap_cursor = varmap;
-        while (NULL != varmap_cursor) {
-          if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
-            struct TymTerm * val = varmap_cursor->val;
-            assert(TYM_VAR == val->kind);
-            vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
-          }
-          varmap_cursor = varmap_cursor->next;
+    tym_z3_get_model(vals);
+    // Map the constant back to the variable in the query.
+    for (unsigned i = 0; i < vals->count; i++) {
+      const struct TymValuation * varmap_cursor = varmap;
+      while (NULL != varmap_cursor) {
+        if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
+          struct TymTerm * val = varmap_cursor->val;
+          assert(TYM_VAR == val->kind);
+          vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
         }
+        varmap_cursor = varmap_cursor->next;
       }
-      tym_z3_print_valuations(vals);
-      tym_z3_free_valuations(vals);
     }
+    tym_z3_print_valuations(vals);
+    tym_z3_free_valuations(vals);
     break;
   case TYM_SAT_NO:
   case TYM_SAT_UNKNOWN:
@@ -153,14 +151,11 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 }
 
 static void
-solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBufferInfo * outbuf)
+solver_loop(struct TymValuation * varmap, struct TymBufferInfo * outbuf)
 {
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
 #else
-  mdl = 0 ? mdl : mdl; // FIXME
-  outbuf = 0 ? outbuf : outbuf; // FIXME
-
   tym_z3_begin();
   tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
 
@@ -178,8 +173,8 @@ solver_loop(struct TymValuation * varmap, struct TymModel * mdl, struct TymBuffe
   while (1) {
     result = solver_invoke(vals, varmap);
     if (TYM_SAT_YES == result) {
-      // FIXME assert the new inequality and rerun the query:
-      //       update "mdl", and reset and reuse "outbuf".
+      // FIXME generate a new inequality from the model and assert it using
+      //       tym_z3_assert_smtlib2()
       break;
     } else {
       break;
@@ -253,7 +248,7 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
     } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      solver_loop(varmap, mdl, outbuf);
+      solver_loop(varmap, outbuf);
     }
   }
 
