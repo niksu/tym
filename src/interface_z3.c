@@ -134,7 +134,7 @@ tym_z3_mk_valuations(const TymStr ** consts)
   result->count = count;
   result->v = malloc(sizeof(*result->v) * count);
   for (unsigned i = 0; i < count; i++) {
-    result->v[i].name = consts[i];
+    result->v[i].name = TYM_STR_DUPLICATE(consts[i]);
     result->v[i].value = NULL;
   }
 
@@ -147,7 +147,9 @@ tym_z3_free_valuations(struct TymMdlValuations * vals)
   assert(NULL != vals);
   for (unsigned i = 0; i < vals->count; i++) {
     tym_free_str(vals->v[i].name);
-    tym_free_str(vals->v[i].value);
+    if (NULL != vals->v[i].value) {
+      tym_free_str(vals->v[i].value);
+    }
   }
   free(vals->v);
   free(vals);
@@ -192,7 +194,7 @@ tym_z3_get_model(struct TymMdlValuations * vals)
             Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
             const TymStr * s2 = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb2));
             if (0 != tym_cmp_str(vals->v[vi].name, s2)) {
-              vals->v[vi].value =s2;
+              vals->v[vi].value = s2;
             } else {
               tym_free_str(s2);
             }

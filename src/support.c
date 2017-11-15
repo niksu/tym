@@ -15,8 +15,8 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
-static enum TymSatisfiable solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap);
-static void solver_loop(struct TymValuation * varmap, struct TymBufferInfo * outbuf);
+static struct TymFmla * solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap);
+static void solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBufferInfo * outbuf);
 
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
@@ -112,9 +112,10 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
   tym_free_buffer(outbuf);
 }
 
-static enum TymSatisfiable
+static struct TymFmla *
 solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 {
+  struct TymFmla * found_model = NULL;
   tym_z3_check();
   enum TymSatisfiable result = tym_z3_satisfied();
 #if TYM_DEBUG
@@ -133,13 +134,33 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
         if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
           struct TymTerm * val = varmap_cursor->val;
           assert(TYM_VAR == val->kind);
-          vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
+//          vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
+          break;
         }
         varmap_cursor = varmap_cursor->next;
       }
+
+      assert(NULL != varmap_cursor);
+
+      // FIXME conjoin the eq's
+      struct TymFmla * atom =
+        tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
+//            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(vals->v[i].name)),  
+            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(varmap_cursor->var)),
+            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(vals->v[i].value)));
+
+      if (NULL == found_model) {
+        found_model = atom;
+      } else {
+        found_model = tym_mk_fmla_and(found_model, atom);
+      }
     }
     tym_z3_print_valuations(vals);
-    tym_z3_free_valuations(vals);
+
+    for (unsigned i = 0; i < vals->count; i++) {
+      tym_free_str(vals->v[i].value);
+      vals->v[i].value = NULL;
+    }
     break;
   case TYM_SAT_NO:
   case TYM_SAT_UNKNOWN:
@@ -147,11 +168,11 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
   default:
     assert(0);
   }
-  return result;
+  return found_model;
 }
 
 static void
-solver_loop(struct TymValuation * varmap, struct TymBufferInfo * outbuf)
+solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBufferInfo * outbuf)
 {
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
@@ -169,19 +190,44 @@ solver_loop(struct TymValuation * varmap, struct TymBufferInfo * outbuf)
   cs[num_vars] = NULL;
   struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
 
-  enum TymSatisfiable result;
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+  struct TymFmla * found_model = NULL;
   while (1) {
-    result = solver_invoke(vals, varmap);
-    if (TYM_SAT_YES == result) {
-      // FIXME generate a new inequality from the model and assert it using
-      //       tym_z3_assert_smtlib2()
+    found_model = solver_invoke(vals, varmap);
+    if (NULL == found_model) {
       break;
     } else {
-      break;
+      struct TymStmt * stmt = tym_mk_stmt_axiom(tym_mk_fmla_not(found_model));
+
+//      tym_reset_buffer(outbuf);
+//      res = tym_stmt_str(stmt, outbuf);
+//      assert(tym_is_ok_TymBufferWriteResult(res));
+//      free(res);
+//printf("new statement: %s\n", tym_buffer_contents(outbuf));    
+
+      tym_strengthen_model(*mdl, stmt);
+
+      // FIXME annoying
+    struct TymStmts * reordered_stmts =
+      tym_order_statements((*mdl)->stmts);
+    tym_shallow_free_stmts((*mdl)->stmts);
+    (*mdl)->stmts = reordered_stmts;
+
+// FIXME DRY?  
+      tym_reset_buffer(outbuf);
+//      res = tym_stmt_str(stmt, outbuf);
+      res = tym_model_str(*mdl, outbuf); // FIXME ideally make Z3 work incrementally instead of giving it the whole model each time.
+      assert(tym_is_ok_TymBufferWriteResult(res));
+      free(res);
+//printf("here it is: %s\n", tym_buffer_contents(outbuf));    
+      tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
+
+//      tym_free_stmt(stmt); -- this will be freed when the model is freed.
     }
   }
 
-  free(cs);
+  tym_z3_free_valuations(vals);  
+  free(cs);  
   tym_z3_end();
 #endif // TYM_INTERFACE_Z3
 }
@@ -248,7 +294,7 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
     } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      solver_loop(varmap, outbuf);
+      solver_loop(&mdl, varmap, outbuf);
     }
   }
 
