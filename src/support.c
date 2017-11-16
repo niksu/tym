@@ -127,14 +127,15 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
     tym_z3_print_model();
 #endif
     tym_z3_get_model(vals);
-    // Map the constant back to the variable in the query.
     for (unsigned i = 0; i < vals->count; i++) {
       const struct TymValuation * varmap_cursor = varmap;
       while (NULL != varmap_cursor) {
         if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
           struct TymTerm * val = varmap_cursor->val;
           assert(TYM_VAR == val->kind);
-//          vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
+          // If we could change "vals", this line would map the constant's name
+          // back to the variable name that was used in the user's query:
+          // vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
           break;
         }
         varmap_cursor = varmap_cursor->next;
@@ -142,10 +143,8 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 
       assert(NULL != varmap_cursor);
 
-      // FIXME conjoin the eq's
       struct TymFmla * atom =
         tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
-//            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(vals->v[i].name)),  
             tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(varmap_cursor->var)),
             tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(vals->v[i].value)));
 
@@ -155,7 +154,8 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
         found_model = tym_mk_fmla_and(found_model, atom);
       }
     }
-    tym_z3_print_valuations(vals);
+
+    tym_z3_print_valuations(vals); // FIXME make debug output?
 
     for (unsigned i = 0; i < vals->count; i++) {
       tym_free_str(vals->v[i].value);
@@ -199,35 +199,25 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBuff
     } else {
       struct TymStmt * stmt = tym_mk_stmt_axiom(tym_mk_fmla_not(found_model));
 
-//      tym_reset_buffer(outbuf);
-//      res = tym_stmt_str(stmt, outbuf);
-//      assert(tym_is_ok_TymBufferWriteResult(res));
-//      free(res);
-//printf("new statement: %s\n", tym_buffer_contents(outbuf));    
-
       tym_strengthen_model(*mdl, stmt);
 
-      // FIXME annoying
-    struct TymStmts * reordered_stmts =
-      tym_order_statements((*mdl)->stmts);
-    tym_shallow_free_stmts((*mdl)->stmts);
-    (*mdl)->stmts = reordered_stmts;
+      // FIXME annoying -- but necessary in general every time the model is updated?
+      struct TymStmts * reordered_stmts =
+        tym_order_statements((*mdl)->stmts);
+      tym_shallow_free_stmts((*mdl)->stmts);
+      (*mdl)->stmts = reordered_stmts;
 
-// FIXME DRY?  
+      // FIXME DRY?
       tym_reset_buffer(outbuf);
-//      res = tym_stmt_str(stmt, outbuf);
       res = tym_model_str(*mdl, outbuf); // FIXME ideally make Z3 work incrementally instead of giving it the whole model each time.
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-//printf("here it is: %s\n", tym_buffer_contents(outbuf));    
       tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
-
-//      tym_free_stmt(stmt); -- this will be freed when the model is freed.
     }
   }
 
-  tym_z3_free_valuations(vals);  
-  free(cs);  
+  tym_z3_free_valuations(vals);
+  free(cs);
   tym_z3_end();
 #endif // TYM_INTERFACE_Z3
 }
