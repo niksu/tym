@@ -156,7 +156,7 @@ tym_z3_free_valuations(struct TymMdlValuations * vals)
 }
 
 void
-tym_z3_print_valuations(struct TymMdlValuations * vals)
+tym_z3_print_valuations(const struct TymMdlValuations * vals)
 {
   assert(NULL != vals);
   printf("Answers (%d):\n", vals->count);
@@ -208,6 +208,15 @@ tym_z3_get_model(struct TymMdlValuations * vals)
 
   if (NULL != z3_mdl) {
     Z3_model_dec_ref(z3_ctxt, z3_mdl);
+  }
+}
+
+void
+tym_z3_reset_valuations(struct TymMdlValuations * vals)
+{
+  for (unsigned i = 0; i < vals->count; i++) {
+    tym_free_str(vals->v[i].value);
+    vals->v[i].value = NULL;
   }
 }
 

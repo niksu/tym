@@ -35,7 +35,8 @@ struct TymMdlValuations {
 
 struct TymMdlValuations * tym_z3_mk_valuations(const TymStr **);
 void tym_z3_free_valuations(struct TymMdlValuations *);
-void tym_z3_print_valuations(struct TymMdlValuations *);
+void tym_z3_print_valuations(const struct TymMdlValuations *);
+void tym_z3_reset_valuations(struct TymMdlValuations *);
 
 void tym_z3_get_model(struct TymMdlValuations *);
 

@@ -157,10 +157,7 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 
     tym_z3_print_valuations(vals); // FIXME make debug output?
 
-    for (unsigned i = 0; i < vals->count; i++) {
-      tym_free_str(vals->v[i].value);
-      vals->v[i].value = NULL;
-    }
+    tym_z3_reset_valuations(vals);
     break;
   case TYM_SAT_NO:
   case TYM_SAT_UNKNOWN:
