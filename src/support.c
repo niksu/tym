@@ -17,6 +17,7 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 
 static struct TymFmla * solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap);
 static void solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBufferInfo * outbuf);
+static const struct TymValuation * find_valuation_for(const TymStr * var_name, struct TymValuation * varmap);
 
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
@@ -112,6 +113,24 @@ print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFil
   tym_free_buffer(outbuf);
 }
 
+static const struct TymValuation *
+find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
+{
+  const struct TymValuation * varmap_cursor = varmap;
+  while (NULL != varmap_cursor) {
+    if (0 == tym_cmp_str(var_name, varmap_cursor->var)) {
+      struct TymTerm * val = varmap_cursor->val;
+      assert(TYM_VAR == val->kind);
+      // If we could change "vals", this line would map the constant's name
+      // back to the variable name that was used in the user's query:
+      // vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
+      break;
+    }
+    varmap_cursor = varmap_cursor->next;
+  }
+  return varmap_cursor;
+}
+
 static struct TymFmla *
 solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 {
@@ -128,24 +147,12 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 #endif
     tym_z3_get_model(vals);
     for (unsigned i = 0; i < vals->count; i++) {
-      const struct TymValuation * varmap_cursor = varmap;
-      while (NULL != varmap_cursor) {
-        if (0 == tym_cmp_str(vals->v[i].name, varmap_cursor->var)) {
-          struct TymTerm * val = varmap_cursor->val;
-          assert(TYM_VAR == val->kind);
-          // If we could change "vals", this line would map the constant's name
-          // back to the variable name that was used in the user's query:
-          // vals->v[i].name = TYM_STR_DUPLICATE(val->identifier);
-          break;
-        }
-        varmap_cursor = varmap_cursor->next;
-      }
-
-      assert(NULL != varmap_cursor);
-
+      const struct TymValuation * mapped_var =
+        find_valuation_for(vals->v[i].name, varmap);
+      assert(NULL != mapped_var);
       struct TymFmla * atom =
         tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
-            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(varmap_cursor->var)),
+            tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(mapped_var->var)),
             tym_mk_term(TYM_CONST, TYM_STR_DUPLICATE(vals->v[i].value)));
 
       if (NULL == found_model) {
