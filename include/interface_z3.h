@@ -24,7 +24,8 @@ void tym_z3_check(void);
 void tym_z3_assert_smtlib2(const char * str);
 
 struct TymMdlValuation {
-  const TymStr * name;
+  const TymStr * var_name; // Variable identifier chosen by the user.
+  const TymStr * const_name; // (Internal) fresh constant identifier chosen by us.
   const TymStr * value;
 };
 
@@ -33,7 +34,7 @@ struct TymMdlValuations {
   struct TymMdlValuation * v;
 };
 
-struct TymMdlValuations * tym_z3_mk_valuations(const TymStr **);
+struct TymMdlValuations * tym_z3_mk_valuations(const TymStr **, const TymStr **);
 void tym_z3_free_valuations(struct TymMdlValuations *);
 void tym_z3_print_valuations(const struct TymMdlValuations *);
 void tym_z3_reset_valuations(struct TymMdlValuations *);

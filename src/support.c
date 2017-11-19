@@ -148,7 +148,7 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
     tym_z3_get_model(vals);
     for (unsigned i = 0; i < vals->count; i++) {
       const struct TymValuation * mapped_var =
-        find_valuation_for(vals->v[i].name, varmap);
+        find_valuation_for(vals->v[i].const_name, varmap);
       assert(NULL != mapped_var);
       struct TymFmla * atom =
         tym_mk_fmla_atom_varargs(TYM_CSTR_DUPLICATE(tym_eqK), 2,
@@ -162,7 +162,10 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
       }
     }
 
-    tym_z3_print_valuations(vals); // FIXME make debug output?
+    tym_z3_print_valuations(vals);
+
+//Print as equation (showing unification)
+//  or as fact.
 
     tym_z3_reset_valuations(vals);
     break;
@@ -185,14 +188,17 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBuff
   tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
 
   size_t num_vars = tym_valuation_len(varmap);
-  const TymStr ** cs = malloc(sizeof(*cs) * (num_vars + 1));
+  const TymStr ** consts = malloc(sizeof(*consts) * (num_vars + 1));
+  const TymStr ** vars = malloc(sizeof(*vars) * (num_vars + 1));
   const struct TymValuation * varmap_cursor = varmap;
   for (unsigned i = 0; i < (unsigned)num_vars; i++) {
-    cs[i] = varmap_cursor->var;
+    consts[i] = varmap_cursor->var;
+    vars[i] = varmap_cursor->val->identifier;
     varmap_cursor = varmap_cursor->next;
   }
-  cs[num_vars] = NULL;
-  struct TymMdlValuations * vals = tym_z3_mk_valuations(cs);
+  consts[num_vars] = NULL;
+  vars[num_vars] = NULL;
+  struct TymMdlValuations * vals = tym_z3_mk_valuations(consts, vars);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
   struct TymFmla * found_model = NULL;
@@ -221,7 +227,8 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBuff
   }
 
   tym_z3_free_valuations(vals);
-  free(cs);
+  free(consts);
+  free(vars);
   tym_z3_end();
 #endif // TYM_INTERFACE_Z3
 }

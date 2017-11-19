@@ -122,19 +122,29 @@ tym_z3_print_model(void)
 }
 
 struct TymMdlValuations *
-tym_z3_mk_valuations(const TymStr ** consts)
+tym_z3_mk_valuations(const TymStr ** consts, const TymStr ** vars)
 {
   assert(NULL != consts);
+  assert(NULL != vars);
   unsigned count = 0;
   while (NULL != consts[count]) {
     count++;
+  }
+
+  {
+    unsigned var_count = 0;
+    while (NULL != vars[var_count]) {
+      var_count++;
+    }
+    assert(count == var_count);
   }
 
   struct TymMdlValuations * result = malloc(sizeof(*result));
   result->count = count;
   result->v = malloc(sizeof(*result->v) * count);
   for (unsigned i = 0; i < count; i++) {
-    result->v[i].name = TYM_STR_DUPLICATE(consts[i]);
+    result->v[i].const_name = TYM_STR_DUPLICATE(consts[i]);
+    result->v[i].var_name = TYM_STR_DUPLICATE(vars[i]);
     result->v[i].value = NULL;
   }
 
@@ -146,7 +156,8 @@ tym_z3_free_valuations(struct TymMdlValuations * vals)
 {
   assert(NULL != vals);
   for (unsigned i = 0; i < vals->count; i++) {
-    tym_free_str(vals->v[i].name);
+    tym_free_str(vals->v[i].const_name);
+    tym_free_str(vals->v[i].var_name);
     if (NULL != vals->v[i].value) {
       tym_free_str(vals->v[i].value);
     }
@@ -159,10 +170,13 @@ void
 tym_z3_print_valuations(const struct TymMdlValuations * vals)
 {
   assert(NULL != vals);
-  printf("Answers (%d):\n", vals->count);
   for (unsigned i = 0; i < vals->count; i++) {
-    printf("%s = %s\n", tym_decode_str(vals->v[i].name), tym_decode_str(vals->v[i].value));
+    printf("%s = %s", tym_decode_str(vals->v[i].var_name), tym_decode_str(vals->v[i].value));
+    if (i < vals->count - 1) {
+      printf(", ");
+    }
   }
+  printf("\n");
 }
 
 void
@@ -184,7 +198,7 @@ tym_z3_get_model(struct TymMdlValuations * vals)
     const TymStr * s = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb));
 
     for (unsigned vi = 0; vi < vals->count; vi++) {
-      if (0 == tym_cmp_str(vals->v[vi].name, s)) {
+      if (0 == tym_cmp_str(vals->v[vi].const_name, s)) {
         assert(NULL == vals->v[vi].value);
 
         for (unsigned j = 0; j < c; j++) {
@@ -193,7 +207,7 @@ tym_z3_get_model(struct TymMdlValuations * vals)
           if (a2 == a) {
             Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
             const TymStr * s2 = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb2));
-            if (0 != tym_cmp_str(vals->v[vi].name, s2)) {
+            if (0 != tym_cmp_str(vals->v[vi].const_name, s2)) {
               vals->v[vi].value = s2;
             } else {
               tym_free_str(s2);
