@@ -15,8 +15,8 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
-static struct TymFmla * solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap);
-static void solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBufferInfo * outbuf);
+static struct TymFmla * solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap);
+static void solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf);
 static const struct TymValuation * find_valuation_for(const TymStr * var_name, struct TymValuation * varmap);
 
 const char * TymFunctionCommandMapping[] =
@@ -132,7 +132,7 @@ find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 }
 
 static struct TymFmla *
-solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
+solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap)
 {
   struct TymFmla * found_model = NULL;
   tym_z3_check();
@@ -162,10 +162,10 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
       }
     }
 
+    // FIXME offer choice to print as equation (showing unification) or as fact.
     tym_z3_print_valuations(vals);
-
-//Print as equation (showing unification)
-//  or as fact.
+//    struct TymFmla * instance = tym_instantiate_valuation(ParsedQuery, vals);
+//    // FIXME print instance.
 
     tym_z3_reset_valuations(vals);
     break;
@@ -179,7 +179,7 @@ solver_invoke(struct TymMdlValuations * vals, struct TymValuation * varmap)
 }
 
 static void
-solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBufferInfo * outbuf)
+solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf)
 {
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
@@ -203,7 +203,7 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymBuff
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
   struct TymFmla * found_model = NULL;
   while (1) {
-    found_model = solver_invoke(vals, varmap);
+    found_model = solver_invoke(ParsedQuery, vals, varmap);
     if (NULL == found_model) {
       break;
     } else {
@@ -295,7 +295,7 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
     } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      solver_loop(&mdl, varmap, outbuf);
+      solver_loop(&mdl, varmap, ParsedQuery, outbuf);
     }
   }
 
