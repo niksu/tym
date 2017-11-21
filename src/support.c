@@ -163,11 +163,12 @@ solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, s
     }
 
     // FIXME offer choice to print as equation (showing unification) or as fact.
-    tym_z3_print_valuations(vals);
+    tym_mdl_print_valuations(vals);
 //    struct TymFmla * instance = tym_instantiate_valuation(ParsedQuery, vals);
 //    // FIXME print instance.
+    assert(ParsedQuery == ParsedQuery);
 
-    tym_z3_reset_valuations(vals);
+    tym_mdl_reset_valuations(vals);
     break;
   case TYM_SAT_NO:
   case TYM_SAT_UNKNOWN:
@@ -198,7 +199,7 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProg
   }
   consts[num_vars] = NULL;
   vars[num_vars] = NULL;
-  struct TymMdlValuations * vals = tym_z3_mk_valuations(consts, vars);
+  struct TymMdlValuations * vals = tym_mdl_mk_valuations(consts, vars);
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
   struct TymFmla * found_model = NULL;
@@ -226,7 +227,7 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProg
     }
   }
 
-  tym_z3_free_valuations(vals);
+  tym_mdl_free_valuations(vals);
   free(consts);
   free(vars);
   tym_z3_end();

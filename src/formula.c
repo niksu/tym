@@ -1199,3 +1199,70 @@ tym_copy_fmlas(const struct TymFmlas * fmlas)
 
   return result;
 }
+
+struct TymMdlValuations *
+tym_mdl_mk_valuations(const TymStr ** consts, const TymStr ** vars)
+{
+  assert(NULL != consts);
+  assert(NULL != vars);
+  unsigned count = 0;
+  while (NULL != consts[count]) {
+    count++;
+  }
+
+  {
+    unsigned var_count = 0;
+    while (NULL != vars[var_count]) {
+      var_count++;
+    }
+    assert(count == var_count);
+  }
+
+  struct TymMdlValuations * result = malloc(sizeof(*result));
+  result->count = count;
+  result->v = malloc(sizeof(*result->v) * count);
+  for (unsigned i = 0; i < count; i++) {
+    result->v[i].const_name = TYM_STR_DUPLICATE(consts[i]);
+    result->v[i].var_name = TYM_STR_DUPLICATE(vars[i]);
+    result->v[i].value = NULL;
+  }
+
+  return result;
+}
+
+void
+tym_mdl_free_valuations(struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  for (unsigned i = 0; i < vals->count; i++) {
+    tym_free_str(vals->v[i].const_name);
+    tym_free_str(vals->v[i].var_name);
+    if (NULL != vals->v[i].value) {
+      tym_free_str(vals->v[i].value);
+    }
+  }
+  free(vals->v);
+  free(vals);
+}
+
+void
+tym_mdl_print_valuations(const struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  for (unsigned i = 0; i < vals->count; i++) {
+    printf("%s = %s", tym_decode_str(vals->v[i].var_name), tym_decode_str(vals->v[i].value));
+    if (i < vals->count - 1) {
+      printf(", ");
+    }
+  }
+  printf("\n");
+}
+
+void
+tym_mdl_reset_valuations(struct TymMdlValuations * vals)
+{
+  for (unsigned i = 0; i < vals->count; i++) {
+    tym_free_str(vals->v[i].value);
+    vals->v[i].value = NULL;
+  }
+}
