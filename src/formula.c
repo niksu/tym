@@ -23,6 +23,9 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 static struct TymFmlas * filter_before_juncts(struct TymFmlas * fmlas, bool is_and_behaviour);
 
+struct TymTerm * tym_mdl_instantiate_valuation_term(struct TymTerm * term, struct TymMdlValuations * vals);
+struct TymAtom * tym_mdl_instantiate_valuation_atom(struct TymAtom * atom, struct TymMdlValuations * vals);
+struct TymClause * tym_mdl_instantiate_valuation_clause(struct TymClause * cl, struct TymMdlValuations * vals);
 
 struct TymFmla *
 tym_mk_fmla_const(bool b)
@@ -1265,4 +1268,73 @@ tym_mdl_reset_valuations(struct TymMdlValuations * vals)
     tym_free_str(vals->v[i].value);
     vals->v[i].value = NULL;
   }
+}
+
+struct TymTerm *
+tym_mdl_instantiate_valuation_term(struct TymTerm * term, struct TymMdlValuations * vals)
+{
+  struct TymTerm * result = NULL;
+  if (TYM_VAR == term->kind) {
+    // FIXME inefficient -- linear time.
+    for (unsigned i = 0; i < vals->count; i++) {
+      if (0 == tym_cmp_str(vals->v[i].var_name, term->identifier)) {
+        result = malloc(sizeof(*result));
+        result->identifier = TYM_STR_DUPLICATE(vals->v[i].const_name);
+        result->kind = TYM_CONST;
+      }
+    }
+  }
+
+  if (NULL == result) {
+    result = tym_copy_term(term);
+  }
+
+  return result;
+}
+
+struct TymAtom *
+tym_mdl_instantiate_valuation_atom(struct TymAtom * atom, struct TymMdlValuations * vals)
+{
+  struct TymAtom * result = malloc(sizeof(*result));
+  result->predicate = TYM_STR_DUPLICATE(atom->predicate);
+  result->arity = atom->arity;
+  result->args = NULL;
+  if (result->arity > 0) {
+    result->args = malloc(sizeof(*(result->args)) * result->arity);
+  }
+  for (int i = 0; i < atom->arity; i++) {
+    result->args[i] = tym_mdl_instantiate_valuation_term(atom->args[i], vals);
+  }
+  return result;
+}
+
+struct TymClause *
+tym_mdl_instantiate_valuation_clause(struct TymClause * cl, struct TymMdlValuations * vals)
+{
+  struct TymClause * result = malloc(sizeof(*result));
+  result->head = tym_mdl_instantiate_valuation_atom(cl->head, vals);
+  result->body_size = cl->body_size;
+  result->body = NULL;
+  if (result->body_size > 0) {
+    result->body = malloc(sizeof(*(result->body)) * result->body_size);
+  }
+  for (int i = 0; i < cl->body_size; i++) {
+    result->body[i] = tym_mdl_instantiate_valuation_atom(cl->body[i], vals);
+  }
+  return result;
+}
+
+struct TymProgram *
+tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals)
+{
+// FIXME Move tym_mdl_* to AST -- or some derivative of that.
+//  since we're working with AST, not with formulas (so formula.c+h isn't the right place for tym_mdl_*)
+
+  struct TymProgram * result = malloc(sizeof(*result));
+  result->no_clauses = ParsedQuery->no_clauses;
+  result->program = malloc(sizeof(*(result->program)) * result->no_clauses);
+  for (int i = 0; i < ParsedQuery->no_clauses; i++) {
+    result->program[i] = tym_mdl_instantiate_valuation_clause(ParsedQuery->program[i], vals);
+  }
+  return result;
 }

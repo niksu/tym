@@ -125,5 +125,6 @@ struct TymMdlValuations * tym_mdl_mk_valuations(const TymStr **, const TymStr **
 void tym_mdl_free_valuations(struct TymMdlValuations *);
 void tym_mdl_print_valuations(const struct TymMdlValuations *);
 void tym_mdl_reset_valuations(struct TymMdlValuations *);
+struct TymProgram * tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals);
 
 #endif /* TYM_FORMULA_H */
