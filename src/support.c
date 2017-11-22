@@ -161,13 +161,11 @@ solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, s
         found_model = tym_mk_fmla_and(found_model, atom);
       }
     }
-assert(ParsedQuery == ParsedQuery);  
 
     // FIXME offer choice to print as equation (showing unification) or as fact.
     tym_mdl_print_valuations(vals);
     struct TymProgram * instance = tym_mdl_instantiate_valuation(ParsedQuery, vals);
-    tym_free_program(instance);
-/*
+
     // FIXME inefficient to keep allocating and freeing the buffer.
     struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
     struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
@@ -177,7 +175,8 @@ assert(ParsedQuery == ParsedQuery);
     free(res);
     printf("%s.\n", tym_buffer_contents(outbuf));
     tym_free_buffer(outbuf);
-*/
+    tym_free_program(instance);
+
     tym_mdl_reset_valuations(vals);
     break;
   case TYM_SAT_NO:
