@@ -173,7 +173,7 @@ solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, s
     res = tym_program_str(instance, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("%s.\n", tym_buffer_contents(outbuf));
+    printf("%s\n", tym_buffer_contents(outbuf));
     tym_free_buffer(outbuf);
     tym_free_program(instance);
 

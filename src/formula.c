@@ -1279,7 +1279,7 @@ tym_mdl_instantiate_valuation_term(struct TymTerm * term, struct TymMdlValuation
     for (unsigned i = 0; i < vals->count; i++) {
       if (0 == tym_cmp_str(vals->v[i].var_name, term->identifier)) {
         result = malloc(sizeof(*result));
-        result->identifier = TYM_STR_DUPLICATE(vals->v[i].const_name);
+        result->identifier = TYM_STR_DUPLICATE(vals->v[i].value);
         result->kind = TYM_CONST;
       }
     }
