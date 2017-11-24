@@ -15,9 +15,12 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
-static struct TymFmla * solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap);
-static void solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf);
+// FIXME inconcsistent parameter naming style -- smallcaps vs pascal
+static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap);
+static void solver_loop(struct TymParams *, struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf);
 static const struct TymValuation * find_valuation_for(const TymStr * var_name, struct TymValuation * varmap);
+
+enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
 
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
@@ -26,8 +29,16 @@ const char * TymFunctionCommandMapping[] =
    NULL
   };
 
+const char * TymModelOutputCommandMapping[] =
+  {"valuation",
+   "fact",
+   "all",
+   NULL
+  };
+
 const char *
-tym_functions(void) {
+tym_functions(void)
+{
   size_t string_length = 0;
   for (unsigned i = 0; i < TYM_NO_FUNCTION; ++i) {
      string_length += strlen(TymFunctionCommandMapping[i]) + 2;
@@ -38,6 +49,28 @@ tym_functions(void) {
      strcpy(result + offset, TymFunctionCommandMapping[i]);
      offset += strlen(TymFunctionCommandMapping[i]);
      if (TYM_NO_FUNCTION - 1 != i) {
+       strcpy(result + offset, sep);
+       offset += strlen(sep);
+     }
+  }
+
+  return result;
+}
+
+const char *
+tym_model_outputs(void)
+{
+  // FIXME DRY principle: repeated code from tym_functions()
+  size_t string_length = 0;
+  for (unsigned i = 0; i < TYM_NO_MODEL_OUTPUT; ++i) {
+     string_length += strlen(TymModelOutputCommandMapping[i]) + 2;
+  }
+  char * result = malloc(string_length + 1);
+  const char * sep = ", ";
+  for (size_t offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
+     strcpy(result + offset, TymModelOutputCommandMapping[i]);
+     offset += strlen(TymModelOutputCommandMapping[i]);
+     if (TYM_NO_MODEL_OUTPUT - 1 != i) {
        strcpy(result + offset, sep);
        offset += strlen(sep);
      }
@@ -132,7 +165,7 @@ find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 }
 
 static struct TymFmla *
-solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap)
+solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap)
 {
   struct TymFmla * found_model = NULL;
   tym_z3_check();
@@ -162,20 +195,26 @@ solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, s
       }
     }
 
-    // FIXME offer choice to print as equation (showing unification) or as fact.
-    tym_mdl_print_valuations(vals);
-    struct TymProgram * instance = tym_mdl_instantiate_valuation(ParsedQuery, vals);
+    if (TYM_MODEL_OUTPUT_VALUATION == params->model_output ||
+        TYM_ALL_MODEL_OUTPUT == params->model_output) {
+      tym_mdl_print_valuations(vals);
+    }
 
-    // FIXME inefficient to keep allocating and freeing the buffer.
-    struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
-    struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
-    tym_reset_buffer(outbuf);
-    res = tym_program_str(instance, outbuf);
-    assert(tym_is_ok_TymBufferWriteResult(res));
-    free(res);
-    printf("%s\n", tym_buffer_contents(outbuf));
-    tym_free_buffer(outbuf);
-    tym_free_program(instance);
+    if (TYM_MODEL_OUTPUT_FACT == params->model_output ||
+        TYM_ALL_MODEL_OUTPUT == params->model_output) {
+      struct TymProgram * instance = tym_mdl_instantiate_valuation(ParsedQuery, vals);
+
+      // FIXME inefficient to keep allocating and freeing the buffer.
+      struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+      struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+      tym_reset_buffer(outbuf);
+      res = tym_program_str(instance, outbuf);
+      assert(tym_is_ok_TymBufferWriteResult(res));
+      free(res);
+      printf("%s\n", tym_buffer_contents(outbuf));
+      tym_free_buffer(outbuf);
+      tym_free_program(instance);
+    }
 
     tym_mdl_reset_valuations(vals);
     break;
@@ -189,7 +228,7 @@ solver_invoke(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, s
 }
 
 static void
-solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf)
+solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf)
 {
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
@@ -213,7 +252,7 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProg
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
   struct TymFmla * found_model = NULL;
   while (1) {
-    found_model = solver_invoke(ParsedQuery, vals, varmap);
+    found_model = solver_invoke(params, ParsedQuery, vals, varmap);
     if (NULL == found_model) {
       break;
     } else {
@@ -244,6 +283,7 @@ solver_loop(struct TymModel ** mdl, struct TymValuation * varmap, struct TymProg
 }
 
 enum TymReturnCodes
+// FIXME better to pass Params as pointer?
 process_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
@@ -305,7 +345,7 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     if (TYM_CONVERT_TO_SMT == Params.function) {
       printf("%s", tym_buffer_contents(outbuf));
     } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      solver_loop(&mdl, varmap, ParsedQuery, outbuf);
+      solver_loop(&Params, &mdl, varmap, ParsedQuery, outbuf);
     }
   }
 

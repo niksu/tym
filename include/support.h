@@ -22,15 +22,22 @@
 
 enum TymFunction {TYM_TEST_PARSING=0, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND_SOLVE, TYM_NO_FUNCTION};
 
+enum TymModelOutput {TYM_MODEL_OUTPUT_VALUATION=0, TYM_MODEL_OUTPUT_FACT, TYM_ALL_MODEL_OUTPUT/*Used for testing*/, TYM_NO_MODEL_OUTPUT};
+
+extern enum TymModelOutput TymDefaultModelOutput;
+
 extern const char * TymFunctionCommandMapping[];
+extern const char * TymModelOutputCommandMapping[];
 
 const char * tym_functions(void);
+const char * tym_model_outputs(void);
 
 struct TymParams {
   char * input_file;
   char verbosity;
   char * query;
   enum TymFunction function;
+  enum TymModelOutput model_output;
 };
 
 enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER, TYM_NO_INPUT, TYM_INVALID_INPUT};

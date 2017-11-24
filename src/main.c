@@ -29,9 +29,11 @@ show_usage(const char * const argv_0)
          "   -f, --function FUNCTION (%s)\n"
          " Optional parameters: \n"
          "   -q, --query QUERY \n"
+         "   -m, --model_output MODEL_OUTPUT (%s). Default: %s\n"
          "   -v, --verbose \n"
          "   --max_var_width N \n"
-         "   -h \n", argv_0, tym_functions());
+         "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
+         TymModelOutputCommandMapping[TymDefaultModelOutput]);
 }
 
 int
@@ -50,7 +52,8 @@ main(int argc, char ** argv)
     .input_file = NULL,
     .verbosity = 0,
     .query = NULL,
-    .function = TYM_NO_FUNCTION
+    .function = TYM_NO_FUNCTION,
+    .model_output = TymDefaultModelOutput
   };
 
   static struct option long_options[] = {
@@ -63,14 +66,16 @@ main(int argc, char ** argv)
 #define LONG_OPT_MAX_VAR_WIDTH 4
     {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH},
 #define LONG_OPT_FUNCTION 5
-    {"function", required_argument, NULL, LONG_OPT_FUNCTION}
+    {"function", required_argument, NULL, LONG_OPT_FUNCTION},
+#define LONG_OPT_MODEL_OUTPUT 6
+    {"model_output", required_argument, NULL, LONG_OPT_FUNCTION}
   };
 
   int option_index = 0;
   long v;
 
   int option;
-  while ((option = getopt_long(argc, argv, "f:hi:q:v", long_options,
+  while ((option = getopt_long(argc, argv, "f:hi:m:q:v", long_options,
           &option_index)) != -1) {
     switch (option) {
     case LONG_OPT_INPUT:
@@ -88,6 +93,19 @@ main(int argc, char ** argv)
       }
       if (TYM_NO_FUNCTION == Params.function) {
         TYM_ERR("Unrecognized function: %s\n", optarg);
+        return TYM_UNRECOGNISED_PARAMETER;
+      }
+      break;
+    case LONG_OPT_MODEL_OUTPUT:
+    case 'm':
+      Params.model_output = TYM_NO_MODEL_OUTPUT;
+      for (unsigned i = 0; i < TYM_NO_MODEL_OUTPUT; ++i) {
+         if (0 == strcmp(optarg, TymModelOutputCommandMapping[i])) {
+            Params.model_output = i;
+         }
+      }
+      if (TYM_NO_MODEL_OUTPUT == Params.model_output) {
+        TYM_ERR("Unrecognized model-output: %s\n", optarg);
         return TYM_UNRECOGNISED_PARAMETER;
       }
       break;
