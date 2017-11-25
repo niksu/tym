@@ -16,6 +16,10 @@
 #include "module_tests.h"
 #include "util.h"
 
+struct TymTerm * tym_mdl_instantiate_valuation_term(struct TymTerm * term, struct TymMdlValuations * vals);
+struct TymAtom * tym_mdl_instantiate_valuation_atom(struct TymAtom * atom, struct TymMdlValuations * vals);
+struct TymClause * tym_mdl_instantiate_valuation_clause(struct TymClause * cl, struct TymMdlValuations * vals);
+
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
 tym_term_str(const struct TymTerm * const term, struct TymBufferInfo * dst)
 {
@@ -779,3 +783,139 @@ tym_hidden_vars_of_clause(const struct TymClause * cl)
 }
 
 TYM_DEFINE_LIST_SHALLOW_FREE(terms, , struct TymTerms)
+
+struct TymMdlValuations *
+tym_mdl_mk_valuations(const TymStr ** consts, const TymStr ** vars)
+{
+  assert(NULL != consts);
+  assert(NULL != vars);
+  unsigned count = 0;
+  while (NULL != consts[count]) {
+    count++;
+  }
+
+  {
+    unsigned var_count = 0;
+    while (NULL != vars[var_count]) {
+      var_count++;
+    }
+    assert(count == var_count);
+  }
+
+  struct TymMdlValuations * result = malloc(sizeof(*result));
+  result->count = count;
+  result->v = malloc(sizeof(*result->v) * count);
+  for (unsigned i = 0; i < count; i++) {
+    result->v[i].const_name = TYM_STR_DUPLICATE(consts[i]);
+    result->v[i].var_name = TYM_STR_DUPLICATE(vars[i]);
+    result->v[i].value = NULL;
+  }
+
+  return result;
+}
+
+void
+tym_mdl_free_valuations(struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  for (unsigned i = 0; i < vals->count; i++) {
+    tym_free_str(vals->v[i].const_name);
+    tym_free_str(vals->v[i].var_name);
+    if (NULL != vals->v[i].value) {
+      tym_free_str(vals->v[i].value);
+    }
+  }
+  free(vals->v);
+  free(vals);
+}
+
+void
+tym_mdl_print_valuations(const struct TymMdlValuations * vals)
+{
+  assert(NULL != vals);
+  for (unsigned i = 0; i < vals->count; i++) {
+    printf("%s = %s", tym_decode_str(vals->v[i].var_name), tym_decode_str(vals->v[i].value));
+    if (i < vals->count - 1) {
+      printf(", ");
+    }
+  }
+  printf("\n");
+}
+
+void
+tym_mdl_reset_valuations(struct TymMdlValuations * vals)
+{
+  for (unsigned i = 0; i < vals->count; i++) {
+    tym_free_str(vals->v[i].value);
+    vals->v[i].value = NULL;
+  }
+}
+
+struct TymTerm *
+tym_mdl_instantiate_valuation_term(struct TymTerm * term, struct TymMdlValuations * vals)
+{
+  struct TymTerm * result = NULL;
+  if (TYM_VAR == term->kind) {
+    // FIXME inefficient -- linear time.
+    for (unsigned i = 0; i < vals->count; i++) {
+      if (0 == tym_cmp_str(vals->v[i].var_name, term->identifier)) {
+        result = malloc(sizeof(*result));
+        result->identifier = TYM_STR_DUPLICATE(vals->v[i].value);
+        result->kind = TYM_CONST;
+      }
+    }
+  }
+
+  if (NULL == result) {
+    result = tym_copy_term(term);
+  }
+
+  return result;
+}
+
+struct TymAtom *
+tym_mdl_instantiate_valuation_atom(struct TymAtom * atom, struct TymMdlValuations * vals)
+{
+  struct TymAtom * result = malloc(sizeof(*result));
+  result->predicate = TYM_STR_DUPLICATE(atom->predicate);
+  result->arity = atom->arity;
+  result->args = NULL;
+  if (result->arity > 0) {
+    result->args = malloc(sizeof(*(result->args)) * result->arity);
+  }
+  for (int i = 0; i < atom->arity; i++) {
+    result->args[i] = tym_mdl_instantiate_valuation_term(atom->args[i], vals);
+  }
+  return result;
+}
+
+struct TymClause *
+tym_mdl_instantiate_valuation_clause(struct TymClause * cl, struct TymMdlValuations * vals)
+{
+  struct TymClause * result = malloc(sizeof(*result));
+  result->head = tym_mdl_instantiate_valuation_atom(cl->head, vals);
+  result->body_size = cl->body_size;
+  result->body = NULL;
+  if (result->body_size > 0) {
+    result->body = malloc(sizeof(*(result->body)) * result->body_size);
+  }
+  for (int i = 0; i < cl->body_size; i++) {
+    result->body[i] = tym_mdl_instantiate_valuation_atom(cl->body[i], vals);
+  }
+  return result;
+}
+
+struct TymProgram *
+tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals)
+{
+// FIXME Move tym_mdl_* to AST -- or some derivative of that.
+//  since we're working with AST, not with formulas (so formula.c+h isn't the right place for tym_mdl_*)
+
+  struct TymProgram * result = malloc(sizeof(*result));
+  result->no_clauses = ParsedQuery->no_clauses;
+  result->program = malloc(sizeof(*(result->program)) * result->no_clauses);
+  for (int i = 0; i < ParsedQuery->no_clauses; i++) {
+    result->program[i] = tym_mdl_instantiate_valuation_clause(ParsedQuery->program[i], vals);
+  }
+  return result;
+}

@@ -106,4 +106,21 @@ struct TymTerms * tym_hidden_vars_of_clause(const struct TymClause *);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(terms, , struct TymTerms)
 
+struct TymMdlValuation {
+  const TymStr * var_name; // Variable identifier chosen by the user.
+  const TymStr * const_name; // (Internal) fresh constant identifier chosen by us.
+  const TymStr * value;
+};
+
+struct TymMdlValuations {
+  unsigned count;
+  struct TymMdlValuation * v;
+};
+
+struct TymMdlValuations * tym_mdl_mk_valuations(const TymStr **, const TymStr **);
+void tym_mdl_free_valuations(struct TymMdlValuations *);
+void tym_mdl_print_valuations(const struct TymMdlValuations *);
+void tym_mdl_reset_valuations(struct TymMdlValuations *);
+struct TymProgram * tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals);
+
 #endif // TYM_AST_H

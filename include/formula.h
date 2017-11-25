@@ -110,21 +110,4 @@ size_t tym_fmla_size(const struct TymFmla * const);
 
 struct TymTerms * tym_consts_in_fmla(const struct TymFmla * fmla, struct TymTerms * acc, bool with_pred_const);
 
-struct TymMdlValuation {
-  const TymStr * var_name; // Variable identifier chosen by the user.
-  const TymStr * const_name; // (Internal) fresh constant identifier chosen by us.
-  const TymStr * value;
-};
-
-struct TymMdlValuations {
-  unsigned count;
-  struct TymMdlValuation * v;
-};
-
-struct TymMdlValuations * tym_mdl_mk_valuations(const TymStr **, const TymStr **);
-void tym_mdl_free_valuations(struct TymMdlValuations *);
-void tym_mdl_print_valuations(const struct TymMdlValuations *);
-void tym_mdl_reset_valuations(struct TymMdlValuations *);
-struct TymProgram * tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals);
-
 #endif /* TYM_FORMULA_H */
