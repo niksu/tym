@@ -908,9 +908,6 @@ tym_mdl_instantiate_valuation_clause(struct TymClause * cl, struct TymMdlValuati
 struct TymProgram *
 tym_mdl_instantiate_valuation(struct TymProgram * ParsedQuery, struct TymMdlValuations * vals)
 {
-// FIXME Move tym_mdl_* to AST -- or some derivative of that.
-//  since we're working with AST, not with formulas (so formula.c+h isn't the right place for tym_mdl_*)
-
   struct TymProgram * result = malloc(sizeof(*result));
   result->no_clauses = ParsedQuery->no_clauses;
   result->program = malloc(sizeof(*(result->program)) * result->no_clauses);

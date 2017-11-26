@@ -23,7 +23,7 @@ void
 tym_z3_begin(void)
 {
   if ((NULL != universe_sort) || (NULL != z3_ctxt)) {
-    // FIXME complain
+    assert(0);
   } else {
     Z3_config cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
@@ -83,7 +83,8 @@ tym_z3_assert_smtlib2(const char * str)
 void
 tym_z3_print_model(void)
 {
-  // FIXME Display only interpretations of constants appearing in the query.
+  // NOTE this function displays the interpretations of all constants, not only
+  //      those appearing in the query.
   z3_mdl = Z3_solver_get_model(z3_ctxt, z3_slvr);
   if (NULL != z3_mdl) {
     Z3_model_inc_ref(z3_ctxt, z3_mdl);
