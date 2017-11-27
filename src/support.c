@@ -15,10 +15,9 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
-// FIXME inconcsistent parameter naming style -- smallcaps vs pascal
-static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap);
-static void solver_loop(struct TymParams *, struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf);
-static const struct TymValuation * find_valuation_for(const TymStr * var_name, struct TymValuation * varmap);
+static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *);
+static void solver_loop(struct TymParams *, struct TymModel **, struct TymValuation *, struct TymProgram *, struct TymBufferInfo *);
+static const struct TymValuation * find_valuation_for(const TymStr *, struct TymValuation *);
 
 enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
 
