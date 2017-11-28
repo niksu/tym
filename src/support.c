@@ -18,6 +18,7 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *);
 static void solver_loop(struct TymParams *, struct TymModel **, struct TymValuation *, struct TymProgram *, struct TymBufferInfo *);
 static const struct TymValuation * find_valuation_for(const TymStr *, struct TymValuation *);
+static const char * tym_show_choices(const char ** choices, const unsigned choice_terminator);
 
 enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
 
@@ -36,18 +37,18 @@ const char * TymModelOutputCommandMapping[] =
   };
 
 const char *
-tym_functions(void)
+tym_show_choices(const char ** choices, const unsigned choice_terminator)
 {
   size_t string_length = 0;
-  for (unsigned i = 0; i < TYM_NO_FUNCTION; ++i) {
-     string_length += strlen(TymFunctionCommandMapping[i]) + 2;
+  for (unsigned i = 0; i < choice_terminator; ++i) {
+     string_length += strlen(choices[i]) + 2;
   }
   char * result = malloc(string_length + 1);
   const char * sep = ", ";
-  for (size_t offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
-     strcpy(result + offset, TymFunctionCommandMapping[i]);
-     offset += strlen(TymFunctionCommandMapping[i]);
-     if (TYM_NO_FUNCTION - 1 != i) {
+  for (size_t offset = 0, i = 0; i < choice_terminator; ++i) {
+     strcpy(result + offset, choices[i]);
+     offset += strlen(choices[i]);
+     if (choice_terminator - 1 != i) {
        strcpy(result + offset, sep);
        offset += strlen(sep);
      }
@@ -57,25 +58,15 @@ tym_functions(void)
 }
 
 const char *
+tym_functions(void)
+{
+  return tym_show_choices(TymFunctionCommandMapping, TYM_NO_FUNCTION);
+}
+
+const char *
 tym_model_outputs(void)
 {
-  // FIXME DRY principle: repeated code from tym_functions()
-  size_t string_length = 0;
-  for (unsigned i = 0; i < TYM_NO_MODEL_OUTPUT; ++i) {
-     string_length += strlen(TymModelOutputCommandMapping[i]) + 2;
-  }
-  char * result = malloc(string_length + 1);
-  const char * sep = ", ";
-  for (size_t offset = 0, i = 0; i < TYM_NO_FUNCTION; ++i) {
-     strcpy(result + offset, TymModelOutputCommandMapping[i]);
-     offset += strlen(TymModelOutputCommandMapping[i]);
-     if (TYM_NO_MODEL_OUTPUT - 1 != i) {
-       strcpy(result + offset, sep);
-       offset += strlen(sep);
-     }
-  }
-
-  return result;
+  return tym_show_choices(TymModelOutputCommandMapping, TYM_NO_MODEL_OUTPUT);
 }
 
 struct TymProgram *
