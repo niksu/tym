@@ -70,67 +70,67 @@ tym_model_outputs(void)
 }
 
 struct TymProgram *
-tym_parse_input_file(struct TymParams Params)
+tym_parse_input_file(struct TymParams * Params)
 {
   struct TymProgram * result = NULL;
-  if (NULL != Params.input_file) {
-    char * InputFileContents = read_file(Params.input_file);
-    if (TYM_TEST_PARSING == Params.function) {
+  if (NULL != Params->input_file) {
+    char * InputFileContents = read_file(Params->input_file);
+    if (TYM_TEST_PARSING == Params->function) {
       printf("input contents |%s|\n", InputFileContents);
     }
     result = parse(InputFileContents);
-    if (Params.verbosity > 0 && NULL != InputFileContents) {
+    if (Params->verbosity > 0 && NULL != InputFileContents) {
       TYM_VERBOSE("input : %d clauses\n", result->no_clauses);
     }
     free(InputFileContents);
-  } else if (TYM_TEST_PARSING == Params.function) {
+  } else if (TYM_TEST_PARSING == Params->function) {
     printf("(no input file given)\n");
   }
   return result;
 }
 
 struct TymProgram *
-tym_parse_query(struct TymParams Params)
+tym_parse_query(struct TymParams * Params)
 {
   struct TymProgram * result = NULL;
-  if (NULL != Params.query) {
-    if ((TYM_TEST_PARSING == Params.function) && 0 == Params.verbosity) {
-      printf("query contents |%s|\n", Params.query);
+  if (NULL != Params->query) {
+    if ((TYM_TEST_PARSING == Params->function) && 0 == Params->verbosity) {
+      printf("query contents |%s|\n", Params->query);
     }
-    result = parse(Params.query);
-    if (Params.verbosity > 0 && NULL != Params.query) {
+    result = parse(Params->query);
+    if (Params->verbosity > 0 && NULL != Params->query) {
       TYM_VERBOSE("query : %d clauses\n", result->no_clauses);
     }
-  } else if (TYM_TEST_PARSING == Params.function) {
+  } else if (TYM_TEST_PARSING == Params->function) {
     printf("(no query given)\n");
   }
   return result;
 }
 
 void
-print_parsed_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
+print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
-  if (NULL != Params.input_file) {
+  if (NULL != Params->input_file) {
     res = tym_program_str(ParsedInputFileContents, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed file contents")
     tym_free_program(ParsedInputFileContents);
-    free(Params.input_file);
+    free(Params->input_file);
   }
 
-  if (NULL != Params.query) {
+  if (NULL != Params->query) {
     tym_reset_buffer(outbuf);
     res = tym_program_str(ParsedQuery, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed query")
     tym_free_program(ParsedQuery);
-    free(Params.query);
+    free(Params->query);
   }
 
   tym_free_buffer(outbuf);
@@ -273,15 +273,14 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
 }
 
 enum TymReturnCodes
-// FIXME better to pass Params as pointer?
-process_program(struct TymParams Params, struct TymProgram * ParsedInputFileContents,
+process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
-  if (NULL == Params.input_file) {
+  if (NULL == Params->input_file) {
     TYM_ERR("No input file given.\n");
     return TYM_INVALID_INPUT;
   } else if (0 == ParsedInputFileContents->no_clauses) {
-    TYM_ERR("Input file (%s) is devoid of clauses.\n", Params.input_file);
+    TYM_ERR("Input file (%s) is devoid of clauses.\n", Params->input_file);
     return TYM_INVALID_INPUT;
   }
 
@@ -332,10 +331,10 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
     free(res);
     TYM_DBG_BUFFER(outbuf, "model")
 
-    if (TYM_CONVERT_TO_SMT == Params.function) {
+    if (TYM_CONVERT_TO_SMT == Params->function) {
       printf("%s", tym_buffer_contents(outbuf));
-    } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      solver_loop(&Params, &mdl, varmap, ParsedQuery, outbuf);
+    } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params->function) {
+      solver_loop(Params, &mdl, varmap, ParsedQuery, outbuf);
     }
   }
 
@@ -354,14 +353,14 @@ process_program(struct TymParams Params, struct TymProgram * ParsedInputFileCont
 
   tym_free_buffer(outbuf);
 
-  if (NULL != Params.input_file) {
+  if (NULL != Params->input_file) {
     tym_free_program(ParsedInputFileContents);
-    free(Params.input_file);
+    free(Params->input_file);
   }
 
-  if (NULL != Params.query) {
+  if (NULL != Params->query) {
     tym_free_program(ParsedQuery);
-    free(Params.query);
+    free(Params->query);
   }
 
   return TYM_AOK;

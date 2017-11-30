@@ -168,18 +168,18 @@ main(int argc, char ** argv)
 
   enum TymReturnCodes result = TYM_AOK;
 
-  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
+  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(&Params);
   if (NULL == ParsedInputFileContents) {
     result = TYM_NO_INPUT;
   }
 
   if (TYM_AOK == result) {
-    struct TymProgram * ParsedQuery = tym_parse_query(Params);
+    struct TymProgram * ParsedQuery = tym_parse_query(&Params);
 
     if (TYM_TEST_PARSING == Params.function) {
-      print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
+      print_parsed_program(&Params, ParsedInputFileContents, ParsedQuery);
     } else {
-      result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+      result = process_program(&Params, ParsedInputFileContents, ParsedQuery);
     }
   }
 
