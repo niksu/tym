@@ -15,7 +15,7 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
-static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *);
+static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *, struct TymBufferInfo *);
 static void solver_loop(struct TymParams *, struct TymModel **, struct TymValuation *, struct TymProgram *, struct TymBufferInfo *);
 static const struct TymValuation * find_valuation_for(const TymStr *, struct TymValuation *);
 static const char * tym_show_choices(const char ** choices, const unsigned choice_terminator);
@@ -155,7 +155,7 @@ find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 }
 
 static struct TymFmla *
-solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap)
+solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap, struct TymBufferInfo * result_outbuf)
 {
   struct TymFmla * found_model = NULL;
   tym_z3_check();
@@ -194,15 +194,12 @@ solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct
         TYM_ALL_MODEL_OUTPUT == params->model_output) {
       struct TymProgram * instance = tym_mdl_instantiate_valuation(ParsedQuery, vals);
 
-      // FIXME inefficient to keep allocating and freeing the buffer.
-      struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
       struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
-      tym_reset_buffer(outbuf);
-      res = tym_program_str(instance, outbuf);
+      tym_reset_buffer(result_outbuf);
+      res = tym_program_str(instance, result_outbuf);
       assert(tym_is_ok_TymBufferWriteResult(res));
       free(res);
-      printf("%s\n", tym_buffer_contents(outbuf));
-      tym_free_buffer(outbuf);
+      printf("%s\n", tym_buffer_contents(result_outbuf));
       tym_free_program(instance);
     }
 
@@ -241,8 +238,11 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
 
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
   struct TymFmla * found_model = NULL;
+
+  struct TymBufferInfo * result_outbuf = tym_mk_buffer(TYM_BUF_SIZE);
+
   while (1) {
-    found_model = solver_invoke(params, ParsedQuery, vals, varmap);
+    found_model = solver_invoke(params, ParsedQuery, vals, varmap, result_outbuf);
     if (NULL == found_model) {
       break;
     } else {
@@ -265,6 +265,7 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
     }
   }
 
+  tym_free_buffer(result_outbuf);
   tym_mdl_free_valuations(vals);
   free(consts);
   free(vars);
