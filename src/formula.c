@@ -920,15 +920,29 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_AND:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct TymFmla *)tym_mk_fmla_and(tym_copy_fmla(fmla->param.args[0]),
-        tym_copy_fmla(fmla->param.args[1]));
+    {
+      int i = 0;
+      struct TymFmlas * fmlas = NULL;
+      while (NULL != fmla->param.args[i]) {
+        fmlas = tym_mk_fmla_cell(tym_copy_fmla(fmla->param.args[i]), fmlas);
+        i++;
+      }
+      result = (struct TymFmla *)tym_mk_fmla_ands(fmlas);
+    }
 #pragma GCC diagnostic pop
     break;
   case FMLA_OR:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct TymFmla *)tym_mk_fmla_or(tym_copy_fmla(fmla->param.args[0]),
-        tym_copy_fmla(fmla->param.args[1]));
+    {
+      int i = 0;
+      struct TymFmlas * fmlas = NULL;
+      while (NULL != fmla->param.args[i]) {
+        fmlas = tym_mk_fmla_cell(tym_copy_fmla(fmla->param.args[i]), fmlas);
+        i++;
+      }
+      result = (struct TymFmla *)tym_mk_fmla_ors(fmlas);
+    }
 #pragma GCC diagnostic pop
     break;
   case FMLA_NOT:
