@@ -150,7 +150,16 @@ tym_z3_get_model(struct TymMdlValuations * vals)
           if (a2 == a) {
             Z3_symbol symb2 = Z3_get_decl_name(z3_ctxt, d2);
             const TymStr * s2 = TYM_CSTR_DUPLICATE(Z3_get_symbol_string(z3_ctxt, symb2));
-            if (0 != tym_cmp_str(vals->v[vi].const_name, s2)) {
+            bool is_a_fresh_const = false;
+            // Ensure that s2 doesn't correspond to any fresh constant, not just vals->v[vi].const_name
+            for (unsigned vj = 0; vj < vals->count; vj++) {
+              if (0 == tym_cmp_str(vals->v[vj].const_name, s2)) {
+                is_a_fresh_const = true;
+                break;
+              }
+            }
+
+            if (!is_a_fresh_const) {
               vals->v[vi].value = s2;
             } else {
               tym_free_str(s2);
