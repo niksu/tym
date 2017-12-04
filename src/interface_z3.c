@@ -27,19 +27,12 @@ tym_z3_begin(void)
   } else {
     Z3_config cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
+    Z3_set_param_value(cfg, "smtlib2_compliant", "true");
     Z3_set_param_value(cfg, "timeout", "5000"); //5s FIXME const
     // FIXME does the return code indicate Timeout if we time out?
 /*
   FIXME other Z3 parameters to consider:
-
-  rlimit (unsigned int) (default: 0)
-  smtlib2_compliant (bool) (default: false)
-  timeout (unsigned int) (default: 4294967295)
   type_check (bool) (default: true)
-
-  memory_high_watermark (unsigned int) (default: 0)
-  memory_max_alloc_count (unsigned int) (default: 0)
-  memory_max_size (unsigned int) (default: 0)
 */
     z3_ctxt = Z3_mk_context(cfg);
     Z3_del_config(cfg);
