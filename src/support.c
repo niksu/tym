@@ -22,6 +22,8 @@ static const char * tym_show_choices(const char ** choices, const unsigned choic
 
 enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
 
+enum TymSatisfiable TymState_LastSolverResult = TYM_SAT_NONE;
+
 const char * TymFunctionCommandMapping[] =
   {"test_parsing",
    "smt_output",
@@ -159,11 +161,11 @@ solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct
 {
   struct TymFmla * found_model = NULL;
   tym_z3_check();
-  enum TymSatisfiable result = tym_z3_satisfied();
+  TymState_LastSolverResult = tym_z3_satisfied();
 #if TYM_DEBUG
   printf("sat=%d\n", (int)result);
 #endif
-  switch (result) {
+  switch (TymState_LastSolverResult) {
   case TYM_SAT_YES:
 #if TYM_DEBUG
     tym_z3_print_model();
@@ -242,7 +244,13 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
   struct TymBufferInfo * result_outbuf = tym_mk_buffer(TYM_BUF_SIZE);
 
   while (1) {
+#if TYM_DEBUG
+    printf("Invoking...\n");
+#endif
     found_model = solver_invoke(params, ParsedQuery, vals, varmap, result_outbuf);
+#if TYM_DEBUG
+    printf("...Invoked\n");
+#endif
     if (NULL == found_model) {
       break;
     } else {
@@ -364,7 +372,14 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     free(Params->query);
   }
 
-  return TYM_AOK;
+  // If we used a solver, check if it timed out or gave up,
+  // so we can communicate this upwards through the return code.
+  if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params->function &&
+      TYM_SAT_UNKNOWN == TymState_LastSolverResult) {
+    return TYM_SOLVER_GAVEUP;
+  } else {
+    return TYM_AOK;
+  }
 }
 
 char *

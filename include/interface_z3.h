@@ -17,8 +17,6 @@
 #include "formula.h"
 #include "string_idx.h"
 
-enum TymSatisfiable {TYM_SAT_UNKNOWN=0, TYM_SAT_YES, TYM_SAT_NO};
-
 void tym_z3_begin(void);
 void tym_z3_end(void);
 enum TymSatisfiable tym_z3_satisfied(void);

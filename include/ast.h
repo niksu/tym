@@ -19,6 +19,10 @@
 #include "string_idx.h"
 #include "util.h"
 
+enum TymSatisfiable {TYM_SAT_NONE=0, // Initial value, before satisfiability check has been attempted.
+  TYM_SAT_UNKNOWN, // Used if a backend solver timed out, for example.
+  TYM_SAT_YES, TYM_SAT_NO};
+
 enum TymTermKind {TYM_VAR=0, TYM_CONST=1, TYM_STR=2};
 
 struct TymTerm {

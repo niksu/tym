@@ -28,8 +28,7 @@ tym_z3_begin(void)
     Z3_config cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
     Z3_set_param_value(cfg, "smtlib2_compliant", "true");
-    Z3_set_param_value(cfg, "timeout", "5000"); //5s FIXME const
-    // FIXME does the return code indicate Timeout if we time out?
+    Z3_set_param_value(cfg, "timeout", "10000"); //10s FIXME const
 /*
   FIXME other Z3 parameters to consider:
   type_check (bool) (default: true)
