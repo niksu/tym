@@ -16,8 +16,9 @@
 #include "ast.h"
 #include "formula.h"
 #include "string_idx.h"
+#include "support.h"
 
-void tym_z3_begin(void);
+void tym_z3_begin(struct TymParams *);
 void tym_z3_end(void);
 enum TymSatisfiable tym_z3_satisfied(void);
 void tym_z3_check(void);

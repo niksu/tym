@@ -25,6 +25,7 @@ enum TymFunction {TYM_TEST_PARSING=0, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND
 enum TymModelOutput {TYM_MODEL_OUTPUT_VALUATION=0, TYM_MODEL_OUTPUT_FACT, TYM_ALL_MODEL_OUTPUT/*Used for testing*/, TYM_NO_MODEL_OUTPUT};
 
 extern enum TymModelOutput TymDefaultModelOutput;
+extern const char * const TymDefaultSolverTimeout;
 
 extern const char * TymFunctionCommandMapping[];
 extern const char * TymModelOutputCommandMapping[];
@@ -40,6 +41,7 @@ struct TymParams {
   char * query;
   enum TymFunction function;
   enum TymModelOutput model_output;
+  const char * solver_timeout;
 };
 
 // NOTE return codes aren't always returned correctly!

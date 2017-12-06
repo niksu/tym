@@ -20,7 +20,7 @@ static Z3_model z3_mdl = NULL;
 static Z3_lbool z3_result = Z3_L_UNDEF;
 
 void
-tym_z3_begin(void)
+tym_z3_begin(struct TymParams * params)
 {
   if ((NULL != universe_sort) || (NULL != z3_ctxt)) {
     assert(0);
@@ -28,7 +28,7 @@ tym_z3_begin(void)
     Z3_config cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
     Z3_set_param_value(cfg, "smtlib2_compliant", "true");
-    Z3_set_param_value(cfg, "timeout", "10000"); //10s FIXME const
+    Z3_set_param_value(cfg, "timeout", params->solver_timeout);
 /*
   FIXME other Z3 parameters to consider:
   type_check (bool) (default: true)

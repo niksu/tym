@@ -21,6 +21,7 @@ static const struct TymValuation * find_valuation_for(const TymStr *, struct Tym
 static const char * tym_show_choices(const char ** choices, const unsigned choice_terminator);
 
 enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
+const char * const TymDefaultSolverTimeout = "10000";
 
 enum TymSatisfiable TymState_LastSolverResult = TYM_SAT_NONE;
 
@@ -222,7 +223,7 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
 #else
-  tym_z3_begin();
+  tym_z3_begin(params);
   tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
 
   size_t num_vars = tym_valuation_len(varmap);

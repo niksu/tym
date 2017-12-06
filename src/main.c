@@ -32,8 +32,10 @@ show_usage(const char * const argv_0)
          "   -m, --model_output MODEL_OUTPUT (%s). Default: %s\n"
          "   -v, --verbose \n"
          "   --max_var_width N \n"
+         "   --solver_timeout N (in milliseconds). Default: %s\n"
          "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
-         TymModelOutputCommandMapping[TymDefaultModelOutput]);
+         TymModelOutputCommandMapping[TymDefaultModelOutput],
+        TymDefaultSolverTimeout);
 }
 
 int
@@ -53,7 +55,8 @@ main(int argc, char ** argv)
     .verbosity = 0,
     .query = NULL,
     .function = TYM_NO_FUNCTION,
-    .model_output = TymDefaultModelOutput
+    .model_output = TymDefaultModelOutput,
+    .solver_timeout = TymDefaultSolverTimeout
   };
 
   static struct option long_options[] = {
@@ -68,7 +71,9 @@ main(int argc, char ** argv)
 #define LONG_OPT_FUNCTION 5
     {"function", required_argument, NULL, LONG_OPT_FUNCTION},
 #define LONG_OPT_MODEL_OUTPUT 6
-    {"model_output", required_argument, NULL, LONG_OPT_FUNCTION}
+    {"model_output", required_argument, NULL, LONG_OPT_MODEL_OUTPUT},
+#define LONG_OPT_SOLVER_TIMEOUT 7
+    {"solver_timeout", required_argument, NULL, LONG_OPT_SOLVER_TIMEOUT}
   };
 
   int option_index = 0;
@@ -102,6 +107,7 @@ main(int argc, char ** argv)
       for (unsigned i = 0; i < TYM_NO_MODEL_OUTPUT; ++i) {
          if (0 == strcmp(optarg, TymModelOutputCommandMapping[i])) {
             Params.model_output = i;
+            break;
          }
       }
       if (TYM_NO_MODEL_OUTPUT == Params.model_output) {
@@ -122,6 +128,9 @@ main(int argc, char ** argv)
       v = strtol(optarg, NULL, 10);
       assert(v <= UINT8_MAX);
       TymMaxVarWidth = (uint8_t)v;
+      break;
+    case LONG_OPT_SOLVER_TIMEOUT:
+      Params.solver_timeout = strdup(optarg);
       break;
     case 'h':
       show_usage(argv[0]);
@@ -160,6 +169,8 @@ main(int argc, char ** argv)
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("query = %s\n", Params.query);
     TYM_VERBOSE("function = %s\n", TymFunctionCommandMapping[Params.function]);
+    TYM_VERBOSE("model_output = %s\n", TymModelOutputCommandMapping[Params.model_output]);
+    TYM_VERBOSE("solver_timeout = %s\n", Params.solver_timeout);
   }
 
   assert(Params.function != TYM_NO_FUNCTION);
@@ -184,6 +195,13 @@ main(int argc, char ** argv)
   }
 
   tym_fin_str();
+
+  if (TymDefaultSolverTimeout != Params.solver_timeout) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)Params.solver_timeout);
+#pragma GCC diagnostic pop
+  }
 
   return result;
 }
