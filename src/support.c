@@ -265,7 +265,6 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
       tym_shallow_free_stmts((*mdl)->stmts);
       (*mdl)->stmts = reordered_stmts;
 
-      // FIXME DRY?
       tym_reset_buffer(outbuf);
       res = tym_model_str(*mdl, outbuf); // FIXME ideally make Z3 work incrementally instead of giving it the whole model each time.
       assert(tym_is_ok_TymBufferWriteResult(res));

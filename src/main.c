@@ -79,6 +79,7 @@ main(int argc, char ** argv)
   int option_index = 0;
   long v;
 
+  // FIXME: "-f smt_output ... -m fact" doesn't make sense, but we don't emit a warning.
   int option;
   while ((option = getopt_long(argc, argv, "f:hi:m:q:v", long_options,
           &option_index)) != -1) {
