@@ -26,7 +26,8 @@ const char * const TymDefaultSolverTimeout = "10000";
 enum TymSatisfiable TymState_LastSolverResult = TYM_SAT_NONE;
 
 const char * TymFunctionCommandMapping[] =
-  {"test_parsing",
+  {"nothing",
+   "test_parsing",
    "smt_output",
    "smt_solve",
    NULL
