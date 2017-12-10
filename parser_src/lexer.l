@@ -38,7 +38,7 @@ VAR {UPPERALPHA}+{NAMEBODY}*
 /* NOTE definition here is more conservative than at
    http://www.ccs.neu.edu/home/ramsdell/tools/datalog/datalog.html*/
 CONST {LOWERALPHA}+{NAMEBODY}*
-STRING {QUOTE}[^{QUOTE}]*{QUOTE}
+STRING {QUOTE}.*{QUOTE}
 
 %%
 
