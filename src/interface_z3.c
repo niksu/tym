@@ -29,7 +29,6 @@ tym_z3_begin(struct TymParams * params)
     Z3_set_param_value(cfg, "model", "true");
     Z3_set_param_value(cfg, "smtlib2_compliant", "true");
     Z3_set_param_value(cfg, "timeout", params->solver_timeout);
-    Z3_set_param_value(cfg, "type_check", "false"); // FIXME unsure whether to include this: the idea is to allow strings to be included in Universe, but maybe should type predicates more accurately rather than resort to type unsoundness.
     z3_ctxt = Z3_mk_context(cfg);
     Z3_del_config(cfg);
 
