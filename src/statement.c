@@ -162,10 +162,19 @@ tym_split_stmt_pred(struct TymStmt * stmt)
   }
 
   struct TymFmla * head =
-    tym_mk_fmla_atom(stmt->param.const_def->const_name, length, predargs);
+    tym_mk_fmla_atom(TYM_STR_DUPLICATE(stmt->param.const_def->const_name), length, predargs);
 
   def = tym_mk_fmla_iff(def, head);
-  def = tym_mk_fmla_quants(FMLA_ALL, stmt->param.const_def->params, def);
+
+  cursor = stmt->param.const_def->params;
+  struct TymTerms * params = NULL;
+  while (NULL != cursor) {
+    params = tym_mk_term_cell(cursor->term, params);
+    cursor = cursor->next;
+  }
+  def = tym_mk_fmla_quants(FMLA_ALL, params, def);
+
+  tym_shallow_free_terms(params);
 
   return tym_mk_stmt_axiom(def);
 }

@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "string_idx.h"
+#include "util.h"
 
 extern uint8_t TymMaxVarWidth;
 extern char * TYM_UNIVERSE_TY;

@@ -25,10 +25,10 @@ struct TymFmlas * tym_translate_bodies(const struct TymClauses * cls);
 
 struct TymFmla * tym_translate_valuation(struct TymValuation * const v);
 
-void tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at);
-void tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla);
+void tym_translate_query_fmla_atom(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmlaAtom * at, struct TymValuation ** varmap);
+void tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, struct TymFmla * fmla, struct TymValuation ** varmap);
 
-void tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg);
+struct TymValuation * tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg);
 
 struct TymModel * tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg);
 

@@ -20,9 +20,17 @@ HEADER_DIR=include
 HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
 
+ifdef TYM_Z3_PATH
+Z3_LINK?=-L $(TYM_Z3_PATH)/bin -lz3
+Z3_INC?=-I $(TYM_Z3_PATH)/include
+OBJ_FILES+=interface_z3.o
+HEADER_FILES+=interface_z3.h
+CFLAGS+=-DTYM_INTERFACE_Z3
+endif
+
 $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR)
+	$(CC) -std=$(STD) $(CFLAGS) -o $(OUT_DIR)/$@ $(OBJ) $(OBJ_OF_TGT) $(PARSER_OBJ) -L $(OUT_DIR) -ltym -I $(HEADER_DIR) $(Z3_LINK)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
@@ -41,7 +49,7 @@ parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 
 out/%.o: src/%.c $(HEADERS) parser
 	mkdir -p $(OUT_DIR)
-	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) -o $@ $<
+	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) $(Z3_INC) -o $@ $<
 
 .PHONY: clean test
 

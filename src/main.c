@@ -29,9 +29,13 @@ show_usage(const char * const argv_0)
          "   -f, --function FUNCTION (%s)\n"
          " Optional parameters: \n"
          "   -q, --query QUERY \n"
+         "   -m, --model_output MODEL_OUTPUT (%s). Default: %s\n"
          "   -v, --verbose \n"
          "   --max_var_width N \n"
-         "   -h \n", argv_0, tym_functions());
+         "   --solver_timeout N (in milliseconds). Default: %s\n"
+         "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
+         TymModelOutputCommandMapping[TymDefaultModelOutput],
+        TymDefaultSolverTimeout);
 }
 
 int
@@ -50,7 +54,9 @@ main(int argc, char ** argv)
     .input_file = NULL,
     .verbosity = 0,
     .query = NULL,
-    .function = TYM_NO_FUNCTION
+    .function = TYM_NO_FUNCTION,
+    .model_output = TymDefaultModelOutput,
+    .solver_timeout = TymDefaultSolverTimeout
   };
 
   static struct option long_options[] = {
@@ -63,14 +69,19 @@ main(int argc, char ** argv)
 #define LONG_OPT_MAX_VAR_WIDTH 4
     {"max_var_width", required_argument, NULL, LONG_OPT_MAX_VAR_WIDTH},
 #define LONG_OPT_FUNCTION 5
-    {"function", required_argument, NULL, LONG_OPT_FUNCTION}
+    {"function", required_argument, NULL, LONG_OPT_FUNCTION},
+#define LONG_OPT_MODEL_OUTPUT 6
+    {"model_output", required_argument, NULL, LONG_OPT_MODEL_OUTPUT},
+#define LONG_OPT_SOLVER_TIMEOUT 7
+    {"solver_timeout", required_argument, NULL, LONG_OPT_SOLVER_TIMEOUT}
   };
 
   int option_index = 0;
   long v;
 
+  // FIXME: "-f smt_output ... -m fact" doesn't make sense, but we don't emit a warning.
   int option;
-  while ((option = getopt_long(argc, argv, "f:hi:q:v", long_options,
+  while ((option = getopt_long(argc, argv, "f:hi:m:q:v", long_options,
           &option_index)) != -1) {
     switch (option) {
     case LONG_OPT_INPUT:
@@ -91,6 +102,20 @@ main(int argc, char ** argv)
         return TYM_UNRECOGNISED_PARAMETER;
       }
       break;
+    case LONG_OPT_MODEL_OUTPUT:
+    case 'm':
+      Params.model_output = TYM_NO_MODEL_OUTPUT;
+      for (unsigned i = 0; i < TYM_NO_MODEL_OUTPUT; ++i) {
+         if (0 == strcmp(optarg, TymModelOutputCommandMapping[i])) {
+            Params.model_output = i;
+            break;
+         }
+      }
+      if (TYM_NO_MODEL_OUTPUT == Params.model_output) {
+        TYM_ERR("Unrecognized model-output: %s\n", optarg);
+        return TYM_UNRECOGNISED_PARAMETER;
+      }
+      break;
     case LONG_OPT_VERBOSE:
     case 'v':
       Params.verbosity = 1;
@@ -104,6 +129,9 @@ main(int argc, char ** argv)
       v = strtol(optarg, NULL, 10);
       assert(v <= UINT8_MAX);
       TymMaxVarWidth = (uint8_t)v;
+      break;
+    case LONG_OPT_SOLVER_TIMEOUT:
+      Params.solver_timeout = strdup(optarg);
       break;
     case 'h':
       show_usage(argv[0]);
@@ -142,6 +170,8 @@ main(int argc, char ** argv)
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("query = %s\n", Params.query);
     TYM_VERBOSE("function = %s\n", TymFunctionCommandMapping[Params.function]);
+    TYM_VERBOSE("model_output = %s\n", TymModelOutputCommandMapping[Params.model_output]);
+    TYM_VERBOSE("solver_timeout = %s\n", Params.solver_timeout);
   }
 
   assert(Params.function != TYM_NO_FUNCTION);
@@ -150,22 +180,29 @@ main(int argc, char ** argv)
 
   enum TymReturnCodes result = TYM_AOK;
 
-  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(Params);
+  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(&Params);
   if (NULL == ParsedInputFileContents) {
     result = TYM_NO_INPUT;
   }
 
   if (TYM_AOK == result) {
-    struct TymProgram * ParsedQuery = tym_parse_query(Params);
+    struct TymProgram * ParsedQuery = tym_parse_query(&Params);
 
     if (TYM_TEST_PARSING == Params.function) {
-      print_parsed_program(Params, ParsedInputFileContents, ParsedQuery);
+      print_parsed_program(&Params, ParsedInputFileContents, ParsedQuery);
     } else {
-      result = process_program(Params, ParsedInputFileContents, ParsedQuery);
+      result = process_program(&Params, ParsedInputFileContents, ParsedQuery);
     }
   }
 
   tym_fin_str();
+
+  if (TymDefaultSolverTimeout != Params.solver_timeout) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    free((void *)Params.solver_timeout);
+#pragma GCC diagnostic pop
+  }
 
   return result;
 }

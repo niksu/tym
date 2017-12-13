@@ -23,7 +23,6 @@ struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_fmla_junction_str(struct
 static struct TymFmlas * tym_copy_fmlas(const struct TymFmlas *);
 static struct TymFmlas * filter_before_juncts(struct TymFmlas * fmlas, bool is_and_behaviour);
 
-
 struct TymFmla *
 tym_mk_fmla_const(bool b)
 {
@@ -766,7 +765,7 @@ tym_free_fmla_atom(struct TymFmlaAtom * at)
   }
 
   if (NULL != at->predargs) {
-    assert(at->arity > 0);
+    assert(at->arity >= 0);
     free(at->predargs);
   } else {
     assert(0 == at->arity);
@@ -921,15 +920,29 @@ tym_copy_fmla(const struct TymFmla * const fmla)
   case FMLA_AND:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct TymFmla *)tym_mk_fmla_and(tym_copy_fmla(fmla->param.args[0]),
-        tym_copy_fmla(fmla->param.args[1]));
+    {
+      int i = 0;
+      struct TymFmlas * fmlas = NULL;
+      while (NULL != fmla->param.args[i]) {
+        fmlas = tym_mk_fmla_cell(tym_copy_fmla(fmla->param.args[i]), fmlas);
+        i++;
+      }
+      result = (struct TymFmla *)tym_mk_fmla_ands(fmlas);
+    }
 #pragma GCC diagnostic pop
     break;
   case FMLA_OR:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    result = (struct TymFmla *)tym_mk_fmla_or(tym_copy_fmla(fmla->param.args[0]),
-        tym_copy_fmla(fmla->param.args[1]));
+    {
+      int i = 0;
+      struct TymFmlas * fmlas = NULL;
+      while (NULL != fmla->param.args[i]) {
+        fmlas = tym_mk_fmla_cell(tym_copy_fmla(fmla->param.args[i]), fmlas);
+        i++;
+      }
+      result = (struct TymFmla *)tym_mk_fmla_ors(fmlas);
+    }
 #pragma GCC diagnostic pop
     break;
   case FMLA_NOT:
