@@ -14,7 +14,7 @@ The `-v` flag activates verbose output.
 To build with backend solver support (to use [Z3](https://github.com/Z3Prover/z3))
 define `TYM_Z3_PATH` to point to Z3's installation directory when calling `make`:
 `TYM_Z3_PATH=${Z3_PATH} make`.
-When running the resulting binary, remember to indicate where to find libz3.dylib (on macOS -- or .so on Linux).
+When running the resulting binary, remember to indicate where to find Z3's dynamically-liked library (libz3.dylib on macOS -- or the .so analogue on Linux).
 For example, `DYLD_LIBRARY_PATH=z3-4.5.0-x64-osx-10.11.6/bin/ ./out/tym -f smt_solve -m fact -i tests/4.test -q "e(X)."`
 
 # Tests
