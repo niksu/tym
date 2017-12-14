@@ -19,7 +19,7 @@ fi
 [ -z "${TYMDIR}" ] && TYMDIR=.
 [ -z "${PREFIX}" ] && PREFIX="valgrind --leak-check=full"
 
-for FILE in $(ls ${TYMDIR}/tests/*.test)
+for FILE in $(ls ${TYMDIR}/parser_tests/*.test)
 do
   if [ "${MEM_CHECK}" == "1" ]
   then

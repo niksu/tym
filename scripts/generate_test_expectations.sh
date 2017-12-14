@@ -9,7 +9,7 @@ set -e
 
 [ -z "${TYMDIR}" ] && TYMDIR=.
 
-for FILE in $(ls ${TYMDIR}/tests/*.test)
+for FILE in $(ls ${TYMDIR}/parser_tests/*.test)
 do
   CMD="${TYMDIR}/out/tym -i ${FILE} -f test_parsing > ${FILE}.expected"
   echo "Running \"${CMD}\""
