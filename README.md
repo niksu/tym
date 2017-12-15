@@ -19,7 +19,7 @@ For example, `DYLD_LIBRARY_PATH=z3-4.5.0-x64-osx-10.11.6/bin/ ./out/tym -f smt_s
 
 # Tests
 * `make test_modules` tests internal APIs (for forming and destroying expressions, etc)
-* `make test_regression` tests parser + printer + internal API
+* `make test_regression` tests parser + printer + internal API.
 * `MEM_CHECK=1 make test_regression` checks for memory-safety during regression tests.
 * for debug output, build with `CFLAGS=-DTYM_DEBUG`.
 * `CC=gcc-7 make` to compile with that specific compiler.
