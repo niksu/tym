@@ -15,9 +15,13 @@
 TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 #pragma GCC diagnostic pop
 
+#ifdef TYM_INTERFACE_Z3
 static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *, struct TymBufferInfo *);
+#endif
 static void solver_loop(struct TymParams *, struct TymModel **, struct TymValuation *, struct TymProgram *, struct TymBufferInfo *);
+#ifdef TYM_INTERFACE_Z3
 static const struct TymValuation * find_valuation_for(const TymStr *, struct TymValuation *);
+#endif
 static const char * tym_show_choices(const char ** choices, const unsigned choice_terminator);
 
 enum TymModelOutput TymDefaultModelOutput = TYM_MODEL_OUTPUT_VALUATION;
@@ -140,6 +144,7 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
   tym_free_buffer(outbuf);
 }
 
+#ifdef TYM_INTERFACE_Z3
 static const struct TymValuation *
 find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 {
@@ -161,7 +166,16 @@ find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 static struct TymFmla *
 solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap, struct TymBufferInfo * result_outbuf)
 {
+  assert(NULL != params);
+  assert(NULL != ParsedQuery);
+  assert(NULL != vals);
+  assert(NULL != varmap);
+  assert(NULL != result_outbuf);
+
   struct TymFmla * found_model = NULL;
+#ifndef TYM_INTERFACE_Z3
+  assert(0); // Cannot run solver in this build mode.
+#else
   tym_z3_check();
   TymState_LastSolverResult = tym_z3_satisfied();
 #if TYM_DEBUG
@@ -215,12 +229,19 @@ solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct
   default:
     assert(0);
   }
+#endif
   return found_model;
 }
+#endif
 
 static void
 solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf)
 {
+  assert(NULL != params);
+  assert(NULL != ParsedQuery);
+  assert(NULL != mdl);
+  assert(NULL != varmap);
+  assert(NULL != outbuf);
 #ifndef TYM_INTERFACE_Z3
   assert(0); // Cannot run solver in this build mode.
 #else
