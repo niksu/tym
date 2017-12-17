@@ -17,9 +17,7 @@ TYM_DEFINE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 
 #ifdef TYM_INTERFACE_Z3
 static struct TymFmla * solver_invoke(struct TymParams *, struct TymProgram *, struct TymMdlValuations *, struct TymValuation *, struct TymBufferInfo *);
-#endif
 static void solver_loop(struct TymParams *, struct TymModel **, struct TymValuation *, struct TymProgram *, struct TymBufferInfo *);
-#ifdef TYM_INTERFACE_Z3
 static const struct TymValuation * find_valuation_for(const TymStr *, struct TymValuation *);
 #endif
 static const char * tym_show_choices(const char ** choices, const unsigned choice_terminator);
@@ -166,16 +164,7 @@ find_valuation_for(const TymStr * var_name, struct TymValuation * varmap)
 static struct TymFmla *
 solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct TymMdlValuations * vals, struct TymValuation * varmap, struct TymBufferInfo * result_outbuf)
 {
-  assert(NULL != params);
-  assert(NULL != ParsedQuery);
-  assert(NULL != vals);
-  assert(NULL != varmap);
-  assert(NULL != result_outbuf);
-
   struct TymFmla * found_model = NULL;
-#ifndef TYM_INTERFACE_Z3
-  assert(0); // Cannot run solver in this build mode.
-#else
   tym_z3_check();
   TymState_LastSolverResult = tym_z3_satisfied();
 #if TYM_DEBUG
@@ -229,22 +218,12 @@ solver_invoke(struct TymParams * params, struct TymProgram * ParsedQuery, struct
   default:
     assert(0);
   }
-#endif
   return found_model;
 }
-#endif
 
 static void
 solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuation * varmap, struct TymProgram * ParsedQuery, struct TymBufferInfo * outbuf)
 {
-  assert(NULL != params);
-  assert(NULL != ParsedQuery);
-  assert(NULL != mdl);
-  assert(NULL != varmap);
-  assert(NULL != outbuf);
-#ifndef TYM_INTERFACE_Z3
-  assert(0); // Cannot run solver in this build mode.
-#else
   tym_z3_begin(params);
   tym_z3_assert_smtlib2(tym_buffer_contents(outbuf));
 
@@ -300,8 +279,8 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
   free(consts);
   free(vars);
   tym_z3_end();
-#endif // TYM_INTERFACE_Z3
 }
+#endif // TYM_INTERFACE_Z3
 
 enum TymReturnCodes
 process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
@@ -365,7 +344,11 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     if (TYM_CONVERT_TO_SMT == Params->function) {
       printf("%s", tym_buffer_contents(outbuf));
     } else if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params->function) {
+#ifdef TYM_INTERFACE_Z3
       solver_loop(Params, &mdl, varmap, ParsedQuery, outbuf);
+#else
+      assert(0);
+#endif // TYM_INTERFACE_Z3
     }
   }
 
