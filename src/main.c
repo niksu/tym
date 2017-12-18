@@ -166,6 +166,12 @@ main(int argc, char ** argv)
 #endif
     TYM_VERBOSE("TYM_TESTING Undefined\n");
 
+#ifdef TYM_INTERFACE_Z3
+    TYM_VERBOSE("TYM_INTERFACE_Z3 = %d\n", TYM_INTERFACE_Z3);
+#else
+    TYM_VERBOSE("TYM_INTERFACE_Z3 Undefined\n");
+#endif
+
     TYM_VERBOSE("input_fine = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("query = %s\n", Params.query);
@@ -175,6 +181,13 @@ main(int argc, char ** argv)
   }
 
   assert(Params.function != TYM_NO_FUNCTION);
+
+#ifndef TYM_INTERFACE_Z3
+    if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
+      TYM_ERR("Must define TYM_INTERFACE_Z3 at build time in order to use function '%s'\n", TymFunctionCommandMapping[TYM_CONVERT_TO_SMT_AND_SOLVE]);
+      return TYM_UNRECOGNISED_PARAMETER;
+    }
+#endif // TYM_INTERFACE_Z3
 
   tym_init_str();
 
