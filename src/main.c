@@ -182,20 +182,23 @@ main(int argc, char ** argv)
 
   assert(Params.function != TYM_NO_FUNCTION);
 
+  enum TymReturnCodes result = TYM_AOK;
+
 #ifndef TYM_INTERFACE_Z3
-    if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
-      TYM_ERR("Must define TYM_INTERFACE_Z3 at build time in order to use function '%s'\n", TymFunctionCommandMapping[TYM_CONVERT_TO_SMT_AND_SOLVE]);
-      return TYM_UNRECOGNISED_PARAMETER;
-    }
+  if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
+    TYM_ERR("Must define TYM_INTERFACE_Z3 at build time in order to use function '%s'\n", TymFunctionCommandMapping[TYM_CONVERT_TO_SMT_AND_SOLVE]);
+    result = TYM_UNRECOGNISED_PARAMETER;
+  }
 #endif // TYM_INTERFACE_Z3
 
   tym_init_str();
 
-  enum TymReturnCodes result = TYM_AOK;
-
-  struct TymProgram * ParsedInputFileContents = tym_parse_input_file(&Params);
-  if (NULL == ParsedInputFileContents) {
-    result = TYM_NO_INPUT;
+  struct TymProgram * ParsedInputFileContents = NULL;
+  if (TYM_AOK == result) {
+    ParsedInputFileContents = tym_parse_input_file(&Params);
+    if (NULL == ParsedInputFileContents) {
+      result = TYM_NO_INPUT;
+    }
   }
 
   if (TYM_AOK == result) {
@@ -209,6 +212,9 @@ main(int argc, char ** argv)
   }
 
   tym_fin_str();
+
+  free(Params.input_file);
+  free(Params.query);
 
   if (TymDefaultSolverTimeout != Params.solver_timeout) {
 #pragma GCC diagnostic push
