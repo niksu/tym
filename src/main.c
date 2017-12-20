@@ -199,6 +199,10 @@ main(int argc, char ** argv)
     if (NULL == ParsedInputFileContents) {
       result = TYM_NO_INPUT;
     }
+  } else {
+    if (NULL != Params.input_file) {
+      free(Params.input_file);
+    }
   }
 
   if (TYM_AOK == result) {
@@ -209,12 +213,13 @@ main(int argc, char ** argv)
     } else {
       result = process_program(&Params, ParsedInputFileContents, ParsedQuery);
     }
+  } else {
+    if (NULL != Params.query) {
+      free(Params.query);
+    }
   }
 
   tym_fin_str();
-
-  free(Params.input_file);
-  free(Params.query);
 
   if (TymDefaultSolverTimeout != Params.solver_timeout) {
 #pragma GCC diagnostic push
