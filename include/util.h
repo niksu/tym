@@ -138,4 +138,6 @@
 
 // NOTE could also include functions for (deep)FREE and STR wrt list.
 
+char * strcpy_prefixed(const char *, const char *);
+
 #endif /* TYM_UTIL_H */
