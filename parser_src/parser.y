@@ -72,7 +72,7 @@ struct TymProgram * parse(const char * string);
 term : TK_CONST
        { char * identifier = $1;
          struct TymTerm * t = tym_mk_term(TYM_CONST,
-           tym_encode_str(strcpy_prefixed("prefix_"/*FIXME const*/, identifier)));
+           tym_encode_str(strcpy_prefixed(TYM_CONST_PREFIX, identifier)));
          $$ = t; }
      | TK_VAR
        { char * identifier = $1;
