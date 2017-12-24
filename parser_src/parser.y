@@ -97,7 +97,7 @@ terms : term TK_R_RB
 atom : TK_CONST TK_L_RB terms
        { char * predicate = $1;
          struct TymTerms * ts = $3;
-         struct TymAtom * atom = tym_mk_atom(tym_encode_str(predicate),
+         struct TymAtom * atom = tym_mk_atom(tym_encode_str(strcpy_prefixed(TYM_PREDICATE_PREFIX, predicate)),
            tym_len_TymTerms_cell(ts), ts);
          $$ = atom; }
 

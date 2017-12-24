@@ -26,8 +26,12 @@
 #endif // TYM_BUF_SIZE
 
 #ifndef TYM_CONST_PREFIX
-#define TYM_CONST_PREFIX "prefix_"
+#define TYM_CONST_PREFIX "constant_"
 #endif // TYM_CONST_PREFIX
+
+#ifndef TYM_PREDICATE_PREFIX
+#define TYM_PREDICATE_PREFIX "predicate_"
+#endif // TYM_PREDICATE_PREFIX
 
 #define TYM_VERBOSE printf
 #define TYM_ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
