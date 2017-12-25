@@ -23,7 +23,15 @@
   #if TYM_BUF_SIZE < 100
   #warn TYM_BUF_SIZE < 100
   #endif
-#endif
+#endif // TYM_BUF_SIZE
+
+#ifndef TYM_CONST_PREFIX
+#define TYM_CONST_PREFIX "constant_"
+#endif // TYM_CONST_PREFIX
+
+#ifndef TYM_PREDICATE_PREFIX
+#define TYM_PREDICATE_PREFIX "predicate_"
+#endif // TYM_PREDICATE_PREFIX
 
 #define TYM_VERBOSE printf
 #define TYM_ERR(...) fflush(stdout); fprintf(stderr, __VA_ARGS__)
@@ -137,5 +145,7 @@
   }
 
 // NOTE could also include functions for (deep)FREE and STR wrt list.
+
+char * strcpy_prefixed(const char *, const char *);
 
 #endif /* TYM_UTIL_H */
