@@ -14,8 +14,8 @@
 // FIXME move to ast.h?
 const char * TymTermKindStr[] = {"TYM_VAR", "TYM_CONST", "TYM_STR"};
 
-const TymStr *
-tym_csyntax_term(const struct TymTerm * term)
+void
+tym_csyntax_term(const TymStr ** definiens, const TymStr ** definition, struct TymSymGen * namegen, const struct TymTerm * term)
 {
   const char * identifier = tym_decode_str(term->identifier);
   const char * template = "(struct TymTerm){.kind = ,\
@@ -28,5 +28,7 @@ tym_csyntax_term(const struct TymTerm * term)
     TymTermKindStr[term->kind], tym_decode_str(term->identifier));
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
-  return tym_encode_str(str_buf);
+
+  *definiens = tym_mk_new_var(namegen);
+  *definition = tym_encode_str(str_buf);
 }
