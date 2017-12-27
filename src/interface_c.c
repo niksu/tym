@@ -14,9 +14,11 @@
 // FIXME move to ast.h?
 const char * TymTermKindStr[] = {"TYM_VAR", "TYM_CONST", "TYM_STR"};
 
-void
-tym_csyntax_term(const TymStr ** definiens, const TymStr ** definition, struct TymSymGen * namegen, const struct TymTerm * term)
+const struct TymCSyntax *
+tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
 {
+  struct TymCSyntax * result = malloc(sizeof(*result));
+
   const char * identifier = tym_decode_str(term->identifier);
   const char * template = "(struct TymTerm){.kind = ,\
     .identifier = TYM_CSTR_DUPLICATE(\"\")}";
@@ -29,6 +31,10 @@ tym_csyntax_term(const TymStr ** definiens, const TymStr ** definition, struct T
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  *definiens = tym_mk_new_var(namegen);
-  *definition = tym_encode_str(str_buf);
+  result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
+  result->name = tym_mk_new_var(namegen);
+  result->definition = tym_encode_str(str_buf);
+  result->kind = TYM_TERM;
+  result->original = term;
+  return result;
 }

@@ -13,7 +13,17 @@
 #include "string_idx.h"
 #include "util.h"
 
-void tym_csyntax_term(const TymStr ** definiens, const TymStr ** definition, struct TymSymGen * namegen, const struct TymTerm * term);
+enum TymSyntaxKind {TYM_TERM, TYM_ATOM, TYM_CLAUSE, TYM_PROGRAM};
+
+struct TymCSyntax {
+  const TymStr * type;
+  const TymStr * name;
+  const TymStr * definition;
+  enum TymSyntaxKind kind;
+  const void * original;
+};
+
+const struct TymCSyntax * tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term);
 const TymStr * tym_csyntax_atom(const struct TymAtom *);
 const TymStr * tym_csyntax_clause(const struct TymClause *);
 const TymStr * tym_csyntax_program(const struct TymProgram *);
