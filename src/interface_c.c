@@ -38,3 +38,19 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   result->original = term;
   return result;
 }
+
+void tym_test_clause_csyn(void);
+/* FIXME copied from ast.c */
+void
+tym_test_clause_csyn(void) {
+  struct TymTerm * t = malloc(sizeof *t);
+  *t = (struct TymTerm){.kind = TYM_CONST,
+    .identifier = TYM_CSTR_DUPLICATE("ok")};
+
+  struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str("var"));
+  const struct TymCSyntax * csyn = tym_csyntax_term(sg, t);
+
+  printf("definition: %s\n", tym_decode_str(csyn->definition));
+
+  tym_free_term(t);
+}
