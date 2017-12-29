@@ -46,6 +46,7 @@ main(int argc, char ** argv)
   tym_test_clause();
   tym_test_formula();
   tym_test_statement();
+  tym_test_clause_csyn();
   tym_fin_str();
   exit(0);
 #endif

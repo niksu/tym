@@ -27,5 +27,6 @@ const struct TymCSyntax * tym_csyntax_term(struct TymSymGen * namegen, const str
 const TymStr * tym_csyntax_atom(const struct TymAtom *);
 const TymStr * tym_csyntax_clause(const struct TymClause *);
 const TymStr * tym_csyntax_program(const struct TymProgram *);
+void tym_csyntax_free(const struct TymCSyntax * csyn);
 
 #endif // TYM_INTERFACE_C_H
