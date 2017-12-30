@@ -50,7 +50,7 @@ tym_test_clause_csyn(void) {
   struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
   const struct TymCSyntax * csyn = tym_csyntax_term(sg, t);
 
-  printf("definition: %s\n", tym_decode_str(csyn->definition));
+  printf("serialised: %s %s = %s\n", tym_decode_str(csyn->type), tym_decode_str(csyn->name), tym_decode_str(csyn->definition));
 
   tym_free_sym_gen(sg);
   tym_free_term(t);
