@@ -208,3 +208,14 @@ tym_cmp_str (const struct TymStrHashIdxStruct * s1, const struct TymStrHashIdxSt
 #else
   #error "Unknown TYM_STRING_TYPE"
 #endif
+
+const TymStr *
+tym_append_str (const TymStr * s1, const TymStr * s2)
+{
+  size_t total_len = tym_len_str(s1) + tym_len_str(s2) + 1;
+  char * result_chars = malloc(sizeof(*result_chars) * total_len);
+  memcpy(result_chars, tym_decode_str(s1), tym_len_str(s1));
+  memcpy(result_chars + tym_len_str(s1), tym_decode_str(s2), tym_len_str(s2));
+  result_chars[total_len - 1] = '\0';
+  return tym_encode_str(result_chars);
+}
