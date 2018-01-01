@@ -51,10 +51,20 @@ tym_test_clause_csyn(void) {
   const struct TymCSyntax * csyn = tym_csyntax_term(sg, t);
 
   printf("serialised: %s %s = %s\n", tym_decode_str(csyn->type), tym_decode_str(csyn->name), tym_decode_str(csyn->definition));
+  const TymStr * malloc_str = tym_csyntax_malloc(csyn);
+  printf("serialised: %s\n", tym_decode_str(malloc_str));
 
   tym_free_sym_gen(sg);
   tym_free_term(t);
   tym_csyntax_free(csyn);
+}
+
+const TymStr *
+tym_csyntax_malloc(const struct TymCSyntax * csyn)
+{
+  const TymStr * malloc_str_prefix = TYM_CSTR_DUPLICATE("malloc(sizeof(*");
+  const TymStr * malloc_str_suffix = TYM_CSTR_DUPLICATE("))");
+  return tym_append_str (malloc_str_prefix, tym_append_str (csyn->name, malloc_str_suffix));
 }
 
 void
