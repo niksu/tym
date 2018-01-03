@@ -21,18 +21,21 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   struct TymCSyntax * result = malloc(sizeof(*result));
 
   const char * identifier = tym_decode_str(term->identifier);
-  const char * template = "(struct TymTerm){.kind = , .identifier = TYM_CSTR_DUPLICATE(\"\")}";
+  const char * template = "struct TymTerm  = (struct TymTerm){.kind = , .identifier = TYM_CSTR_DUPLICATE(\"\")}";
+
+  result->name = tym_mk_new_var(namegen);
+  result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
+
   char * str_buf = malloc(sizeof(*str_buf) *
-      (strlen(identifier) + strlen(TymTermKindStr[term->kind]) +
+      (tym_len_str(result->type) + tym_len_str(result->name) + strlen(identifier) + strlen(TymTermKindStr[term->kind]) +
        strlen(template) + 1));
-  int buf_occupied = sprintf(str_buf, "(struct TymTerm){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")}",
-    TymTermKindStr[term->kind], identifier);
+
+  int buf_occupied = sprintf(str_buf, "struct TymTerm %s = (struct TymTerm){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")};",
+    tym_decode_str(result->name), TymTermKindStr[term->kind], identifier);
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
-  result->name = tym_mk_new_var(namegen);
-  result->definition = tym_encode_str(str_buf);
+  result->serialised = tym_encode_str(str_buf);
   result->kind = TYM_TERM;
   result->original = term;
   return result;
@@ -49,7 +52,7 @@ tym_test_clause_csyn(void) {
   struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
   const struct TymCSyntax * csyn = tym_csyntax_term(sg, t);
 
-  printf("serialised: %s %s = %s\n", tym_decode_str(csyn->type), tym_decode_str(csyn->name), tym_decode_str(csyn->definition));
+  printf("serialised: %s\n", tym_decode_str(csyn->serialised));
   const TymStr * malloc_str = tym_csyntax_malloc(csyn);
   printf("serialised: %s\n", tym_decode_str(malloc_str));
 
