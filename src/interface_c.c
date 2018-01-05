@@ -21,17 +21,15 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   struct TymCSyntax * result = malloc(sizeof(*result));
 
   const char * identifier = tym_decode_str(term->identifier);
-  const char * template = "struct TymTerm  = (struct TymTerm){.kind = , .identifier = TYM_CSTR_DUPLICATE(\"\")}";
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME later copy to a smaller buffer  
 
   result->name = tym_mk_new_var(namegen);
   result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
 
-  char * str_buf = malloc(sizeof(*str_buf) *
-      (tym_len_str(result->type) + tym_len_str(result->name) + strlen(identifier) + strlen(TymTermKindStr[term->kind]) +
-       strlen(template) + 1));
-
-  int buf_occupied = sprintf(str_buf, "struct TymTerm %s = (struct TymTerm){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")};",
-    tym_decode_str(result->name), TymTermKindStr[term->kind], identifier);
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")};",
+    tym_decode_str(result->type), tym_decode_str(result->name),
+    tym_decode_str(result->type), TymTermKindStr[term->kind],
+    identifier);
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
