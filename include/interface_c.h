@@ -18,7 +18,7 @@ enum TymSyntaxKind {TYM_TERM, TYM_ATOM, TYM_CLAUSE, TYM_PROGRAM};
 struct TymCSyntax {
   const TymStr * type;
   const TymStr * name;
-  const TymStr * definition;
+  const TymStr * serialised;
   enum TymSyntaxKind kind;
   const void * original;
 };
