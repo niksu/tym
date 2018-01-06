@@ -21,7 +21,7 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   struct TymCSyntax * result = malloc(sizeof(*result));
 
   const char * identifier = tym_decode_str(term->identifier);
-  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME later copy to a smaller buffer  
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
 
   result->name = tym_mk_new_var(namegen);
   result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
@@ -33,7 +33,10 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  result->serialised = tym_encode_str(str_buf);
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf));
+  strcpy(trimmed_str_buf, str_buf);
+  free(str_buf);
+  result->serialised = tym_encode_str(trimmed_str_buf);
   result->kind = TYM_TERM;
   result->original = term;
   return result;
