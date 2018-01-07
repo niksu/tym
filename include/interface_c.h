@@ -24,7 +24,7 @@ struct TymCSyntax {
 };
 
 const struct TymCSyntax * tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term);
-const TymStr * tym_csyntax_atom(const struct TymAtom *);
+const struct TymCSyntax * tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom *);
 const TymStr * tym_csyntax_clause(const struct TymClause *);
 const TymStr * tym_csyntax_program(const struct TymProgram *);
 const TymStr * tym_csyntax_malloc(const struct TymCSyntax * csyn);

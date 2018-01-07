@@ -78,3 +78,35 @@ tym_csyntax_free(const struct TymCSyntax * csyn)
   free((void *)csyn);
 #pragma GCC diagnostic pop
 }
+
+const struct TymCSyntax *
+tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
+{
+  struct TymCSyntax * result = malloc(sizeof(*result));
+/*
+FIXME complete the definition:
+* accumulate the definitions of "args", appending them.
+* function that takes a list of strings and returns a C array containing those expressions (strings)
+*/
+  const TymStr * args_identifier = NULL;
+  const char * predicate = tym_decode_str(atom->predicate);
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
+
+  result->name = tym_mk_new_var(namegen);
+  result->type = TYM_CSTR_DUPLICATE("struct TymAtom");
+
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.predicate = TYM_CSTR_DUPLICATE(\"%s\"), .arity = %d, .args = %s};",
+    tym_decode_str(result->type), tym_decode_str(result->name),
+    tym_decode_str(result->type), predicate, atom->arity,
+    tym_decode_str(args_identifier));
+  assert(buf_occupied > 0);
+  assert(strlen(str_buf) == (unsigned long)buf_occupied);
+
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf));
+  strcpy(trimmed_str_buf, str_buf);
+  free(str_buf);
+  result->serialised = tym_encode_str(trimmed_str_buf);
+  result->kind = TYM_ATOM;
+  result->original = atom;
+  return result;
+}
