@@ -85,10 +85,18 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   struct TymCSyntax * result = malloc(sizeof(*result));
 /*
 FIXME complete the definition:
-* accumulate the definitions of "args", appending them.
-* function that takes a list of strings and returns a C array containing those expressions (strings)
+* need function that takes a list of strings and returns a C array containing those expressions (strings)
 */
-  const TymStr * args_identifier = NULL;
+
+  const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * atom->arity);
+  for (int i = 0; i < atom->arity; i++) {
+    const struct TymCSyntax * sub_csyn =
+      tym_csyntax_term(namegen, atom->args[i]);
+    str_buf_args = tym_decode_str(tym_append_str(sub_csyn->serialised, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
+    // FIXME gather sub_csyn->name to put in an array.
+  }
+
+  const TymStr * args_identifier = tym_mk_new_var(namegen);
   const char * predicate = tym_decode_str(atom->predicate);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
 
@@ -102,6 +110,7 @@ FIXME complete the definition:
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
+  // FIXME prepend str_buf_args
   char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf));
   strcpy(trimmed_str_buf, str_buf);
   free(str_buf);
