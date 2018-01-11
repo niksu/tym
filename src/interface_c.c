@@ -119,3 +119,26 @@ FIXME complete the definition:
   result->original = atom;
   return result;
 }
+
+const TymStr *
+tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, TymStr * expression_type, TymStr ** expression_strs)
+{
+  const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * array_size);
+  // FIXME initialise str_buf_args to empty string -- also at the other occurrence of this idiom.  
+  for (size_t i = 0; i < array_size; i++) {
+    str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
+  }
+
+  *result_name = tym_mk_new_var(namegen);
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
+  int buf_occupied = sprintf(str_buf, "%s %s[%lu] = {%s};",
+    tym_decode_str(expression_type), tym_decode_str(*result_name),
+    array_size, str_buf_args);
+
+  assert(buf_occupied > 0);
+  assert(strlen(str_buf) == (unsigned long)buf_occupied);
+
+  // FIXME copy str_buf to a "trimmed" buffer to save space.
+
+  return tym_encode_str(str_buf);
+}
