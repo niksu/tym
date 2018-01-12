@@ -83,19 +83,21 @@ const struct TymCSyntax *
 tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 {
   struct TymCSyntax * result = malloc(sizeof(*result));
-/*
-FIXME complete the definition:
-* need function that takes a list of strings and returns a C array containing those expressions (strings)
-*/
 
   const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * atom->arity);
-  str_buf_args[0] = '\0';
+  //str_buf_args[0] = '\0'; FIXME avoid malloc and this assignment.
+  const TymStr * array[atom->arity];
   for (int i = 0; i < atom->arity; i++) {
     const struct TymCSyntax * sub_csyn =
       tym_csyntax_term(namegen, atom->args[i]);
     str_buf_args = tym_decode_str(tym_append_str(sub_csyn->serialised, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
-    // FIXME gather sub_csyn->name to put in an array.
+    array[i] = sub_csyn->name;
   }
+
+  const TymStr * array_name = NULL;
+  const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
+  const TymStr * array_str = tym_array_of(namegen, &array_name, atom->arity, array_type, array);
+    str_buf_args = tym_decode_str(tym_append_str(array_str, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
 
   const TymStr * args_identifier = tym_mk_new_var(namegen);
   const char * predicate = tym_decode_str(atom->predicate);
@@ -122,10 +124,10 @@ FIXME complete the definition:
 }
 
 const TymStr *
-tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, TymStr * expression_type, TymStr ** expression_strs)
+tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, const TymStr * expression_type, const TymStr ** expression_strs)
 {
   const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * array_size);
-  str_buf_args[0] = '\0';
+  //str_buf_args[0] = '\0'; FIXME avoid malloc and this assignment.
   for (size_t i = 0; i < array_size; i++) {
     str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
   }
