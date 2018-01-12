@@ -89,6 +89,7 @@ FIXME complete the definition:
 */
 
   const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * atom->arity);
+  str_buf_args[0] = '\0';
   for (int i = 0; i < atom->arity; i++) {
     const struct TymCSyntax * sub_csyn =
       tym_csyntax_term(namegen, atom->args[i]);
@@ -124,7 +125,7 @@ const TymStr *
 tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, TymStr * expression_type, TymStr ** expression_strs)
 {
   const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * array_size);
-  // FIXME initialise str_buf_args to empty string -- also at the other occurrence of this idiom.  
+  str_buf_args[0] = '\0';
   for (size_t i = 0; i < array_size; i++) {
     str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
   }
