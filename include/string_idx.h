@@ -45,6 +45,8 @@
   #error "Unknown TYM_STRING_TYPE"
 #endif
 
+extern const TymStr * TymEmptyString;
+
 void tym_init_str (void);
 void tym_fin_str (void);
 

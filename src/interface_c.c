@@ -84,8 +84,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 {
   struct TymCSyntax * result = malloc(sizeof(*result));
 
-  const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * atom->arity);
-  //str_buf_args[0] = '\0'; FIXME avoid malloc and this assignment.
+  const char * str_buf_args = tym_decode_str(TymEmptyString);
   const TymStr * array[atom->arity];
   for (int i = 0; i < atom->arity; i++) {
     const struct TymCSyntax * sub_csyn =
@@ -126,8 +125,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 const TymStr *
 tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, const TymStr * expression_type, const TymStr ** expression_strs)
 {
-  const char * str_buf_args = malloc(sizeof(*str_buf_args) * TYM_BUF_SIZE * array_size);
-  //str_buf_args[0] = '\0'; FIXME avoid malloc and this assignment.
+  const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
     str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
   }

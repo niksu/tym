@@ -13,11 +13,13 @@
 
 #include "string_idx.h"
 
+static void init_str(void);
+
 #if TYM_STRING_TYPE == 0
 void
 tym_init_str(void)
 {
-  // Nothing needed here.
+  init_str();
 }
 
 void
@@ -66,7 +68,7 @@ struct TymStrIdxStruct {
 void
 tym_init_str(void)
 {
-  // Nothing needed here.
+  init_str();
 }
 
 void
@@ -123,6 +125,7 @@ tym_init_str(void)
 {
   assert(NULL == stringhash);
   stringhash = tym_ht_create();
+  init_str();
 }
 
 void
@@ -218,4 +221,11 @@ tym_append_str (const TymStr * s1, const TymStr * s2)
   memcpy(result_chars + tym_len_str(s1), tym_decode_str(s2), tym_len_str(s2));
   result_chars[total_len - 1] = '\0';
   return tym_encode_str(result_chars);
+}
+
+const TymStr * TymEmptyString;
+static void
+init_str(void)
+{
+  TymEmptyString = TYM_CSTR_DUPLICATE("");
 }
