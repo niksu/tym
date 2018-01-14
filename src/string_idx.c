@@ -151,10 +151,12 @@ tym_encode_str (const char * s)
     assert(tym_ht_add(stringhash, s, result));
     return result;
   } else {
+    if (s != pre_result->content) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    free((void *)s);
+      free((void *)s);
 #pragma GCC diagnostic pop
+    }
     return pre_result;
   }
 }
