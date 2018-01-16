@@ -10,6 +10,7 @@
 #ifndef TYM_STRING_IDX_H
 #define TYM_STRING_IDX_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 // TYM_STRING_TYPE values:
@@ -56,5 +57,7 @@ void tym_free_str (const TymStr *);
 size_t tym_len_str (const TymStr *);
 int tym_cmp_str (const TymStr *, const TymStr *);
 const TymStr * tym_append_str (const TymStr *, const TymStr *);
+void tym_dump_str(void);
+extern const bool TymCanDumpStrings;
 
 #endif // TYM_STRING_IDX_H

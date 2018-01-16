@@ -106,4 +106,18 @@ tym_ht_free(TYM_HASHTABLE(String) * ht)
   free(ht);
 }
 
+void
+tym_ht_dump(TYM_HASHTABLE(String) * ht)
+{
+  assert(NULL != ht);
+
+  for (int i = 0; i < TYM_HASH_RANGE; i++) {
+    TYM_HASHTABLE_CELL(String) * cursor = ht->arr[i];
+    while (NULL != cursor) {
+      printf("%s : %s\n", cursor->k, tym_decode_str(cursor->v));
+      cursor = cursor->next;
+    }
+  }
+}
+
 #endif // TYM_STRING_TYPE == 2

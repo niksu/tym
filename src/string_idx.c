@@ -28,6 +28,13 @@ tym_fin_str(void)
   // Nothing needed here.
 }
 
+const bool TymCanDumpStrings = false;
+void
+tym_dump_str(void)
+{
+  assert(0); // This kind of string doesn't maintain a record of all strings that we could dump.
+}
+
 const char *
 tym_decode_str (const TymStr * s)
 {
@@ -75,6 +82,13 @@ void
 tym_fin_str(void)
 {
   // Nothing needed here.
+}
+
+const bool TymCanDumpStrings = false;
+void
+tym_dump_str(void)
+{
+  assert(0); // This kind of string doesn't maintain a record of all strings that we could dump.
 }
 
 const char *
@@ -134,6 +148,13 @@ tym_fin_str(void)
   assert(NULL != stringhash);
   tym_ht_free(stringhash);
   stringhash = NULL;
+}
+
+const bool TymCanDumpStrings = true;
+void
+tym_dump_str(void)
+{
+  tym_ht_dump(stringhash);
 }
 
 // NOTE the object pointed to by the "s" parameter (given to tym_encode_str)

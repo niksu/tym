@@ -47,6 +47,11 @@ main(int argc, char ** argv)
   tym_test_formula();
   tym_test_statement();
   tym_test_clause_csyn();
+#ifdef TYM_DEBUG
+  if (TymCanDumpStrings) {
+    tym_dump_str();
+  }
+#endif // TYM_DEBUG
   tym_fin_str();
   exit(0);
 #endif
