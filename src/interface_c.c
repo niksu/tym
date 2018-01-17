@@ -50,16 +50,26 @@ tym_test_clause_csyn(void) {
   *t = (struct TymTerm){.kind = TYM_CONST,
     .identifier = TYM_CSTR_DUPLICATE("ok")};
 
-  struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
-  const struct TymCSyntax * csyn = tym_csyntax_term(sg, t);
+  struct TymAtom * at = malloc(sizeof *at);
+  at->predicate = TYM_CSTR_DUPLICATE("world");
+  at->arity = 1;
+  at->args = malloc(sizeof *at->args * 1);
+  at->args[0] = t;
 
-  printf("serialised: %s\n", tym_decode_str(csyn->serialised));
-  const TymStr * malloc_str = tym_csyntax_malloc(csyn);
+  struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
+  const struct TymCSyntax * csyn_t = tym_csyntax_term(sg, t);
+  const struct TymCSyntax * csyn_at = tym_csyntax_atom(sg, at);
+
+  printf("serialised: %s\n", tym_decode_str(csyn_t->serialised));
+  printf("serialised: %s\n", tym_decode_str(csyn_at->serialised));
+  const TymStr * malloc_str = tym_csyntax_malloc(csyn_t);
   printf("serialised: %s\n", tym_decode_str(malloc_str));
 
-  tym_free_sym_gen(sg);
-  tym_free_term(t);
-  tym_csyntax_free(csyn);
+//  tym_free_sym_gen(sg);
+//  tym_free_term(t);
+//  tym_free_atom(at);
+//  tym_csyntax_free(csyn_t);
+//  tym_csyntax_free(csyn_at);
 }
 
 const TymStr *
@@ -93,12 +103,11 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
     array[i] = sub_csyn->name;
   }
 
-  const TymStr * array_name = NULL;
+  const TymStr * args_identifier = NULL;
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
-  const TymStr * array_str = tym_array_of(namegen, &array_name, atom->arity, array_type, array);
+  const TymStr * array_str = tym_array_of(namegen, &args_identifier, atom->arity, array_type, array);
     str_buf_args = tym_decode_str(tym_append_str(array_str, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
 
-  const TymStr * args_identifier = tym_mk_new_var(namegen);
   const char * predicate = tym_decode_str(atom->predicate);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
 
@@ -115,7 +124,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const char * pretrimmed_str_buf = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), tym_encode_str(str_buf))); // FIXME purge intermediate strings
   char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(pretrimmed_str_buf));
   strcpy(trimmed_str_buf, pretrimmed_str_buf);
-  free(str_buf); // FIXME can "free", since str_buf has been passed to tym_encode_str?
+//  free(str_buf); // FIXME can "free", since str_buf has been passed to tym_encode_str?   
   result->serialised = tym_encode_str(trimmed_str_buf);
   result->kind = TYM_ATOM;
   result->original = atom;
