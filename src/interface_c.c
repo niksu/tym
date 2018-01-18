@@ -65,11 +65,11 @@ tym_test_clause_csyn(void) {
   const TymStr * malloc_str = tym_csyntax_malloc(csyn_t);
   printf("serialised: %s\n", tym_decode_str(malloc_str));
 
-//  tym_free_sym_gen(sg);
-//  tym_free_term(t);
-//  tym_free_atom(at);
-//  tym_csyntax_free(csyn_t);
-//  tym_csyntax_free(csyn_at);
+  tym_free_sym_gen(sg);
+  tym_free_term(t);
+//  tym_free_atom(at);  
+  tym_csyntax_free(csyn_t);
+  tym_csyntax_free(csyn_at);
 }
 
 const TymStr *
@@ -124,7 +124,6 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const char * pretrimmed_str_buf = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), tym_encode_str(str_buf))); // FIXME purge intermediate strings
   char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(pretrimmed_str_buf));
   strcpy(trimmed_str_buf, pretrimmed_str_buf);
-//  free(str_buf); // FIXME can "free", since str_buf has been passed to tym_encode_str?   
   result->serialised = tym_encode_str(trimmed_str_buf);
   result->kind = TYM_ATOM;
   result->original = atom;
