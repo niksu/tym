@@ -33,7 +33,7 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf));
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf)); // FIXME add one for the terminating \0?
   strcpy(trimmed_str_buf, str_buf);
   free(str_buf);
   result->serialised = tym_encode_str(trimmed_str_buf);
@@ -122,7 +122,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
   const char * pretrimmed_str_buf = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), tym_encode_str(str_buf))); // FIXME purge intermediate strings
-  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(pretrimmed_str_buf));
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(pretrimmed_str_buf)); // FIXME add one for the terminating \0?
   strcpy(trimmed_str_buf, pretrimmed_str_buf);
   result->serialised = tym_encode_str(trimmed_str_buf);
   result->kind = TYM_ATOM;
@@ -152,7 +152,8 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  // FIXME copy str_buf to a "trimmed" buffer to save space.
-
-  return tym_encode_str(str_buf);
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * strlen(str_buf)); // FIXME add one for the terminating \0?
+  strcpy(trimmed_str_buf, str_buf);
+  free(str_buf);
+  return tym_encode_str(trimmed_str_buf);
 }
