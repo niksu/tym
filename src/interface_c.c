@@ -12,7 +12,6 @@
 #include "interface_c.h"
 #include "module_tests.h"
 
-// FIXME move to ast.h?
 const char * TymTermKindStr[] = {"TYM_VAR", "TYM_CONST", "TYM_STR"};
 
 const struct TymCSyntax *
