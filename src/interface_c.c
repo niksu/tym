@@ -88,6 +88,7 @@ tym_csyntax_free(const struct TymCSyntax * csyn)
 #pragma GCC diagnostic pop
 }
 
+// FIXME the order of statements needs to be changed -- currently identifiers are being used before being defined.
 const struct TymCSyntax *
 tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 {
