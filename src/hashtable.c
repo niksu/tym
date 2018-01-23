@@ -76,16 +76,19 @@ tym_ht_lookup(TYM_HASHTABLE(String) * ht, const char * key)
   assert(NULL != ht);
   assert(NULL != key);
 
+  TYM_HVALUETYPE result = NULL;
+
   TYM_HASH_VTYPE h = tym_hash_str(key);
   TYM_HASHTABLE_CELL(String) * cursor = ht->arr[h];
   while (NULL != cursor) {
     if (0 == strcmp(key, cursor->k)) {
-      return cursor->v;
+      result = cursor->v;
+      break;
     } else {
       cursor = cursor->next;
     }
   }
-  return NULL;
+  return result;
 }
 
 void
