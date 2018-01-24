@@ -211,6 +211,7 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s);
   assert(NULL != s->content);
 
+  // FIXME update the index?
   free((void *)s->content);
   free((void *)s);
 }
