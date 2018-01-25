@@ -35,6 +35,7 @@
 #define TYM_DECL_HASHTABLE(typename, ktype, vtype) \
   TYM_HASHTABLE(typename) { \
     TYM_HASHTABLE_CELL(typename) * arr[TYM_HASH_RANGE]; \
+    void (*free_cell)(TYM_HASHTABLE_CELL(typename) *); \
   };
 
 // FIXME currently this only works if TYM_STRING_TYPE == 2.
@@ -45,8 +46,8 @@ TYM_HASHTABLE(String);
 TYM_HASHTABLE(String) * tym_ht_create(void);
 bool tym_ht_add(TYM_HASHTABLE(String) *, const char * key, TYM_HVALUETYPE value);
 TYM_HVALUETYPE tym_ht_lookup(TYM_HASHTABLE(String) *, const char * key);
+bool tym_ht_delete(TYM_HASHTABLE(String) *, const char * key);
 void tym_ht_dump(TYM_HASHTABLE(String) *);
-// NOTE "delete entry" doesn't seem needed at the moment.
 void tym_ht_free(TYM_HASHTABLE(String) *);
 #endif // TYM_STRING_TYPE == 2
 
