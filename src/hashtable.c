@@ -123,7 +123,7 @@ tym_ht_free(TYM_HASHTABLE(String) * ht)
       // NOTE "free(ht->arr[i]->k);" is done implicitly when ->v is freed below,
       //      since the value contains the key as content.
       tym_force_free_str(ht->arr[i]->v);
-      free(ht->arr[i]);
+      //free(ht->arr[i]); FIXME purge?
     }
   }
   free(ht);
@@ -161,8 +161,8 @@ tym_ht_delete(TYM_HASHTABLE(String) * ht, const char * key)
       } else {
         assert(NULL != prev_cursor);
         prev_cursor->next = cursor->next;
-        ht->free_cell(cursor);
       }
+      ht->free_cell(cursor);
       result = true;
       break;
     } else {
