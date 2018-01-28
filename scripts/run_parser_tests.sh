@@ -18,16 +18,22 @@ fi
 
 [ -z "${TYMDIR}" ] && TYMDIR=.
 [ -z "${PREFIX}" ] && PREFIX="valgrind --leak-check=full"
+if [ -n "${TYM_Z3_PATH}" ]
+then
+  DLP="DYLD_LIBRARY_PATH=${TYM_Z3_PATH}/bin/"
+else
+  DLP=
+fi
 
 for FILE in $(ls ${TYMDIR}/parser_tests/*.test)
 do
   if [ "${MEM_CHECK}" == "1" ]
   then
-    CMD="${PREFIX} ${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
+    CMD="${DLP} ${PREFIX} ${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
     echo "Running \"${CMD}\""
     eval ${CMD} | grep "ERROR SUMMARY"
   else
-    CMD="${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
+    CMD="${DLP} ${TYMDIR}/out/tym -i ${FILE} -f test_parsing 2>&1"
     echo "Running \"${CMD}\""
     diff ${QUIET} <(eval ${CMD}) ${FILE}.expected
   fi

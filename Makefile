@@ -59,7 +59,7 @@ test_modules:
 	./$(OUT_DIR)/$(TGT)
 
 test_regression:
-	@TYMDIR=`pwd` ./scripts/run_parser_tests.sh
+	@TYM_Z3_PATH="$(TYM_Z3_PATH)" TYMDIR=`pwd` ./scripts/run_parser_tests.sh
 
 clean:
 	rm -f $(OUT_DIR)/$(TGT) $(OUT_DIR)/$(LIB) $(OUT_DIR)/*.o $(OUT_DIR)/lexer.{c,h} $(OUT_DIR)/parser.{c,h}
