@@ -73,6 +73,7 @@ term : TK_CONST
        { char * identifier = $1;
          struct TymTerm * t = tym_mk_term(TYM_CONST,
            tym_encode_str(strcpy_prefixed(TYM_CONST_PREFIX, identifier)));
+         free(identifier);
          $$ = t; }
      | TK_VAR
        { char * identifier = $1;
@@ -99,6 +100,7 @@ atom : TK_CONST TK_L_RB terms
          struct TymTerms * ts = $3;
          struct TymAtom * atom = tym_mk_atom(tym_encode_str(strcpy_prefixed(TYM_PREDICATE_PREFIX, predicate)),
            tym_len_TymTerms_cell(ts), ts);
+         free(predicate);
          $$ = atom; }
 
 atoms : atom
