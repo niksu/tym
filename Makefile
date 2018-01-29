@@ -51,7 +51,7 @@ out/%.o: src/%.c $(HEADERS) parser
 	mkdir -p $(OUT_DIR)
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) $(Z3_INC) -o $@ $<
 
-.PHONY: clean test
+.PHONY: clean test test_modules test_regression
 
 test_modules:
 	make clean
