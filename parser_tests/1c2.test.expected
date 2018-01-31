@@ -2,8 +2,8 @@ input contents |hellom1123_AS12_1() :- a(), b(), c(), d().
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=61, remaining=1939)
-|hellom1123_AS12_1() :- a(), b(), c(), d().
-c() :- a().
-a(b).|
-stringed file contents strlen=60
+stringed file contents (size=150, remaining=1850)
+|predicate_hellom1123_AS12_1() :- predicate_a(), predicate_b(), predicate_c(), predicate_d().
+predicate_c() :- predicate_a().
+predicate_a(constant_b).|
+stringed file contents strlen=149

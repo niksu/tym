@@ -8,10 +8,16 @@
 set -e
 
 [ -z "${TYMDIR}" ] && TYMDIR=.
+if [ -n "${TYM_Z3_PATH}" ]
+then
+  DLP="DYLD_LIBRARY_PATH=${TYM_Z3_PATH}/bin/"
+else
+  DLP=
+fi
 
 for FILE in $(ls ${TYMDIR}/parser_tests/*.test)
 do
-  CMD="${TYMDIR}/out/tym -i ${FILE} -f test_parsing > ${FILE}.expected"
+  CMD="${DLP} ${TYMDIR}/out/tym -i ${FILE} -f test_parsing > ${FILE}.expected"
   echo "Running \"${CMD}\""
   eval ${CMD}
 done
