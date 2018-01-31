@@ -5,10 +5,10 @@ input contents |   a2(b2).   a(b).
   a3(b4). 
 |
 (no query given)
-stringed file contents (size=38, remaining=1962)
-|a2(b2).
-a(b).
-a1(b1).
-a3(b3).
-a3(b4).|
-stringed file contents strlen=37
+stringed file contents (size=133, remaining=1867)
+|predicate_a2(constant_b2).
+predicate_a(constant_b).
+predicate_a1(constant_b1).
+predicate_a3(constant_b3).
+predicate_a3(constant_b4).|
+stringed file contents strlen=132

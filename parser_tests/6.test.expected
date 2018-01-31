@@ -10,13 +10,13 @@ e(X,Y) :- e(X, Z), e(Z, Y).
 %?- e(a,c).
 |
 (no query given)
-stringed file contents (size=83, remaining=1917)
-|v(a).
-v(b).
-v(c).
-e(a, a).
-e(b, b).
-e(a, b).
-e(b, c).
-e(X, Y) :- e(X, Z), e(Z, Y).|
-stringed file contents strlen=82
+stringed file contents (size=282, remaining=1718)
+|predicate_v(constant_a).
+predicate_v(constant_b).
+predicate_v(constant_c).
+predicate_e(constant_a, constant_a).
+predicate_e(constant_b, constant_b).
+predicate_e(constant_a, constant_b).
+predicate_e(constant_b, constant_c).
+predicate_e(X, Y) :- predicate_e(X, Z), predicate_e(Z, Y).|
+stringed file contents strlen=281

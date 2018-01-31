@@ -2,7 +2,7 @@ input contents |%hello
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=18, remaining=1982)
-|c() :- a().
-a(b).|
-stringed file contents strlen=17
+stringed file contents (size=57, remaining=1943)
+|predicate_c() :- predicate_a().
+predicate_a(constant_b).|
+stringed file contents strlen=56

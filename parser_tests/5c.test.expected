@@ -8,10 +8,10 @@ b() :- b().
 c() :- b().
 |
 (no query given)
-stringed file contents (size=46, remaining=1954)
-|c().
-a().
-b() :- c().
-b() :- b().
-c() :- b().|
-stringed file contents strlen=45
+stringed file contents (size=126, remaining=1874)
+|predicate_c().
+predicate_a().
+predicate_b() :- predicate_c().
+predicate_b() :- predicate_b().
+predicate_c() :- predicate_b().|
+stringed file contents strlen=125

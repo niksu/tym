@@ -1,6 +1,6 @@
 input contents |a().
 |
 (no query given)
-stringed file contents (size=5, remaining=1995)
-|a().|
-stringed file contents strlen=4
+stringed file contents (size=15, remaining=1985)
+|predicate_a().|
+stringed file contents strlen=14

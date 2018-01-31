@@ -10,7 +10,7 @@ e(X,Y) :- d(X, Z), d(Z, Y).
 %d(X, X).
 |
 (no query given)
-stringed file contents (size=38, remaining=1962)
-|d(X, X).
-e(X, Y) :- d(X, Z), d(Z, Y).|
-stringed file contents strlen=37
+stringed file contents (size=78, remaining=1922)
+|predicate_d(X, X).
+predicate_e(X, Y) :- predicate_d(X, Z), predicate_d(Z, Y).|
+stringed file contents strlen=77
