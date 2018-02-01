@@ -212,9 +212,9 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s->content);
 
   // FIXME distinguish between freeing memory and removing a string from the index?
-  assert(tym_ht_delete(stringhash, s->content));
-//  free((void *)s->content); FIXME purge?
-//  free((void *)s); FIXME purge?
+//  assert(tym_ht_delete(stringhash, s->content));
+  free((void *)s->content); // FIXME purge?
+  free((void *)s); // FIXME purge?
 }
 #pragma GCC diagnostic pop
 
@@ -237,6 +237,7 @@ tym_cmp_str (const struct TymStrHashIdxStruct * s1, const struct TymStrHashIdxSt
   #error "Unknown TYM_STRING_TYPE"
 #endif
 
+// FIXME make destructive
 const TymStr *
 tym_append_str (const TymStr * s1, const TymStr * s2)
 {

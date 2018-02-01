@@ -35,7 +35,7 @@ free_cell(TYM_HASHTABLE_CELL(String) * cell)
   //       function specifically for "struct TymStrHashIdxStruct *"
   //       here.
   free((void *)cell->k);
-  free((void *)cell->v);
+  //free((void *)cell->v); FIXME
   free((void *)cell);
 #pragma GCC diagnostic pop
 }
@@ -123,7 +123,7 @@ tym_ht_free(TYM_HASHTABLE(String) * ht)
       // NOTE "free(ht->arr[i]->k);" is done implicitly when ->v is freed below,
       //      since the value contains the key as content.
       tym_force_free_str(ht->arr[i]->v);
-      //free(ht->arr[i]); FIXME purge?
+      free(ht->arr[i]); // FIXME purge?
     }
   }
   free(ht);
