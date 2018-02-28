@@ -1,0 +1,22 @@
+input contents |g() :- a(b1, b2).
+a(X, Y) :- b(X), c(Y), d().
+a(X, bla) :- b(X), c(X), f(X).
+a(X, X).
+b(h1).
+b(h2).
+c(h3).
+d().
+e(h1).
+|
+(no query given)
+stringed file contents (size=342, remaining=1658)
+|predicate_g() :- predicate_a(constant_b1, constant_b2).
+predicate_a(X, Y) :- predicate_b(X), predicate_c(Y), predicate_d().
+predicate_a(X, constant_bla) :- predicate_b(X), predicate_c(X), predicate_f(X).
+predicate_a(X, X).
+predicate_b(constant_h1).
+predicate_b(constant_h2).
+predicate_c(constant_h3).
+predicate_d().
+predicate_e(constant_h1).|
+stringed file contents strlen=341
