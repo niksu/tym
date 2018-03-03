@@ -33,9 +33,10 @@ show_usage(const char * const argv_0)
          "   -v, --verbose \n"
          "   --max_var_width N \n"
          "   --solver_timeout N (in milliseconds). Default: %s\n"
+         "   --buffer_size N (in bytes). Default: %zd\n"
          "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
          TymModelOutputCommandMapping[TymDefaultModelOutput],
-        TymDefaultSolverTimeout);
+        TymDefaultSolverTimeout, TYM_BUF_SIZE);
 }
 
 int
@@ -73,7 +74,9 @@ main(int argc, char ** argv)
 #define LONG_OPT_MODEL_OUTPUT 6
     {"model_output", required_argument, NULL, LONG_OPT_MODEL_OUTPUT},
 #define LONG_OPT_SOLVER_TIMEOUT 7
-    {"solver_timeout", required_argument, NULL, LONG_OPT_SOLVER_TIMEOUT}
+    {"solver_timeout", required_argument, NULL, LONG_OPT_SOLVER_TIMEOUT},
+#define LONG_OPT_BUF_SIZE 8
+    {"buffer_size", required_argument, NULL, LONG_OPT_BUF_SIZE}
   };
 
   int option_index = 0;
@@ -132,6 +135,11 @@ main(int argc, char ** argv)
       break;
     case LONG_OPT_SOLVER_TIMEOUT:
       Params.solver_timeout = strdup(optarg);
+      break;
+    case LONG_OPT_BUF_SIZE:
+      v = strtol(optarg, NULL, 10);
+      assert(v > 100);
+      TYM_BUF_SIZE = (size_t)v;
       break;
     case 'h':
       show_usage(argv[0]);

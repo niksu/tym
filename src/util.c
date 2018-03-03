@@ -12,6 +12,8 @@
 
 #include "util.h"
 
+size_t TYM_BUF_SIZE = 3000;
+
 char *
 strcpy_prefixed(const char * prefix, const char * str)
 {
