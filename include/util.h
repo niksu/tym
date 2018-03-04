@@ -17,13 +17,7 @@
 
 #include "lifted.h"
 
-#ifndef TYM_BUF_SIZE
-#define TYM_BUF_SIZE 2000
-#else
-  #if TYM_BUF_SIZE < 100
-  #warn TYM_BUF_SIZE < 100
-  #endif
-#endif // TYM_BUF_SIZE
+extern size_t TYM_BUF_SIZE;
 
 #ifndef TYM_CONST_PREFIX
 #define TYM_CONST_PREFIX "constant_"
