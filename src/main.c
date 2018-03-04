@@ -138,7 +138,7 @@ main(int argc, char ** argv)
       break;
     case LONG_OPT_BUF_SIZE:
       v = strtol(optarg, NULL, 10);
-      assert(v > 100);
+      assert(v > 0);
       TYM_BUF_SIZE = (size_t)v;
       break;
     case 'h':
