@@ -6,7 +6,7 @@ b() :- b().
 
 |
 (no query given)
-stringed file contents (size=79, remaining=1921)
+stringed file contents (size=79, remaining=2921)
 |predicate_a().
 predicate_b() :- predicate_c().
 predicate_b() :- predicate_b().|

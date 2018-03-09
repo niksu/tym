@@ -10,7 +10,7 @@ e(X,Y) :- e(X, Z), e(Z, Y).
 %?- e(a,c).
 |
 (no query given)
-stringed file contents (size=282, remaining=1718)
+stringed file contents (size=282, remaining=2718)
 |predicate_v(constant_a).
 predicate_v(constant_b).
 predicate_v(constant_c).

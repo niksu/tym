@@ -4,7 +4,7 @@ b(h2).
 c(h3).
 |
 (no query given)
-stringed file contents (size=131, remaining=1869)
+stringed file contents (size=131, remaining=2869)
 |predicate_a(X, Y) :- predicate_b(X), predicate_c(Y).
 predicate_b(constant_h1).
 predicate_b(constant_h2).

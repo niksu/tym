@@ -2,7 +2,7 @@ input contents |hellom1123_AS12_1(a, B, a123) :- a(), b(c___,a1).
 c() :- a(). a(b).
 |
 (no query given)
-stringed file contents (size=174, remaining=1826)
+stringed file contents (size=174, remaining=2826)
 |predicate_hellom1123_AS12_1(constant_a, B, constant_a123) :- predicate_a(), predicate_b(constant_c___, constant_a1).
 predicate_c() :- predicate_a().
 predicate_a(constant_b).|
