@@ -31,11 +31,11 @@ free_cell(TYM_HASHTABLE_CELL(String) * cell)
   // FIXME This function works correctly, but the the encapsulation
   //       isn't being done right. This function is rather tightly
   //       bound to tym_encode_str, in particular the "v" value
-  //       references "k".  So I think we should call a "free"
-  //       function specifically for "struct TymStrHashIdxStruct *"
-  //       here.
-  free((void *)cell->k);
-  //free((void *)cell->v); FIXME
+  //       references "k", so we only free one of them.  We call a
+  //       "free" function specifically for "struct
+  //       TymStrHashIdxStruct *" here to free it as well as
+  //       the character string.
+  tym_force_free_str(cell->v);
   free((void *)cell);
 #pragma GCC diagnostic pop
 }
@@ -120,10 +120,7 @@ tym_ht_free(TYM_HASHTABLE(String) * ht)
     while (NULL != cursor) {
       ht->arr[i] = cursor;
       cursor = cursor->next;
-      // NOTE "free(ht->arr[i]->k);" is done implicitly when ->v is freed below,
-      //      since the value contains the key as content.
-      tym_force_free_str(ht->arr[i]->v);
-      free(ht->arr[i]); // FIXME purge?
+      free_cell(ht->arr[i]);
     }
   }
   free(ht);
