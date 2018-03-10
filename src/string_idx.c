@@ -211,10 +211,10 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s);
   assert(NULL != s->content);
 
-  // FIXME distinguish between freeing memory and removing a string from the index?
-//  assert(tym_ht_delete(stringhash, s->content));
-  free((void *)s->content); // FIXME purge?
-  free((void *)s); // FIXME purge?
+  // NOTE this function frees memory, but doesn't remove it from the
+  //      index -- for that call tym_ht_delete()
+  free((void *)s->content);
+  free((void *)s);
 }
 #pragma GCC diagnostic pop
 
