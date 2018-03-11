@@ -218,6 +218,20 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
 }
 #pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+void
+tym_safe_free_str (const struct TymStrHashIdxStruct * s)
+{
+  assert(NULL != stringhash);
+
+  assert(NULL != s);
+  assert(NULL != s->content);
+
+  assert(tym_ht_delete(stringhash, s->content));
+}
+#pragma GCC diagnostic pop
+
 size_t
 tym_len_str (const struct TymStrHashIdxStruct * s)
 {
@@ -237,7 +251,6 @@ tym_cmp_str (const struct TymStrHashIdxStruct * s1, const struct TymStrHashIdxSt
   #error "Unknown TYM_STRING_TYPE"
 #endif
 
-// FIXME make destructive
 const TymStr *
 tym_append_str (const TymStr * s1, const TymStr * s2)
 {
@@ -247,6 +260,15 @@ tym_append_str (const TymStr * s1, const TymStr * s2)
   memcpy(result_chars + tym_len_str(s1), tym_decode_str(s2), tym_len_str(s2));
   result_chars[total_len - 1] = '\0';
   return tym_encode_str(result_chars);
+}
+
+const TymStr *
+tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
+{
+  const TymStr * result = tym_append_str(s1, s2);
+  tym_safe_free_str(s1);
+  tym_safe_free_str(s2);
+  return result;
 }
 
 const TymStr * TymEmptyString;
