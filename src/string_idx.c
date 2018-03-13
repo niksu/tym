@@ -213,8 +213,10 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
 
   // NOTE this function frees memory, but doesn't remove it from the
   //      index -- for that call tym_ht_delete()
-  free((void *)s->content);
-  free((void *)s);
+  if (s != TymEmptyString) {
+    free((void *)s->content);
+    free((void *)s);
+  }
 }
 #pragma GCC diagnostic pop
 
@@ -228,7 +230,9 @@ tym_safe_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s);
   assert(NULL != s->content);
 
-  assert(tym_ht_delete(stringhash, s->content));
+  if (s != TymEmptyString) {
+    assert(tym_ht_delete(stringhash, s->content));
+  }
 }
 #pragma GCC diagnostic pop
 
@@ -267,7 +271,9 @@ tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
 {
   const TymStr * result = tym_append_str(s1, s2);
   tym_safe_free_str(s1);
-  tym_safe_free_str(s2);
+  if (s1 != s2) {
+    tym_safe_free_str(s2);
+  }
   return result;
 }
 
