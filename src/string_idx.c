@@ -147,6 +147,14 @@ tym_fin_str(void)
 {
   assert(NULL != stringhash);
   tym_ht_free(stringhash);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  // TymEmptyString is excluded from freeing, so we do it explicitly here.
+  free((void *)TymEmptyString->content);
+  free((void *)TymEmptyString);
+#pragma GCC diagnostic pop
+
   stringhash = NULL;
 }
 
