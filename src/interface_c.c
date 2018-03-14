@@ -99,14 +99,14 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const TymStr * array[atom->arity];
   for (int i = 0; i < atom->arity; i++) {
     sub_csyns[i] = tym_csyntax_term(namegen, atom->args[i]);
-    str_buf_args = tym_decode_str(tym_append_str(sub_csyns[i]->serialised, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
+    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
     array[i] = sub_csyns[i]->name;
   }
 
   const TymStr * args_identifier = NULL;
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, atom->arity, array_type, array);
-    str_buf_args = tym_decode_str(tym_append_str(array_str, tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
+    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(array_str, tym_encode_str(str_buf_args)));
 
   const char * predicate = tym_decode_str(atom->predicate);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
@@ -121,7 +121,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
 
-  const char * pretrimmed_str_buf = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), tym_encode_str(str_buf))); // FIXME purge intermediate strings
+  const char * pretrimmed_str_buf = tym_decode_str(tym_append_str_destructive(tym_encode_str(str_buf_args), tym_encode_str(str_buf)));
   char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * (1 + strlen(pretrimmed_str_buf)));
   strcpy(trimmed_str_buf, pretrimmed_str_buf);
   result->serialised = tym_encode_str(trimmed_str_buf);
@@ -140,7 +140,7 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
 {
   const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
-    str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // FIXME purge intermediate strings
+    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(expression_strs[i], tym_encode_str(str_buf_args)));
   }
 
   *result_name = tym_mk_new_var(namegen);
