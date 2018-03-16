@@ -140,7 +140,9 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
 {
   const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
-    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(expression_strs[i], tym_encode_str(str_buf_args)));
+    const char * new_str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args)));
+    tym_safe_free_str(tym_encode_str(str_buf_args));
+    str_buf_args = new_str_buf_args;
   }
 
   *result_name = tym_mk_new_var(namegen);
