@@ -99,7 +99,11 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const TymStr * array[atom->arity];
   for (int i = 0; i < atom->arity; i++) {
     sub_csyns[i] = tym_csyntax_term(namegen, atom->args[i]);
-    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
+
+    const char * new_str_buf_args = tym_decode_str(tym_append_str(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
+    tym_safe_free_str(tym_encode_str(str_buf_args));
+    str_buf_args = new_str_buf_args;
+
     array[i] = sub_csyns[i]->name;
   }
 
