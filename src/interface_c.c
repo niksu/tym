@@ -110,7 +110,10 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const TymStr * args_identifier = NULL;
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, atom->arity, array_type, array);
-    str_buf_args = tym_decode_str(tym_append_str/*FIXME _destructive*/(array_str, tym_encode_str(str_buf_args)));
+
+  const char * new_str_buf_args = tym_decode_str(tym_append_str(array_str, tym_encode_str(str_buf_args)));
+  tym_safe_free_str(tym_encode_str(str_buf_args));
+  str_buf_args = new_str_buf_args;
 
   const char * predicate = tym_decode_str(atom->predicate);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
