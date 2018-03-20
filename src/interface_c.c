@@ -88,7 +88,6 @@ tym_csyntax_free(const struct TymCSyntax * csyn)
 #pragma GCC diagnostic pop
 }
 
-// FIXME the order of statements needs to be changed -- currently identifiers are being used before being defined.
 const struct TymCSyntax *
 tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 {
@@ -111,7 +110,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, atom->arity, array_type, array);
 
-  const char * new_str_buf_args = tym_decode_str(tym_append_str(array_str, tym_encode_str(str_buf_args)));
+  const char * new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), array_str));
   tym_safe_free_str(tym_encode_str(str_buf_args));
   str_buf_args = new_str_buf_args;
 
