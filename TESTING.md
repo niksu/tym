@@ -8,5 +8,5 @@
 # Memory Tests
 * valgrind --leak-check=full out/tym 2>&1
 * For regressiong tests: valgrind --leak-check=full out/tym -i tests/1.test --test_parsing 2>&1
-* For solving: `./out/tym -i tests/4.test` and Valgrind of it.
-* For solving with queries: `./out/tym -i tests/4.test -q "e(X)."` and Valgrind of it.
+* For solving: `./out/tym -f smt_solve -i parser_tests/4.test` and Valgrind of it.
+* For solving with queries: `./out/tym -f smt_solve -i parser_tests/4.test -q "e(X)."` and Valgrind of it.
