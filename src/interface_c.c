@@ -25,7 +25,7 @@ tym_csyntax_term(struct TymSymGen * namegen, const struct TymTerm * term)
   result->name = tym_mk_new_var(namegen);
   result->type = TYM_CSTR_DUPLICATE("struct TymTerm");
 
-  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")};",
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.kind = %s, .identifier = TYM_CSTR_DUPLICATE(\"%s\")};\n",
     tym_decode_str(result->type), tym_decode_str(result->name),
     tym_decode_str(result->type), TymTermKindStr[term->kind],
     identifier);
@@ -120,7 +120,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   result->name = tym_mk_new_var(namegen);
   result->type = TYM_CSTR_DUPLICATE("struct TymAtom");
 
-  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.predicate = TYM_CSTR_DUPLICATE(\"%s\"), .arity = %d, .args = %s};",
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.predicate = TYM_CSTR_DUPLICATE(\"%s\"), .arity = %d, .args = %s};\n",
     tym_decode_str(result->type), tym_decode_str(result->name),
     tym_decode_str(result->type), predicate, atom->arity,
     tym_decode_str(args_identifier));
@@ -153,7 +153,7 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
 
   *result_name = tym_mk_new_var(namegen);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
-  int buf_occupied = sprintf(str_buf, "%s %s[%lu] = {%s};",
+  int buf_occupied = sprintf(str_buf, "%s %s[%lu] = {%s};\n",
     tym_decode_str(expression_type), tym_decode_str(*result_name),
     array_size, str_buf_args);
 
