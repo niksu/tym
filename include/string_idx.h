@@ -48,6 +48,7 @@
 #endif
 
 extern const TymStr * TymEmptyString;
+extern const TymStr * TymNewLine;
 
 void tym_init_str (void);
 void tym_fin_str (void);
@@ -59,7 +60,10 @@ size_t tym_len_str (const TymStr *);
 int tym_cmp_str (const TymStr *, const TymStr *);
 const TymStr * tym_append_str (const TymStr *, const TymStr *);
 const TymStr * tym_append_str_destructive (const TymStr * s1, const TymStr * s2);
+
 void tym_dump_str(void);
 extern const bool TymCanDumpStrings;
+
+bool tym_is_special_string(const TymStr * s);
 
 #endif // TYM_STRING_IDX_H

@@ -150,9 +150,13 @@ tym_fin_str(void)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-  // TymEmptyString is excluded from freeing, so we do it explicitly here.
+  // TymEmptyString and other "special strings" are excluded from
+  // freeing, so we do it explicitly here.
   free((void *)TymEmptyString->content);
   free((void *)TymEmptyString);
+
+  free((void *)TymNewLine->content);
+  free((void *)TymNewLine);
 #pragma GCC diagnostic pop
 
   stringhash = NULL;
@@ -221,7 +225,7 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
 
   // NOTE this function frees memory, but doesn't remove it from the
   //      index -- for that call tym_ht_delete()
-  if (s != TymEmptyString) {
+  if (!tym_is_special_string(s)) {
     free((void *)s->content);
     free((void *)s);
   }
@@ -238,7 +242,7 @@ tym_safe_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s);
   assert(NULL != s->content);
 
-  if (s != TymEmptyString) {
+  if (!tym_is_special_string(s)) {
     assert(tym_ht_delete(stringhash, s->content));
   }
 }
@@ -286,8 +290,20 @@ tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
 }
 
 const TymStr * TymEmptyString;
+const TymStr * TymNewLine;
 static void
 init_str(void)
 {
   TymEmptyString = TYM_CSTR_DUPLICATE("");
+  TymNewLine = TYM_CSTR_DUPLICATE("\n");
+}
+
+bool
+tym_is_special_string(const TymStr * s)
+{
+  if (TymEmptyString == s ||
+      TymNewLine == s) {
+    return true;
+  }
+  return false;
 }
