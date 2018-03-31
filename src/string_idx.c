@@ -291,6 +291,7 @@ tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
 
 const TymStr * TymEmptyString;
 const TymStr * TymNewLine;
+static const TymStr ** special_strings[] = {&TymEmptyString, &TymNewLine, NULL};
 static void
 init_str(void)
 {
@@ -301,9 +302,10 @@ init_str(void)
 bool
 tym_is_special_string(const TymStr * s)
 {
-  if (TymEmptyString == s ||
-      TymNewLine == s) {
-    return true;
+  for (int i = 0; NULL != special_strings[i]; i++) {
+    if (s == *special_strings[i]) {
+      return true;
+    }
   }
   return false;
 }
