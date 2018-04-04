@@ -55,20 +55,35 @@ tym_test_clause_csyn(void) {
   at->args = malloc(sizeof *at->args * 1);
   at->args[0] = tym_copy_term(t);
 
+  struct TymAtom * hd = malloc(sizeof *hd);
+  hd->predicate = TYM_CSTR_DUPLICATE("hello");
+  hd->arity = 0;
+  hd->args = NULL;
+
+  struct TymClause * cl = malloc(sizeof *cl);
+  cl->head = hd;
+  cl->body_size = 1;
+  cl->body = malloc(sizeof *cl->body * 1);
+  cl->body[0] = tym_copy_atom(at); // Copying "at" since otherwise freeing "at" and "cl" would double-free "at".
+
   struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
   const struct TymCSyntax * csyn_t = tym_csyntax_term(sg, t);
   const struct TymCSyntax * csyn_at = tym_csyntax_atom(sg, at);
+  const struct TymCSyntax * csyn_cl = tym_csyntax_clause(sg, cl);
 
   printf("serialised: %s\n", tym_decode_str(csyn_t->serialised));
   printf("serialised: %s\n", tym_decode_str(csyn_at->serialised));
+  printf("serialised: %s\n", tym_decode_str(csyn_cl->serialised));
   const TymStr * malloc_str = tym_csyntax_malloc(csyn_t);
   printf("serialised: %s\n", tym_decode_str(malloc_str));
 
   tym_free_sym_gen(sg);
   tym_free_term(t);
   tym_free_atom(at);
+  tym_free_clause(cl);
   tym_csyntax_free(csyn_t);
   tym_csyntax_free(csyn_at);
+  tym_csyntax_free(csyn_cl);
 }
 
 const TymStr *
@@ -164,4 +179,63 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
   strcpy(trimmed_str_buf, str_buf);
   free(str_buf);
   return tym_encode_str(trimmed_str_buf);
+}
+
+const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const struct TymClause * cl)
+{
+  struct TymCSyntax * result = malloc(sizeof(*result));
+
+  const char * str_buf_args = tym_decode_str(TymEmptyString);
+  const struct TymCSyntax * sub_csyns[cl->body_size];
+  const TymStr * array[cl->body_size];
+  for (int i = 0; i < cl->body_size; i++) {
+    sub_csyns[i] = tym_csyntax_atom(namegen, cl->body[i]);
+
+    const char * new_str_buf_args = tym_decode_str(tym_append_str(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
+    tym_safe_free_str(tym_encode_str(str_buf_args));
+    str_buf_args = new_str_buf_args;
+
+    array[i] = sub_csyns[i]->name;
+  }
+
+  const TymStr * args_identifier = NULL;
+  const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymAtom");
+  const TymStr * array_str = tym_array_of(namegen, &args_identifier, cl->body_size, array_type, array); // FIXME check if array is zero-size? Are zero-sized arrays legal in C?
+
+  const char * new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), array_str));
+  tym_safe_free_str(tym_encode_str(str_buf_args));
+  str_buf_args = new_str_buf_args;
+
+  const struct TymCSyntax * head = tym_csyntax_atom(namegen, cl->head);
+
+  // FIXME this idiom recurs a lot; turn into function.
+  new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), head->serialised));
+  tym_safe_free_str(tym_encode_str(str_buf_args));
+  str_buf_args = new_str_buf_args;
+
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME is this freed?
+
+  result->name = tym_mk_new_var(namegen);
+  result->type = TYM_CSTR_DUPLICATE("struct TymClause");
+
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.head = %s, .body_size = %d, .body = %s};\n",
+    tym_decode_str(result->type), tym_decode_str(result->name),
+    tym_decode_str(result->type), tym_decode_str(head->name), cl->body_size,
+    tym_decode_str(args_identifier));
+  assert(buf_occupied > 0);
+  assert(strlen(str_buf) == (unsigned long)buf_occupied);
+
+  const char * pretrimmed_str_buf = tym_decode_str(tym_append_str_destructive(tym_encode_str(str_buf_args), tym_encode_str(str_buf)));
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * (1 + strlen(pretrimmed_str_buf)));
+  strcpy(trimmed_str_buf, pretrimmed_str_buf);
+  result->serialised = tym_encode_str(trimmed_str_buf);
+  result->kind = TYM_CLAUSE;
+  result->original = cl;
+
+  tym_csyntax_free(head);
+  for (int i = 0; i < cl->body_size; i++) {
+    tym_csyntax_free(sub_csyns[i]);
+  }
+
+  return result;
 }
