@@ -213,7 +213,7 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
   tym_safe_free_str(tym_encode_str(str_buf_args));
   str_buf_args = new_str_buf_args;
 
-  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME is this freed?
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
 
   result->name = tym_mk_new_var(namegen);
   result->type = TYM_CSTR_DUPLICATE("struct TymClause");
