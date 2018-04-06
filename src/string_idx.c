@@ -270,6 +270,12 @@ tym_cmp_str (const struct TymStrHashIdxStruct * s1, const struct TymStrHashIdxSt
 const TymStr *
 tym_append_str (const TymStr * s1, const TymStr * s2)
 {
+  if (0 == tym_len_str(s1)) {
+    return s2;
+  } else if (0 == tym_len_str(s2)) {
+    return s1;
+  }
+
   size_t total_len = tym_len_str(s1) + tym_len_str(s2) + 1;
   char * result_chars = malloc(sizeof(*result_chars) * total_len);
   memcpy(result_chars, tym_decode_str(s1), tym_len_str(s1));
@@ -281,6 +287,12 @@ tym_append_str (const TymStr * s1, const TymStr * s2)
 const TymStr *
 tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
 {
+  if (0 == tym_len_str(s1)) {
+    return s2;
+  } else if (0 == tym_len_str(s2)) {
+    return s1;
+  }
+
   const TymStr * result = tym_append_str(s1, s2);
   tym_safe_free_str(s1);
   if (s1 != s2) {

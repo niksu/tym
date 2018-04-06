@@ -159,6 +159,12 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
 const TymStr *
 tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, const TymStr * expression_type, const TymStr ** expression_strs)
 {
+  if (0 == array_size) {
+    *expression_strs = NULL;
+    *result_name = TYM_CSTR_DUPLICATE("NULL");
+    return TymEmptyString;
+  }
+
   const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
     const char * new_str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // NOTE using tym_append_str_destructive would not have worked here, since we'd have also destroyed expression_strs[i]; so instead I explicitly call tym_safe_free_str() below.
@@ -200,7 +206,7 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
 
   const TymStr * args_identifier = NULL;
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymAtom");
-  const TymStr * array_str = tym_array_of(namegen, &args_identifier, cl->body_size, array_type, array); // FIXME check if array is zero-size? Are zero-sized arrays legal in C?
+  const TymStr * array_str = tym_array_of(namegen, &args_identifier, cl->body_size, array_type, array);
 
   const char * new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), array_str));
   tym_safe_free_str(tym_encode_str(str_buf_args));
