@@ -114,9 +114,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   for (int i = 0; i < atom->arity; i++) {
     sub_csyns[i] = tym_csyntax_term(namegen, atom->args[i]);
 
-    const char * new_str_buf_args = tym_decode_str(tym_append_str(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
-    tym_safe_free_str(tym_encode_str(str_buf_args));
-    str_buf_args = new_str_buf_args;
+    str_buf_args = tym_decode_str(tym_append_str_destructive2(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
 
     array[i] = sub_csyns[i]->name;
   }
@@ -125,9 +123,7 @@ tym_csyntax_atom(struct TymSymGen * namegen, const struct TymAtom * atom)
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymTerm");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, atom->arity, array_type, array);
 
-  const char * new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), array_str));
-  tym_safe_free_str(tym_encode_str(str_buf_args));
-  str_buf_args = new_str_buf_args;
+  str_buf_args = tym_decode_str(tym_append_str_destructive1(tym_encode_str(str_buf_args), array_str));
 
   const char * predicate = tym_decode_str(atom->predicate);
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
@@ -167,9 +163,7 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
 
   const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
-    const char * new_str_buf_args = tym_decode_str(tym_append_str(expression_strs[i], tym_encode_str(str_buf_args))); // NOTE using tym_append_str_destructive would not have worked here, since we'd have also destroyed expression_strs[i]; so instead I explicitly call tym_safe_free_str() below.
-    tym_safe_free_str(tym_encode_str(str_buf_args));
-    str_buf_args = new_str_buf_args;
+    str_buf_args = tym_decode_str(tym_append_str_destructive2(expression_strs[i], tym_encode_str(str_buf_args))); // NOTE using tym_append_str_destructive would not have worked here, since we'd have also destroyed expression_strs[i]; so instead I explicitly specify wrt which parameter the append function acts destructively.
   }
 
   *result_name = tym_mk_new_var(namegen);
@@ -197,9 +191,7 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
   for (int i = 0; i < cl->body_size; i++) {
     sub_csyns[i] = tym_csyntax_atom(namegen, cl->body[i]);
 
-    const char * new_str_buf_args = tym_decode_str(tym_append_str(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
-    tym_safe_free_str(tym_encode_str(str_buf_args));
-    str_buf_args = new_str_buf_args;
+    str_buf_args = tym_decode_str(tym_append_str_destructive2(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
 
     array[i] = sub_csyns[i]->name;
   }
@@ -208,16 +200,11 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
   const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymAtom");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, cl->body_size, array_type, array);
 
-  const char * new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), array_str));
-  tym_safe_free_str(tym_encode_str(str_buf_args));
-  str_buf_args = new_str_buf_args;
+  str_buf_args = tym_decode_str(tym_append_str_destructive1(tym_encode_str(str_buf_args), array_str));
 
   const struct TymCSyntax * head = tym_csyntax_atom(namegen, cl->head);
 
-  // FIXME this idiom recurs a lot; turn into function.
-  new_str_buf_args = tym_decode_str(tym_append_str(tym_encode_str(str_buf_args), head->serialised));
-  tym_safe_free_str(tym_encode_str(str_buf_args));
-  str_buf_args = new_str_buf_args;
+  str_buf_args = tym_decode_str(tym_append_str_destructive1(tym_encode_str(str_buf_args), head->serialised));
 
   char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
 

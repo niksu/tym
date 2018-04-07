@@ -60,6 +60,8 @@ size_t tym_len_str (const TymStr *);
 int tym_cmp_str (const TymStr *, const TymStr *);
 const TymStr * tym_append_str (const TymStr *, const TymStr *);
 const TymStr * tym_append_str_destructive (const TymStr * s1, const TymStr * s2);
+const TymStr * tym_append_str_destructive1 (const TymStr * s1, const TymStr * s2);
+const TymStr * tym_append_str_destructive2 (const TymStr * s1, const TymStr * s2);
 
 void tym_dump_str(void);
 extern const bool TymCanDumpStrings;
