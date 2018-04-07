@@ -66,24 +66,32 @@ tym_test_clause_csyn(void) {
   cl->body = malloc(sizeof *cl->body * 1);
   cl->body[0] = tym_copy_atom(at); // Copying "at" since otherwise freeing "at" and "cl" would double-free "at".
 
+  struct TymProgram * prog = malloc(sizeof *prog);
+  prog->no_clauses = 1;
+  prog->program = malloc(sizeof *prog->program * 1);
+  prog->program[0] = cl;
+
   struct TymSymGen * sg = tym_mk_sym_gen(tym_encode_str(strdup("var")));
   const struct TymCSyntax * csyn_t = tym_csyntax_term(sg, t);
   const struct TymCSyntax * csyn_at = tym_csyntax_atom(sg, at);
   const struct TymCSyntax * csyn_cl = tym_csyntax_clause(sg, cl);
+  const struct TymCSyntax * csyn_prog = tym_csyntax_program(sg, prog);
 
   printf("serialised: %s\n", tym_decode_str(csyn_t->serialised));
   printf("serialised: %s\n", tym_decode_str(csyn_at->serialised));
   printf("serialised: %s\n", tym_decode_str(csyn_cl->serialised));
+  printf("serialised: %s\n", tym_decode_str(csyn_prog->serialised));
   const TymStr * malloc_str = tym_csyntax_malloc(csyn_t);
   printf("serialised: %s\n", tym_decode_str(malloc_str));
 
   tym_free_sym_gen(sg);
   tym_free_term(t);
   tym_free_atom(at);
-  tym_free_clause(cl);
+  tym_free_program(prog); // prog references cl, so we don't call tym_free_clause(cl);
   tym_csyntax_free(csyn_t);
   tym_csyntax_free(csyn_at);
   tym_csyntax_free(csyn_cl);
+  tym_csyntax_free(csyn_prog);
 }
 
 const TymStr *
@@ -227,6 +235,53 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
 
   tym_csyntax_free(head);
   for (int i = 0; i < cl->body_size; i++) {
+    tym_csyntax_free(sub_csyns[i]);
+  }
+
+  return result;
+}
+
+const struct TymCSyntax * tym_csyntax_program(struct TymSymGen * namegen, const struct TymProgram * prog)
+{
+  struct TymCSyntax * result = malloc(sizeof(*result));
+
+  const char * str_buf_args = tym_decode_str(TymEmptyString);
+  const struct TymCSyntax * sub_csyns[prog->no_clauses];
+  const TymStr * array[prog->no_clauses];
+  for (int i = 0; i < prog->no_clauses; i++) {
+    sub_csyns[i] = tym_csyntax_clause(namegen, prog->program[i]);
+
+    str_buf_args = tym_decode_str(tym_append_str_destructive2(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
+
+    array[i] = sub_csyns[i]->name;
+  }
+
+  const TymStr * args_identifier = NULL;
+  const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymClause");
+  const TymStr * array_str = tym_array_of(namegen, &args_identifier, prog->no_clauses, array_type, array);
+
+  str_buf_args = tym_decode_str(tym_append_str_destructive1(tym_encode_str(str_buf_args), array_str));
+
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE);
+
+  result->name = tym_mk_new_var(namegen);
+  result->type = TYM_CSTR_DUPLICATE("struct TymProgram");
+
+  int buf_occupied = sprintf(str_buf, "%s %s = (%s){.no_clauses = %d, .program = %s};\n",
+    tym_decode_str(result->type), tym_decode_str(result->name),
+    tym_decode_str(result->type), prog->no_clauses,
+    tym_decode_str(args_identifier));
+  assert(buf_occupied > 0);
+  assert(strlen(str_buf) == (unsigned long)buf_occupied);
+
+  const char * pretrimmed_str_buf = tym_decode_str(tym_append_str_destructive(tym_encode_str(str_buf_args), tym_encode_str(str_buf)));
+  char * trimmed_str_buf = malloc(sizeof(*trimmed_str_buf) * (1 + strlen(pretrimmed_str_buf)));
+  strcpy(trimmed_str_buf, pretrimmed_str_buf);
+  result->serialised = tym_encode_str(trimmed_str_buf);
+  result->kind = TYM_PROGRAM;
+  result->original = prog;
+
+  for (int i = 0; i < prog->no_clauses; i++) {
     tym_csyntax_free(sub_csyns[i]);
   }
 
