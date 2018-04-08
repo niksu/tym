@@ -8,6 +8,7 @@
 #ifdef TYM_INTERFACE_Z3
 #include "interface_z3.h"
 #endif
+#include "interface_c.h"
 #include "support.h"
 
 #pragma GCC diagnostic push
@@ -32,6 +33,7 @@ const char * TymFunctionCommandMapping[] =
    "test_parsing",
    "smt_output",
    "smt_solve",
+   "c_output",
    NULL
   };
 
@@ -321,7 +323,13 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
-  if (NULL != mdl) {
+  if (TYM_CONVERT_TO_C == Params->function) {
+    struct TymSymGen * ng = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("var"));
+    const struct TymCSyntax * csyn = tym_csyntax_program(ng, ParsedInputFileContents); // FIXME also include ParsedQuery
+    printf("%s\n", tym_decode_str(csyn->serialised)); // FIXME use outbuf for csyn->serialised?
+    tym_free_sym_gen(ng);
+    tym_csyntax_free(csyn);
+  } else if (NULL != mdl) {
 #if TYM_DEBUG
     tym_reset_buffer(outbuf);
     res = tym_model_str(mdl, outbuf);

@@ -10,6 +10,8 @@
 #ifndef TYM_INTERFACE_C_H
 #define TYM_INTERFACE_C_H
 
+#include "ast.h"
+#include "formula.h"
 #include "string_idx.h"
 #include "util.h"
 
