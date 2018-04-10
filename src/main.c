@@ -186,7 +186,7 @@ main(int argc, char ** argv)
     TYM_VERBOSE("TYM_INTERFACE_Z3 Undefined\n");
 #endif
 
-    TYM_VERBOSE("input_fine = %s\n", Params.input_file);
+    TYM_VERBOSE("input_file = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("query = %s\n", Params.query);
     TYM_VERBOSE("function = %s\n", TymFunctionCommandMapping[Params.function]);
