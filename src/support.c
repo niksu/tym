@@ -327,8 +327,8 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     struct TymSymGen * ng = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("var"));
     const struct TymCSyntax * csyn_program = tym_csyntax_program(ng, ParsedInputFileContents);
     const struct TymCSyntax * csyn_query = tym_csyntax_program(ng, ParsedQuery);
-    printf("// Program\n%s\n", tym_decode_str(csyn_program->serialised)); // FIXME use outbuf for csyn->serialised?
-    printf("// Query\n%s\n", tym_decode_str(csyn_query->serialised)); // FIXME use outbuf for csyn->serialised?
+    printf("// Program\n%s\n", tym_decode_str(csyn_program->serialised));
+    printf("// Query\n%s\n", tym_decode_str(csyn_query->serialised));
     tym_free_sym_gen(ng);
     tym_csyntax_free(csyn_program);
     tym_csyntax_free(csyn_query);
