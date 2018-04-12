@@ -169,8 +169,12 @@ tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t arr
     return TymEmptyString;
   }
 
+  const TymStr * sep = TYM_CSTR_DUPLICATE(", ");
   const char * str_buf_args = tym_decode_str(TymEmptyString);
   for (size_t i = 0; i < array_size; i++) {
+    if (TymEmptyString != tym_encode_str(str_buf_args)) {
+      str_buf_args = tym_decode_str(tym_append_str_destructive2(sep, tym_encode_str(str_buf_args)));
+    }
     str_buf_args = tym_decode_str(tym_append_str_destructive2(expression_strs[i], tym_encode_str(str_buf_args))); // NOTE using tym_append_str_destructive would not have worked here, since we'd have also destroyed expression_strs[i]; so instead I explicitly specify wrt which parameter the append function acts destructively.
   }
 
