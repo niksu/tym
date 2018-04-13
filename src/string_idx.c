@@ -304,32 +304,22 @@ tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
 const TymStr *
 tym_append_str_destructive1 (const TymStr * s1, const TymStr * s2)
 {
-  if (0 == tym_len_str(s1)) {
-    return s2;
-  } else if (0 == tym_len_str(s2)) {
-    return s1;
-  }
-
-  assert(s1 != s2); // We're going to free s1, so it had better not be s2.
-
   const TymStr * result = tym_append_str(s1, s2);
-  tym_safe_free_str(s1);
+  if (s1 != s2) {
+    // We err on the side of caution, and don't implicitly destroy s2 if s1 == s2.
+    tym_safe_free_str(s1);
+  }
   return result;
 }
 
 const TymStr *
 tym_append_str_destructive2 (const TymStr * s1, const TymStr * s2)
 {
-  if (0 == tym_len_str(s1)) {
-    return s2;
-  } else if (0 == tym_len_str(s2)) {
-    return s1;
-  }
-
-  assert(s1 != s2); // We're going to free s2, so it had better not be s1.
-
   const TymStr * result = tym_append_str(s1, s2);
-  tym_safe_free_str(s2);
+  if (s1 != s2) {
+    // We err on the side of caution, and don't implicitly destroy s1 if s2 == s1.
+    tym_safe_free_str(s2);
+  }
   return result;
 }
 
