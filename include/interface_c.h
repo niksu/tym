@@ -30,6 +30,7 @@ const struct TymCSyntax * tym_csyntax_atom(struct TymSymGen * namegen, const str
 const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const struct TymClause *);
 const struct TymCSyntax * tym_csyntax_program(struct TymSymGen * namegen, const struct TymProgram *);
 const TymStr * tym_csyntax_malloc(const struct TymCSyntax * csyn);
+const TymStr * tym_csyntax_address_of(const struct TymCSyntax * csyn);
 void tym_csyntax_free(const struct TymCSyntax * csyn);
 
 const TymStr * tym_array_of(struct TymSymGen * namegen, const TymStr ** result_name, size_t array_size, const TymStr * expression_type, const TymStr ** expression_strs);

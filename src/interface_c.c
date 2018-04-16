@@ -102,6 +102,14 @@ tym_csyntax_malloc(const struct TymCSyntax * csyn)
   return tym_append_str (malloc_str_prefix, tym_append_str (csyn->name, malloc_str_suffix));
 }
 
+const TymStr *
+tym_csyntax_address_of(const struct TymCSyntax * csyn)
+{
+  const TymStr * str_prefix = TYM_CSTR_DUPLICATE("&(");
+  const TymStr * str_suffix = TYM_CSTR_DUPLICATE(")");
+  return tym_append_str (str_prefix, tym_append_str (csyn->name, str_suffix));
+}
+
 void
 tym_csyntax_free(const struct TymCSyntax * csyn)
 {
@@ -225,7 +233,7 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
 
   int buf_occupied = sprintf(str_buf, "%s %s = (%s){.head = %s, .body_size = %d, .body = %s};\n",
     tym_decode_str(result->type), tym_decode_str(result->name),
-    tym_decode_str(result->type), tym_decode_str(head->name), cl->body_size,
+    tym_decode_str(result->type), tym_decode_str(tym_csyntax_address_of(head)), cl->body_size,
     tym_decode_str(args_identifier));
   assert(buf_occupied > 0);
   assert(strlen(str_buf) == (unsigned long)buf_occupied);
