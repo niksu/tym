@@ -213,11 +213,11 @@ const struct TymCSyntax * tym_csyntax_clause(struct TymSymGen * namegen, const s
 
     str_buf_args = tym_decode_str(tym_append_str_destructive2(sub_csyns[i]->serialised, tym_encode_str(str_buf_args)));
 
-    array[i] = sub_csyns[i]->name;
+    array[i] = tym_csyntax_address_of(sub_csyns[i]);
   }
 
   const TymStr * args_identifier = NULL;
-  const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymAtom");
+  const TymStr * array_type = TYM_CSTR_DUPLICATE("struct TymAtom *");
   const TymStr * array_str = tym_array_of(namegen, &args_identifier, cl->body_size, array_type, array);
 
   str_buf_args = tym_decode_str(tym_append_str_destructive1(tym_encode_str(str_buf_args), array_str));
