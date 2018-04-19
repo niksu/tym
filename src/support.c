@@ -127,8 +127,6 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed file contents")
-    tym_free_program(ParsedInputFileContents);
-    free(Params->input_file);
   }
 
   if (NULL != Params->query) {
@@ -137,8 +135,6 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed query")
-    tym_free_program(ParsedQuery);
-    free(Params->query);
   }
 
   tym_free_buffer(outbuf);
