@@ -34,7 +34,7 @@ $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-	ar crv $(OUT_DIR)/$@ $(OBJ)
+	ar crv $(OUT_DIR)/$@ $(OBJ) $(PARSER_OBJ)
 
 parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	mkdir -p $(OUT_DIR)
