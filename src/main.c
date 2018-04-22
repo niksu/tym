@@ -21,7 +21,8 @@ static void show_usage(const char * const);
 static void
 show_usage(const char * const argv_0)
 {
-  // FIXME include name + version + url
+  printf("Tym Datalog\nversion %d.%d\n", TYM_VERSION_MAJOR, TYM_VERSION_MINOR);
+  // FIXME include url
   // FIXME include description of each parameter
   printf("usage: %s PARAMETERS \n"
          " Mandatory parameters: \n"
