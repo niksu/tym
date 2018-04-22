@@ -323,8 +323,19 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     struct TymSymGen * ng = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("var"));
     const struct TymCSyntax * csyn_program = tym_csyntax_program(ng, ParsedInputFileContents);
     const struct TymCSyntax * csyn_query = tym_csyntax_program(ng, ParsedQuery);
+
+    // FIXME include version of Tym that generated this output.
+    printf("#include \"tym.h\"\n");
+    printf("void\n");
+    printf("apply (void (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query), struct TymParams * Params)\n");
+    printf("{\n");
     printf("// Program\n%s\n", tym_decode_str(csyn_program->serialised));
     printf("// Query\n%s\n", tym_decode_str(csyn_query->serialised));
+    printf("struct TymProgram * program = &%s;\n", tym_decode_str(csyn_program->name));
+    printf("struct TymProgram * query = &%s;\n", tym_decode_str(csyn_query->name));
+    printf("meta_program(Params, program, query);\n");
+    printf("}\n");
+
     tym_free_sym_gen(ng);
     tym_csyntax_free(csyn_program);
     tym_csyntax_free(csyn_query);
