@@ -20,16 +20,16 @@ timestamp(char * charbuff, size_t charbuff_len)
 {
   time_t now = time(NULL);
   if ((time_t)-1 == now) {
-    exit(2/*FIXME const -- use/extend one of our exit codes*/);
+    exit(TYM_TIMESTAMP_ERROR);
   }
 
   struct tm * now_calendar = localtime(&now);
   if (NULL == now_calendar) {
-    exit(2/*FIXME const -- use/extend one of our exit codes*/);
+    exit(TYM_TIMESTAMP_ERROR);
   }
 
   if (!strftime(charbuff, charbuff_len, "%A %c %z", now_calendar)) {
-    exit(2/*FIXME const -- use/extend one of our exit codes*/);
+    exit(TYM_TIMESTAMP_ERROR);
   }
 }
 

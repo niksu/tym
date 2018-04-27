@@ -53,7 +53,7 @@ struct TymParams {
 //      and terminates the entire process, and returns a code of 1,
 //      overriding TYM's preference to return the value of
 //      TYM_SOLVER_GAVEUP
-enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4};
+enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4, TYM_TIMESTAMP_ERROR=5};
 
 struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
