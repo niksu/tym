@@ -56,7 +56,7 @@ main(int argc, char ** argv)
 #endif // TYM_DEBUG
   tym_fin_str();
   exit(0);
-#endif
+#endif // TYM_TESTING
 
   struct TymParams Params = {
     .input_file = NULL,
