@@ -7,4 +7,5 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 OUTFILE=$1
-gcc -g -Iinclude/ -Iout/ -Lout -ltym -o ${OUTFILE} ${OUTFILE}.c
+CFLAGS=$2
+gcc ${CFLAGS} -Iinclude/ -Iout/ -Lout -ltym -o ${OUTFILE} ${OUTFILE}.c
