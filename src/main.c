@@ -16,6 +16,12 @@
 #include "tym.h"
 #include "module_tests.h"
 
+#ifdef TYM_PRECODED
+// FIXME is there a better place to put this?
+void apply (void (*meta_program)(struct TymParams * Params, struct TymProgram
+      * program, struct TymProgram * query), struct TymParams * Params);
+#endif
+
 static void show_usage(const char * const);
 
 static void
@@ -43,6 +49,15 @@ show_usage(const char * const argv_0)
 int
 main(int argc, char ** argv)
 {
+  struct TymParams Params = {
+    .input_file = NULL,
+    .verbosity = 0,
+    .query = NULL,
+    .function = TYM_NO_FUNCTION,
+    .model_output = TymDefaultModelOutput,
+    .solver_timeout = TymDefaultSolverTimeout
+  };
+
 #ifdef TYM_TESTING
   tym_init_str();
   tym_test_clause();
@@ -58,14 +73,13 @@ main(int argc, char ** argv)
   exit(0);
 #endif // TYM_TESTING
 
-  struct TymParams Params = {
-    .input_file = NULL,
-    .verbosity = 0,
-    .query = NULL,
-    .function = TYM_NO_FUNCTION,
-    .model_output = TymDefaultModelOutput,
-    .solver_timeout = TymDefaultSolverTimeout
-  };
+#ifdef TYM_PRECODED
+  tym_init_str();
+  // FIXME take as parameter (at compile time or run time) the "meta_program" function. Here hardcoding to "print_parsed_program"
+  apply(print_parsed_program, &Params);
+  tym_fin_str();
+  exit(0);
+#endif // TYM_PRECODED
 
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1

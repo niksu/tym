@@ -65,7 +65,7 @@ test_regression:
 # FIXME generate link-able .o that will call "apply"
 tym_runtime.o : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-	$(CC) -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
+	$(CC) -DTYM_PRECODED -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
 
 clean:
 	rm -f $(OUT_DIR)/$(TGT) $(OUT_DIR)/$(LIB) $(OUT_DIR)/*.o $(OUT_DIR)/lexer.{c,h} $(OUT_DIR)/parser.{c,h}
