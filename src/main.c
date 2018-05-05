@@ -76,6 +76,9 @@ main(int argc, char ** argv)
 #ifdef TYM_PRECODED
   tym_init_str();
   // FIXME take as parameter (at compile time or run time) the "meta_program" function. Here hardcoding to "print_parsed_program"
+
+  Params.input_file = "<input_file>"; // FIXME
+  Params.query = "<query>"; // FIXME
   apply(print_parsed_program, &Params);
   tym_fin_str();
   exit(0);
