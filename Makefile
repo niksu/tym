@@ -63,7 +63,7 @@ test_regression:
 
 # FIXME compile the generated file (containing "apply") to a .o
 # FIXME generate link-able .o that will call "apply"
-tym_runtime.o : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
+out/tym_runtime.o : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
 	$(CC) -DTYM_PRECODED -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
 
