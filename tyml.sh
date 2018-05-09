@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Wrapper for cc driver to link Tym-generated C code.
+# Wrapper for cc driver to compile and link Tym-generated C code.
 # Nik Sultana, April 2018
 # https://github.com/niksu/tym
 #
