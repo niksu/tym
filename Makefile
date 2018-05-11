@@ -61,8 +61,6 @@ test_modules:
 test_regression:
 	@TYM_Z3_PATH="$(TYM_Z3_PATH)" TYMDIR=`pwd` ./scripts/run_parser_tests.sh
 
-# FIXME compile the generated file (containing "apply") to a .o
-# FIXME generate link-able .o that will call "apply"
 out/tym_runtime.o : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 	mkdir -p $(OUT_DIR)
 	$(CC) -DTYM_PRECODED -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
