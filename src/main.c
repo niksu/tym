@@ -73,17 +73,6 @@ main(int argc, char ** argv)
   exit(0);
 #endif // TYM_TESTING
 
-#ifdef TYM_PRECODED
-  tym_init_str();
-  // FIXME take as parameter (at compile time or run time) the "meta_program" function. Here hardcoding to "print_parsed_program"
-
-  Params.input_file = "<input_file>"; // FIXME
-  Params.query = "<query>"; // FIXME
-  apply(print_parsed_program, &Params);
-  tym_fin_str();
-  exit(0);
-#endif // TYM_PRECODED
-
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
     {"input_file", required_argument, NULL, LONG_OPT_INPUT},
@@ -222,6 +211,27 @@ main(int argc, char ** argv)
     result = TYM_UNRECOGNISED_PARAMETER;
   }
 #endif // TYM_INTERFACE_Z3
+
+
+#ifdef TYM_PRECODED
+  tym_init_str();
+
+  void (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
+
+  if (TYM_TEST_PARSING == Params.function) {
+    meta_program = print_parsed_program;
+  } else {
+    // FIXME support other "meta_program" functions beyond  "print_parsed_program".
+    assert(0);
+  }
+
+  Params.input_file = "<input_file>"; // FIXME
+  Params.query = "<query>"; // FIXME
+  apply(meta_program, &Params);
+  tym_fin_str();
+  exit(0);
+#endif // TYM_PRECODED
+
 
   tym_init_str();
 
