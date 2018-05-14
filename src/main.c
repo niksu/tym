@@ -225,8 +225,8 @@ main(int argc, char ** argv)
     assert(0);
   }
 
-  Params.input_file = "<input_file>"; // FIXME
-  Params.query = "<query>"; // FIXME
+  Params.input_file = "<precoded_input_file>";
+  Params.query = "<precoded_query>";
   apply(meta_program, &Params);
   tym_fin_str();
   exit(0);
