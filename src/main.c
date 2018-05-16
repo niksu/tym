@@ -218,9 +218,14 @@ main(int argc, char ** argv)
 
   void (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
 
-  if (TYM_TEST_PARSING == Params.function) {
+  switch (Params.function) {
+  case TYM_TEST_PARSING:
     meta_program = print_parsed_program;
-  } else {
+    break;
+  case TYM_CONVERT_TO_SMT:
+  case TYM_CONVERT_TO_SMT_AND_SOLVE:
+  case TYM_CONVERT_TO_C:
+  default:
     // FIXME support other "meta_program" functions beyond  "print_parsed_program".
     assert(0);
   }
