@@ -225,6 +225,8 @@ main(int argc, char ** argv)
   case TYM_CONVERT_TO_SMT:
   case TYM_CONVERT_TO_SMT_AND_SOLVE:
   case TYM_CONVERT_TO_C:
+    meta_program = process_program; // FIXME incorrect return type.
+    break;
   default:
     // FIXME support other "meta_program" functions beyond  "print_parsed_program".
     assert(0);
