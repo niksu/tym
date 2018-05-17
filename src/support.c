@@ -116,7 +116,7 @@ tym_parse_query(struct TymParams * Params)
   return result;
 }
 
-void
+enum TymReturnCodes
 print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
@@ -139,6 +139,7 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
   }
 
   tym_free_buffer(outbuf);
+  return TYM_AOK;
 }
 
 #ifdef TYM_INTERFACE_Z3

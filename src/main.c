@@ -18,7 +18,7 @@
 
 #ifdef TYM_PRECODED
 // FIXME is there a better place to put this?
-void apply (void (*meta_program)(struct TymParams * Params, struct TymProgram
+enum TymReturnCodes apply (enum TymReturnCodes (*meta_program)(struct TymParams * Params, struct TymProgram
       * program, struct TymProgram * query), struct TymParams * Params);
 #endif
 
@@ -216,7 +216,7 @@ main(int argc, char ** argv)
 #ifdef TYM_PRECODED
   tym_init_str();
 
-  void (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
+  enum TymReturnCodes (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
 
   switch (Params.function) {
   case TYM_TEST_PARSING:
@@ -225,18 +225,17 @@ main(int argc, char ** argv)
   case TYM_CONVERT_TO_SMT:
   case TYM_CONVERT_TO_SMT_AND_SOLVE:
   case TYM_CONVERT_TO_C:
-    meta_program = process_program; // FIXME incorrect return type.
+    meta_program = process_program;
     break;
   default:
-    // FIXME support other "meta_program" functions beyond  "print_parsed_program".
     assert(0);
   }
 
   Params.input_file = "<precoded_input_file>";
   Params.query = "<precoded_query>";
-  apply(meta_program, &Params);
+  result = apply(meta_program, &Params);
   tym_fin_str();
-  exit(0);
+  return result;
 #endif // TYM_PRECODED
 
 

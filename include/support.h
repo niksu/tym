@@ -59,7 +59,7 @@ struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct TymParams * Params);
 struct TymProgram * tym_parse_query(struct TymParams * Params);
-void print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCodes print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 enum TymReturnCodes process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
