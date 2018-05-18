@@ -17,7 +17,7 @@
 #include "module_tests.h"
 
 #ifdef TYM_PRECODED
-// FIXME is there a better place to put this?
+// The "apply" function will be provided by the .o from the precoded problem.
 enum TymReturnCodes apply (enum TymReturnCodes (*meta_program)(struct TymParams * Params, struct TymProgram
       * program, struct TymProgram * query), struct TymParams * Params);
 #endif
