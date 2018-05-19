@@ -59,4 +59,3 @@ emit_c_program(struct TymProgram * ParsedInputFileContents,
   tym_csyntax_free(csyn_program);
   tym_csyntax_free(csyn_query);
 }
-
