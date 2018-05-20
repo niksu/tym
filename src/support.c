@@ -116,7 +116,7 @@ tym_parse_query(struct TymParams * Params)
   return result;
 }
 
-enum TymReturnCodes
+enum TymReturnCode
 print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
@@ -282,7 +282,7 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
 }
 #endif // TYM_INTERFACE_Z3
 
-enum TymReturnCodes
+enum TymReturnCode
 process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {

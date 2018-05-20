@@ -53,14 +53,14 @@ struct TymParams {
 //      and terminates the entire process, and returns a code of 1,
 //      overriding TYM's preference to return the value of
 //      TYM_SOLVER_GAVEUP
-enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4, TYM_TIMESTAMP_ERROR=5};
+enum TymReturnCode {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4, TYM_TIMESTAMP_ERROR=5};
 
 struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct TymParams * Params);
 struct TymProgram * tym_parse_query(struct TymParams * Params);
-enum TymReturnCodes print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
-enum TymReturnCodes process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCode print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCode process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 

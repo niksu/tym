@@ -18,7 +18,7 @@
 
 #ifdef TYM_PRECODED
 // The "apply" function will be provided by the .o from the precoded problem.
-enum TymReturnCodes apply (enum TymReturnCodes (*meta_program)(struct TymParams * Params, struct TymProgram
+enum TymReturnCode apply (enum TymReturnCode (*meta_program)(struct TymParams * Params, struct TymProgram
       * program, struct TymProgram * query), struct TymParams * Params);
 #endif
 
@@ -203,7 +203,7 @@ main(int argc, char ** argv)
 
   assert(Params.function != TYM_NO_FUNCTION);
 
-  enum TymReturnCodes result = TYM_AOK;
+  enum TymReturnCode result = TYM_AOK;
 
 #ifndef TYM_INTERFACE_Z3
   if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
@@ -216,7 +216,7 @@ main(int argc, char ** argv)
 #ifdef TYM_PRECODED
   tym_init_str();
 
-  enum TymReturnCodes (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
+  enum TymReturnCode (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
 
   switch (Params.function) {
   case TYM_TEST_PARSING:
