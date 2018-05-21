@@ -258,18 +258,18 @@ main(int argc, char ** argv)
 
     if (TYM_TEST_PARSING == Params.function) {
       print_parsed_program(&Params, ParsedInputFileContents, ParsedQuery);
-
-      if (NULL != Params.input_file) {
-        tym_free_program(ParsedInputFileContents);
-        free(Params.input_file);
-      }
-
-      if (NULL != Params.query) {
-        tym_free_program(ParsedQuery);
-        free(Params.query);
-      }
     } else {
       result = process_program(&Params, ParsedInputFileContents, ParsedQuery);
+    }
+
+    if (NULL != Params.input_file) {
+      tym_free_program(ParsedInputFileContents);
+      free(Params.input_file);
+    }
+
+    if (NULL != Params.query) {
+      tym_free_program(ParsedQuery);
+      free(Params.query);
     }
   } else {
     if (NULL != Params.query) {

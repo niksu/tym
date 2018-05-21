@@ -369,16 +369,6 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
 
   tym_free_buffer(outbuf);
 
-  if (NULL != Params->input_file) {
-    tym_free_program(ParsedInputFileContents);
-    free(Params->input_file);
-  }
-
-  if (NULL != Params->query) {
-    tym_free_program(ParsedQuery);
-    free(Params->query);
-  }
-
   // If we used a solver, check if it timed out or gave up,
   // so we can communicate this upwards through the return code.
   if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params->function &&
