@@ -7,6 +7,6 @@
 # License: LGPL version 3 (for licensing terms see the file called LICENSE)
 
 OUTFILE=$1
-gcc -Iinclude/ -Iout -c ${OUTFILE}.c
+gcc ${CFLAGS} -Iinclude/ -Iout -c ${OUTFILE}.c
 # FIXME hardcoded path to tym_runtime.o
-gcc -Lout -ltym -o ${OUTFILE} out/tym_runtime.o ${OUTFILE}.o
+gcc ${CFLAGS} -Lout -ltym -o ${OUTFILE} out/tym_runtime.o ${OUTFILE}.o
