@@ -31,10 +31,10 @@ show_usage(const char * const argv_0)
   // FIXME include url
   // FIXME include description of each parameter
   printf("usage: %s PARAMETERS \n"
-         " Mandatory parameters: \n"
+         " Mandatory PARAMETERS: \n"
          "   -i, --input_file FILENAME \n"
          "   -f, --function FUNCTION (%s)\n"
-         " Optional parameters: \n"
+         " Optional PARAMETERS: \n"
          "   -q, --query QUERY \n"
          "   -m, --model_output MODEL_OUTPUT (%s). Default: %s\n"
          "   -v, --verbose \n"
