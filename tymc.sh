@@ -13,6 +13,12 @@ then
   # if $TYM isn't defined, then we assume to be in the Tym directory
   TYM_DEV=.
   TYM_LIB=./out/
+else
+  # FIXME TYM_DEV feel redundant, since it's just TYM.
+  #       Maybe TYM and TYM_LIB are redundant too -- just advise the user
+  #       to use CFLAGS.
+  TYM_DEV="${TYM}/"
+  TYM_LIB="${TYM}/out/"
 fi
 
 OUTFILE=$1
