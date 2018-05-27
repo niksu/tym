@@ -17,6 +17,11 @@ define `TYM_Z3_PATH` to point to Z3's installation directory when calling `make`
 When running the resulting binary, remember to indicate where to find Z3's dynamically-liked library (libz3.dylib on macOS -- or the .so analogue on Linux).
 For example, `DYLD_LIBRARY_PATH=z3-4.5.0-x64-osx-10.11.6/bin/ ./out/tym -f smt_solve -m fact -i tests/4.test -q "e(X)."`
 
+## Stand-alone binaries from Datalog programs
+Use `-f c_output` to translate a Datalog program to C, then use `tymc.sh`
+to compile and link it with Tym, to produce a standalone executable from your
+original program.
+
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
 
