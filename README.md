@@ -20,7 +20,8 @@ For example, `DYLD_LIBRARY_PATH=z3-4.5.0-x64-osx-10.11.6/bin/ ./out/tym -f smt_s
 ## Stand-alone binaries from Datalog programs
 Use `-f c_output` to translate a Datalog program to C, then use `tymc.sh`
 to compile and link it with Tym, to produce a standalone executable from your
-original program.
+original program. Use the `CFLAGS` environment variable to instruct tymc on
+`-L` and `-I` parameters to find Tym's binaries and headers.
 
 # License
 LGPL v3 (see [LICENSE](LICENSE)).
