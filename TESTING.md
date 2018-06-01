@@ -12,6 +12,7 @@
 * For solving with queries: `./out/tym -i tests/4.test -q "e(X)."` and Valgrind of it.
 
 # Translation tests
-`make out/tym_runtime.o`
-`TYM="out/" CFLAGS="-I include/ -I out/ -L out/" ./tymc.sh test`
-`./test -f test_parsing`
+Carry out the following steps to test translation:
+1. `make out/tym_runtime.o`
+2. `TYM="out/" CFLAGS="-I include/ -I out/ -L out/" ./tymc.sh test`
+3. `./test -f test_parsing`
