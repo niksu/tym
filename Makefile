@@ -47,11 +47,11 @@ parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/lexer.o $(OUT_DIR)/lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
-out/%.o: src/%.c $(HEADERS) parser
+$(OUT_DIR)/%.o: src/%.c $(HEADERS) parser
 	mkdir -p $(OUT_DIR)
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) $(Z3_INC) -o $@ $<
 
-.PHONY: clean test test_modules test_regression
+.PHONY: clean test_modules test_regression
 
 test_modules:
 	make clean
@@ -61,7 +61,7 @@ test_modules:
 test_regression:
 	@TYM_Z3_PATH="$(TYM_Z3_PATH)" TYMDIR=`pwd` ./scripts/run_parser_tests.sh
 
-$(OUT_DIR)/tym_runtime.o : $(LIB) $(OBJ_OF_TGT) $(HEADERS) src/main.c
+$(OUT_DIR)/tym_runtime.o : $(LIB) $(HEADERS)
 	mkdir -p $(OUT_DIR)
 	$(CC) -DTYM_PRECODED -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
 
