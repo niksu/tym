@@ -30,6 +30,8 @@ show_usage(const char * const argv_0)
   printf("Tym Datalog\nversion %d.%d\n", TYM_VERSION_MAJOR, TYM_VERSION_MINOR);
   // FIXME include url
   // FIXME include description of each parameter
+  const char * function_choices = tym_functions();
+  const char * model_output_choices = tym_model_outputs();
   printf("usage: %s PARAMETERS \n"
          " Mandatory PARAMETERS: \n"
          "   -i, --input_file FILENAME \n"
@@ -41,9 +43,14 @@ show_usage(const char * const argv_0)
          "   --max_var_width N \n"
          "   --solver_timeout N (in milliseconds). Default: %s\n"
          "   --buffer_size N (in bytes). Default: %zd\n"
-         "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
+         "   -h \n", argv_0, function_choices, model_output_choices,
          TymModelOutputCommandMapping[TymDefaultModelOutput],
         TymDefaultSolverTimeout, TYM_BUF_SIZE);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)function_choices);
+  free((void *)model_output_choices);
+#pragma GCC diagnostic pop
 }
 
 int
