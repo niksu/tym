@@ -20,7 +20,10 @@
 #include "translate.h"
 #include "util.h"
 
-enum TymFunction {TYM_NOTHING_FUNCTION=0, TYM_TEST_PARSING, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND_SOLVE, TYM_NO_FUNCTION};
+#define TYM_VERSION_MAJOR 0
+#define TYM_VERSION_MINOR 0
+
+enum TymFunction {TYM_NOTHING_FUNCTION=0, TYM_TEST_PARSING, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND_SOLVE, TYM_CONVERT_TO_C, TYM_NO_FUNCTION};
 
 enum TymModelOutput {TYM_MODEL_OUTPUT_VALUATION=0, TYM_MODEL_OUTPUT_FACT, TYM_ALL_MODEL_OUTPUT/*Used for testing*/, TYM_NO_MODEL_OUTPUT};
 
@@ -50,14 +53,14 @@ struct TymParams {
 //      and terminates the entire process, and returns a code of 1,
 //      overriding TYM's preference to return the value of
 //      TYM_SOLVER_GAVEUP
-enum TymReturnCodes {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4};
+enum TymReturnCode {TYM_AOK=0, TYM_UNRECOGNISED_PARAMETER=1, TYM_NO_INPUT=2, TYM_INVALID_INPUT=3, TYM_SOLVER_GAVEUP=4, TYM_TIMESTAMP_ERROR=5};
 
 struct TymProgram * parse(const char * string);
 char * read_file(char * filename);
 struct TymProgram * tym_parse_input_file(struct TymParams * Params);
 struct TymProgram * tym_parse_query(struct TymParams * Params);
-void print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
-enum TymReturnCodes process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCode print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
+enum TymReturnCode process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents, struct TymProgram * ParsedQuery);
 
 TYM_DECLARE_LIST_SHALLOW_FREE(stmts, const, struct TymStmts)
 

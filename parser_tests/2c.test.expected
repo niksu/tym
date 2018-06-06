@@ -1,6 +1,6 @@
 input contents |c() :- a().
 |
 (no query given)
-stringed file contents (size=32, remaining=1968)
+stringed file contents (size=32, remaining=2968)
 |predicate_c() :- predicate_a().|
 stringed file contents strlen=31

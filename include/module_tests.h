@@ -13,5 +13,6 @@
 void tym_test_clause(void);
 void tym_test_formula(void);
 void tym_test_statement(void);
+void tym_test_clause_csyn(void);
 
 #endif /* TYM_MODULE_TESTS_H */

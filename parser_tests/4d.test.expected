@@ -9,7 +9,7 @@ d().
 e(h1).
 |
 (no query given)
-stringed file contents (size=342, remaining=1658)
+stringed file contents (size=342, remaining=2658)
 |predicate_g() :- predicate_a(constant_b1, constant_b2).
 predicate_a(X, Y) :- predicate_b(X), predicate_c(Y), predicate_d().
 predicate_a(X, constant_bla) :- predicate_b(X), predicate_c(X), predicate_f(X).

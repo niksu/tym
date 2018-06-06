@@ -8,6 +8,8 @@
 #ifdef TYM_INTERFACE_Z3
 #include "interface_z3.h"
 #endif
+#include "interface_c.h"
+#include "output_c.h"
 #include "support.h"
 
 #pragma GCC diagnostic push
@@ -32,6 +34,7 @@ const char * TymFunctionCommandMapping[] =
    "test_parsing",
    "smt_output",
    "smt_solve",
+   "c_output",
    NULL
   };
 
@@ -113,7 +116,7 @@ tym_parse_query(struct TymParams * Params)
   return result;
 }
 
-void
+enum TymReturnCode
 print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
@@ -125,8 +128,6 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed file contents")
-    tym_free_program(ParsedInputFileContents);
-    free(Params->input_file);
   }
 
   if (NULL != Params->query) {
@@ -135,11 +136,10 @@ print_parsed_program(struct TymParams * Params, struct TymProgram * ParsedInputF
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     TYM_DBG_PRINT_BUFFER(printf, outbuf, "stringed query")
-    tym_free_program(ParsedQuery);
-    free(Params->query);
   }
 
   tym_free_buffer(outbuf);
+  return TYM_AOK;
 }
 
 #ifdef TYM_INTERFACE_Z3
@@ -282,7 +282,7 @@ solver_loop(struct TymParams * params, struct TymModel ** mdl, struct TymValuati
 }
 #endif // TYM_INTERFACE_Z3
 
-enum TymReturnCodes
+enum TymReturnCode
 process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileContents,
   struct TymProgram * ParsedQuery)
 {
@@ -321,7 +321,9 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
 
-  if (NULL != mdl) {
+  if (TYM_CONVERT_TO_C == Params->function) {
+    emit_c_program(ParsedInputFileContents, ParsedQuery);
+  } else if (NULL != mdl) {
 #if TYM_DEBUG
     tym_reset_buffer(outbuf);
     res = tym_model_str(mdl, outbuf);
@@ -366,16 +368,6 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   tym_free_sym_gen(cg);
 
   tym_free_buffer(outbuf);
-
-  if (NULL != Params->input_file) {
-    tym_free_program(ParsedInputFileContents);
-    free(Params->input_file);
-  }
-
-  if (NULL != Params->query) {
-    tym_free_program(ParsedQuery);
-    free(Params->query);
-  }
 
   // If we used a solver, check if it timed out or gave up,
   // so we can communicate this upwards through the return code.

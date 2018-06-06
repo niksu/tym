@@ -16,41 +16,46 @@
 #include "tym.h"
 #include "module_tests.h"
 
+#ifdef TYM_PRECODED
+// The "apply" function will be provided by the .o from the precoded problem.
+enum TymReturnCode apply (enum TymReturnCode (*meta_program)(struct TymParams * Params, struct TymProgram
+      * program, struct TymProgram * query), struct TymParams * Params);
+#endif
+
 static void show_usage(const char * const);
 
 static void
 show_usage(const char * const argv_0)
 {
-  // FIXME include name + version + url
+  printf("Tym Datalog\nversion %d.%d\n", TYM_VERSION_MAJOR, TYM_VERSION_MINOR);
+  // FIXME include url
   // FIXME include description of each parameter
+  const char * function_choices = tym_functions();
+  const char * model_output_choices = tym_model_outputs();
   printf("usage: %s PARAMETERS \n"
-         " Mandatory parameters: \n"
+         " Mandatory PARAMETERS: \n"
          "   -i, --input_file FILENAME \n"
          "   -f, --function FUNCTION (%s)\n"
-         " Optional parameters: \n"
+         " Optional PARAMETERS: \n"
          "   -q, --query QUERY \n"
          "   -m, --model_output MODEL_OUTPUT (%s). Default: %s\n"
          "   -v, --verbose \n"
          "   --max_var_width N \n"
          "   --solver_timeout N (in milliseconds). Default: %s\n"
          "   --buffer_size N (in bytes). Default: %zd\n"
-         "   -h \n", argv_0, tym_functions(), tym_model_outputs(),
+         "   -h \n", argv_0, function_choices, model_output_choices,
          TymModelOutputCommandMapping[TymDefaultModelOutput],
         TymDefaultSolverTimeout, TYM_BUF_SIZE);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)function_choices);
+  free((void *)model_output_choices);
+#pragma GCC diagnostic pop
 }
 
 int
 main(int argc, char ** argv)
 {
-#ifdef TYM_TESTING
-  tym_init_str();
-  tym_test_clause();
-  tym_test_formula();
-  tym_test_statement();
-  tym_fin_str();
-  exit(0);
-#endif
-
   struct TymParams Params = {
     .input_file = NULL,
     .verbosity = 0,
@@ -59,6 +64,21 @@ main(int argc, char ** argv)
     .model_output = TymDefaultModelOutput,
     .solver_timeout = TymDefaultSolverTimeout
   };
+
+#ifdef TYM_TESTING
+  tym_init_str();
+  tym_test_clause();
+  tym_test_formula();
+  tym_test_statement();
+  tym_test_clause_csyn();
+#ifdef TYM_DEBUG
+  if (TymCanDumpStrings) {
+    tym_dump_str();
+  }
+#endif // TYM_DEBUG
+  tym_fin_str();
+  exit(0);
+#endif // TYM_TESTING
 
   static struct option long_options[] = {
 #define LONG_OPT_INPUT 1
@@ -81,6 +101,11 @@ main(int argc, char ** argv)
 
   int option_index = 0;
   long v;
+
+  if (1 == argc) { // i.e., no other arguments provided
+    show_usage(argv[0]);
+    return TYM_AOK;
+  }
 
   // FIXME: "-f smt_output ... -m fact" doesn't make sense, but we don't emit a warning.
   int option;
@@ -180,7 +205,7 @@ main(int argc, char ** argv)
     TYM_VERBOSE("TYM_INTERFACE_Z3 Undefined\n");
 #endif
 
-    TYM_VERBOSE("input_fine = %s\n", Params.input_file);
+    TYM_VERBOSE("input_file = %s\n", Params.input_file);
     TYM_VERBOSE("verbosity = %d\n", Params.verbosity);
     TYM_VERBOSE("query = %s\n", Params.query);
     TYM_VERBOSE("function = %s\n", TymFunctionCommandMapping[Params.function]);
@@ -190,7 +215,7 @@ main(int argc, char ** argv)
 
   assert(Params.function != TYM_NO_FUNCTION);
 
-  enum TymReturnCodes result = TYM_AOK;
+  enum TymReturnCode result = TYM_AOK;
 
 #ifndef TYM_INTERFACE_Z3
   if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params.function) {
@@ -198,6 +223,33 @@ main(int argc, char ** argv)
     result = TYM_UNRECOGNISED_PARAMETER;
   }
 #endif // TYM_INTERFACE_Z3
+
+
+#ifdef TYM_PRECODED
+  tym_init_str();
+
+  enum TymReturnCode (*meta_program)(struct TymParams * Params, struct TymProgram * program, struct TymProgram * query) = NULL;
+
+  switch (Params.function) {
+  case TYM_TEST_PARSING:
+    meta_program = print_parsed_program;
+    break;
+  case TYM_CONVERT_TO_SMT:
+  case TYM_CONVERT_TO_SMT_AND_SOLVE:
+  case TYM_CONVERT_TO_C:
+    meta_program = process_program;
+    break;
+  default:
+    assert(0);
+  }
+
+  Params.input_file = "<precoded_input_file>";
+  Params.query = "<precoded_query>";
+  result = apply(meta_program, &Params);
+  tym_fin_str();
+  return result;
+#endif // TYM_PRECODED
+
 
   tym_init_str();
 
@@ -220,6 +272,16 @@ main(int argc, char ** argv)
       print_parsed_program(&Params, ParsedInputFileContents, ParsedQuery);
     } else {
       result = process_program(&Params, ParsedInputFileContents, ParsedQuery);
+    }
+
+    if (NULL != Params.input_file) {
+      tym_free_program(ParsedInputFileContents);
+      free(Params.input_file);
+    }
+
+    if (NULL != Params.query) {
+      tym_free_program(ParsedQuery);
+      free(Params.query);
     }
   } else {
     if (NULL != Params.query) {

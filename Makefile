@@ -12,10 +12,10 @@ TGT=tym
 LIB=libtym.a
 OUT_DIR=out
 PARSER_OBJ=$(OUT_DIR)/lexer.o $(OUT_DIR)/parser.o
-OBJ_FILES=ast.o buffer.o formula.o hash.o hashtable.o statement.o string_idx.o support.o symbols.o translate.o util.o
+OBJ_FILES=ast.o buffer.o formula.o hash.o hashtable.o interface_c.o output_c.o statement.o string_idx.o support.o symbols.o translate.o util.o
 OBJ=$(addprefix $(OUT_DIR)/, $(OBJ_FILES))
 OBJ_OF_TGT=$(OUT_DIR)/main.o
-HEADER_FILES=ast.h buffer.h formula.h hash.h hashtable.h lifted.h statement.h string_idx.h support.h symbols.h translate.h util.h
+HEADER_FILES=ast.h buffer.h formula.h hash.h hashtable.h interface_c.h output_c.h lifted.h statement.h string_idx.h support.h symbols.h translate.h util.h
 HEADER_DIR=include
 HEADERS=$(addprefix $(HEADER_DIR)/, $(HEADER_FILES))
 STD=iso9899:1999
@@ -34,7 +34,7 @@ $(TGT) : $(LIB) $(OBJ_OF_TGT) $(HEADERS)
 
 $(LIB) : $(OBJ) $(HEADERS)
 	mkdir -p $(OUT_DIR)
-	ar crv $(OUT_DIR)/$@ $(OBJ)
+	ar crv $(OUT_DIR)/$@ $(OBJ) $(PARSER_OBJ)
 
 parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	mkdir -p $(OUT_DIR)
@@ -47,11 +47,11 @@ parser: $(HEADERS) parser_src/parser.y parser_src/lexer.l
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/lexer.o $(OUT_DIR)/lexer.c
 	$(CC) -c -std=$(STD) $(CFLAGS) -I $(HEADER_DIR) -o $(OUT_DIR)/parser.o $(OUT_DIR)/parser.c
 
-out/%.o: src/%.c $(HEADERS) parser
+$(OUT_DIR)/%.o: src/%.c $(HEADERS) parser
 	mkdir -p $(OUT_DIR)
 	$(CC) -c -std=$(STD) $(CFLAGS) -Werror -I $(HEADER_DIR) -I $(OUT_DIR) $(Z3_INC) -o $@ $<
 
-.PHONY: clean test test_modules test_regression
+.PHONY: clean test_modules test_regression
 
 test_modules:
 	make clean
@@ -60,6 +60,10 @@ test_modules:
 
 test_regression:
 	@TYM_Z3_PATH="$(TYM_Z3_PATH)" TYMDIR=`pwd` ./scripts/run_parser_tests.sh
+
+$(OUT_DIR)/tym_runtime.o : $(LIB) $(HEADERS)
+	mkdir -p $(OUT_DIR)
+	$(CC) -DTYM_PRECODED -std=$(STD) $(CFLAGS) -c -o $(OUT_DIR)/tym_runtime.o src/main.c -I $(OUT_DIR) -I $(HEADER_DIR)
 
 clean:
 	rm -f $(OUT_DIR)/$(TGT) $(OUT_DIR)/$(LIB) $(OUT_DIR)/*.o $(OUT_DIR)/lexer.{c,h} $(OUT_DIR)/parser.{c,h}

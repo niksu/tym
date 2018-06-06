@@ -8,7 +8,7 @@ b() :- b().
 c() :- b().
 |
 (no query given)
-stringed file contents (size=126, remaining=1874)
+stringed file contents (size=126, remaining=2874)
 |predicate_c().
 predicate_a().
 predicate_b() :- predicate_c().

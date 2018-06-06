@@ -13,17 +13,26 @@
 
 #include "string_idx.h"
 
+static void init_str(void);
+
 #if TYM_STRING_TYPE == 0
 void
 tym_init_str(void)
 {
-  // Nothing needed here.
+  init_str();
 }
 
 void
 tym_fin_str(void)
 {
   // Nothing needed here.
+}
+
+const bool TymCanDumpStrings = false;
+void
+tym_dump_str(void)
+{
+  assert(0); // This kind of string doesn't maintain a record of all strings that we could dump.
 }
 
 const char *
@@ -66,13 +75,20 @@ struct TymStrIdxStruct {
 void
 tym_init_str(void)
 {
-  // Nothing needed here.
+  init_str();
 }
 
 void
 tym_fin_str(void)
 {
   // Nothing needed here.
+}
+
+const bool TymCanDumpStrings = false;
+void
+tym_dump_str(void)
+{
+  assert(0); // This kind of string doesn't maintain a record of all strings that we could dump.
 }
 
 const char *
@@ -123,6 +139,7 @@ tym_init_str(void)
 {
   assert(NULL == stringhash);
   stringhash = tym_ht_create();
+  init_str();
 }
 
 void
@@ -130,7 +147,26 @@ tym_fin_str(void)
 {
   assert(NULL != stringhash);
   tym_ht_free(stringhash);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  // TymEmptyString and other "special strings" are excluded from
+  // freeing, so we do it explicitly here.
+  free((void *)TymEmptyString->content);
+  free((void *)TymEmptyString);
+
+  free((void *)TymNewLine->content);
+  free((void *)TymNewLine);
+#pragma GCC diagnostic pop
+
   stringhash = NULL;
+}
+
+const bool TymCanDumpStrings = true;
+void
+tym_dump_str(void)
+{
+  tym_ht_dump(stringhash);
 }
 
 // NOTE the object pointed to by the "s" parameter (given to tym_encode_str)
@@ -148,10 +184,12 @@ tym_encode_str (const char * s)
     assert(tym_ht_add(stringhash, s, result));
     return result;
   } else {
+    if (s != pre_result->content) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    free((void *)s);
+      free((void *)s);
 #pragma GCC diagnostic pop
+    }
     return pre_result;
   }
 }
@@ -185,8 +223,28 @@ tym_force_free_str (const struct TymStrHashIdxStruct * s)
   assert(NULL != s);
   assert(NULL != s->content);
 
-  free((void *)s->content);
-  free((void *)s);
+  // NOTE this function frees memory, but doesn't remove it from the
+  //      index -- for that call tym_ht_delete()
+  if (!tym_is_special_string(s)) {
+    free((void *)s->content);
+    free((void *)s);
+  }
+}
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+void
+tym_safe_free_str (const struct TymStrHashIdxStruct * s)
+{
+  assert(NULL != stringhash);
+
+  assert(NULL != s);
+  assert(NULL != s->content);
+
+  if (!tym_is_special_string(s)) {
+    assert(tym_ht_delete(stringhash, s->content));
+  }
 }
 #pragma GCC diagnostic pop
 
@@ -208,3 +266,80 @@ tym_cmp_str (const struct TymStrHashIdxStruct * s1, const struct TymStrHashIdxSt
 #else
   #error "Unknown TYM_STRING_TYPE"
 #endif
+
+const TymStr *
+tym_append_str (const TymStr * s1, const TymStr * s2)
+{
+  if (0 == tym_len_str(s1)) {
+    return s2;
+  } else if (0 == tym_len_str(s2)) {
+    return s1;
+  }
+
+  size_t total_len = tym_len_str(s1) + tym_len_str(s2) + 1;
+  char * result_chars = malloc(sizeof(*result_chars) * total_len);
+  memcpy(result_chars, tym_decode_str(s1), tym_len_str(s1));
+  memcpy(result_chars + tym_len_str(s1), tym_decode_str(s2), tym_len_str(s2));
+  result_chars[total_len - 1] = '\0';
+  return tym_encode_str(result_chars);
+}
+
+const TymStr *
+tym_append_str_destructive (const TymStr * s1, const TymStr * s2)
+{
+  if (0 == tym_len_str(s1)) {
+    return s2;
+  } else if (0 == tym_len_str(s2)) {
+    return s1;
+  }
+
+  const TymStr * result = tym_append_str(s1, s2);
+  tym_safe_free_str(s1);
+  if (s1 != s2) {
+    tym_safe_free_str(s2);
+  }
+  return result;
+}
+
+const TymStr *
+tym_append_str_destructive1 (const TymStr * s1, const TymStr * s2)
+{
+  const TymStr * result = tym_append_str(s1, s2);
+  if (s1 != s2) {
+    // We err on the side of caution, and don't implicitly destroy s2 if s1 == s2.
+    tym_safe_free_str(s1);
+  }
+  return result;
+}
+
+const TymStr *
+tym_append_str_destructive2 (const TymStr * s1, const TymStr * s2)
+{
+  const TymStr * result = tym_append_str(s1, s2);
+  if (s1 != s2) {
+    // We err on the side of caution, and don't implicitly destroy s1 if s2 == s1.
+    tym_safe_free_str(s2);
+  }
+  return result;
+}
+
+const TymStr * TymEmptyString;
+const TymStr * TymNewLine;
+static const TymStr ** special_strings[] = {&TymEmptyString, &TymNewLine, NULL};
+static void
+init_str(void)
+{
+  TymEmptyString = TYM_CSTR_DUPLICATE("");
+  TymNewLine = TYM_CSTR_DUPLICATE("\n");
+}
+
+bool
+tym_is_special_string(const TymStr * s)
+{
+  for (int i = 0; NULL != special_strings[i]; i++) {
+    if (s == *special_strings[i]) {
+      return true;
+    }
+  }
+  return false;
+}

@@ -5,7 +5,7 @@ input contents |   a2(b2).   a(b).
   a3(b4). 
 |
 (no query given)
-stringed file contents (size=133, remaining=1867)
+stringed file contents (size=133, remaining=2867)
 |predicate_a2(constant_b2).
 predicate_a(constant_b).
 predicate_a1(constant_b1).

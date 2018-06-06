@@ -21,6 +21,25 @@
 TYM_DECL_HASHTABLE_CELL(String, const char *, const TymStr *)
 TYM_DECL_HASHTABLE(String, const char *, const TymStr *)
 
+static void free_cell(TYM_HASHTABLE_CELL(String) * cell);
+
+static void
+free_cell(TYM_HASHTABLE_CELL(String) * cell)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  // FIXME This function works correctly, but the the encapsulation
+  //       isn't being done right. This function is rather tightly
+  //       bound to tym_encode_str, in particular the "v" value
+  //       references "k", so we only free one of them.  We call a
+  //       "free" function specifically for "struct
+  //       TymStrHashIdxStruct *" here to free it as well as
+  //       the character string.
+  tym_force_free_str(cell->v);
+  free((void *)cell);
+#pragma GCC diagnostic pop
+}
+
 TYM_HASHTABLE(String) *
 tym_ht_create(void)
 {
@@ -28,6 +47,7 @@ tym_ht_create(void)
   for (int i = 0; i < TYM_HASH_RANGE; ++i) {
     result->arr[i] = NULL;
   }
+  result->free_cell = &free_cell;
   return result;
 }
 
@@ -76,16 +96,19 @@ tym_ht_lookup(TYM_HASHTABLE(String) * ht, const char * key)
   assert(NULL != ht);
   assert(NULL != key);
 
+  TYM_HVALUETYPE result = NULL;
+
   TYM_HASH_VTYPE h = tym_hash_str(key);
   TYM_HASHTABLE_CELL(String) * cursor = ht->arr[h];
   while (NULL != cursor) {
     if (0 == strcmp(key, cursor->k)) {
-      return cursor->v;
+      result = cursor->v;
+      break;
     } else {
       cursor = cursor->next;
     }
   }
-  return NULL;
+  return result;
 }
 
 void
@@ -97,13 +120,55 @@ tym_ht_free(TYM_HASHTABLE(String) * ht)
     while (NULL != cursor) {
       ht->arr[i] = cursor;
       cursor = cursor->next;
-      // NOTE "free(ht->arr[i]->k);" is done implicitly when ->v is freed below,
-      //      since the value contains the key as content.
-      tym_force_free_str(ht->arr[i]->v);
-      free(ht->arr[i]);
+      free_cell(ht->arr[i]);
     }
   }
   free(ht);
+}
+
+void
+tym_ht_dump(TYM_HASHTABLE(String) * ht)
+{
+  assert(NULL != ht);
+
+  for (int i = 0; i < TYM_HASH_RANGE; i++) {
+    TYM_HASHTABLE_CELL(String) * cursor = ht->arr[i];
+    while (NULL != cursor) {
+      printf("%s : %s\n", cursor->k, tym_decode_str(cursor->v));
+      cursor = cursor->next;
+    }
+  }
+}
+
+bool
+tym_ht_delete(TYM_HASHTABLE(String) * ht, const char * key)
+{
+  assert(NULL != ht);
+  assert(NULL != key);
+
+  bool result = false;
+
+  TYM_HASH_VTYPE h = tym_hash_str(key);
+  TYM_HASHTABLE_CELL(String) * cursor = ht->arr[h];
+  TYM_HASHTABLE_CELL(String) * prev_cursor = NULL;
+  while (NULL != cursor) {
+    if (0 == strcmp(key, cursor->k)) {
+      if (cursor == ht->arr[h]) {
+        ht->arr[h] = cursor->next;
+      } else {
+        assert(NULL != prev_cursor);
+        prev_cursor->next = cursor->next;
+      }
+      ht->free_cell(cursor);
+      result = true;
+      break;
+    } else {
+      prev_cursor = cursor;
+      cursor = cursor->next;
+    }
+  }
+
+  return result;
 }
 
 #endif // TYM_STRING_TYPE == 2
