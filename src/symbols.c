@@ -100,8 +100,6 @@ tym_mk_pred(const TymStr * predicate, uint8_t arity)
   return p;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_pred(struct TymPredicate * pred)
 {
@@ -111,7 +109,6 @@ tym_free_pred(struct TymPredicate * pred)
   }
   free(pred);
 }
-#pragma GCC diagnostic pop
 
 TYM_DEFINE_MUTABLE_LIST_MK(predicate, pred, struct TymPredicate, struct TymPredicates)
 
