@@ -26,8 +26,6 @@ static void free_cell(TYM_HASHTABLE_CELL(String) * cell);
 static void
 free_cell(TYM_HASHTABLE_CELL(String) * cell)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
   // FIXME This function works correctly, but the the encapsulation
   //       isn't being done right. This function is rather tightly
   //       bound to tym_encode_str, in particular the "v" value
@@ -37,7 +35,6 @@ free_cell(TYM_HASHTABLE_CELL(String) * cell)
   //       the character string.
   tym_force_free_str(cell->v);
   free((void *)cell);
-#pragma GCC diagnostic pop
 }
 
 TYM_HASHTABLE(String) *
