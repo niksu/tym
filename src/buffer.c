@@ -54,15 +54,12 @@ tym_reset_buffer(struct TymBufferInfo * buf)
   buf->buffer[0] = '\0';
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_buffer(struct TymBufferInfo * buf)
 {
   free((void *)buf->buffer);
   free((void *)buf);
 }
-#pragma GCC diagnostic pop
 
 bool
 tym_have_space(struct TymBufferInfo * buf, size_t n)
