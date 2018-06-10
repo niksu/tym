@@ -346,8 +346,6 @@ tym_mk_program(uint8_t no_clauses, struct TymClauses * program)
   return p;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_term(struct TymTerm * term)
 {
@@ -359,7 +357,6 @@ tym_free_term(struct TymTerm * term)
 
   free((void *)term);
 }
-#pragma GCC diagnostic pop
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
