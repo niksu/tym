@@ -358,8 +358,6 @@ tym_free_term(struct TymTerm * term)
   free((void *)term);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_terms(struct TymTerms * terms)
 {
@@ -372,7 +370,6 @@ tym_free_terms(struct TymTerms * terms)
   }
   free(terms);
 }
-#pragma GCC diagnostic pop
 
 void
 tym_free_atom(struct TymAtom * at)
@@ -398,8 +395,6 @@ tym_free_atom(struct TymAtom * at)
   free(at);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_atoms(struct TymAtoms * atoms)
 {
@@ -412,7 +407,6 @@ tym_free_atoms(struct TymAtoms * atoms)
   }
   free(atoms);
 }
-#pragma GCC diagnostic pop
 
 void
 tym_free_clause(struct TymClause * clause)
@@ -434,8 +428,6 @@ tym_free_clause(struct TymClause * clause)
   free(clause);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_clauses(struct TymClauses * clauses)
 {
@@ -448,10 +440,7 @@ tym_free_clauses(struct TymClauses * clauses)
   }
   free(clauses);
 }
-#pragma GCC diagnostic pop
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 void
 tym_free_program(struct TymProgram * program)
 {
@@ -472,7 +461,6 @@ tym_free_program(struct TymProgram * program)
 
   free(program); // Free the program struct.
 }
-#pragma GCC diagnostic pop
 
 void
 tym_debug_out_syntax(void * x, struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * (*tym_x_str)(void *, struct TymBufferInfo * dst))
