@@ -46,11 +46,8 @@ show_usage(const char * const argv_0)
          "   -h \n", argv_0, function_choices, model_output_choices,
          TymModelOutputCommandMapping[TymDefaultModelOutput],
         TymDefaultSolverTimeout, TYM_BUF_SIZE);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-  free((void *)function_choices);
-  free((void *)model_output_choices);
-#pragma GCC diagnostic pop
+  free_const(function_choices);
+  free_const(model_output_choices);
 }
 
 int

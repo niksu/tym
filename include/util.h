@@ -142,4 +142,6 @@ extern size_t TYM_BUF_SIZE;
 
 char * strcpy_prefixed(const char *, const char *);
 
+void free_const(const void *);
+
 #endif /* TYM_UTIL_H */

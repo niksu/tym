@@ -23,3 +23,12 @@ strcpy_prefixed(const char * prefix, const char * str)
   result[strlen(prefix) + strlen(str)] = '\0';
   return result;
 }
+
+void
+free_const(const void * m)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+  free((void *)m);
+#pragma GCC diagnostic pop
+}
