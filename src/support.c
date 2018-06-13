@@ -301,8 +301,9 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   struct TymSymGen * cg = tym_mk_sym_gen(TYM_CSTR_DUPLICATE("c"));
 
   struct TymModel * mdl = NULL;
+  struct TymAtomDatabase * adb = tym_mk_atom_database();
   if (NULL != ParsedInputFileContents) {
-    mdl = tym_translate_program(ParsedInputFileContents, vg);
+    mdl = tym_translate_program(ParsedInputFileContents, vg, adb);
     tym_statementise_universe(mdl);
   }
 
@@ -377,6 +378,8 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   } else {
     return TYM_AOK;
   }
+
+  tym_free_atom_database(adb);
 }
 
 char *

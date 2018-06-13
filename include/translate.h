@@ -30,7 +30,7 @@ void tym_translate_query_fmla(struct TymModel * mdl, struct TymSymGen * cg, stru
 
 struct TymValuation * tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct TymSymGen * cg);
 
-struct TymModel * tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg);
+struct TymModel * tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg, struct TymAtomDatabase * adb);
 
 struct TymStmts * tym_order_statements(struct TymStmts * stmts);
 

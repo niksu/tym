@@ -189,10 +189,8 @@ tym_translate_query(struct TymProgram * query, struct TymModel * mdl, struct Tym
 }
 
 struct TymModel *
-tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
+tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg, struct TymAtomDatabase * adb)
 {
-  struct TymAtomDatabase * adb = tym_mk_atom_database();
-
   for (int i = 0; i < program->no_clauses; i++) {
     (void)tym_clause_database_add(program->program[i], adb, NULL);
   }
@@ -378,8 +376,6 @@ tym_translate_program(struct TymProgram * program, struct TymSymGen ** vg)
   }
 
   tym_free_buffer(outbuf);
-
-  tym_free_atom_database(adb);
 
   return mdl;
 }
