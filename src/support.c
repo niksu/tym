@@ -370,6 +370,8 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
 
   tym_free_buffer(outbuf);
 
+  tym_free_atom_database(adb);
+
   // If we used a solver, check if it timed out or gave up,
   // so we can communicate this upwards through the return code.
   if (TYM_CONVERT_TO_SMT_AND_SOLVE == Params->function &&
@@ -378,8 +380,6 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
   } else {
     return TYM_AOK;
   }
-
-  tym_free_atom_database(adb);
 }
 
 char *
