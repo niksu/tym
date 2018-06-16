@@ -35,6 +35,7 @@ const char * TymFunctionCommandMapping[] =
    "smt_output",
    "smt_solve",
    "c_output",
+   "dump_hilbert_universe",
    NULL
   };
 
@@ -321,6 +322,14 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
 
   struct TymBufferInfo * outbuf = tym_mk_buffer(TYM_BUF_SIZE);
   struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+
+  if (TYM_DUMP_HILBERT_UNIVERSE == Params->function) {
+    tym_reset_buffer(outbuf);
+    res = tym_term_database_str(adb->tdb, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("Hilbert universe:\n%s", tym_buffer_contents(outbuf));
+  }
 
   if (TYM_CONVERT_TO_C == Params->function) {
     emit_c_program(ParsedInputFileContents, ParsedQuery);
