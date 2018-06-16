@@ -329,9 +329,7 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("Hilbert universe:\n%s", tym_buffer_contents(outbuf));
-  }
-
-  if (TYM_CONVERT_TO_C == Params->function) {
+  } else if (TYM_CONVERT_TO_C == Params->function) {
     emit_c_program(ParsedInputFileContents, ParsedQuery);
   } else if (NULL != mdl) {
 #if TYM_DEBUG
