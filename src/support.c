@@ -36,6 +36,7 @@ const char * TymFunctionCommandMapping[] =
    "smt_solve",
    "c_output",
    "dump_hilbert_universe",
+   "dump_atoms",
    NULL
   };
 
@@ -329,6 +330,12 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
     printf("Hilbert universe:\n%s", tym_buffer_contents(outbuf));
+  } else if (TYM_DUMP_ATOMS == Params->function) {
+    tym_reset_buffer(outbuf);
+    res = tym_atom_database_str(adb, outbuf);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
+    printf("Atoms:\n%s", tym_buffer_contents(outbuf));
   } else if (TYM_CONVERT_TO_C == Params->function) {
     emit_c_program(ParsedInputFileContents, ParsedQuery);
   } else if (NULL != mdl) {
