@@ -32,6 +32,7 @@ struct TymTermDatabase {
 struct TymTermDatabase * tym_mk_term_database(void);
 bool tym_term_database_add(struct TymTerm * term, struct TymTermDatabase * tdb);
 struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst);
+char * tym_term_database_dump(struct TymTermDatabase * tdb);
 
 struct TymPredicate {
   const TymStr * predicate;

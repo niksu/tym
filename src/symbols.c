@@ -86,6 +86,29 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
+char *
+tym_term_database_dump(struct TymTermDatabase * tdb)
+{
+  assert(NULL != tdb);
+
+  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME would be better to use a TymBuffer
+  int buf_idx = 0;
+
+  const struct TymTerms * cursor = tdb->herbrand_universe;
+
+  while (NULL != cursor) {
+    const char * src = tym_decode_str(cursor->term->identifier);
+    strcpy(str_buf + buf_idx, src);
+    buf_idx += strlen(src) + 1;
+
+    cursor = cursor->next;
+  }
+
+  str_buf[buf_idx] = '\0';
+
+  return str_buf;
+}
+
 struct TymPredicate *
 tym_mk_pred(const TymStr * predicate, uint8_t arity)
 {
