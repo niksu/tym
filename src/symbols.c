@@ -86,27 +86,29 @@ tym_term_database_str(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
-char *
-tym_term_database_dump(struct TymTermDatabase * tdb)
+struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) *
+tym_term_database_dump(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
 {
   assert(NULL != tdb);
+  assert(NULL != dst);
 
-  char * str_buf = malloc(sizeof(*str_buf) * TYM_BUF_SIZE); // FIXME would be better to use a TymBuffer
-  int buf_idx = 0;
+  size_t initial_idx = tym_buffer_len(dst);
 
   const struct TymTerms * cursor = tdb->herbrand_universe;
 
+  struct TYM_LIFTED_TYPE_NAME(TymBufferWriteResult) * res = NULL;
+
   while (NULL != cursor) {
-    const char * src = tym_decode_str(cursor->term->identifier);
-    strcpy(str_buf + buf_idx, src);
-    buf_idx += strlen(src) + 1;
+    res = tym_term_str(cursor->term, dst);
+    assert(tym_is_ok_TymBufferWriteResult(res));
+    free(res);
 
     cursor = cursor->next;
   }
 
-  str_buf[buf_idx] = '\0';
+  tym_done_last_entry(dst);
 
-  return str_buf;
+  return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 
 struct TymPredicate *
