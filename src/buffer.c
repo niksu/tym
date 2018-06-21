@@ -11,12 +11,7 @@
 #include <string.h>
 
 #include "buffer.h"
-
-struct TymBufferInfo {
-  char * buffer;
-  size_t idx;
-  size_t buffer_size;
-};
+#include "buffer_internal.h"
 
 const char *
 tym_buffer_contents(struct TymBufferInfo * buf)
@@ -144,21 +139,4 @@ inline void
 tym_reset_idx(struct TymBufferInfo * buf)
 {
   buf->idx = 0;
-}
-
-inline void
-tym_done_last_entry(struct TymBufferInfo * buf)
-{
-  tym_unsafe_buffer_str(buf, "");
-}
-
-inline bool
-tym_progress_next_entry(struct TymBufferInfo * buf)
-{
-  if ('\0' == buf->buffer[buf->idx + 1]) {
-    return false;
-  } else {
-    buf->idx += 1;
-    return true;
-  }
 }
