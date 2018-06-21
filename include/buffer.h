@@ -70,9 +70,5 @@ TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_er
 #endif // TYM_DEBUG
 
 void tym_reset_idx(struct TymBufferInfo * buf);
-void tym_done_last_entry(struct TymBufferInfo * buf);
-bool tym_progress_next_entry(struct TymBufferInfo * buf);
-
-void tym_reset_idx(struct TymBufferInfo * buf);
 
 #endif /* TYM_BUFFER_H */

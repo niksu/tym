@@ -7,6 +7,7 @@
  * License: LGPL version 3 (for licensing terms see the file called LICENSE)
  */
 
+#include "buffer_list.h"
 #include "hash.h"
 #include "symbols.h"
 
