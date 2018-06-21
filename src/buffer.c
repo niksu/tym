@@ -98,6 +98,7 @@ tym_unsafe_buffer_str(struct TymBufferInfo * buf, char * s)
 inline void
 tym_unsafe_dec_idx(struct TymBufferInfo * buf, size_t n)
 {
+  // FIXME could be made safe by ensuring that "idx >= n"
   buf->idx -= n;
 }
 
@@ -138,3 +139,26 @@ tym_buff_error_msg(void * x)
 }
 
 TYM_ERROR_CHECK_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors, tym_buff_error_msg)
+
+inline void
+tym_reset_idx(struct TymBufferInfo * buf)
+{
+  buf->idx = 0;
+}
+
+inline void
+tym_done_last_entry(struct TymBufferInfo * buf)
+{
+  tym_unsafe_buffer_str(buf, "");
+}
+
+inline bool
+tym_progress_next_entry(struct TymBufferInfo * buf)
+{
+  if ('\0' == buf->buffer[buf->idx + 1]) {
+    return false;
+  } else {
+    buf->idx += 1;
+    return true;
+  }
+}

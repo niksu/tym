@@ -69,4 +69,8 @@ TYM_ERROR_CHECK_DECL(TymBufferWriteResult, size_t, enum TymBufferErrors, buff_er
 #define TYM_DBG_BUFFER_PRINT_ENCLOSE(buffvar, txt, txtend)
 #endif // TYM_DEBUG
 
+void tym_reset_idx(struct TymBufferInfo * buf);
+void tym_done_last_entry(struct TymBufferInfo * buf);
+bool tym_progress_next_entry(struct TymBufferInfo * buf);
+
 #endif /* TYM_BUFFER_H */
