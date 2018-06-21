@@ -12,6 +12,7 @@
 
 #include "ast.h"
 #include "buffer.h"
+#include "buffer_list.h"
 #include "formula.h"
 #include "parser.h"
 #include "lexer.h"
