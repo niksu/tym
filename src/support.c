@@ -326,10 +326,16 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
 
   if (TYM_DUMP_HILBERT_UNIVERSE == Params->function) {
     tym_reset_buffer(outbuf);
-    res = tym_term_database_str(adb->tdb, outbuf);
+    res = tym_term_database_dump(adb->tdb, outbuf);
+//    res = tym_term_database_str(adb->tdb, outbuf);
     assert(tym_is_ok_TymBufferWriteResult(res));
     free(res);
-    printf("Hilbert universe:\n%s", tym_buffer_contents(outbuf));
+    printf("Hilbert universe:\n");
+//    printf("  %s\n", tym_buffer_contents(outbuf));
+    tym_reset_idx(outbuf);
+    do {
+      printf("  %s\n", tym_buffer_contents(outbuf));
+    } while(tym_progress_next_entry(outbuf));
   } else if (TYM_DUMP_ATOMS == Params->function) {
     tym_reset_buffer(outbuf);
     res = tym_atom_database_str(adb, outbuf);

@@ -18,10 +18,20 @@ tym_done_last_entry(struct TymBufferInfo * buf)
 inline bool
 tym_progress_next_entry(struct TymBufferInfo * buf)
 {
-  if ('\0' == buf->buffer[buf->idx + 1]) {
+  if ((buf->idx >= buf->buffer_size) ||
+      (('\0' == buf->buffer[buf->idx + 1]) &&
+       ('\0' == buf->buffer[buf->idx + 2]))) {
     return false;
   } else {
-    buf->idx += 1;
-    return true;
+    while ((buf->idx < buf->buffer_size) ||
+           ('\0' != buf->buffer[buf->idx])) {
+      buf->idx += 1;
+    }
+    if (buf->idx < buf->buffer_size) {
+       buf->idx += 1;
+       return true;
+    } else {
+       return false;
+    }
   }
 }
