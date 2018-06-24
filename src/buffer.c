@@ -16,7 +16,7 @@
 const char *
 tym_buffer_contents(struct TymBufferInfo * buf)
 {
-  return buf->buffer;
+  return buf->buffer + buf->read_idx;
 }
 
 size_t
@@ -46,6 +46,7 @@ void
 tym_reset_buffer(struct TymBufferInfo * buf)
 {
   buf->write_idx = 0;
+  buf->read_idx = 0;
   buf->buffer[0] = '\0';
 }
 
@@ -136,7 +137,7 @@ tym_buff_error_msg(void * x)
 TYM_ERROR_CHECK_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors, tym_buff_error_msg)
 
 inline void
-tym_reset_idx(struct TymBufferInfo * buf)
+tym_reset_read_idx(struct TymBufferInfo * buf)
 {
-  buf->write_idx = 0; // FIXME should reset read_idx
+  buf->read_idx = 0;
 }
