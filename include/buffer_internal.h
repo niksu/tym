@@ -12,7 +12,7 @@
 
 struct TymBufferInfo {
   char * buffer;
-  size_t idx;
+  size_t write_idx;
   size_t buffer_size;
 };
 
