@@ -15,6 +15,7 @@ tym_done_last_entry(struct TymBufferInfo * buf)
   tym_unsafe_buffer_str(buf, "");
 }
 
+// FIXME this is an instance of "stateful reading" of the buffer, that can take place regardless of whether the buffer holds a single item or multiple items.
 inline bool
 tym_progress_next_entry(struct TymBufferInfo * buf)
 {
