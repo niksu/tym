@@ -18,6 +18,7 @@ tym_reset_read_idx(struct TymBufferInfo * buf)
 inline void
 tym_done_last_entry(struct TymBufferInfo * buf)
 {
+  // FIXME for this could check whether read_idx==write_idx?
   tym_unsafe_buffer_str(buf, "");
 }
 
