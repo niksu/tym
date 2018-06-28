@@ -10,6 +10,12 @@
 #include "buffer_list.h"
 
 inline void
+tym_reset_read_idx(struct TymBufferInfo * buf)
+{
+  buf->read_idx = 0;
+}
+
+inline void
 tym_done_last_entry(struct TymBufferInfo * buf)
 {
   tym_unsafe_buffer_str(buf, "");

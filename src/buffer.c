@@ -135,9 +135,3 @@ tym_buff_error_msg(void * x)
 }
 
 TYM_ERROR_CHECK_DEFN(TymBufferWriteResult, size_t, enum TymBufferErrors, tym_buff_error_msg)
-
-inline void
-tym_reset_read_idx(struct TymBufferInfo * buf)
-{
-  buf->read_idx = 0;
-}
