@@ -13,6 +13,7 @@
 #include "buffer.h"
 #include "buffer_internal.h"
 
+void tym_reset_idx(struct TymBufferInfo * buf);
 void tym_done_last_entry(struct TymBufferInfo * buf);
 bool tym_progress_next_entry(struct TymBufferInfo * buf);
 
