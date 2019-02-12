@@ -107,8 +107,6 @@ tym_term_database_dump(struct TymTermDatabase * tdb, struct TymBufferInfo * dst)
     cursor = cursor->next;
   }
 
-  tym_done_last_entry(dst);
-
   return tym_mkval_TymBufferWriteResult(tym_buffer_len(dst) - initial_idx);
 }
 

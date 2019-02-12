@@ -332,7 +332,7 @@ process_program(struct TymParams * Params, struct TymProgram * ParsedInputFileCo
     free(res);
     printf("Hilbert universe:\n");
 //    printf("  %s\n", tym_buffer_contents(outbuf));
-    tym_reset_idx(outbuf);
+    tym_reset_read_idx(outbuf);
     do {
       printf("  %s\n", tym_buffer_contents(outbuf));
     } while(tym_progress_next_entry(outbuf));
