@@ -25,20 +25,20 @@ tym_more_to_read(struct TymBufferInfo * buf)
 inline bool
 tym_progress_next_entry(struct TymBufferInfo * buf)
 {
-  if ((buf->write_idx >= buf->buffer_size) ||
-      (('\0' == buf->buffer[buf->write_idx + 1]) &&
-       ('\0' == buf->buffer[buf->write_idx + 2]))) {
-    return false;
-  } else {
-    while ((buf->write_idx < buf->buffer_size) ||
-           ('\0' != buf->buffer[buf->write_idx])) {
-      buf->write_idx += 1;
+  bool result = tym_more_to_read(buf);
+
+  if (result) {
+    while (tym_more_to_read(buf) ||
+           ('\0' != buf->buffer[buf->read_idx])) {
+      buf->read_idx += 1;
     }
-    if (buf->write_idx < buf->buffer_size) {
-       buf->write_idx += 1;
-       return true;
+    if (tym_more_to_read(buf)) {
+       buf->read_idx += 1;
+       result = tym_more_to_read(buf);
     } else {
-       return false;
+       result = false;
     }
   }
+
+  return result;
 }
