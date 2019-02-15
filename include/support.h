@@ -1,11 +1,25 @@
 /*
- * Support functions for TYM Datalog.
- * Nik Sultana, March 2017.
- *
- * This is part of TYM Datalog (https://www.github.com/niksu/tym)
- *
- * License: LGPL version 3 (for licensing terms see the file called LICENSE)
- */
+Copyright Nik Sultana, 2019
+
+This file is part of TYM Datalog. (https://www.github.com/niksu/tym)
+
+TYM Datalog is free software: you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+TYM Datalog is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details, a copy of which
+is included in the file called LICENSE distributed with TYM Datalog.
+
+You should have received a copy of the GNU Lesser General Public License
+along with TYM Datalog.  If not, see <https://www.gnu.org/licenses/>.
+
+
+This file: Support functions for TYM Datalog.
+*/
 
 #ifndef TYM_SUPPORT_H
 #define TYM_SUPPORT_H
@@ -21,7 +35,7 @@
 #include "translate.h"
 #include "util.h"
 
-#define TYM_VERSION_MAJOR 0
+#define TYM_VERSION_MAJOR 1
 #define TYM_VERSION_MINOR 0
 
 enum TymFunction {TYM_NOTHING_FUNCTION=0, TYM_TEST_PARSING, TYM_CONVERT_TO_SMT, TYM_CONVERT_TO_SMT_AND_SOLVE, TYM_CONVERT_TO_C, TYM_DUMP_HILBERT_UNIVERSE, TYM_DUMP_ATOMS, TYM_NO_FUNCTION};

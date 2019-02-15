@@ -1,4 +1,5 @@
 # TYM Datalog
+Version 1.0
 
 # Building
 `make`
@@ -24,7 +25,7 @@ original program. Use the `CFLAGS` environment variable to instruct tymc on
 `-L` and `-I` parameters to find Tym's binaries and headers.
 
 # License
-LGPL v3 (see [LICENSE](LICENSE)).
+LGPL v3 or any later version (see [LICENSE](LICENSE)).
 
 # Author
 Nik Sultana
